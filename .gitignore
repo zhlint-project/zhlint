@@ -60,4 +60,8 @@ typings/
 # next.js build output
 .next
 
+# ignore temporarily
+yarn.lock
+
+# personal plan
 todo
