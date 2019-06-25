@@ -1,2 +1,3 @@
-# translation-replacement
-Dealing with a batch of translation replacement.
+# zh-lint
+
+A linting tool for Chinese language.
