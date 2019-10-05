@@ -139,16 +139,20 @@ function checkCharType(char) {
 //   - 连续 unicode?
 // - 记录：标签的开始和结束，括号的开始和结束，日期组合
 module.exports = (str, options) => {
+  console.log(str)
   // - ''
   // - 'latin'
   // - 'cjk'
   // - 'space'
-  // - 'punctuation-split'
-  // - 'punctuation-sub'
-  // - 'punctuation-mark'
-  const tokens = []
-  let token = {}
-  let last = {}
+  // - 'split'
+  // - 'sub'
+  // - 'mark'
+  let tokens = []
+  tokens.current = {}
+  tokens.last = {}
+  tokens.left = ''
+  tokens.right = ''
+  const tokensStack = []
   for (let i = 0; i < str.length; i++) {
     const char = str[i]
     const type = checkCharType(char)
@@ -163,36 +167,86 @@ module.exports = (str, options) => {
         nextChar = str[nextIndex]
         nextType = checkCharType(nextChar)
       }
-      if (nextType === token.type) {
-        token.content = token.content + spaceContent
+      if (nextType === tokens.current.type) {
+        tokens.current.content = tokens.current.content + spaceContent
       } else {
-        token.end = i - 1
-        tokens.push(token)
-        last = token
-        token = {}
+        if (tokens.current.content) {
+          tokens.current.end = i - 1
+          tokens.push(tokens.current)
+          tokens.last = tokens.current
+          tokens.current = {}
+        }
       }
       i = nextIndex - 1
-    } else if (type === token.type) {
-      token.content = token.content + char
-    } else {
-      if (token && token.content) {
-        token.end = i - 1
-        tokens.push(token)
-        last = token
+    } else if (
+      // is sub or mark
+      (type === 'cjk-punctuation' || type === 'latin-punctuation') &&
+      `“”‘’"'()《》【】「」（）`.indexOf(char) >= 0
+    ) {
+      // if left or right
+      let isLeft =
+        `“‘(《【「（`.indexOf(char) >= 0 ||
+        `"'`.indexOf(char) >= 0 && tokens.left === char
+      if (
+        `”’)》】」）`.indexOf(char) >= 0 &&
+        (!tokens.left || char.charCodeAt(0) - tokens.left.charCodeAt(0) !== 1)
+      ) {
+        throw new Error(`Error closed punctuation ${char} in column ${i}!`)
       }
-      token = {
+      if (isLeft) {
+        // end last token
+        if (tokens.current.content) {
+          tokens.current.end = i - 1
+          tokens.push(tokens.current)
+          tokens.last = tokens.current
+          tokens.current = {}
+        }
+        // new last left
+        const newTokens = []
+        newTokens.type = 'sub'
+        newTokens.current = {}
+        newTokens.last = {}
+        newTokens.left = char
+        newTokens.start = i
+        newTokens.right = ''
+        tokens.push(newTokens)
+        tokensStack.push(tokens)
+        tokens = newTokens
+      } else {
+        // end last token
+        if (tokens.current.content) {
+          tokens.current.end = i - 1
+          tokens.push(tokens.current)
+          tokens.last = tokens.current
+          tokens.current = {}
+        }
+        // end last left
+        tokens.right = char
+        tokens.end = i
+        tokens = tokensStack.pop()
+      }
+    } else if (type === tokens.current.type) {
+      tokens.current.content = tokens.current.content + char
+    } else {
+      if (tokens.current.content) {
+        tokens.current.end = i - 1
+        tokens.push(tokens.current)
+        tokens.last = tokens.current
+      }
+      tokens.current = {
         type,
         content: char,
         start: i
       }
     }
   }
-  if (token.content) {
-    token.end = str.length - 1
-    tokens.push(token)
-    last = token
-    token = {}
+  if (tokens.current.content) {
+    tokens.current.end = str.length - 1
+    tokens.push(tokens.current)
+    tokens.last = tokens.current
+    tokens.current = {}
   }
+  // if still last left not flushed, throw error
   console.log(tokens)
   return str
 }
