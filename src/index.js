@@ -2,16 +2,21 @@ function checkCharType(char) {
   // console.log(char.charCodeAt(0).toString(16), char)
   // console.log(char.charCodeAt(1).toString(16), char)
 
+  // space
+  if (char.match(/\s/)) {
+    return 'space'
+  }
+
   // 0-9
   if (char.match(/[0-9]/)) {
     return 'digit'
   }
 
-  if (',.;:"\'`$@#!&*()[]{}-+_=|\/<>~?'.indexOf(char) >= 0) {
+  if (',.;:?!~-+*/\\%=&|"\'`()[]{}<>'.indexOf(char) >= 0) {
     return 'latin-punctuation'
   }
 
-  if ('，。、；：‘’“”《》【】「」｜·～！¥…（）—'.indexOf(char) >= 0) {
+  if ('，。、；：？！…—～｜·‘’“”《》【】「」（）'.indexOf(char) >= 0) {
     return 'cjk-punctuation'
   }
 
@@ -134,14 +139,61 @@ function checkCharType(char) {
 //   - 连续 unicode?
 // - 记录：标签的开始和结束，括号的开始和结束，日期组合
 module.exports = (str, options) => {
-  // state machine parsing
-  const output = str.replace(/\s/g, (index, sub, str) => {
-    // indexBegin, indexEnd
-    // before, after
-    // result
-    return ''
-  })
-  console.log(output)
+  // - ''
+  // - 'latin'
+  // - 'cjk'
+  // - 'space'
+  // - 'punctuation-split'
+  // - 'punctuation-sub'
+  // - 'punctuation-mark'
+  const tokens = []
+  let token = {}
+  let last = {}
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i]
+    const type = checkCharType(char)
+    if (type === 'space') {
+      let spaceContent = char
+      let nextIndex = i + 1
+      let nextChar = str[nextIndex]
+      let nextType = checkCharType(nextChar)
+      while (nextType === 'space') {
+        spaceContent = spaceContent + nextChar
+        nextIndex++
+        nextChar = str[nextIndex]
+        nextType = checkCharType(nextChar)
+      }
+      if (nextType === token.type) {
+        token.content = token.content + spaceContent
+      } else {
+        token.end = i - 1
+        tokens.push(token)
+        last = token
+        token = {}
+      }
+      i = nextIndex - 1
+    } else if (type === token.type) {
+      token.content = token.content + char
+    } else {
+      if (token && token.content) {
+        token.end = i - 1
+        tokens.push(token)
+        last = token
+      }
+      token = {
+        type,
+        content: char,
+        start: i
+      }
+    }
+  }
+  if (token.content) {
+    token.end = str.length - 1
+    tokens.push(token)
+    last = token
+    token = {}
+  }
+  console.log(tokens)
   return str
 }
 module.exports.checkCharType = checkCharType

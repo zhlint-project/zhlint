@@ -1,6 +1,9 @@
 const lint = require('../src')
 
 describe('check char type', () => {
+  test('space', () => {
+    expect(lint.checkCharType(' ')).toBe('space')
+  })
   test('digit', () => {
     expect(lint.checkCharType('0')).toBe('digit')
   })
@@ -38,7 +41,7 @@ describe('check char type', () => {
   })
 })
 
-describe.skip('plain text', () => {
+describe('plain text', () => {
   test('spaces', () => {
     // 遵守JavaScript编码规范非常重要
     expect(lint('遵守 JavaScript 编码规范非常重要'))
