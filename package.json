@@ -4,6 +4,7 @@
   "description": "A linting tool for Chinese language.",
   "main": "index.js",
   "scripts": {
+    "dev": "jest --watch",
     "test": "jest"
   },
   "repository": {
