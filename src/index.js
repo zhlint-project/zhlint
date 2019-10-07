@@ -251,28 +251,34 @@ const travel = (tokens, filter, handler) => {
   }
 }
 
-// special case
-// - 3 minite(s) left
-// - (xxxx
-// - 今天是2019年06月26号 vs 请于 2019-06-26 之前完成
 module.exports = (str, options = {}) => {
   const topLevelTokens = parse(str)
   let lastToken
   let lastTokens
   const outputTokens = []
 
+  // false|true|keep
   const spaceBetweenLatinAndCjk =
     options.hasOwnProperty('spaceBetweenLatinAndCjk')
       ? options.spaceBetweenLatinAndCjk
       : 'keep'
+
+  // false|inside|outside|both|keep
   const spaceBesideBrackets =
     options.hasOwnProperty('spaceBesideBrackets')
       ? options.spaceBesideBrackets
       : 'keep'
 
+  // false|right-for-latin|right|keep
+  const spaceBesidePunctuation =
+    options.hasOwnProperty('spaceBesidePunctuation')
+      ? options.spaceBesidePunctuation
+      : 'keep'
+
   travel(topLevelTokens, () => true, (token, index, tokens) => {
+
     // append space in a same group
-    if (lastToken && lastTokens === tokens) {
+    if (lastToken && lastTokens === tokens && token.type !== 'group') {
 
       // between latin and cjk
       if (
@@ -286,12 +292,32 @@ module.exports = (str, options = {}) => {
           const end = token.start
           outputTokens.push(str.substring(start, end))
         }
-      } else {
-        if (token.type !== 'group') {
+      } else if (
+        (lastToken.type === 'cjk-punctuation' || lastToken.type === 'latin-punctuation') &&
+        (token.type === 'cjk' || token.type === 'latin')
+      ) {
+        if (spaceBesidePunctuation === 'right') {
+          outputTokens.push(' ')
+        } else if (spaceBesidePunctuation === 'right-for-latin' && lastToken.type === 'latin-punctuation') {
+          outputTokens.push(' ')
+        } else if (spaceBesidePunctuation === 'keep') {
           const start = lastToken.end + 1
           const end = token.start
           outputTokens.push(str.substring(start, end))
         }
+      } else if (
+        (token.type === 'cjk-punctuation' || token.type === 'latin-punctuation') &&
+        (lastToken.type === 'cjk' || lastToken.type === 'latin')
+      ) {
+        if (spaceBesidePunctuation === 'keep') {
+          const start = lastToken.end + 1
+          const end = token.start
+          outputTokens.push(str.substring(start, end))
+        }
+      } else {
+        const start = lastToken.end + 1
+        const end = token.start
+        outputTokens.push(str.substring(start, end))
       }
     }
 

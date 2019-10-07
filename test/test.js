@@ -48,6 +48,7 @@ describe('parser', () => {
     }
     return x
   })
+
   test('遵守JavaScript编码规范非常重要', () => {
     const result = lint.parse('遵守JavaScript编码规范非常重要')
     expect(purify(result)).toEqual([
@@ -148,6 +149,7 @@ describe('parser', () => {
 
 describe('travel', () => {
   const purify = result => JSON.parse(JSON.stringify(result))
+
   test('general travel', () => {
     const records = []
     const tokens = lint.parse('遵守JavaScript编码规范非常重要')
@@ -219,6 +221,43 @@ describe('travel', () => {
 })
 
 describe('plain text', () => {
+  // token types
+  // - cjk
+  // - latin
+  // - cjk-punc
+  // - latin-punc
+  // - group
+
+  // - [ ] cjk-cjk: keep
+  // - [x] cjk-latin: spaceBetweenLatinAndCjk
+  // - [x] cjk->group: spaceBesideBrackets
+  // - [x] cjk->cjk-punc: spaceBesidePunctuation
+  // - [x] cjk->latin-punc: spaceBesidePunctuation
+
+  // - [ ] latin-latin: keep
+  // - [x] latin->cjk: spaceBetweenLatinAndCjk
+  // - [x] latin->group: spaceBesideBrackets
+  // - [x] latin->cjk-punc: spaceBesidePunctuation
+  // - [x] latin->latin-punc: spaceBesidePunctuation
+
+  // - [ ] cjk-punc-cjk-punc: keep
+  // - [x] cjk-punc->cjk: spaceBesidePunctuation
+  // - [x] cjk-punc-latin: spaceBesidePunctuation
+  // - [ ] cjk-punc->latin-punc: keep
+  // - [ ] cjk-punc->group: spaceBesideBrackets
+
+  // - [ ] latin-punc-latin-punc: keep
+  // - [x] latin-punc->cjk: spaceBesidePunctuation
+  // - [x] latin-punc-latin: spaceBesidePunctuation
+  // - [ ] latin-punc->cjk-punc: keep
+  // - [ ] latin-punc->group: spaceBesideBrackets
+
+  // - [ ] group->group: spaceBesideBrackets
+  // - [x] group->latin: spaceBesideBrackets
+  // - [x] group->cjk: spaceBesideBrackets
+  // - [ ] group->latin-punc: spaceBesideBrackets
+  // - [ ] group->cjk-punc: spaceBesideBrackets
+
   test('space bewteen latin and cjk chars', () => {
     expect(lint('遵守JavaScript 编码规范非常重要'))
       .toBe('遵守JavaScript 编码规范非常重要')
@@ -274,10 +313,36 @@ describe('plain text', () => {
       .toBe('Vue 也可以在 unpkg 和 cdnjs 上获取 ( cdnjs 的版本更新可能略滞后)')
    })
     
-  test('punctuation marks', () => {
+  test('space beside punctuations', () => {
+    expect(lint('Hello,如果你有任何问题，请联系@Vuejs_Events！'))
+      .toBe('Hello,如果你有任何问题，请联系@Vuejs_Events！')
+    expect(lint('Hello,如果你有任何问题，请联系@Vuejs_Events！', {}))
+      .toBe('Hello,如果你有任何问题，请联系@Vuejs_Events！')
+    expect(lint('Hello,如果你有任何问题，请联系@Vuejs_Events！', { spaceBesidePunctuation: false }))
+      .toBe('Hello,如果你有任何问题，请联系@Vuejs_Events！')
+    expect(lint('Hello , 如果你有任何问题 ， 请联系@Vuejs_Events！', { spaceBesidePunctuation: false }))
+      .toBe('Hello,如果你有任何问题，请联系@Vuejs_Events！')
+    expect(lint('Hello,如果你有任何问题，请联系@Vuejs_Events ！', { spaceBesidePunctuation: 'right' }))
+      .toBe('Hello, 如果你有任何问题， 请联系@Vuejs_Events！')
+    expect(lint('Hello , 如果你有任何问题 ， 请联系@Vuejs_Events ！', { spaceBesidePunctuation: 'right' }))
+      .toBe('Hello, 如果你有任何问题， 请联系@Vuejs_Events！')
+    expect(lint('Hello,如果你有任何问题，请联系@Vuejs_Events！', { spaceBesidePunctuation: 'right-for-latin' }))
+      .toBe('Hello, 如果你有任何问题，请联系@Vuejs_Events！')
+    expect(lint('Hello , 如果你有任何问题 ， 请联系@Vuejs_Events ！', { spaceBesidePunctuation: 'right-for-latin' }))
+      .toBe('Hello, 如果你有任何问题，请联系@Vuejs_Events！')
+    expect(lint('Hello,如果你有任何问题，请联系@Vuejs_Events！', { spaceBesidePunctuation: 'keep' }))
+      .toBe('Hello,如果你有任何问题，请联系@Vuejs_Events！')
+    expect(lint('Hello , 如果你有任何问题 ， 请联系@Vuejs_Events ！', { spaceBesidePunctuation: 'keep' }))
+      .toBe('Hello , 如果你有任何问题 ， 请联系@Vuejs_Events ！')
+  })
+
+  test('half-width/full-width punctuations', () => {
     // 对于制作原型或学习,你可以这样使用最新版本:
     // 该指令的意思是: "将这个元素节点的 title 特性和 Vue 实例的 message 属性保持一致".
-   })
+  })
+
+  test('punctuations replacement', () => {
+  })
 })
 
 describe.skip('markdown', () => {
