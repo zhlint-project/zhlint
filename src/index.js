@@ -118,7 +118,7 @@ const parse = str => {
   // - 'cjk'
   // - 'space'
   // - 'split'
-  // - 'sub'
+  // - 'group'
   // - 'mark'
   let tokens = []
   tokens.current = {}
@@ -178,7 +178,7 @@ const parse = str => {
         }
         // new last left
         const newTokens = []
-        newTokens.type = 'sub'
+        newTokens.type = 'group'
         newTokens.current = {}
         newTokens.last = {}
         newTokens.left = char
@@ -245,7 +245,7 @@ const travel = (tokens, filter, handler) => {
     if (result) {
       handler(token, i, tokens, result)
     }
-    if (token.type === 'sub') {
+    if (token.type === 'group') {
       travel(token, filter, handler)
     }
   }
@@ -255,64 +255,114 @@ const travel = (tokens, filter, handler) => {
 // - 3 minite(s) left
 // - (xxxx
 // - 今天是2019年06月26号 vs 请于 2019-06-26 之前完成
-// unit types
-// - special: html 标签, 代码片段, 英文中的单引号?
-// - 文字: 中文, 英文, 数字
-// - 特殊组合: 日期
-// - featured
-//   - 成对: 括号
-//   - 分层: 引号, 书名号
-//   - 分段: 逗号, 句号, 冒号, 分号, 顿号, 省略号, 破折号
-// algorithm
-// - 逐个字符
-// - 分段？断开
-// - 分层？子组
-// - 成对：记录
-// - html 标签：记录
-// - markdown 标签：记录
-// - 包裹标签：跳过匹配下一个对
-// - 特殊空格：前后都是英文或数字
-// - 特殊单引号：前面有一个右单引号，前方没有空格
-// - 特殊组合：日期
-// structure
-// - 嵌套式小组：小组标点符号
-//   - 连续英文or数字or特殊单引号
-//   - 英文or数字or特殊单引号之间的空格
-//   - emoji/unicode 两侧的空格
-//   - 连续中文
-//   - 特殊标签包裹
-//   - 分段标点符号
-//   - 连续 emoji
-//   - 连续 unicode?
-// - 记录：标签的开始和结束，括号的开始和结束，日期组合
-module.exports = (str, options) => {
-  const tokens = parse(str)
+module.exports = (str, options = {}) => {
+  const topLevelTokens = parse(str)
   let lastToken
   let lastTokens
   const outputTokens = []
-  travel(tokens, () => true, (token, index, tokens) => {
-    if (options.spaceBetweenLatinAndCjk === true) {
-      if (lastToken && lastTokens === tokens) {
-        if (lastToken.type === 'latin' && token.type === 'cjk') {
+
+  const spaceBetweenLatinAndCjk =
+    options.hasOwnProperty('spaceBetweenLatinAndCjk')
+      ? options.spaceBetweenLatinAndCjk
+      : 'keep'
+  const spaceBesideBrackets =
+    options.hasOwnProperty('spaceBesideBrackets')
+      ? options.spaceBesideBrackets
+      : 'keep'
+
+  travel(topLevelTokens, () => true, (token, index, tokens) => {
+    // append space in a same group
+    if (lastToken && lastTokens === tokens) {
+
+      // between latin and cjk
+      if (
+        lastToken.type === 'latin' && token.type === 'cjk' ||
+        lastToken.type === 'cjk' && token.type === 'latin'
+      ) {
+        if (spaceBetweenLatinAndCjk === true) {
           outputTokens.push(' ')
-        } else if (lastToken.type === 'cjk' && token.type === 'latin') {
-          outputTokens.push(' ')
+        } else if (spaceBetweenLatinAndCjk === 'keep') {
+          const start = lastToken.end + 1
+          const end = token.start
+          outputTokens.push(str.substring(start, end))
+        }
+      } else {
+        if (token.type !== 'group') {
+          const start = lastToken.end + 1
+          const end = token.start
+          outputTokens.push(str.substring(start, end))
         }
       }
     }
-    if (token.type === 'sub') {
+
+    // start of a group
+    if (token.type === 'group') {
+      // space outside group
+      if (lastToken) {
+        if (spaceBesideBrackets === 'outside' || spaceBesideBrackets === 'both') {
+          outputTokens.push(' ')
+        } else if (spaceBesideBrackets === 'keep') {
+          const start = lastToken.end + 1
+          const end = token.start
+          outputTokens.push(str.substring(start, end))
+        }
+      }
+      // group left identifier
       outputTokens.push(token.left)
     }
-    if (tokens[index - 1] && tokens[index - 1].type === 'sub') {
-      outputTokens.push(tokens[index - 1].right)
+    if (lastToken && lastToken.type === 'group') {
+      // space inside group
+      if (spaceBesideBrackets === 'inside' || spaceBesideBrackets === 'both') {
+        outputTokens.push(' ')
+      } else if (spaceBesideBrackets === 'keep') {
+        const start = lastToken.start + 1
+        const end = token.start
+        outputTokens.push(str.substring(start, end))
+      }
     }
+
+    // end of a group
+    if (lastTokens && tokens.indexOf(lastTokens) >= 0) {
+      // space inside group
+      if (spaceBesideBrackets === 'inside' || spaceBesideBrackets === 'both') {
+        outputTokens.push(' ')
+      } else if (spaceBesideBrackets === 'keep') {
+        const start = lastToken.end + 1
+        const end = lastTokens.end
+        outputTokens.push(str.substring(start, end))
+      }
+      // group right identifier
+      outputTokens.push(lastTokens.right)
+      // space outside group
+      if (spaceBesideBrackets === 'outside' || spaceBesideBrackets === 'both') {
+        outputTokens.push(' ')
+      } else if (spaceBesideBrackets === 'keep') {
+        const start = lastTokens.end + 1
+        const end = token.start
+        outputTokens.push(str.substring(start, end))
+      }
+    }
+
+    // append content
     outputTokens.push(token.content)
+
     lastToken = token
     lastTokens = tokens
   })
-  if (tokens && tokens[tokens.length - 1] && tokens[tokens.length - 1].type === 'sub') {
-    outputTokens.push(tokens[tokens.length - 1].right)
+
+  // append last group identifier if has
+  if (lastTokens && lastTokens !== topLevelTokens) {
+    // todo: use parent to find all unclosed group(s), with outside space
+    if (spaceBesideBrackets === 'inside' || spaceBesideBrackets === 'both') {
+      outputTokens.push(' ')
+    } else if (spaceBesideBrackets === 'keep') {
+      const start = lastToken.end + 1
+      const end = lastTokens.end
+      outputTokens.push(str.substring(start, end))
+    }
+    outputTokens.push(lastTokens.right)
   }
+
   return outputTokens.join('')
 }
 module.exports.checkCharType = checkCharType
