@@ -108,6 +108,9 @@ const checkCharType = char => {
   return 'unknown'
 }
 
+// todo:
+// - each token should have a parent and index
+// - should record each meaningless space token
 const parse = str => {
   // console.log(str)
   // - ''
@@ -227,6 +230,27 @@ const parse = str => {
   return tokens
 }
 
+const travel = (tokens, filter, handler) => {
+  let normalizedFilter = () => false
+  if (typeof filter === 'object' && filter.type) {
+    normalizedFilter = token => token.type === filter.type
+  } else if (filter instanceof RegExp || typeof filter === 'string') {
+    normalizedFilter = token => token.content.match(filter)
+  } else if (typeof filter === 'function') {
+    normalizedFilter = (token, i, tokens) => filter(token, i, tokens)
+  }
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i]
+    const result = normalizedFilter(token, i, tokens)
+    if (result) {
+      handler(token, i, tokens, result)
+    }
+    if (token.type === 'sub') {
+      travel(token, filter, handler)
+    }
+  }
+}
+
 // special case
 // - 3 minite(s) left
 // - (xxxx
@@ -266,3 +290,4 @@ module.exports = (str, options) => {
 }
 module.exports.checkCharType = checkCharType
 module.exports.parse = parse
+module.exports.travel = travel
