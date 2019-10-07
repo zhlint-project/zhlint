@@ -218,13 +218,18 @@ describe('travel', () => {
   })
 })
 
-describe.skip('plain text', () => {
-  test('spaces', () => {
-    // 遵守JavaScript编码规范非常重要
-    // 关注(watch)你关心的仓库。
-    // 如果你有任何问题，请联系@Vuejs_Events！
-    // 每个版本的更新日志见 GitHub 。
-    // Vue 也可以在 unpkg 和 cdnjs 上获取 ( cdnjs 的版本更新可能略滞后) 
+describe('plain text', () => {
+  test('space bewteen latin and cjk chars', () => {
+    expect(lint('遵守JavaScript编码规范非常重要', { spaceBetweenLatinAndCjk: true }))
+      .toBe('遵守 JavaScript 编码规范非常重要')
+    expect(lint('关注(watch)你关心的仓库。', { spaceBetweenLatinAndCjk: true }))
+      .toBe('关注(watch)你关心的仓库。')
+    expect(lint('如果你有任何问题，请联系@Vuejs_Events！', { spaceBetweenLatinAndCjk: true }))
+      .toBe('如果你有任何问题，请联系 @Vuejs_Events！')
+    expect(lint('每个版本的更新日志见 GitHub 。', { spaceBetweenLatinAndCjk: true }))
+      .toBe('每个版本的更新日志见 GitHub。')
+    expect(lint('Vue 也可以在 unpkg 和 cdnjs 上获取 ( cdnjs 的版本更新可能略滞后) ', { spaceBetweenLatinAndCjk: true }))
+      .toBe('Vue 也可以在 unpkg 和 cdnjs 上获取(cdnjs 的版本更新可能略滞后)')
    })
     
   test('punctuation marks', () => {

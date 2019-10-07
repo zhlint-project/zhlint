@@ -286,7 +286,34 @@ const travel = (tokens, filter, handler) => {
 //   - 连续 unicode?
 // - 记录：标签的开始和结束，括号的开始和结束，日期组合
 module.exports = (str, options) => {
-  return str
+  const tokens = parse(str)
+  let lastToken
+  let lastTokens
+  const outputTokens = []
+  travel(tokens, () => true, (token, index, tokens) => {
+    if (options.spaceBetweenLatinAndCjk === true) {
+      if (lastToken && lastTokens === tokens) {
+        if (lastToken.type === 'latin' && token.type === 'cjk') {
+          outputTokens.push(' ')
+        } else if (lastToken.type === 'cjk' && token.type === 'latin') {
+          outputTokens.push(' ')
+        }
+      }
+    }
+    if (token.type === 'sub') {
+      outputTokens.push(token.left)
+    }
+    if (tokens[index - 1] && tokens[index - 1].type === 'sub') {
+      outputTokens.push(tokens[index - 1].right)
+    }
+    outputTokens.push(token.content)
+    lastToken = token
+    lastTokens = tokens
+  })
+  if (tokens && tokens[tokens.length - 1] && tokens[tokens.length - 1].type === 'sub') {
+    outputTokens.push(tokens[tokens.length - 1].right)
+  }
+  return outputTokens.join('')
 }
 module.exports.checkCharType = checkCharType
 module.exports.parse = parse
