@@ -276,7 +276,6 @@ module.exports = (str, options = {}) => {
       : 'keep'
 
   // full|half|keep
-  // ,.;:?!...-- <-> ，。；：？！……——
   const punctuationWidth =
     options.hasOwnProperty('punctuationWidth')
       ? options.punctuationWidth
@@ -300,6 +299,40 @@ module.exports = (str, options = {}) => {
     '！': '!',
     '……': '...',
     '——': '--'
+  }
+
+  // full|half|keep
+  const bracketsWidth =
+    options.hasOwnProperty('bracketsWidth')
+      ? options.bracketsWidth
+      : 'keep'
+  const half2FullBracketMap = {
+    '(': '（',
+    ')': '）'
+  }
+  const full2HalfBracketMap = {
+    '（': '(',
+    '）': ')'
+  }
+
+  // full|half|keep
+  const quotesWidth =
+    options.hasOwnProperty('quotesWidth')
+      ? options.quotesWidth
+      : 'keep'
+  const half2FullLeftQuoteMap = {
+    '"': '“',
+    '\'': '‘'
+  }
+  const half2FullRightQuoteMap = {
+    '"': '”',
+    '\'': '’'
+  }
+  const full2HalfQuoteMap = {
+    '“': '"',
+    '”': '"',
+    '‘': '\'',
+    '’': '\''
   }
 
   travel(topLevelTokens, () => true, (token, index, tokens) => {
@@ -365,7 +398,17 @@ module.exports = (str, options = {}) => {
         }
       }
       // group left identifier
-      outputTokens.push(token.left)
+      if (bracketsWidth === 'full' && half2FullBracketMap[token.left]) {
+        outputTokens.push(half2FullBracketMap[token.left])
+      } else if (bracketsWidth === 'half' && full2HalfBracketMap[token.left]) {
+        outputTokens.push(full2HalfBracketMap[token.left])
+      } else if (quotesWidth === 'full' && half2FullLeftQuoteMap[token.left]) {
+        outputTokens.push(half2FullLeftQuoteMap[token.left])
+      } else if (quotesWidth === 'half' && full2HalfQuoteMap[token.left]) {
+        outputTokens.push(full2HalfQuoteMap[token.left])
+      } else {
+        outputTokens.push(token.left)
+      }
     }
     if (lastToken && lastToken.type === 'group') {
       // space inside group
@@ -389,7 +432,18 @@ module.exports = (str, options = {}) => {
         outputTokens.push(str.substring(start, end))
       }
       // group right identifier
-      outputTokens.push(lastTokens.right)
+      if (bracketsWidth === 'full' && half2FullBracketMap[lastTokens.right]) {
+        outputTokens.push(half2FullBracketMap[lastTokens.right])
+      } else if (bracketsWidth === 'half' && full2HalfBracketMap[lastTokens.right]) {
+        outputTokens.push(full2HalfBracketMap[lastTokens.right])
+      } else if (quotesWidth === 'full' && half2FullRightQuoteMap[lastTokens.right]) {
+        outputTokens.push(half2FullRightQuoteMap[lastTokens.right])
+      } else if (quotesWidth === 'half' && full2HalfQuoteMap[lastTokens.right]) {
+        console.log(quotesWidth, lastTokens.right, full2HalfQuoteMap[lastTokens.right])
+        outputTokens.push(full2HalfQuoteMap[lastTokens.right])
+      } else {
+        outputTokens.push(lastTokens.right)
+      }
       // space outside group
       if (spaceBesideBrackets === 'outside' || spaceBesideBrackets === 'both') {
         outputTokens.push(' ')
