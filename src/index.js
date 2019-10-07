@@ -1,6 +1,10 @@
-function checkCharType(char) {
+const checkCharType = char => {
   // console.log(char.charCodeAt(0).toString(16), char)
   // console.log(char.charCodeAt(1).toString(16), char)
+
+  if (!char) {
+    return 'empty'
+  }
 
   // space
   if (char.match(/\s/)) {
@@ -104,6 +108,125 @@ function checkCharType(char) {
   return 'unknown'
 }
 
+const parse = str => {
+  // console.log(str)
+  // - ''
+  // - 'latin'
+  // - 'cjk'
+  // - 'space'
+  // - 'split'
+  // - 'sub'
+  // - 'mark'
+  let tokens = []
+  tokens.current = {}
+  tokens.last = {}
+  tokens.left = ''
+  tokens.right = ''
+  const tokensStack = []
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i]
+    const type = checkCharType(char)
+    // console.log(i, char, type, tokens)
+    if (type === 'space') {
+      let spaceContent = char
+      let nextIndex = i + 1
+      let nextChar = str[nextIndex]
+      let nextType = checkCharType(nextChar)
+      while (nextType === 'space') {
+        spaceContent = spaceContent + nextChar
+        nextIndex++
+        nextChar = str[nextIndex]
+        nextType = checkCharType(nextChar)
+      }
+      if (nextType === tokens.current.type) {
+        tokens.current.content = tokens.current.content + spaceContent
+      } else {
+        if (tokens.current.content) {
+          tokens.current.end = i - 1
+          tokens.push(tokens.current)
+          tokens.last = tokens.current
+          tokens.current = {}
+        }
+      }
+      i = nextIndex - 1
+    } else if (
+      // is sub or mark
+      (type === 'cjk-punctuation' || type === 'latin-punctuation') &&
+      `“”‘’"'()《》【】「」（）`.indexOf(char) >= 0
+    ) {
+      // if left or right
+      let isLeft =
+        `“‘(《【「（`.indexOf(char) >= 0 ||
+        `"'`.indexOf(char) >= 0 && tokens.left !== char
+      if (
+        `”’)》】」）`.indexOf(char) >= 0 &&
+        (!tokens.left || char.charCodeAt(0) - tokens.left.charCodeAt(0) !== 1)
+      ) {
+        throw new Error(`Error closed punctuation ${char} in column ${i}!`)
+      }
+      // console.log(`${char} isLeft: ${isLeft}`)
+      if (isLeft) {
+        // end last token
+        if (tokens.current.content) {
+          tokens.current.end = i - 1
+          tokens.push(tokens.current)
+          tokens.last = tokens.current
+          tokens.current = {}
+        }
+        // new last left
+        const newTokens = []
+        newTokens.type = 'sub'
+        newTokens.current = {}
+        newTokens.last = {}
+        newTokens.left = char
+        newTokens.start = i
+        newTokens.right = ''
+        tokens.push(newTokens)
+        tokensStack.push(tokens)
+        tokens = newTokens
+      } else {
+        // end last token
+        if (tokens.current.content) {
+          tokens.current.end = i - 1
+          tokens.push(tokens.current)
+        }
+        // tokens.last = tokens.current
+        // tokens.current = {}
+        delete tokens.last
+        delete tokens.current
+        // end last left
+        tokens.right = char
+        tokens.end = i
+        tokens = tokensStack.pop()
+      }
+    } else if (type === tokens.current.type) {
+      tokens.current.content = tokens.current.content + char
+    } else {
+      if (tokens.current.content) {
+        tokens.current.end = i - 1
+        tokens.push(tokens.current)
+        tokens.last = tokens.current
+      }
+      tokens.current = {
+        type,
+        content: char,
+        start: i
+      }
+    }
+  }
+  if (tokens.current.content) {
+    tokens.current.end = str.length - 1
+    tokens.push(tokens.current)
+  }
+  // tokens.last = tokens.current
+  // tokens.current = {}
+  delete tokens.last
+  delete tokens.current
+  // if still last left not flushed, throw error
+  // console.log(tokens)
+  return tokens
+}
+
 // special case
 // - 3 minite(s) left
 // - (xxxx
@@ -139,115 +262,7 @@ function checkCharType(char) {
 //   - 连续 unicode?
 // - 记录：标签的开始和结束，括号的开始和结束，日期组合
 module.exports = (str, options) => {
-  console.log(str)
-  // - ''
-  // - 'latin'
-  // - 'cjk'
-  // - 'space'
-  // - 'split'
-  // - 'sub'
-  // - 'mark'
-  let tokens = []
-  tokens.current = {}
-  tokens.last = {}
-  tokens.left = ''
-  tokens.right = ''
-  const tokensStack = []
-  for (let i = 0; i < str.length; i++) {
-    const char = str[i]
-    const type = checkCharType(char)
-    if (type === 'space') {
-      let spaceContent = char
-      let nextIndex = i + 1
-      let nextChar = str[nextIndex]
-      let nextType = checkCharType(nextChar)
-      while (nextType === 'space') {
-        spaceContent = spaceContent + nextChar
-        nextIndex++
-        nextChar = str[nextIndex]
-        nextType = checkCharType(nextChar)
-      }
-      if (nextType === tokens.current.type) {
-        tokens.current.content = tokens.current.content + spaceContent
-      } else {
-        if (tokens.current.content) {
-          tokens.current.end = i - 1
-          tokens.push(tokens.current)
-          tokens.last = tokens.current
-          tokens.current = {}
-        }
-      }
-      i = nextIndex - 1
-    } else if (
-      // is sub or mark
-      (type === 'cjk-punctuation' || type === 'latin-punctuation') &&
-      `“”‘’"'()《》【】「」（）`.indexOf(char) >= 0
-    ) {
-      // if left or right
-      let isLeft =
-        `“‘(《【「（`.indexOf(char) >= 0 ||
-        `"'`.indexOf(char) >= 0 && tokens.left === char
-      if (
-        `”’)》】」）`.indexOf(char) >= 0 &&
-        (!tokens.left || char.charCodeAt(0) - tokens.left.charCodeAt(0) !== 1)
-      ) {
-        throw new Error(`Error closed punctuation ${char} in column ${i}!`)
-      }
-      if (isLeft) {
-        // end last token
-        if (tokens.current.content) {
-          tokens.current.end = i - 1
-          tokens.push(tokens.current)
-          tokens.last = tokens.current
-          tokens.current = {}
-        }
-        // new last left
-        const newTokens = []
-        newTokens.type = 'sub'
-        newTokens.current = {}
-        newTokens.last = {}
-        newTokens.left = char
-        newTokens.start = i
-        newTokens.right = ''
-        tokens.push(newTokens)
-        tokensStack.push(tokens)
-        tokens = newTokens
-      } else {
-        // end last token
-        if (tokens.current.content) {
-          tokens.current.end = i - 1
-          tokens.push(tokens.current)
-          tokens.last = tokens.current
-          tokens.current = {}
-        }
-        // end last left
-        tokens.right = char
-        tokens.end = i
-        tokens = tokensStack.pop()
-      }
-    } else if (type === tokens.current.type) {
-      tokens.current.content = tokens.current.content + char
-    } else {
-      if (tokens.current.content) {
-        tokens.current.end = i - 1
-        tokens.push(tokens.current)
-        tokens.last = tokens.current
-      }
-      tokens.current = {
-        type,
-        content: char,
-        start: i
-      }
-    }
-  }
-  if (tokens.current.content) {
-    tokens.current.end = str.length - 1
-    tokens.push(tokens.current)
-    tokens.last = tokens.current
-    tokens.current = {}
-  }
-  // if still last left not flushed, throw error
-  console.log(tokens)
   return str
 }
 module.exports.checkCharType = checkCharType
+module.exports.parse = parse
