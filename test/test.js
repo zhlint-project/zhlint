@@ -386,6 +386,16 @@ describe('plain text', () => {
   })
 
   test('punctuations replacement', () => {
+    const replaceMap = {
+      '《': '『',
+      '〈': '「',
+      '〉': '」',
+      '》': '』',
+    }
+    expect(lint('关注《watch》你关心的仓库。', { replaceMap }))
+      .toBe('关注『watch』你关心的仓库。')
+    expect(lint('关注〈watch〉你关心的仓库。', { replaceMap }))
+      .toBe('关注「watch」你关心的仓库。')
   })
 })
 

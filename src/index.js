@@ -155,14 +155,14 @@ const parse = str => {
     } else if (
       // is sub or mark
       (type === 'cjk-punctuation' || type === 'latin-punctuation') &&
-      `“”‘’"'()《》【】「」（）`.indexOf(char) >= 0
+      `“”‘’"'()《》〈〉『』「」【】（）`.indexOf(char) >= 0
     ) {
       // if left or right
       let isLeft =
-        `“‘(《【「（`.indexOf(char) >= 0 ||
+        `“‘(《〈『「【（`.indexOf(char) >= 0 ||
         `"'`.indexOf(char) >= 0 && tokens.left !== char
       if (
-        `”’)》】」）`.indexOf(char) >= 0 &&
+        `”’)》〉』」】）`.indexOf(char) >= 0 &&
         (!tokens.left || char.charCodeAt(0) - tokens.left.charCodeAt(0) !== 1)
       ) {
         throw new Error(`Error closed punctuation ${char} in column ${i}!`)
@@ -252,10 +252,6 @@ const travel = (tokens, filter, handler) => {
 }
 
 module.exports = (str, options = {}) => {
-  const topLevelTokens = parse(str)
-  let lastToken
-  let lastTokens
-  const outputTokens = []
 
   // false|true|keep
   const spaceBetweenLatinAndCjk =
@@ -334,6 +330,15 @@ module.exports = (str, options = {}) => {
     '‘': '\'',
     '’': '\''
   }
+
+  const replaceMap = options.replaceMap || {}
+
+  const finalStr = str.split('').map(char => replaceMap[char] || char).join('')
+
+  const topLevelTokens = parse(finalStr)
+  let lastToken
+  let lastTokens
+  const outputTokens = []
 
   travel(topLevelTokens, () => true, (token, index, tokens) => {
 
