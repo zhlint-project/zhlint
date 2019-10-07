@@ -337,8 +337,18 @@ describe('plain text', () => {
   })
 
   test('half-width/full-width punctuations', () => {
-    // 对于制作原型或学习,你可以这样使用最新版本:
-    // 该指令的意思是: "将这个元素节点的 title 特性和 Vue 实例的 message 属性保持一致".
+    expect(lint('Hello,如果你有任何问题，请联系@Vuejs_Events！'))
+      .toBe('Hello,如果你有任何问题，请联系@Vuejs_Events！')
+    expect(lint('Hello,如果你有任何问题，请联系@Vuejs_Events！', {}))
+      .toBe('Hello,如果你有任何问题，请联系@Vuejs_Events！')
+    expect(lint('Hello,如果你有任何问题，请联系@Vuejs_Events！', { punctuationWidth: 'half' }))
+      .toBe('Hello,如果你有任何问题,请联系@Vuejs_Events!')
+    expect(lint('Hello,如果你有任何问题，请联系@Vuejs_Events！', { punctuationWidth: 'half', spaceBesidePunctuation: 'right' }))
+      .toBe('Hello, 如果你有任何问题, 请联系@Vuejs_Events!')
+    expect(lint('Hello,如果你有任何问题，请联系@Vuejs_Events！', { punctuationWidth: 'full', spaceBesidePunctuation: 'right-for-latin' }))
+      .toBe('Hello，如果你有任何问题，请联系@Vuejs_Events！')
+    expect(lint('Hello,如果你有任何问题，请联系@Vuejs_Events！', { punctuationWidth: 'keep' }))
+      .toBe('Hello,如果你有任何问题，请联系@Vuejs_Events！')
   })
 
   test('punctuations replacement', () => {

@@ -275,6 +275,33 @@ module.exports = (str, options = {}) => {
       ? options.spaceBesidePunctuation
       : 'keep'
 
+  // full|half|keep
+  // ,.;:?!...-- <-> ，。；：？！……——
+  const punctuationWidth =
+    options.hasOwnProperty('punctuationWidth')
+      ? options.punctuationWidth
+      : 'keep'
+  const half2FullMap = {
+    ',': '，',
+    '.': '。',
+    ';': '；',
+    ':': '：',
+    '?': '？',
+    '!': '！',
+    '...': '……',
+    '--': '——'
+  }
+  const full2HalfMap = {
+    '，': ',',
+    '。': '.',
+    '；': ';',
+    '：': ':',
+    '？': '?',
+    '！': '!',
+    '……': '...',
+    '——': '--'
+  }
+
   travel(topLevelTokens, () => true, (token, index, tokens) => {
 
     // append space in a same group
@@ -298,7 +325,11 @@ module.exports = (str, options = {}) => {
       ) {
         if (spaceBesidePunctuation === 'right') {
           outputTokens.push(' ')
-        } else if (spaceBesidePunctuation === 'right-for-latin' && lastToken.type === 'latin-punctuation') {
+        } else if (
+          lastToken.type === 'latin-punctuation' &&
+          spaceBesidePunctuation === 'right-for-latin' &&
+          punctuationWidth !== 'full'
+        ) {
           outputTokens.push(' ')
         } else if (spaceBesidePunctuation === 'keep') {
           const start = lastToken.end + 1
@@ -370,7 +401,13 @@ module.exports = (str, options = {}) => {
     }
 
     // append content
-    outputTokens.push(token.content)
+    if (token.type === 'latin-punctuation' && punctuationWidth === 'full') {
+      outputTokens.push(half2FullMap[token.content] || token.content)
+    } else if (token.type === 'cjk-punctuation' && punctuationWidth === 'half') {
+      outputTokens.push(full2HalfMap[token.content] || token.content)
+    } else {
+      outputTokens.push(token.content)
+    }
 
     lastToken = token
     lastTokens = tokens
