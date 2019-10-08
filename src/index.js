@@ -128,7 +128,8 @@ const parse = str => {
   const tokensStack = []
   for (let i = 0; i < str.length; i++) {
     const char = str[i]
-    const type = checkCharType(char)
+    const oriType = checkCharType(char)
+    const type = oriType === 'digit' ? 'latin' : oriType
     // console.log(i, char, type, tokens)
     if (type === 'space') {
       let spaceContent = char
@@ -254,16 +255,13 @@ const travel = (tokens, filter, handler) => {
 /**
   options
   - spaceBetweenLatinAndCjk: false|true|'keep'
-    - (todo) special case: 2019年06月26号
   - spaceBesideBrackets: false|'inside'|'outside'|'both'|'keep'
-    - (todo) special case/position: 3 minite(s) left
   - spaceBesidePunctuation: false|'right'|'right-for-latin'|'keep'
-    - (todo) special case: false|'left'|'right'|'both'|'keep'
-      - 2019-06-26 12:00
   - punctuationWidth: 'full'|'half'|'keep'
-    - (todo) customize one-by-one
   - bracketsWidth: 'full'|'half'|'keep'
   - quotesWidth: 'full'|'half'|'keep'
+  - replaceCharMap: { [charBefore]: char }
+  - replace: [{ input/linted, output }]
  */
 module.exports = (str, options = {}) => {
 
@@ -334,13 +332,32 @@ module.exports = (str, options = {}) => {
     '‘': '\'',
     '’': '\''
   }
-  const replaceMap = options.replaceMap || {}
+  const replaceCharMap = options.replaceCharMap || {}
+  const replaceOptions = options.replace || []
+  for (const input in replaceCharMap) {
+    replaceOptions.push({ input, output: replaceCharMap[input] })
+  }
+  const finalReplaceOptions = replaceOptions.map(({ input, linted, output }) => {
+    if (input && typeof input === 'string') {
+      input = new RegExp(`\\${input}`, 'g')
+    }
+    if (linted && typeof linted === 'string') {
+      linted = new RegExp(`\\${linted}`, 'g')
+    }
+    return {
+      input,
+      linted,
+      output
+    }
+  })
 
-  // replace
-  const finalStr = str.split('').map(char => replaceMap[char] || char).join('')
+  // replace before
+  const strBefore = finalReplaceOptions
+    .filter(({ input, output }) => input && output)
+    .reduce((result, { input, output }) => result.replace(input, output), str)
 
   // parse: string -> tokens
-  const topLevelTokens = parse(finalStr)
+  const topLevelTokens = parse(strBefore)
 
   // travel
   let lastToken
@@ -491,7 +508,15 @@ module.exports = (str, options = {}) => {
     outputTokens.push(lastTokens.right)
   }
 
-  return outputTokens.join('')
+  // join linted tokens together
+  const strAfter = outputTokens.join('')
+
+  // replace after
+  const finalStr = finalReplaceOptions
+    .filter(({ linted, output }) => linted && output)
+    .reduce((result, { linted, output }) => result.replace(linted, output), strAfter)
+
+  return finalStr
 }
 
 module.exports.checkCharType = checkCharType
