@@ -251,27 +251,35 @@ const travel = (tokens, filter, handler) => {
   }
 }
 
+/**
+  options
+  - spaceBetweenLatinAndCjk: false|true|'keep'
+    - (todo) special case: 2019年06月26号
+  - spaceBesideBrackets: false|'inside'|'outside'|'both'|'keep'
+    - (todo) special case/position: 3 minite(s) left
+  - spaceBesidePunctuation: false|'right'|'right-for-latin'|'keep'
+    - (todo) special case: false|'left'|'right'|'both'|'keep'
+      - 2019-06-26 12:00
+  - punctuationWidth: 'full'|'half'|'keep'
+    - (todo) customize one-by-one
+  - bracketsWidth: 'full'|'half'|'keep'
+  - quotesWidth: 'full'|'half'|'keep'
+ */
 module.exports = (str, options = {}) => {
 
-  // false|true|keep
+  // options
   const spaceBetweenLatinAndCjk =
     options.hasOwnProperty('spaceBetweenLatinAndCjk')
       ? options.spaceBetweenLatinAndCjk
       : 'keep'
-
-  // false|inside|outside|both|keep
   const spaceBesideBrackets =
     options.hasOwnProperty('spaceBesideBrackets')
       ? options.spaceBesideBrackets
       : 'keep'
-
-  // false|right-for-latin|right|keep
   const spaceBesidePunctuation =
     options.hasOwnProperty('spaceBesidePunctuation')
       ? options.spaceBesidePunctuation
       : 'keep'
-
-  // full|half|keep
   const punctuationWidth =
     options.hasOwnProperty('punctuationWidth')
       ? options.punctuationWidth
@@ -296,8 +304,6 @@ module.exports = (str, options = {}) => {
     '……': '...',
     '——': '--'
   }
-
-  // full|half|keep
   const bracketsWidth =
     options.hasOwnProperty('bracketsWidth')
       ? options.bracketsWidth
@@ -310,8 +316,6 @@ module.exports = (str, options = {}) => {
     '（': '(',
     '）': ')'
   }
-
-  // full|half|keep
   const quotesWidth =
     options.hasOwnProperty('quotesWidth')
       ? options.quotesWidth
@@ -330,16 +334,18 @@ module.exports = (str, options = {}) => {
     '‘': '\'',
     '’': '\''
   }
-
   const replaceMap = options.replaceMap || {}
 
+  // replace
   const finalStr = str.split('').map(char => replaceMap[char] || char).join('')
 
+  // parse: string -> tokens
   const topLevelTokens = parse(finalStr)
+
+  // travel
   let lastToken
   let lastTokens
   const outputTokens = []
-
   travel(topLevelTokens, () => true, (token, index, tokens) => {
 
     // append space in a same group
@@ -487,6 +493,7 @@ module.exports = (str, options = {}) => {
 
   return outputTokens.join('')
 }
+
 module.exports.checkCharType = checkCharType
 module.exports.parse = parse
 module.exports.travel = travel
