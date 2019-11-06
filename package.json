@@ -24,5 +24,8 @@
   "homepage": "https://github.com/Jinjiang/zh-lint#readme",
   "devDependencies": {
     "jest": "^24.8.0"
+  },
+  "dependencies": {
+    "escape-string-regexp": "^2.0.0"
   }
 }

@@ -1,3 +1,5 @@
+const escapeStringRegexp = require('escape-string-regexp')
+
 const checkCharType = char => {
   // console.log(char.charCodeAt(0).toString(16), char)
   // console.log(char.charCodeAt(1).toString(16), char)
@@ -45,7 +47,7 @@ const checkCharType = char => {
   if (char.match(/[\u0370-\u03FF]/)) {
     return 'greek'
   }
-  
+
   // https://stackoverflow.com/a/21113538
   // CJK Unified Ideographs
   if (char.match(/[\u4E00-\u9FFF]/)) {
@@ -332,29 +334,34 @@ module.exports = (str, options = {}) => {
     '‘': '\'',
     '’': '\''
   }
-  const replaceCharMap = options.replaceCharMap || {}
-  const replaceOptions = options.replace || []
-  for (const input in replaceCharMap) {
-    replaceOptions.push({ input, output: replaceCharMap[input] })
+  const preReplaceOptions = []
+  const postReplaceOptions = []
+  const parseReplaceOptions = (src, dest) => {
+    if (!Array.isArray(src)) {
+      return
+    }
+    src.forEach(({ input, output }) => {
+      if (typeof input === 'string') {
+        input = escapeStringRegexp(input)
+      }
+      dest.push({ input, output })
+    })
   }
-  const finalReplaceOptions = replaceOptions.map(({ input, linted, output }) => {
-    if (input && typeof input === 'string') {
-      input = new RegExp(`\\${input}`, 'g')
-    }
-    if (linted && typeof linted === 'string') {
-      linted = new RegExp(`\\${linted}`, 'g')
-    }
-    return {
-      input,
-      linted,
-      output
-    }
-  })
+  const replaceCharMap = options.replaceCharMap || {}
+  for (const input in replaceCharMap) {
+    preReplaceOptions.push({ input, output: replaceCharMap[input] })
+  }
+  const replaceOptions = options.replace || {}
+  if (Array.isArray(options.replace)) {
+    parseReplaceOptions(options.replace, postReplaceOptions)
+  } else {
+    const { pre, post } = options.replace || {}
+    parseReplaceOptions(pre, preReplaceOptions)
+    parseReplaceOptions(post, postReplaceOptions)
+  }
 
-  // replace before
-  const strBefore = finalReplaceOptions
-    .filter(({ input, output }) => input && output)
-    .reduce((result, { input, output }) => result.replace(input, output), str)
+  // apply pre replace options
+  const strBefore = preReplaceOptions.reduce((result, { input, output }) => result.replace(input, output), str)
 
   // parse: string -> tokens
   const topLevelTokens = parse(strBefore)
@@ -511,10 +518,8 @@ module.exports = (str, options = {}) => {
   // join linted tokens together
   const strAfter = outputTokens.join('')
 
-  // replace after
-  const finalStr = finalReplaceOptions
-    .filter(({ linted, output }) => linted && output)
-    .reduce((result, { linted, output }) => result.replace(linted, output), strAfter)
+  // apply post replace options
+  const finalStr = postReplaceOptions.reduce((result, { input, output }) => result.replace(input, output), strAfter)
 
   return finalStr
 }
