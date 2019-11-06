@@ -254,20 +254,7 @@ const travel = (tokens, filter, handler) => {
   }
 }
 
-/**
-  options
-  - spaceBetweenLatinAndCjk: false|true|'keep'
-  - spaceBesideBrackets: false|'inside'|'outside'|'both'|'keep'
-  - spaceBesidePunctuation: false|'right'|'right-for-latin'|'keep'
-  - punctuationWidth: 'full'|'half'|'keep'
-  - bracketsWidth: 'full'|'half'|'keep'
-  - quotesWidth: 'full'|'half'|'keep'
-  - replaceCharMap: { [charBefore]: char }
-  - replace: [{ input/linted, output }]
- */
-module.exports = (str, options = {}) => {
-
-  // options
+const prepareOptions = options => {
   const spaceBetweenLatinAndCjk =
     options.hasOwnProperty('spaceBetweenLatinAndCjk')
       ? options.spaceBetweenLatinAndCjk
@@ -351,7 +338,6 @@ module.exports = (str, options = {}) => {
   for (const input in replaceCharMap) {
     preReplaceOptions.push({ input, output: replaceCharMap[input] })
   }
-  const replaceOptions = options.replace || {}
   if (Array.isArray(options.replace)) {
     parseReplaceOptions(options.replace, postReplaceOptions)
   } else {
@@ -359,6 +345,61 @@ module.exports = (str, options = {}) => {
     parseReplaceOptions(pre, preReplaceOptions)
     parseReplaceOptions(post, postReplaceOptions)
   }
+
+  return {
+    spaceBetweenLatinAndCjk,
+
+    spaceBesideBrackets,
+
+    spaceBesidePunctuation,
+
+    punctuationWidth,
+    half2FullMap,
+    full2HalfMap,
+
+    bracketsWidth,
+    full2HalfBracketMap,
+    half2FullBracketMap,
+
+    quotesWidth,
+    full2HalfQuoteMap,
+    half2FullLeftQuoteMap,
+    half2FullRightQuoteMap,
+
+    preReplaceOptions,
+    postReplaceOptions,
+  }
+}
+
+/**
+  options
+  - spaceBetweenLatinAndCjk: false|true|'keep'
+  - spaceBesideBrackets: false|'inside'|'outside'|'both'|'keep'
+  - spaceBesidePunctuation: false|'right'|'right-for-latin'|'keep'
+  - punctuationWidth: 'full'|'half'|'keep'
+  - bracketsWidth: 'full'|'half'|'keep'
+  - quotesWidth: 'full'|'half'|'keep'
+  - replaceCharMap: { [charBefore]: char }
+  - replace: [{ input/linted, output }]
+ */
+module.exports = (str, options = {}) => {
+  const {
+    spaceBetweenLatinAndCjk,
+    spaceBesideBrackets,
+    spaceBesidePunctuation,
+    punctuationWidth,
+    half2FullMap,
+    full2HalfMap,
+    bracketsWidth,
+    full2HalfBracketMap,
+    half2FullBracketMap,
+    quotesWidth,
+    full2HalfQuoteMap,
+    half2FullLeftQuoteMap,
+    half2FullRightQuoteMap,
+    preReplaceOptions,
+    postReplaceOptions,
+  } = prepareOptions(options)
 
   // apply pre replace options
   const strBefore = preReplaceOptions.reduce((result, { input, output }) => result.replace(input, output), str)
@@ -372,14 +413,22 @@ module.exports = (str, options = {}) => {
   const outputTokens = []
   travel(topLevelTokens, () => true, (token, index, tokens) => {
 
-    // append space in a same group
+    // if in a same group with the last token
     if (lastToken && lastTokens === tokens && token.type !== 'group') {
 
-      // between latin and cjk
+      // process the spaces in a same group
+      // - between a half width letter and a full width letter
+      // - after a punctuation, before a letter
+      // - after a letter, before a punctuations
+      // - other situations
       if (
         lastToken.type === 'latin' && token.type === 'cjk' ||
         lastToken.type === 'cjk' && token.type === 'latin'
-      ) {
+        ) {
+        // spacing between a latin char and a cjk char
+        // - one space,
+        // - keep
+        // - no space
         if (spaceBetweenLatinAndCjk === true) {
           outputTokens.push(' ')
         } else if (spaceBetweenLatinAndCjk === 'keep') {
@@ -391,6 +440,11 @@ module.exports = (str, options = {}) => {
         (lastToken.type === 'cjk-punctuation' || lastToken.type === 'latin-punctuation') &&
         (token.type === 'cjk' || token.type === 'latin')
       ) {
+        // spacing after a punctuation (before a cjk/latin char):
+        // - a space,
+        // - a space only if the char after is latin (and the punctuation _should_ be half width),
+        // - keep
+        // - no space
         if (spaceBesidePunctuation === 'right') {
           outputTokens.push(' ')
         } else if (
@@ -408,12 +462,17 @@ module.exports = (str, options = {}) => {
         (token.type === 'cjk-punctuation' || token.type === 'latin-punctuation') &&
         (lastToken.type === 'cjk' || lastToken.type === 'latin')
       ) {
+        // spacing before a punctuation (after a cjk/latin char):
+        // - keep,
+        // - no space
         if (spaceBesidePunctuation === 'keep') {
           const start = lastToken.end + 1
           const end = token.start
           outputTokens.push(str.substring(start, end))
         }
       } else {
+        // space in other situations
+        // - keep
         const start = lastToken.end + 1
         const end = token.start
         outputTokens.push(str.substring(start, end))
