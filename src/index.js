@@ -485,8 +485,11 @@ module.exports = (str, options = {}) => {
 
     // start of a group
     // split characters into 3 parts
-    // - before the left bracket/quote, and the left bracket/quote
-    // - after the left bracket/quote
+    // - first round: before the left bracket/quote, and the left bracket/quote
+    // - second round: after the left bracket/quote
+    // @notice:
+    // they couldn't be done in a same token travel because
+    // we haven't already gotten the next token when it comes to the start identity
     if (token.type === 'group') {
       // make sure there is another token in the same group before
       if (lastToken) {
@@ -535,6 +538,16 @@ module.exports = (str, options = {}) => {
     }
 
     // end of a group
+    // split characters into 3 parts
+    // - before the right bracket/quote
+    // - the right bracket/quote
+    // - after the right bracket/quote
+    // @notice:
+    // they could be done in a same token travel
+    // @notice:
+    // for the last token of a string, the space
+    // before the right bracket/quote will not be processed here
+    // so there will be another process at the end of the whole travel
     if (lastTokens && tokens.indexOf(lastTokens) >= 0) {
       // space inside group
       // - one space
@@ -578,6 +591,9 @@ module.exports = (str, options = {}) => {
     }
 
     // append content
+    // - convert punctuation from half width to full width
+    // - convert punctuation from full width to half width
+    // - keep
     if (token.type === 'latin-punctuation' && punctuationWidth === 'full') {
       outputTokens.push(half2FullMap[token.content] || token.content)
     } else if (token.type === 'cjk-punctuation' && punctuationWidth === 'half') {
@@ -586,12 +602,17 @@ module.exports = (str, options = {}) => {
       outputTokens.push(token.content)
     }
 
+    // update travel states
     lastToken = token
     lastTokens = tokens
   })
 
-  // append last group identifier if has
+  // append identifier for end of groups if has
   if (lastTokens && lastTokens !== topLevelTokens) {
+    // space inside group
+    // - one space
+    // - keep
+    // - no space
     // todo: use parent to find all unclosed group(s), with outside space
     if (spaceBesideBrackets === 'inside' || spaceBesideBrackets === 'both') {
       outputTokens.push(' ')
@@ -600,6 +621,7 @@ module.exports = (str, options = {}) => {
       const end = lastTokens.end
       outputTokens.push(str.substring(start, end))
     }
+    // end of the group
     outputTokens.push(lastTokens.right)
   }
 
