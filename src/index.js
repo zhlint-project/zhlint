@@ -412,11 +412,41 @@ module.exports = (str, options = {}) => {
   // parse: string -> tokens
   const topLevelTokens = parse(strBefore)
 
+  const prependSibling = (token, output, content) => {
+    output.push(content)
+    content && token.pre && token.pre.push(content)
+  }
+  const pushContent = (token, output, content) => {
+    output.push(content)
+  }
+  const appendSibling = (token, output, content) => {
+    output.push(content)
+    content && token.post && token.post.push(content)
+  }
+
   // travel
   let lastToken
   let lastTokens
   const outputTokens = []
+  const groupPieces = []
+  const tokenSiblingsMap = []
   travel(topLevelTokens, () => true, (token, index, tokens) => {
+
+    // record group pieces and prepare space for recording token siblings
+    if (lastTokens !== tokens) {
+      groupPieces.push([])
+    }
+    if (token.type === 'group') {
+      token.id = `${groupPieces.length - 1}`
+      groupPieces[groupPieces.length - 1].left = token.left
+      groupPieces[groupPieces.length - 1].right = token.right
+    } else {
+      groupPieces[groupPieces.length - 1].push(token)
+      token.id = `${groupPieces.length - 1}-${groupPieces[groupPieces.length - 1].length - 1}`
+      token.pre = (lastToken && lastToken.post) ? lastToken.post : []
+      token.post = []
+      tokenSiblingsMap.push(token)
+    }
 
     // if in a same group with the last token
     if (lastToken && lastTokens === tokens && token.type !== 'group') {
@@ -434,11 +464,11 @@ module.exports = (str, options = {}) => {
         // - keep
         // - no space
         if (spaceBetweenLatinAndCjk === true) {
-          outputTokens.push(' ')
+          prependSibling(token, outputTokens, ' ')
         } else if (spaceBetweenLatinAndCjk === 'keep') {
           const start = lastToken.end + 1
           const end = token.start
-          outputTokens.push(str.substring(start, end))
+          prependSibling(token, outputTokens, str.substring(start, end))
         }
       } else if (
         (lastToken.type === 'cjk-punctuation' || lastToken.type === 'latin-punctuation') &&
@@ -450,17 +480,17 @@ module.exports = (str, options = {}) => {
         // - keep
         // - no space
         if (spaceBesidePunctuation === 'right') {
-          outputTokens.push(' ')
+          prependSibling(token, outputTokens, ' ')
         } else if (
           lastToken.type === 'latin-punctuation' &&
           spaceBesidePunctuation === 'right-for-latin' &&
           punctuationWidth !== 'full'
         ) {
-          outputTokens.push(' ')
+          prependSibling(token, outputTokens, ' ')
         } else if (spaceBesidePunctuation === 'keep') {
           const start = lastToken.end + 1
           const end = token.start
-          outputTokens.push(str.substring(start, end))
+          prependSibling(token, outputTokens, str.substring(start, end))
         }
       } else if (
         (token.type === 'cjk-punctuation' || token.type === 'latin-punctuation') &&
@@ -472,14 +502,14 @@ module.exports = (str, options = {}) => {
         if (spaceBesidePunctuation === 'keep') {
           const start = lastToken.end + 1
           const end = token.start
-          outputTokens.push(str.substring(start, end))
+          prependSibling(token, outputTokens, str.substring(start, end))
         }
       } else {
         // space in other situations
         // - keep
         const start = lastToken.end + 1
         const end = token.start
-        outputTokens.push(str.substring(start, end))
+        prependSibling(token, outputTokens, str.substring(start, end))
       }
     }
 
@@ -498,11 +528,11 @@ module.exports = (str, options = {}) => {
         // - keep
         // - no space
         if (spaceBesideBrackets === 'outside' || spaceBesideBrackets === 'both') {
-          outputTokens.push(' ')
+          pushContent(token, outputTokens, ' ')
         } else if (spaceBesideBrackets === 'keep') {
           const start = lastToken.end + 1
           const end = token.start
-          outputTokens.push(str.substring(start, end))
+          pushContent(token, outputTokens, str.substring(start, end))
         }
       }
       // the left bracket/quote
@@ -512,15 +542,15 @@ module.exports = (str, options = {}) => {
       // - half width quote
       // - keep
       if (bracketsWidth === 'full' && half2FullBracketMap[token.left]) {
-        outputTokens.push(half2FullBracketMap[token.left])
+        pushContent(token, outputTokens, half2FullBracketMap[token.left])
       } else if (bracketsWidth === 'half' && full2HalfBracketMap[token.left]) {
-        outputTokens.push(full2HalfBracketMap[token.left])
+        pushContent(token, outputTokens, full2HalfBracketMap[token.left])
       } else if (quotesWidth === 'full' && half2FullLeftQuoteMap[token.left]) {
-        outputTokens.push(half2FullLeftQuoteMap[token.left])
+        pushContent(token, outputTokens, half2FullLeftQuoteMap[token.left])
       } else if (quotesWidth === 'half' && full2HalfQuoteMap[token.left]) {
-        outputTokens.push(full2HalfQuoteMap[token.left])
+        pushContent(token, outputTokens, full2HalfQuoteMap[token.left])
       } else {
-        outputTokens.push(token.left)
+        pushContent(token, outputTokens, token.left)
       }
     }
     if (lastToken && lastToken.type === 'group') {
@@ -529,11 +559,11 @@ module.exports = (str, options = {}) => {
       // - keep
       // - no space
       if (spaceBesideBrackets === 'inside' || spaceBesideBrackets === 'both') {
-        outputTokens.push(' ')
+        pushContent(token, outputTokens, ' ')
       } else if (spaceBesideBrackets === 'keep') {
         const start = lastToken.start + 1
         const end = token.start
-        outputTokens.push(str.substring(start, end))
+        pushContent(token, outputTokens, str.substring(start, end))
       }
     }
 
@@ -554,11 +584,11 @@ module.exports = (str, options = {}) => {
       // - keep
       // - no space
       if (spaceBesideBrackets === 'inside' || spaceBesideBrackets === 'both') {
-        outputTokens.push(' ')
+        pushContent(token, outputTokens, ' ')
       } else if (spaceBesideBrackets === 'keep') {
         const start = lastToken.end + 1
         const end = lastTokens.end
-        outputTokens.push(str.substring(start, end))
+        pushContent(token, outputTokens, str.substring(start, end))
       }
       // group right identifier
       // - full width right bracket
@@ -567,26 +597,26 @@ module.exports = (str, options = {}) => {
       // - half width quote
       // - keep
       if (bracketsWidth === 'full' && half2FullBracketMap[lastTokens.right]) {
-        outputTokens.push(half2FullBracketMap[lastTokens.right])
+        pushContent(token, outputTokens, half2FullBracketMap[lastTokens.right])
       } else if (bracketsWidth === 'half' && full2HalfBracketMap[lastTokens.right]) {
-        outputTokens.push(full2HalfBracketMap[lastTokens.right])
+        pushContent(token, outputTokens, full2HalfBracketMap[lastTokens.right])
       } else if (quotesWidth === 'full' && half2FullRightQuoteMap[lastTokens.right]) {
-        outputTokens.push(half2FullRightQuoteMap[lastTokens.right])
+        pushContent(token, outputTokens, half2FullRightQuoteMap[lastTokens.right])
       } else if (quotesWidth === 'half' && full2HalfQuoteMap[lastTokens.right]) {
-        outputTokens.push(full2HalfQuoteMap[lastTokens.right])
+        pushContent(token, outputTokens, full2HalfQuoteMap[lastTokens.right])
       } else {
-        outputTokens.push(lastTokens.right)
+        pushContent(token, outputTokens, lastTokens.right)
       }
       // space outside group
       // - one space
       // - keep
       // - no space
       if (spaceBesideBrackets === 'outside' || spaceBesideBrackets === 'both') {
-        outputTokens.push(' ')
+        pushContent(token, outputTokens, ' ')
       } else if (spaceBesideBrackets === 'keep') {
         const start = lastTokens.end + 1
         const end = token.start
-        outputTokens.push(str.substring(start, end))
+        pushContent(token, outputTokens, str.substring(start, end))
       }
     }
 
@@ -595,11 +625,11 @@ module.exports = (str, options = {}) => {
     // - convert punctuation from full width to half width
     // - keep
     if (token.type === 'latin-punctuation' && punctuationWidth === 'full') {
-      outputTokens.push(half2FullMap[token.content] || token.content)
+      pushContent(token, outputTokens, half2FullMap[token.content] || token.content)
     } else if (token.type === 'cjk-punctuation' && punctuationWidth === 'half') {
-      outputTokens.push(full2HalfMap[token.content] || token.content)
+      pushContent(token, outputTokens, full2HalfMap[token.content] || token.content)
     } else {
-      outputTokens.push(token.content)
+      pushContent(token, outputTokens, token.content)
     }
 
     // update travel states
@@ -615,15 +645,29 @@ module.exports = (str, options = {}) => {
     // - no space
     // todo: use parent to find all unclosed group(s), with outside space
     if (spaceBesideBrackets === 'inside' || spaceBesideBrackets === 'both') {
-      outputTokens.push(' ')
+      pushContent(lastToken, outputTokens, ' ')
     } else if (spaceBesideBrackets === 'keep') {
       const start = lastToken.end + 1
       const end = lastTokens.end
-      outputTokens.push(str.substring(start, end))
+      pushContent(lastToken, outputTokens, str.substring(start, end))
     }
     // end of the group
-    outputTokens.push(lastTokens.right)
+    // todo:
+    // - full width right bracket
+    // - half width right bracket
+    // - full width right quote
+    // - half width quote
+    // - keep
+    pushContent(lastToken, outputTokens, lastTokens.right)
   }
+
+  // todo
+  // - match token type + token content for each group piece
+  // console.log(groupPieces.map(piece => piece.map(token => token.content).join('')))
+  // console.log(tokenSiblingsMap.map(
+  //   ({ type, content, start, end, id, pre, post }) =>
+  //     ({ type, content, start, end, id, pre, post })
+  // ))
 
   // join linted tokens together
   const strAfter = outputTokens.join('')
