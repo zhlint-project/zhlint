@@ -1,8 +1,10 @@
 const lint = require('../src')
 
-const { checkCharType, parse } = lint
+const { checkCharType, parse, travel } = lint
 
 const purify = arr => arr.map(item => Array.isArray(item) ? purify(item) : item)
+
+const clone = obj => JSON.parse(JSON.stringify(obj))
 
 describe('check char type', () => {
   test('space', () => {
@@ -147,3 +149,51 @@ describe('parser', () => {
     expect(result.groups[0].endChar).toBe('"')
   })
 })
+
+describe('travel', () => {
+  const { tokens } = parse('遵守JavaScript编码规范非常重要')
+  const expectedTokens = [
+    { type: 'content-full', content: '遵守', index: 0, length: 1 - 0 + 1 },
+    { type: 'content-half', content: 'JavaScript', index: 2, length: 11 - 2 + 1 },
+    { type: 'content-full', content: '编码规范非常重要', index: 12, length: 19 - 12 + 1 }
+  ]
+  test('general travel', () => {
+    const records = []
+    travel(tokens, () => true, (token, index, tokens, result) => records.push({ token, index, tokens, result }))
+    expect(clone(records)).toEqual([
+      { token: expectedTokens[0], tokens: expectedTokens, index: 0, result: true },
+      { token: expectedTokens[1], tokens: expectedTokens, index: 1, result: true },
+      { token: expectedTokens[2], tokens: expectedTokens, index: 2, result: true }
+    ])
+  })
+  test('filter by type', () => {
+    const records = []
+    travel(tokens, { type: 'content-half' }, (token, index, tokens, result) => records.push({ token, index, tokens, result }))
+    expect(clone(records)).toEqual([
+      { token: expectedTokens[1], tokens: expectedTokens, index: 1, result: true },
+    ])
+  })
+  test('filter by string match', () => {
+    const records = []
+    travel(tokens, '规范', (token, index, tokens, result) => records.push({ token, index, tokens, result }))
+    expect(clone(records)).toEqual([
+      { token: expectedTokens[2], tokens: expectedTokens, index: 2, result: ['规范'] },
+    ])
+  })
+  test('filter by regexp match', () => {
+    const records = []
+    travel(tokens, /[a-z]{3}/, (token, index, tokens, result) => records.push({ token, index, tokens, result }))
+    expect(clone(records)).toEqual([
+      { token: expectedTokens[1], tokens: expectedTokens, index: 1, result: ['ava'] },
+    ])
+  })
+  test('filter by function', () => {
+    const records = []
+    travel(tokens, (token, index, tokens) => index, (token, index, tokens, result) => records.push({ token, index, tokens, result }))
+    expect(clone(records)).toEqual([
+      { token: expectedTokens[1], tokens: expectedTokens, index: 1, result: 1 },
+      { token: expectedTokens[2], tokens: expectedTokens, index: 2, result: 2 }
+    ])
+  })
+})
+
