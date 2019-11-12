@@ -1,6 +1,12 @@
 const lint = require('../src')
 
-const { checkCharType, parse, travel, join } = lint
+const {
+  checkCharType,
+  parse,
+  travel,
+  join,
+  processRule
+} = lint
 
 const purify = arr => arr.map(item => Array.isArray(item) ? purify(item) : item)
 
@@ -210,5 +216,24 @@ describe('join', () => {
       .toBe(`Vue 也可以在 unpkg 和 cdnjs 上获取 ( cdnjs 的版本更新可能略滞后) `)
     expect(restruct(`该指令的意思是: "将这个元素节点的 title 特性和 Vue 实例的 message 属性保持一致"`))
       .toBe(`该指令的意思是: "将这个元素节点的 title 特性和 Vue 实例的 message 属性保持一致"`)
+  })
+})
+
+describe('process rules', () => {
+  test('replace half-width brackets into full-width', () => {
+    const data = parse(`关注(watch)你关心的仓库。`)
+    processRule(
+      data,
+      {
+        filter: { type: 'punctuation-mark' },
+        handler: (token, index, group, matched, marks) => {
+          token.content = {
+            '(': '（',
+            ')': '）',
+          }[token.content] || token.content
+        }
+      }
+    )
+    expect(join(data.tokens)).toBe(`关注（watch）你关心的仓库。`)
   })
 })

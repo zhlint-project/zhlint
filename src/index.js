@@ -344,7 +344,14 @@ const parse = str => {
   return { tokens, groups, marks }
 }
 
-const travel = (group, filter, handler) => {
+/**
+ * Travel through a group nestedly
+ * @param  {Group}                                         group
+ * @param  {function | string | RegExp | { type: stirng }} filter
+ * @param  {function(token, index, group, matched, marks)} handler
+ * @param  {Array<Mark>}                                   marks
+ */
+const travel = (group, filter, handler, marks) => {
   let normalizedFilter = () => false
   if (typeof filter === 'object' && filter.type) {
     normalizedFilter = token => token.type === filter.type
@@ -357,14 +364,19 @@ const travel = (group, filter, handler) => {
     const token = group[i]
     const matched = normalizedFilter(token, i, group)
     if (matched) {
-      handler(token, i, group, matched)
+      handler(token, i, group, matched, marks)
     }
     if (Array.isArray(token)) {
-      travel(token, filter, handler)
+      travel(token, filter, handler, marks)
     }
   }
 }
 
+/**
+ * Join tokens back into string
+ * @param  {Array<Token>} tokens
+ * @return {string}
+ */
 const join = tokens => [
   tokens.startChar,
   tokens.innerSpaceBefore,
@@ -379,7 +391,25 @@ const join = tokens => [
   tokens.endChar
 ].filter(Boolean).join('')
 
+/**
+ * Process a single lint rule
+ * @param  {{ tokens, groups, marks }}      data
+ * @param  {function | { filter, handler }} rule
+ */
+const processRule = (data, rule) => {
+  if (!rule) {
+    return data
+  }
+  const handler = typeof rule === 'function' ? rule : rule.handler
+  const filter = typeof rule === 'function' ? null : rule.filter
+  if (!handler) {
+    return data
+  }
+  travel(data.tokens, filter, handler, data.marks)
+}
+
 module.exports.checkCharType = checkCharType
 module.exports.parse = parse
 module.exports.travel = travel
 module.exports.join = join
+module.exports.processRule = processRule
