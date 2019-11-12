@@ -365,6 +365,21 @@ const travel = (group, filter, handler) => {
   }
 }
 
+const join = tokens => [
+  tokens.startChar,
+  tokens.innerSpaceBefore,
+  ...tokens.map(token =>
+    Array.isArray(token)
+      ? join(token)
+      : [
+          token.content,
+          token.spaceAfter
+        ].filter(Boolean).join('')
+  ),
+  tokens.endChar
+].filter(Boolean).join('')
+
 module.exports.checkCharType = checkCharType
 module.exports.parse = parse
 module.exports.travel = travel
+module.exports.join = join
