@@ -122,4 +122,227 @@ const checkCharType = char => {
   return 'unknown'
 }
 
+/**
+ * Parse a string into several tokens.
+ * - half-width content x {1,n} (letter)
+ * - full-width content x {1,n}
+ * - half-width punctuation
+ * - width-width punctuation
+ * - punctuation pair as special marks: brackets
+ * - punctuation pair as a group: quotes
+ * Types
+ * - Token: { type, content, index, length, mark?, markSide?, spaceAfter? }
+ * - Mark: { startIndex, startChar, endIndex, endChar }
+ * - Group: extends Array<Token> { startChar, startIndex, endChar, endIndex, innerSpaceBefore }
+ * @param  {string} str
+ * @return {
+ *   tokens: Token[],
+ *   marks: Mark[],
+ *   groups: Group[]
+ * }
+ */
+const parse = str => {
+  // constants
+  const markChars = {
+    left: '(（',
+    right: ')）'
+  }
+  const groupChars = {
+    left: `“‘《〈『「【`,
+    right: `”’》〉』」】`,
+    neutral: `'"`
+  }
+
+  // states
+  let lastUnfinishedToken
+  let lastUnfinishedGroup = []
+  let lastUnfinishedMark
+
+  // temp stacks
+  const groupStack = []
+  const markStack = []
+
+  // results
+  const tokens = lastUnfinishedGroup
+  const marks = []
+  const groups = []
+
+  // helpers
+  const getSpaceLength = start => {
+    for (let i = start + 1; i < str.length; i++) {
+      const char = str[i]
+      const type = checkCharType(char)
+      if (type !== 'space') {
+        return i - start;
+      }
+    }
+    return str.length - start;
+  }
+  const endLastUnfinishedToken = index => {
+    if (lastUnfinishedToken) {
+      lastUnfinishedToken.length = index - lastUnfinishedToken.index
+      lastUnfinishedGroup.push(lastUnfinishedToken)
+      lastUnfinishedToken = null
+    }
+  }
+  const addMarkPunctuation = (index, char, markSide) => {
+    lastUnfinishedToken = {
+      type: 'punctuation-mark',
+      content: char,
+      index,
+      length: 1,
+      mark: lastUnfinishedMark,
+      markSide
+    }
+    lastUnfinishedGroup.push(lastUnfinishedToken)
+    lastUnfinishedToken = null
+  }
+  const createNewMark = (index, char) => {
+    if (lastUnfinishedMark) {
+      markStack.push(lastUnfinishedMark)
+      lastUnfinishedMark = null
+    }
+    lastUnfinishedMark = { startIndex: index, startChar: char }
+    marks.push(lastUnfinishedMark)
+  }
+  const endLastUnfinishedMark = (index, char) => {
+    lastUnfinishedMark.endIndex = index
+    lastUnfinishedMark.endChar = char
+    if (markStack.length) {
+      lastUnfinishedMark = markStack.pop()
+    } else {
+      lastUnfinishedMark = null
+    }
+  }
+  const createNewGroup = (index, char) => {
+    groupStack.push(lastUnfinishedGroup)
+    lastUnfinishedGroup = []
+    lastUnfinishedGroup.startChar = char
+    lastUnfinishedGroup.startIndex = index
+    groupStack[groupStack.length - 1].push(lastUnfinishedGroup)
+    groups.push(lastUnfinishedGroup)
+  }
+  const endLastUnfinishedGroup = (index, char) => {
+    lastUnfinishedGroup.endChar = char
+    lastUnfinishedGroup.endIndex = index
+    if (groupStack.length) {
+      lastUnfinishedGroup = groupStack.pop()
+    } else {
+      lastUnfinishedGroup = null
+    }
+  }
+  const addNormalPunctuation = (index, char, type) => {
+    lastUnfinishedToken = { type, content: char, index, length: 1 }
+    lastUnfinishedGroup.push(lastUnfinishedToken)
+    lastUnfinishedToken = null
+  }
+  const createContent = (index, char, type) => {
+    lastUnfinishedToken = { type, content: char, index, length: 1 }
+  }
+  const appendContent = (char) => {
+    lastUnfinishedToken.content += char
+    lastUnfinishedToken.length++
+  }
+
+  // travel every character in the string
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i]
+    const type = checkCharType(char)
+
+    // finally get `marks` and `lastUnfinishedGroup` as the top-level tokens
+    // - space: end current -> move forward -> record space beside
+    // - punctuation: whether start/end a mark or group, or just add a normal one
+    // - content: whether start a new one or append into the current one
+    if (type === 'space') {
+      // end the last unfinished token
+      // jump to the next non-space char
+      // record the last space
+      // - space after a token
+      // - inner space before a group
+      endLastUnfinishedToken(i)
+      const spaceLength = getSpaceLength(i)
+      if (lastUnfinishedGroup.length) {
+        const lastToken = lastUnfinishedGroup[lastUnfinishedGroup.length - 1]
+        lastToken.spaceAfter = str.substr(i, spaceLength)
+      } else {
+        lastUnfinishedGroup.innerSpaceBefore = str.substr(i, spaceLength)
+      }
+      if (spaceLength - 1 > 0) {
+        i += spaceLength - 1
+      }
+    } else if (type.match(/^punctuation/)) {
+      // end the last unfinished token
+      endLastUnfinishedToken(i)
+      // check the current token type
+      // - start of a mark: start an unfinished mark
+      // - end of a mark: end the current unfinished mark
+      // - neutral quote: start/end a group by pairing the last unfinished group
+      // - left quote: start a new unfinished group
+      // - right quote: end the current unfinished group
+      // - other punctuation: add and end the current token
+      if (markChars.left.indexOf(char) >= 0) {
+        // push (save) the current unfinished mark if have
+        createNewMark(i, char)
+        // generate a new token and mark it as a mark punctuation by left
+        // and finish the token
+        addMarkPunctuation(i, char, 'left')
+      } else if (markChars.right.indexOf(char) >= 0) {
+        if (!lastUnfinishedMark) {
+          throw new Error(`Unmatched closed bracket ${char} at ${i}`)
+        }
+        // generate token as a punctuation
+        addMarkPunctuation(i, char, 'right')
+        // end the last unfinished mark
+        // and pop the previous one if exists
+        endLastUnfinishedMark(i, char)
+      } else if (groupChars.neutral.indexOf(char) >= 0) {
+        // - end the last unfinished group
+        // - start a new group
+        if (lastUnfinishedGroup && char === lastUnfinishedGroup.startChar) {
+          endLastUnfinishedGroup(i, char)
+        } else {
+          createNewGroup(i, char)
+        }
+      } else if (groupChars.left.indexOf(char) >= 0) {
+        createNewGroup(i, char)
+      } else if (groupChars.right.indexOf(char) >= 0) {
+        if (!lastUnfinishedGroup) {
+          throw new Error(`Unmatched closed quote ${char} at ${i}`)
+        }
+        endLastUnfinishedGroup(i, char)
+      } else {
+        addNormalPunctuation(i, char, type)
+      }
+    } else if (type.match(/^content/)) {
+      // check if type changed and last token unfinished
+      // - create new token in the current group
+      // - append into current unfinished token
+      if (lastUnfinishedToken) {
+        if (lastUnfinishedToken.type !== type) {
+          endLastUnfinishedToken(i)
+          createContent(i, char, type)
+        } else {
+          appendContent(char)
+        }
+      } else {
+        createContent(i, char, type)
+      }
+    }
+  }
+  endLastUnfinishedToken(str.length)
+
+  // throw error if `markStack` or `groupStack` not fully flushed
+  if (markStack.length) {
+    const mark = markStack[markStack.length - 1]
+    throw new Error(`Unmatched closed bracket ${mark.startChar} at ${mark.startIndex}`)
+  }
+  if (groupStack.length) {
+    const group = groupStack[groupStack.length - 1]
+    throw new Error(`Unmatched closed quote ${group.startChar} at ${group.startIndex}`)
+  }
+
+  return { tokens, groups, marks }
+}
+
 module.exports.checkCharType = checkCharType
+module.exports.parse = parse
