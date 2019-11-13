@@ -1,3 +1,12 @@
+const spacePunctuation = require('./rules/space-punctuation')
+const spaceBrackets = require('./rules/space-brackets')
+const spaceQuotes = require('./rules/space-quotes')
+const spaceFullWidthContent = require('./rules/space-full-width-content')
+const unifyPunctuation = require('./rules/unify-punctuation')
+const preferencesPunctuation = require('./rules/preferences-punctuation')
+const caseDatetime = require('./rules/case-datetime')
+const casePlural = require('./rules/case-plural')
+const caseShortQuote = require('./rules/case-short-quote')
 
 /**
  * Check whether the character is full-width or half-width,
@@ -406,6 +415,23 @@ const processRule = (data, rule) => {
     return data
   }
   travel(data.tokens, filter, handler, data.marks)
+}
+
+const lint = str => {
+  const data = parse(str)
+  const rules = [
+    spacePunctuation,
+    spaceBrackets,
+    spaceQuotes,
+    spaceFullWidthContent,
+    unifyPunctuation,
+    preferencesPunctuation,
+    caseDatetime,
+    casePlural,
+    caseShortQuote
+  ]
+  rules.forEach(rule => processRule(data, rule))
+  return join(data.tokens)
 }
 
 module.exports.checkCharType = checkCharType
