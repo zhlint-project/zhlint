@@ -1,1 +1,5 @@
-module.exports = (token, index, group, matched, marks) => {}
+module.exports = (token, index, group, matched, marks) => {
+  // quotes
+  // book quotes
+  // brackets
+}
