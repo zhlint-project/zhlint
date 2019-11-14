@@ -410,7 +410,7 @@ const processRule = (data, rule) => {
     return data
   }
   const handler = typeof rule === 'function' ? rule : rule.handler
-  const filter = typeof rule === 'function' ? null : rule.filter
+  const filter = typeof rule === 'function' ? () => true : rule.filter
   if (!handler) {
     return data
   }
@@ -433,6 +433,8 @@ const lint = str => {
   rules.forEach(rule => processRule(data, rule))
   return join(data.tokens)
 }
+
+module.exports = lint
 
 module.exports.checkCharType = checkCharType
 module.exports.parse = parse

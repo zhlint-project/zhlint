@@ -237,3 +237,10 @@ describe('process rules', () => {
     expect(join(data.tokens)).toBe(`关注（watch）你关心的仓库。`)
   })
 })
+
+describe('lint', () => {
+  test('space between half-width content and full-width content', () => {
+    expect(lint('汉字和English之间需要有空格比如 half width content。'))
+      .toBe('汉字和 English 之间需要有空格比如 half width content。')
+  })
+})
