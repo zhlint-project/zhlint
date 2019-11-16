@@ -226,6 +226,7 @@ const parse = str => {
   const createNewGroup = (index, char) => {
     groupStack.push(lastUnfinishedGroup)
     lastUnfinishedGroup = []
+    lastUnfinishedGroup.type = 'group'
     lastUnfinishedGroup.startChar = char
     lastUnfinishedGroup.startIndex = index
     groupStack[groupStack.length - 1].push(lastUnfinishedGroup)
