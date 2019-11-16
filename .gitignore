@@ -65,3 +65,5 @@ yarn.lock
 
 # personal plan
 todo
+
+.DS_Store
