@@ -5,7 +5,7 @@ const spaceBrackets = require('../src/rules/space-brackets')
 const spaceQuotes = require('../src/rules/space-quotes')
 const spaceFullWidthContent = require('../src/rules/space-full-width-content')
 const unifyPunctuation = require('../src/rules/unify-punctuation')
-const preferencesPunctuation = require('../src/rules/preferences-punctuation')
+const caseTraditional = require('../src/rules/case-traditional')
 const caseDatetime = require('../src/rules/case-datetime')
 const casePlural = require('../src/rules/case-plural')
 const caseShortQuote = require('../src/rules/case-short-quote')
@@ -278,5 +278,41 @@ describe('lint', () => {
   test('space beside quotes', () => {
     expect(lint(`汉"字'和'English之间"需“要‘有’空”格比如 h'a'lf "width" content.`, [spaceQuotes]))
       .toBe(`汉 "字 '和' English之间" 需“要‘有’空”格比如 h 'a' lf "width" content.`)
+  })
+  test('traditional characters', () => {
+    expect(lint(`老師說：「你們要記住國父說的『青年要立志做大事，不要做大官』這句話。」`, [caseTraditional]))
+      .toBe(`老師說：“你們要記住國父說的‘青年要立志做大事，不要做大官’這句話。”`)
+    expect(lint(`孔子曰：「求，周任有言曰：『陳力就列，不能則止。』危而不持，顛而不扶，則將焉用彼相矣？」`, [caseTraditional]))
+      .toBe(`孔子曰：“求，周任有言曰：‘陳力就列，不能則止。’危而不持，顛而不扶，則將焉用彼相矣？”`)
+    expect(lint(`我們雖不敢希望每個人能有范文正公「先天下之憂而憂，後天下之樂而樂」的大志向，但至少要有陶侃勤懇不懈的精神`, [caseTraditional]))
+      .toBe(`我們雖不敢希望每個人能有范文正公“先天下之憂而憂，後天下之樂而樂”的大志向，但至少要有陶侃勤懇不懈的精神`)
+    expect(lint(`所謂忠恕，也就是「盡己之心，推己及人」的意思。`, [caseTraditional]))
+      .toBe(`所謂忠恕，也就是“盡己之心，推己及人”的意思。`)
+  })
+  test.skip('special cases', () => {
+    const replaceCharMap = {
+      '《': '『',
+      '〈': '「',
+      '〉': '」',
+      '》': '』',
+    }
+    expect(lint('关注《watch》你关心的仓库。', { replaceCharMap }))
+      .toBe('关注『watch』你关心的仓库。')
+    expect(lint('关注〈watch〉你关心的仓库。', { replaceCharMap }))
+      .toBe('关注「watch」你关心的仓库。')
+
+    expect(lint('2019年06月26号 2019-06-26 12:00 3 minite(s) left. 1+1=2', {
+      spaceBetweenLatinAndCjk: true,
+      spaceBesideBrackets: 'outside',
+      spaceBesidePunctuation: 'right-for-latin',
+      replace: [
+        { input: /(\d+) 年 (\d+) 月 (\d+) ([日号])/g, output: '$1年$2月$3$4' },
+        { input: /(\d+)\- (\d+)\- (\d+)/g, output: '$1-$2-$3' },
+        { input: /(\d+)\: (\d+)/g, output: '$1:$2' },
+        { input: /([a-z]) \(s\) /g, output: '$1(s) ' },
+        { input: /(\S)\+(\s)/g, output: '$1 +$2' },
+        { input: /(\S)\=(\s)/g, output: '$1 =$2' }
+      ]
+    })).toBe('2019年06月26号 2019-06-26 12:00 3 minite(s) left. 1 + 1 = 2')
   })
 })

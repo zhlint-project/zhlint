@@ -3,7 +3,7 @@ const spaceBrackets = require('./rules/space-brackets')
 const spaceQuotes = require('./rules/space-quotes')
 const spaceFullWidthContent = require('./rules/space-full-width-content')
 const unifyPunctuation = require('./rules/unify-punctuation')
-const preferencesPunctuation = require('./rules/preferences-punctuation')
+const caseTraditional = require('./rules/case-traditional')
 const caseDatetime = require('./rules/case-datetime')
 const casePlural = require('./rules/case-plural')
 const caseShortQuote = require('./rules/case-short-quote')
@@ -431,7 +431,7 @@ const lint = (str, rules = [
   spaceQuotes,
   spaceFullWidthContent,
   unifyPunctuation,
-  preferencesPunctuation,
+  caseTraditional,
   caseDatetime,
   casePlural,
   caseShortQuote
