@@ -404,7 +404,8 @@ const join = tokens => [
           token.spaceAfter
         ].filter(Boolean).join('')
   ),
-  tokens.endChar
+  tokens.endChar,
+  tokens.spaceAfter
 ].filter(Boolean).join('')
 
 /**

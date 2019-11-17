@@ -275,4 +275,8 @@ describe('lint', () => {
     expect(lint('汉字和Engl,is。h之间,需，要有, 空， 格 ，比 , 如 half width content.', [spacePunctuation]))
       .toBe('汉字和Engl,is。h之间, 需，要有, 空，格，比, 如 half width content.')
   })
+  test('space beside quotes', () => {
+    expect(lint(`汉"字'和'English之间"需“要‘有’空”格比如 h'a'lf "width" content.`, [spaceQuotes]))
+      .toBe(`汉 "字 '和' English之间" 需“要‘有’空”格比如 h 'a' lf "width" content.`)
+  })
 })
