@@ -198,6 +198,7 @@ const parse = str => {
     lastUnfinishedToken = {
       type: 'punctuation-mark',
       content: char,
+      raw: char,
       index,
       length: 1,
       mark: lastUnfinishedMark,
@@ -242,15 +243,16 @@ const parse = str => {
     }
   }
   const addNormalPunctuation = (index, char, type) => {
-    lastUnfinishedToken = { type, content: char, index, length: 1 }
+    lastUnfinishedToken = { type, content: char, raw: char, index, length: 1 }
     lastUnfinishedGroup.push(lastUnfinishedToken)
     lastUnfinishedToken = null
   }
   const createContent = (index, char, type) => {
-    lastUnfinishedToken = { type, content: char, index, length: 1 }
+    lastUnfinishedToken = { type, content: char, raw: char, index, length: 1 }
   }
   const appendContent = (char) => {
     lastUnfinishedToken.content += char
+    lastUnfinishedToken.raw = lastUnfinishedToken.content
     lastUnfinishedToken.length++
   }
 
@@ -273,9 +275,13 @@ const parse = str => {
       const spaceLength = getSpaceLength(i)
       if (lastUnfinishedGroup.length) {
         const lastToken = lastUnfinishedGroup[lastUnfinishedGroup.length - 1]
-        lastToken.spaceAfter = str.substr(i, spaceLength)
+        const spaceAfter = str.substr(i, spaceLength)
+        lastToken.spaceAfter = spaceAfter
+        lastToken.rawSpaceAfter = spaceAfter
       } else {
-        lastUnfinishedGroup.innerSpaceBefore = str.substr(i, spaceLength)
+        const innerSpaceBefore = str.substr(i, spaceLength)
+        lastUnfinishedGroup.innerSpaceBefore = innerSpaceBefore
+        lastUnfinishedGroup.rawInnerSpaceBefore = innerSpaceBefore
       }
       if (spaceLength - 1 > 0) {
         i += spaceLength - 1
