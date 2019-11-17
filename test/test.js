@@ -1,5 +1,15 @@
 const lint = require('../src')
 
+const spacePunctuation = require('../src/rules/space-punctuation')
+const spaceBrackets = require('../src/rules/space-brackets')
+const spaceQuotes = require('../src/rules/space-quotes')
+const spaceFullWidthContent = require('../src/rules/space-full-width-content')
+const unifyPunctuation = require('../src/rules/unify-punctuation')
+const preferencesPunctuation = require('../src/rules/preferences-punctuation')
+const caseDatetime = require('../src/rules/case-datetime')
+const casePlural = require('../src/rules/case-plural')
+const caseShortQuote = require('../src/rules/case-short-quote')
+
 const {
   checkCharType,
   parse,
@@ -253,11 +263,16 @@ describe('lint', () => {
       .toBe('汉 (字) 和 Eng（lish 之间）需（要）有 (空格) 比如 half w(i)dth content。')
   })
   test('unifies full-width/half-width mixed punctuation usage', () => {
-    expect(lint('汉字和English之间需要有空格比如 half width content.'))
+    const rules = [spaceFullWidthContent, unifyPunctuation]
+    expect(lint('汉字和English之间需要有空格比如 half width content.', rules))
       .toBe('汉字和 English 之间需要有空格比如 half width content。')
-    expect(lint('汉字和"English"之间需要有空格比如 half width content.'))
+    expect(lint('汉字和"English"之间需要有空格比如 half width content.', rules))
       .toBe('汉字和“English”之间需要有空格比如 half width content。')
-    expect(lint('汉字和English之间需要:有；空格比如 half width content.'))
+    expect(lint('汉字和English之间需要:有；空格比如 half width content.', rules))
       .toBe('汉字和 English 之间需要：有；空格比如 half width content。')
+  })
+  test('space beside punctuations', () => {
+    expect(lint('汉字和Engl,is。h之间,需，要有, 空， 格 ，比 , 如 half width content.', [spacePunctuation]))
+      .toBe('汉字和Engl,is。h之间, 需，要有, 空，格，比, 如 half width content.')
   })
 })

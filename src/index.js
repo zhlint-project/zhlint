@@ -424,19 +424,18 @@ const processRule = (data, rule) => {
   travel(data.tokens, filter, handler, data.marks)
 }
 
-const lint = str => {
+const lint = (str, rules = [
+  spacePunctuation,
+  spaceBrackets,
+  spaceQuotes,
+  spaceFullWidthContent,
+  unifyPunctuation,
+  preferencesPunctuation,
+  caseDatetime,
+  casePlural,
+  caseShortQuote
+]) => {
   const data = parse(str)
-  const rules = [
-    spacePunctuation,
-    spaceBrackets,
-    spaceQuotes,
-    spaceFullWidthContent,
-    unifyPunctuation,
-    preferencesPunctuation,
-    caseDatetime,
-    casePlural,
-    caseShortQuote
-  ]
   rules.forEach(rule => processRule(data, rule))
   return join(data.tokens)
 }
