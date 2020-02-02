@@ -491,8 +491,9 @@ const lint = (str, rules = [
   caseDatetime,
   casePlural,
   caseShortQuote
-]) => {
-  const data = parse(str)
+], hyperParse) => {
+  const hyperMarks = typeof hyperParse === 'function' ? hyperParse(str) : []
+  const data = parse(str, hyperMarks)
   rules.forEach(rule => processRule(data, rule))
   return join(data.tokens)
 }

@@ -319,6 +319,11 @@ describe('lint', () => {
     expect(lint(`所謂忠恕，也就是「盡己之心，推己及人」的意思。`, [caseTraditional]))
       .toBe(`所謂忠恕，也就是“盡己之心，推己及人”的意思。`)
   })
+  test('hyper marks', () => {
+    expect(lint('X [xxx](xxx) X', undefined, () => [
+      { startIndex: 2, startChar: '[', endIndex: 6, endChar: '](xxx)', type: 'md' }
+    ])).toBe('X [xxx](xxx) X')
+  })
   test.skip('special cases', () => {
     const replaceCharMap = {
       '《': '『',
