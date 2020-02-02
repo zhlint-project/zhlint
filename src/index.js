@@ -151,7 +151,7 @@ const checkCharType = char => {
  *   groups: Group[]
  * }
  */
-const parse = (str, hyperMarks) => {
+const parse = (str, hyperMarks = []) => {
   // constants
   const markChars = {
     left: '(（',
@@ -166,7 +166,7 @@ const parse = (str, hyperMarks) => {
   // states
   let lastUnfinishedToken
   let lastUnfinishedGroup = []
-  let lastUnfinishedMark
+  let lastUnfinishedBracket
 
   // temp stacks
   const groupStack = []
@@ -174,8 +174,15 @@ const parse = (str, hyperMarks) => {
 
   // results
   const tokens = lastUnfinishedGroup
-  const marks = []
+  const marks = [...hyperMarks]
   const groups = []
+
+  // pre-process hyper marks
+  const hyperMarksMap = {}
+  hyperMarks.forEach(mark => {
+    hyperMarksMap[mark.startIndex] = mark
+    hyperMarksMap[mark.endIndex] = mark
+  })
 
   // helpers
   const getSpaceLength = start => {
@@ -202,28 +209,52 @@ const parse = (str, hyperMarks) => {
       raw: char,
       index,
       length: 1,
-      mark: lastUnfinishedMark,
+      mark: lastUnfinishedBracket,
       markSide
     }
     lastUnfinishedGroup.push(lastUnfinishedToken)
     lastUnfinishedToken = null
   }
   const createBracket = (index, char, type = 'brackets') => {
-    if (lastUnfinishedMark) {
-      markStack.push(lastUnfinishedMark)
-      lastUnfinishedMark = null
+    if (lastUnfinishedBracket) {
+      markStack.push(lastUnfinishedBracket)
+      lastUnfinishedBracket = null
     }
-    lastUnfinishedMark = { startIndex: index, startChar: char, type }
-    marks.push(lastUnfinishedMark)
+    lastUnfinishedBracket = { startIndex: index, startChar: char, type }
+    marks.push(lastUnfinishedBracket)
   }
   const endLastUnfinishedBracket = (index, char) => {
-    lastUnfinishedMark.endIndex = index
-    lastUnfinishedMark.endChar = char
+    lastUnfinishedBracket.endIndex = index
+    lastUnfinishedBracket.endChar = char
     if (markStack.length) {
-      lastUnfinishedMark = markStack.pop()
+      lastUnfinishedBracket = markStack.pop()
     } else {
-      lastUnfinishedMark = null
+      lastUnfinishedBracket = null
     }
+  }
+  const appendHyperMark = (index, mark, content, markSide) => {
+    lastUnfinishedToken = {
+      type: `mark-${mark.type}`,
+      content: content,
+      raw: content,
+      index,
+      length: content.length,
+      mark: mark,
+      markSide
+    }
+    lastUnfinishedGroup.push(lastUnfinishedToken)
+    lastUnfinishedToken = null
+  }
+  const appendHyperContent = (index, content) => {
+    lastUnfinishedToken = {
+      type: 'content-hyper',
+      content: content,
+      raw: content,
+      index,
+      length: content.length
+    }
+    lastUnfinishedGroup.push(lastUnfinishedToken)
+    lastUnfinishedToken = null
   }
   const createNewGroup = (index, char) => {
     groupStack.push(lastUnfinishedGroup)
@@ -261,12 +292,36 @@ const parse = (str, hyperMarks) => {
   for (let i = 0; i < str.length; i++) {
     const char = str[i]
     const type = checkCharType(char)
+    const hyperMark = hyperMarksMap[i]
 
     // finally get `marks` and `lastUnfinishedGroup` as the top-level tokens
+    // - hyper marks: end last unfinished token -> add mark
     // - space: end current -> move forward -> record space beside
     // - punctuation: whether start/end a mark or group, or just add a normal one
     // - content: whether start a new one or append into the current one
-    if (type === 'space') {
+    if (hyperMark) {
+      // end the last unfinished token
+      endLastUnfinishedToken(i)
+      // check the next token
+      // - start mark: append token, then append next token if the mark type is raw
+      // - end mark: append token, append mark
+      if (i === hyperMark.startIndex) {
+        appendHyperMark(i, hyperMark, hyperMark.startChar, 'left')
+        i += hyperMark.startChar.length - 1
+        if (hyperMark.type === 'raw') {
+          appendHyperContent(
+            i + hyperMark.startChar.length,
+            str.substring(
+              hyperMark.startIndex + hyperMark.startChar.length,
+              hyperMark.endIndex))
+          i = hyperMark.endIndex - 1
+        }
+      } else if (i === hyperMark.endIndex) {
+        appendHyperMark(i, hyperMark, hyperMark.endChar, 'right')
+        i += hyperMark.endChar.length - 1
+      }
+    }
+    else if (type === 'space') {
       // end the last unfinished token
       // jump to the next non-space char
       // record the last space
@@ -304,7 +359,7 @@ const parse = (str, hyperMarks) => {
         // and finish the token
         appendBracket(i, char, 'left')
       } else if (markChars.right.indexOf(char) >= 0) {
-        if (!lastUnfinishedMark) {
+        if (!lastUnfinishedBracket) {
           throw new Error(`Unmatched closed bracket ${char} at ${i}`)
         }
         // generate token as a punctuation

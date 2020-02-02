@@ -172,6 +172,34 @@ describe('parser', () => {
   })
 })
 
+describe('parser with hyper marks', () => {
+  test('X [xxx](xxx) X', () => {
+    const hyperMark = { startIndex: 2, startChar: '[', endIndex: 6, endChar: '](xxx)', type: 'md' }
+    const { tokens, marks, groups } = parse('X [xxx](xxx) X', [hyperMark])
+    expect(purify(tokens)).toEqual([
+      { type: 'content-half', raw: 'X', content: 'X', index: 0, length: 1, rawSpaceAfter: ' ', spaceAfter: ' ' },
+      { type: 'mark-md', raw: '[', content: '[', index: 2, length: 1, markSide: 'left', mark: hyperMark },
+      { type: 'content-half', raw: 'xxx', content: 'xxx', index: 3, length: 3 },
+      { type: 'mark-md', raw: '](xxx)', content: '](xxx)', index: 6, length: 6, markSide: 'right', mark: hyperMark, rawSpaceAfter: ' ', spaceAfter: ' ' },
+      { type: 'content-half', raw: 'X', content: 'X', index: 13, length: 1 }
+    ])
+    expect(marks).toEqual([hyperMark])
+    expect(groups.length).toBe(0)
+  })
+  test('`v-bind:style` 的对象语法', () => {
+    const hyperMark = { startIndex: 0, startChar: '`', endIndex: 13, endChar: '`', type: 'raw' }
+    const { tokens, marks, groups } = parse('`v-bind:style` 的对象语法', [hyperMark])
+    expect(purify(tokens)).toEqual([
+      { type: 'mark-raw', raw: '`', content: '`', index: 0, length: 1, markSide: 'left', mark: hyperMark },
+      { type: 'content-hyper', raw: 'v-bind:style', content: 'v-bind:style', index: 1, length: 12 },
+      { type: 'mark-raw', raw: '`', content: '`', index: 13, length: 1, markSide: 'right', mark: hyperMark, rawSpaceAfter: ' ', spaceAfter: ' ' },
+      { type: 'content-full', raw: '的对象语法', content: '的对象语法', index: 15, length: 5 }
+    ])
+    expect(marks).toEqual([hyperMark])
+    expect(groups.length).toBe(0)
+  })
+})
+
 describe('travel', () => {
   const { tokens } = parse('遵守JavaScript编码规范非常重要')
   const expectedTokens = [
