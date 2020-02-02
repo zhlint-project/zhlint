@@ -79,6 +79,7 @@ describe('parser', () => {
   test('关注(watch)你关心的仓库。', () => {
     const { tokens, marks } = parse('关注(watch)你关心的仓库。')
     const mark = {
+      type: 'brackets',
       startChar: `(`,
       startIndex: 2,
       endChar: `)`,
@@ -87,9 +88,9 @@ describe('parser', () => {
     expect(marks).toEqual([mark])
     expect(purify(tokens)).toEqual([
       { type: 'content-full', raw: '关注', content: '关注', index: 0, length: 2 },
-      { type: 'punctuation-mark', raw: '(', content: '(', index: 2, length: 1, markSide: 'left', mark },
+      { type: 'mark-brackets', raw: '(', content: '(', index: 2, length: 1, markSide: 'left', mark },
       { type: 'content-half', raw: 'watch', content: 'watch', index: 3, length: 5 },
-      { type: 'punctuation-mark', raw: ')', content: ')', index: 8, length: 1, markSide: 'right', mark },
+      { type: 'mark-brackets', raw: ')', content: ')', index: 8, length: 1, markSide: 'right', mark },
       { type: 'content-full', raw: '你关心的仓库', content: '你关心的仓库', index: 9, length: 6 },
       { type: 'punctuation-full', raw: '。', content: '。', index: 15, length: 1 }
     ])
@@ -115,6 +116,7 @@ describe('parser', () => {
   test('Vue 也可以在 unpkg 和 cdnjs 上获取 ( cdnjs 的版本更新可能略滞后) ', () => {
     const { tokens, marks } = parse('Vue 也可以在 unpkg 和 cdnjs 上获取 ( cdnjs 的版本更新可能略滞后) ')
     const mark = {
+      type: 'brackets',
       startChar: `(`,
       startIndex: 27,
       endChar: `)`,
@@ -128,10 +130,10 @@ describe('parser', () => {
       { type: 'content-full', raw: '和', content: '和', index: 15, length: 15 - 15 + 1, rawSpaceAfter: ' ', spaceAfter: ' ' },
       { type: 'content-half', raw: 'cdnjs', content: 'cdnjs', index: 17, length: 21 - 17 + 1, rawSpaceAfter: ' ', spaceAfter: ' ' },
       { type: 'content-full', raw: '上获取', content: '上获取', index: 23, length: 25 - 23 + 1, rawSpaceAfter: ' ', spaceAfter: ' ' },
-      { type: 'punctuation-mark', raw: '(', content: '(', index: 27, length: 1, markSide: 'left', mark, rawSpaceAfter: ' ', spaceAfter: ' ' },
+      { type: 'mark-brackets', raw: '(', content: '(', index: 27, length: 1, markSide: 'left', mark, rawSpaceAfter: ' ', spaceAfter: ' ' },
       { type: 'content-half', raw: 'cdnjs', content: 'cdnjs', index: 29, length: 33 - 29 + 1, rawSpaceAfter: ' ', spaceAfter: ' ' },
       { type: 'content-full', raw: '的版本更新可能略滞后', content: '的版本更新可能略滞后', index: 35, length: 44 - 35 + 1 },
-      { type: 'punctuation-mark', raw: ')', content: ')', index: 45, length: 1, markSide: 'right', mark, rawSpaceAfter: ' ', spaceAfter: ' ' },
+      { type: 'mark-brackets', raw: ')', content: ')', index: 45, length: 1, markSide: 'right', mark, rawSpaceAfter: ' ', spaceAfter: ' ' },
     ])
   })
   test('对于制作原型或学习,你可以这样使用最新版本:', () => {
@@ -236,7 +238,7 @@ describe('process rules', () => {
     processRule(
       data,
       {
-        filter: { type: 'punctuation-mark' },
+        filter: { type: 'mark-brackets' },
         handler: (token, index, group, matched, marks) => {
           token.content = {
             '(': '（',

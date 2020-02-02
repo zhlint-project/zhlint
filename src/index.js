@@ -196,7 +196,7 @@ const parse = str => {
   }
   const addMarkPunctuation = (index, char, markSide) => {
     lastUnfinishedToken = {
-      type: 'punctuation-mark',
+      type: 'mark-brackets',
       content: char,
       raw: char,
       index,
@@ -207,12 +207,12 @@ const parse = str => {
     lastUnfinishedGroup.push(lastUnfinishedToken)
     lastUnfinishedToken = null
   }
-  const createNewMark = (index, char) => {
+  const createNewMark = (index, char, type = 'brackets') => {
     if (lastUnfinishedMark) {
       markStack.push(lastUnfinishedMark)
       lastUnfinishedMark = null
     }
-    lastUnfinishedMark = { startIndex: index, startChar: char }
+    lastUnfinishedMark = { startIndex: index, startChar: char, type }
     marks.push(lastUnfinishedMark)
   }
   const endLastUnfinishedMark = (index, char) => {
