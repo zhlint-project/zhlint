@@ -141,16 +141,17 @@ const checkCharType = char => {
  * - punctuation pair as a group: quotes
  * Types
  * - Token: { type, content, index, length, mark?, markSide?, spaceAfter? }
- * - Mark: { startIndex, startChar, endIndex, endChar }
+ * - Mark: { startIndex, startChar, endIndex, endChar, type }
  * - Group: extends Array<Token> { startChar, startIndex, endChar, endIndex, innerSpaceBefore }
  * @param  {string} str
+ * @param  {Mark[]} hyperMarks Pre-defined marks like HTML tags
  * @return {
  *   tokens: Token[],
  *   marks: Mark[],
  *   groups: Group[]
  * }
  */
-const parse = str => {
+const parse = (str, hyperMarks) => {
   // constants
   const markChars = {
     left: '(（',
@@ -194,7 +195,7 @@ const parse = str => {
       lastUnfinishedToken = null
     }
   }
-  const addMarkPunctuation = (index, char, markSide) => {
+  const appendBracket = (index, char, markSide) => {
     lastUnfinishedToken = {
       type: 'mark-brackets',
       content: char,
@@ -207,7 +208,7 @@ const parse = str => {
     lastUnfinishedGroup.push(lastUnfinishedToken)
     lastUnfinishedToken = null
   }
-  const createNewMark = (index, char, type = 'brackets') => {
+  const createBracket = (index, char, type = 'brackets') => {
     if (lastUnfinishedMark) {
       markStack.push(lastUnfinishedMark)
       lastUnfinishedMark = null
@@ -215,7 +216,7 @@ const parse = str => {
     lastUnfinishedMark = { startIndex: index, startChar: char, type }
     marks.push(lastUnfinishedMark)
   }
-  const endLastUnfinishedMark = (index, char) => {
+  const endLastUnfinishedBracket = (index, char) => {
     lastUnfinishedMark.endIndex = index
     lastUnfinishedMark.endChar = char
     if (markStack.length) {
@@ -298,19 +299,19 @@ const parse = str => {
       // - other punctuation: add and end the current token
       if (markChars.left.indexOf(char) >= 0) {
         // push (save) the current unfinished mark if have
-        createNewMark(i, char)
+        createBracket(i, char)
         // generate a new token and mark it as a mark punctuation by left
         // and finish the token
-        addMarkPunctuation(i, char, 'left')
+        appendBracket(i, char, 'left')
       } else if (markChars.right.indexOf(char) >= 0) {
         if (!lastUnfinishedMark) {
           throw new Error(`Unmatched closed bracket ${char} at ${i}`)
         }
         // generate token as a punctuation
-        addMarkPunctuation(i, char, 'right')
+        appendBracket(i, char, 'right')
         // end the last unfinished mark
         // and pop the previous one if exists
-        endLastUnfinishedMark(i, char)
+        endLastUnfinishedBracket(i, char)
       } else if (groupChars.neutral.indexOf(char) >= 0) {
         // - end the last unfinished group
         // - start a new group
