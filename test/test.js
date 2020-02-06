@@ -1,5 +1,6 @@
 const lint = require('../src')
 
+const markHyper = require('../src/rules/mark-hyper')
 const spacePunctuation = require('../src/rules/space-punctuation')
 const spaceBrackets = require('../src/rules/space-brackets')
 const spaceQuotes = require('../src/rules/space-quotes')
@@ -342,9 +343,7 @@ describe('lint', () => {
       .toBe(`所謂忠恕，也就是“盡己之心，推己及人”的意思。`)
   })
   test('hyper marks', () => {
-    expect(lint('X [xxx](xxx) X', undefined, () => [
-      { startIndex: 2, startChar: '[', endIndex: 6, endChar: '](xxx)', type: 'md' }
-    ])).toBe('X [xxx](xxx) X')
+    expect(lint('X [xxx](xxx) X')).toBe('X [xxx](xxx) X')
   })
   test.skip('special cases', () => {
     const replaceCharMap = {

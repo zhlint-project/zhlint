@@ -1,3 +1,6 @@
+const markdownParser = require('./parsers/md')
+
+const markHyper = require('./rules/mark-hyper')
 const spacePunctuation = require('./rules/space-punctuation')
 const spaceBrackets = require('./rules/space-brackets')
 const spaceQuotes = require('./rules/space-quotes')
@@ -482,6 +485,7 @@ const processRule = (data, rule) => {
 }
 
 const lint = (str, rules = [
+  markHyper,
   spacePunctuation,
   spaceBrackets,
   spaceQuotes,
@@ -491,9 +495,12 @@ const lint = (str, rules = [
   caseDatetime,
   casePlural,
   caseShortQuote
-], hyperParse) => {
-  const hyperMarks = typeof hyperParse === 'function' ? hyperParse(str) : []
-  const data = parse(str, hyperMarks)
+], hyperParse = markdownParser) => {
+  const blocks =
+    typeof hyperParse === 'function'
+      ? hyperParse(str) : [{ value: str }]
+  // todo: support multi-blocks string
+  const data = parse(blocks[0].value, blocks[0].marks)
   rules.forEach(rule => processRule(data, rule))
   return join(data.tokens)
 }
