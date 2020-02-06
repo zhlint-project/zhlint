@@ -1,3 +1,17 @@
+// todo:
+// - new rule for pre: for hyper marks, should move inside spaces outside
+// - new rule for pre: for raw marks, should ensure spaces out of both sides
+// - add outside space out of marks
+// examples:
+// - a ** (a) ** a -> a **(a)** a
+// - a** (a) **a
+// - a **(a)** a
+// - a**(a)**a
+// - a( ** a ** )a -> a (**a**) a
+// - a(** a **)a
+// - a( **a** )a
+// - a(**a**)a
+
 module.exports = (token, index, group, matched, marks) => {
   // half-width: one space outside
   // half-width: no space inside

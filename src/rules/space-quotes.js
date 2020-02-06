@@ -1,3 +1,6 @@
+// todo:
+// - add outside space out of marks, may need to travel up-level/down-level
+
 const quoteIsFullWidth = char => '‘’“”'.indexOf(char) >= 0
 
 module.exports = (token, index, group, matched, marks) => {
