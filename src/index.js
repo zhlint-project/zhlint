@@ -141,7 +141,7 @@ const checkCharType = char => {
  * - punctuation pair as a group: quotes
  * Types
  * - Token: { type, content, index, length, mark?, markSide?, spaceAfter? }
- * - Mark: { startIndex, startChar, endIndex, endChar, type }
+ * - Mark: { startIndex, startChar, endIndex, endChar, type: 'brackets'|'hyper'|'raw' }
  * - Group: extends Array<Token> { startChar, startIndex, endChar, endIndex, innerSpaceBefore }
  * @param  {string} str
  * @param  {Mark[]} hyperMarks Pre-defined marks like HTML tags
