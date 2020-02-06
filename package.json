@@ -26,6 +26,8 @@
     "jest": "^24.8.0"
   },
   "dependencies": {
-    "escape-string-regexp": "^2.0.0"
+    "escape-string-regexp": "^2.0.0",
+    "remark-parse": "^7.0.2",
+    "unified": "^8.4.2"
   }
 }

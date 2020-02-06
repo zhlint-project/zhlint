@@ -10,6 +10,8 @@ const caseDatetime = require('../src/rules/case-datetime')
 const casePlural = require('../src/rules/case-plural')
 const caseShortQuote = require('../src/rules/case-short-quote')
 
+const markdownParser = require('../src/parsers/md')
+
 const {
   checkCharType,
   parse,
@@ -197,6 +199,26 @@ describe('parser with hyper marks', () => {
     ])
     expect(marks).toEqual([hyperMark])
     expect(groups.length).toBe(0)
+  })
+})
+
+describe('parser with markdown', () => {
+  test('single paragraph', () => {
+    const text = 'X [xxx](xxx) X *y* __x__ `ss` _0_ ~~asd~~ *asf**asf**adsf*'
+    const result = markdownParser(text)
+    const marks = [
+      { type: 'hyper', meta: 'link', startIndex: 2, startChar: '[', endIndex: 6, endChar: '](xxx)' },
+      { type: 'hyper', meta: 'emphasis', startIndex: 15, startChar: '*', endIndex: 17, endChar: '*' },
+      { type: 'hyper', meta: 'strong', startIndex: 19, startChar: '__', endIndex: 22, endChar: '__' },
+      { type: 'raw', meta: 'inlineCode', startIndex: 25, endIndex: 29, startChar: '`ss`', endChar: '' },
+      { type: 'hyper', meta: 'emphasis', startIndex: 30, startChar: '_', endIndex: 32, endChar: '_' },
+      { type: 'hyper', meta: 'delete', startIndex: 34, startChar: '~~', endIndex: 39, endChar: '~~' },
+      { type: 'hyper', meta: 'emphasis', startIndex: 42, startChar: '*', endIndex: 57, endChar: '*' },
+      { type: 'hyper', meta: 'strong', startIndex: 46, startChar: '**', endIndex: 51, endChar: '**' }
+    ]
+    expect(result.length).toBe(1)
+    expect(result[0].value).toBe(text)
+    expect(result[0].marks).toEqual(marks)
   })
 })
 
