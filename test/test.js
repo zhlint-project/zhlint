@@ -190,12 +190,10 @@ describe('parser with hyper marks', () => {
     expect(groups.length).toBe(0)
   })
   test('`v-bind:style` 的对象语法', () => {
-    const hyperMark = { startIndex: 0, startChar: '`', endIndex: 13, endChar: '`', type: 'raw' }
+    const hyperMark = { startIndex: 0, startChar: '`v-bind:style`', endIndex: 14, endChar: '', type: 'raw' }
     const { tokens, marks, groups } = parse('`v-bind:style` 的对象语法', [hyperMark])
     expect(purify(tokens)).toEqual([
-      { type: 'mark-raw', raw: '`', content: '`', index: 0, length: 1, markSide: 'left', mark: hyperMark },
-      { type: 'content-hyper', raw: 'v-bind:style', content: 'v-bind:style', index: 1, length: 12 },
-      { type: 'mark-raw', raw: '`', content: '`', index: 13, length: 1, markSide: 'right', mark: hyperMark, rawSpaceAfter: ' ', spaceAfter: ' ' },
+      { type: 'content-hyper', raw: '`v-bind:style`', content: '`v-bind:style`', index: 0, length: 14, spaceAfter: ' ', rawSpaceAfter: ' ' },
       { type: 'content-full', raw: '的对象语法', content: '的对象语法', index: 15, length: 5 }
     ])
     expect(marks).toEqual([hyperMark])

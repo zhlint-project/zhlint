@@ -1,6 +1,7 @@
 const markdownParser = require('./parsers/md')
 
 const markHyper = require('./rules/mark-hyper')
+const markRaw = require('./rules/mark-raw')
 const spacePunctuation = require('./rules/space-punctuation')
 const spaceBrackets = require('./rules/space-brackets')
 const spaceQuotes = require('./rules/space-quotes')
@@ -184,7 +185,9 @@ const parse = (str, hyperMarks = []) => {
   const hyperMarksMap = {}
   hyperMarks.forEach(mark => {
     hyperMarksMap[mark.startIndex] = mark
-    hyperMarksMap[mark.endIndex] = mark
+    if (mark.type !== 'raw') {
+      hyperMarksMap[mark.endIndex] = mark
+    }
   })
 
   // helpers
@@ -306,22 +309,23 @@ const parse = (str, hyperMarks = []) => {
       // end the last unfinished token
       endLastUnfinishedToken(i)
       // check the next token
-      // - start mark: append token, then append next token if the mark type is raw
-      // - end mark: append token, append mark
-      if (i === hyperMark.startIndex) {
-        appendHyperMark(i, hyperMark, hyperMark.startChar, 'left')
-        i += hyperMark.startChar.length - 1
-        if (hyperMark.type === 'raw') {
-          appendHyperContent(
-            i + hyperMark.startChar.length,
-            str.substring(
-              hyperMark.startIndex + hyperMark.startChar.length,
-              hyperMark.endIndex))
-          i = hyperMark.endIndex - 1
+      // - if the mark type is raw
+      //   - append next token
+      // - else
+      //   - start mark: append token
+      //   - end mark: append token, append mark
+      if (hyperMark.type === 'raw') {
+        appendHyperContent(i,
+          str.substring(hyperMark.startIndex, hyperMark.endIndex))
+        i = hyperMark.endIndex - 1
+      } else {
+        if (i === hyperMark.startIndex) {
+          appendHyperMark(i, hyperMark, hyperMark.startChar, 'left')
+          i += hyperMark.startChar.length - 1
+        } else if (i === hyperMark.endIndex) {
+          appendHyperMark(i, hyperMark, hyperMark.endChar, 'right')
+          i += hyperMark.endChar.length - 1
         }
-      } else if (i === hyperMark.endIndex) {
-        appendHyperMark(i, hyperMark, hyperMark.endChar, 'right')
-        i += hyperMark.endChar.length - 1
       }
     }
     else if (type === 'space') {
@@ -486,6 +490,7 @@ const processRule = (data, rule) => {
 
 const lint = (str, rules = [
   markHyper,
+  markRaw,
   spacePunctuation,
   spaceBrackets,
   spaceQuotes,
