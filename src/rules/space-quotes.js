@@ -1,28 +1,67 @@
-// todo:
-// - add outside space out of marks, may need to travel up-level/down-level
+const {
+  findTokenBefore,
+  findTokenAfter,
+  findContentTokenBefore,
+  findContentTokenAfter
+} = require('./util')
 
 const quoteIsFullWidth = char => '‘’“”'.indexOf(char) >= 0
 
 module.exports = (token, index, group, matched, marks) => {
-  // half-width: one space outside
-  // half-width: no space inside
   if (token.type === 'group') {
-    const outerTokenBefore = group[index - 1]
-    const outerTokenAfter = group[index + 1]
-    const firstInnerToken = token[0]
-    const lastInnerToken = token[token.length - 1]
+    // no space inside
     token.innerSpaceBefore = ''
-    if (outerTokenBefore) {
-      if (quoteIsFullWidth(token.startChar)) {
-        outerTokenBefore.spaceAfter = ''
-      } else {
-        outerTokenBefore.spaceAfter = ' '
-      }
-    }
+    const lastInnerToken = token[token.length - 1]
     if (lastInnerToken) {
       lastInnerToken.spaceAfter = ''
     }
-    if (outerTokenAfter) {
+    // half-width: one space outside
+    const tokenBefore = findTokenBefore(group, token)
+    const contentTokenBefore = findContentTokenBefore(group, token)
+    // - no mark -> tokenBefore.spaceAfter = isHalfWidth() ? ' ' : ''
+    // - has mark -> isHalfWidth()
+    //   - ? content.spaceAfter = markSide ? ' ' : '', before.spaceAfter = markSide ? '' : ' '
+    //   - : content.spaceAfter = before.spaceAfter = ''
+    if (tokenBefore) {
+      if (!contentTokenBefore) {
+        tokenBefore.spaceAfter = ''
+      } else {
+        const isFullWidth = quoteIsFullWidth(token.startChar)
+        if (contentTokenBefore === tokenBefore) {
+          tokenBefore.spaceAfter = isFullWidth ? '' : ' '
+        } else {
+          if (isFullWidth) {
+            tokenBefore.spaceAfter = ''
+            contentTokenBefore.spaceAfter = ''
+          } else {
+            const markSide = findTokenAfter(group, contentTokenBefore).markSide
+            contentTokenBefore.spaceAfter = markSide === 'left' ? ' ' : ''
+            tokenBefore.spaceAfter = markSide === 'left' ? '' : ' '
+          }
+        }
+      }
+    }
+    const tokenAfter = findTokenAfter(group, token)
+    const contentTokenAfter = findContentTokenAfter(group, token)
+    if (tokenAfter) {
+      if (!contentTokenAfter) {
+        token.spaceAfter = ''
+      } else {
+        const isFullWidth = quoteIsFullWidth(token.endChar)
+        if (contentTokenAfter === tokenAfter) {
+          token.spaceAfter = isFullWidth ? '' : ' '
+        } else {
+          const tokenBeforeContentTokenAfter = findTokenBefore(contentTokenAfter)
+          if (isFullWidth) {
+            token.spaceAfter = ''
+            tokenBeforeContentTokenAfter.spaceAfter = ''
+          } else {
+            const markSide = tokenAfter.markSide
+            token.spaceAfter = markSide === 'left' ? ' ' : ''
+            tokenBeforeContentTokenAfter.spaceAfter = markSide === 'left' ? '' : ' '
+          }
+        }
+      }
       if (quoteIsFullWidth(token.endChar)) {
         token.spaceAfter = ''
       } else {
