@@ -1,6 +1,3 @@
-// todo:
-// - new rules: short single quote, datetime, score
-
 const {
   findTokenBefore,
   findTokenAfter,
