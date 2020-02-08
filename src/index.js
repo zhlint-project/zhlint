@@ -145,8 +145,8 @@ const checkCharType = char => {
  * - punctuation pair as a group: quotes
  * Types
  * - Token: { type, content, index, length, mark?, markSide?, spaceAfter? }
- * - Mark: { startIndex, startChar, endIndex, endChar, type: 'brackets'|'hyper'|'raw' }
- * - Group: extends Array<Token> { startChar, startIndex, endChar, endIndex, innerSpaceBefore }
+ * - Mark: { startIndex, startContent, endIndex, endContent, type: 'brackets'|'hyper'|'raw' }
+ * - Group: extends Array<Token> { startContent, startIndex, endContent, endIndex, innerSpaceBefore }
  * @param  {string} str
  * @param  {Mark[]} hyperMarks Pre-defined marks like HTML tags
  * @return {
@@ -226,12 +226,12 @@ const parse = (str, hyperMarks = []) => {
       markStack.push(lastUnfinishedBracket)
       lastUnfinishedBracket = null
     }
-    lastUnfinishedBracket = { startIndex: index, startChar: char, type }
+    lastUnfinishedBracket = { startIndex: index, startContent: char, type }
     marks.push(lastUnfinishedBracket)
   }
   const endLastUnfinishedBracket = (index, char) => {
     lastUnfinishedBracket.endIndex = index
-    lastUnfinishedBracket.endChar = char
+    lastUnfinishedBracket.endContent = char
     if (markStack.length) {
       lastUnfinishedBracket = markStack.pop()
     } else {
@@ -266,13 +266,13 @@ const parse = (str, hyperMarks = []) => {
     groupStack.push(lastUnfinishedGroup)
     lastUnfinishedGroup = []
     lastUnfinishedGroup.type = 'group'
-    lastUnfinishedGroup.startChar = char
+    lastUnfinishedGroup.startContent = char
     lastUnfinishedGroup.startIndex = index
     groupStack[groupStack.length - 1].push(lastUnfinishedGroup)
     groups.push(lastUnfinishedGroup)
   }
   const endLastUnfinishedGroup = (index, char) => {
-    lastUnfinishedGroup.endChar = char
+    lastUnfinishedGroup.endContent = char
     lastUnfinishedGroup.endIndex = index
     if (groupStack.length) {
       lastUnfinishedGroup = groupStack.pop()
@@ -320,11 +320,11 @@ const parse = (str, hyperMarks = []) => {
         i = hyperMark.endIndex - 1
       } else {
         if (i === hyperMark.startIndex) {
-          appendHyperMark(i, hyperMark, hyperMark.startChar, 'left')
-          i += hyperMark.startChar.length - 1
+          appendHyperMark(i, hyperMark, hyperMark.startContent, 'left')
+          i += hyperMark.startContent.length - 1
         } else if (i === hyperMark.endIndex) {
-          appendHyperMark(i, hyperMark, hyperMark.endChar, 'right')
-          i += hyperMark.endChar.length - 1
+          appendHyperMark(i, hyperMark, hyperMark.endContent, 'right')
+          i += hyperMark.endContent.length - 1
         }
       }
     }
@@ -377,7 +377,7 @@ const parse = (str, hyperMarks = []) => {
       } else if (groupChars.neutral.indexOf(char) >= 0) {
         // - end the last unfinished group
         // - start a new group
-        if (lastUnfinishedGroup && char === lastUnfinishedGroup.startChar) {
+        if (lastUnfinishedGroup && char === lastUnfinishedGroup.startContent) {
           endLastUnfinishedGroup(i, char)
         } else {
           createNewGroup(i, char)
@@ -413,11 +413,11 @@ const parse = (str, hyperMarks = []) => {
   // throw error if `markStack` or `groupStack` not fully flushed
   if (markStack.length) {
     const mark = markStack[markStack.length - 1]
-    throw new Error(`Unmatched closed bracket ${mark.startChar} at ${mark.startIndex}`)
+    throw new Error(`Unmatched closed bracket ${mark.startContent} at ${mark.startIndex}`)
   }
   if (groupStack.length) {
     const group = groupStack[groupStack.length - 1]
-    throw new Error(`Unmatched closed quote ${group.startChar} at ${group.startIndex}`)
+    throw new Error(`Unmatched closed quote ${group.startContent} at ${group.startIndex}`)
   }
 
   return { tokens, groups, marks }
@@ -457,7 +457,7 @@ const travel = (group, filter, handler, marks) => {
  * @return {string}
  */
 const join = tokens => [
-  tokens.startChar,
+  tokens.startContent,
   tokens.innerSpaceBefore,
   ...tokens.map(token =>
     Array.isArray(token)
@@ -467,7 +467,7 @@ const join = tokens => [
           token.spaceAfter
         ].filter(Boolean).join('')
   ),
-  tokens.endChar,
+  tokens.endContent,
   tokens.spaceAfter
 ].filter(Boolean).join('')
 

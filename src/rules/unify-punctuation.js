@@ -23,17 +23,17 @@ module.exports = (token, index, group, matched, marks) => {
     token.content = halfWidthMap[token.content] || token.content
   }
   if (token.type === 'group') {
-    if (token.startChar === '"') {
-      token.startChar = '“'
+    if (token.startContent === '"') {
+      token.startContent = '“'
     }
-    if (token.startChar === "'") {
-      token.startChar = '‘'
+    if (token.startContent === "'") {
+      token.startContent = '‘'
     }
-    if (token.endChar === '"') {
-      token.endChar = '”'
+    if (token.endContent === '"') {
+      token.endContent = '”'
     }
-    if (token.endChar === "'") {
-      token.endChar = '’'
+    if (token.endContent === "'") {
+      token.endContent = '’'
     }
   }
 }

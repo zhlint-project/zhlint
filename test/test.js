@@ -83,9 +83,9 @@ describe('parser', () => {
     const { tokens, marks } = parse('关注(watch)你关心的仓库。')
     const mark = {
       type: 'brackets',
-      startChar: `(`,
+      startContent: `(`,
       startIndex: 2,
-      endChar: `)`,
+      endContent: `)`,
       endIndex: 8,
     }
     expect(marks).toEqual([mark])
@@ -120,9 +120,9 @@ describe('parser', () => {
     const { tokens, marks } = parse('Vue 也可以在 unpkg 和 cdnjs 上获取 ( cdnjs 的版本更新可能略滞后) ')
     const mark = {
       type: 'brackets',
-      startChar: `(`,
+      startContent: `(`,
       startIndex: 27,
-      endChar: `)`,
+      endContent: `)`,
       endIndex: 45,
     }
     expect(marks).toEqual([mark])
@@ -167,9 +167,9 @@ describe('parser', () => {
     expect(marks.length).toBe(0)
     expect(groups.length).toBe(1)
     expect(groups[0].startIndex).toBe(9)
-    expect(groups[0].startChar).toBe('"')
+    expect(groups[0].startContent).toBe('"')
     expect(groups[0].endIndex).toBe(51 + 1)
-    expect(groups[0].endChar).toBe('"')
+    expect(groups[0].endContent).toBe('"')
     expect(groups[0].innerSpaceBefore).toBe(' ')
     expect(groups[0].rawInnerSpaceBefore).toBe(' ')
   })
@@ -177,7 +177,7 @@ describe('parser', () => {
 
 describe('parser with hyper marks', () => {
   test('X [xxx](xxx) X', () => {
-    const hyperMark = { startIndex: 2, startChar: '[', endIndex: 6, endChar: '](xxx)', type: 'md' }
+    const hyperMark = { startIndex: 2, startContent: '[', endIndex: 6, endContent: '](xxx)', type: 'md' }
     const { tokens, marks, groups } = parse('X [xxx](xxx) X', [hyperMark])
     expect(purify(tokens)).toEqual([
       { type: 'content-half', raw: 'X', content: 'X', index: 0, length: 1, rawSpaceAfter: ' ', spaceAfter: ' ' },
@@ -190,7 +190,7 @@ describe('parser with hyper marks', () => {
     expect(groups.length).toBe(0)
   })
   test('`v-bind:style` 的对象语法', () => {
-    const hyperMark = { startIndex: 0, startChar: '`v-bind:style`', endIndex: 14, endChar: '', type: 'raw' }
+    const hyperMark = { startIndex: 0, startContent: '`v-bind:style`', endIndex: 14, endContent: '', type: 'raw' }
     const { tokens, marks, groups } = parse('`v-bind:style` 的对象语法', [hyperMark])
     expect(purify(tokens)).toEqual([
       { type: 'content-hyper', raw: '`v-bind:style`', content: '`v-bind:style`', index: 0, length: 14, spaceAfter: ' ', rawSpaceAfter: ' ' },
@@ -206,14 +206,14 @@ describe('parser with markdown', () => {
     const text = 'X [xxx](xxx) X *y* __x__ `ss` _0_ ~~asd~~ *asf**asf**adsf*'
     const result = markdownParser(text)
     const marks = [
-      { type: 'hyper', meta: 'link', startIndex: 2, startChar: '[', endIndex: 6, endChar: '](xxx)' },
-      { type: 'hyper', meta: 'emphasis', startIndex: 15, startChar: '*', endIndex: 17, endChar: '*' },
-      { type: 'hyper', meta: 'strong', startIndex: 19, startChar: '__', endIndex: 22, endChar: '__' },
-      { type: 'raw', meta: 'inlineCode', startIndex: 25, endIndex: 29, startChar: '`ss`', endChar: '' },
-      { type: 'hyper', meta: 'emphasis', startIndex: 30, startChar: '_', endIndex: 32, endChar: '_' },
-      { type: 'hyper', meta: 'delete', startIndex: 34, startChar: '~~', endIndex: 39, endChar: '~~' },
-      { type: 'hyper', meta: 'emphasis', startIndex: 42, startChar: '*', endIndex: 57, endChar: '*' },
-      { type: 'hyper', meta: 'strong', startIndex: 46, startChar: '**', endIndex: 51, endChar: '**' }
+      { type: 'hyper', meta: 'link', startIndex: 2, startContent: '[', endIndex: 6, endContent: '](xxx)' },
+      { type: 'hyper', meta: 'emphasis', startIndex: 15, startContent: '*', endIndex: 17, endContent: '*' },
+      { type: 'hyper', meta: 'strong', startIndex: 19, startContent: '__', endIndex: 22, endContent: '__' },
+      { type: 'raw', meta: 'inlineCode', startIndex: 25, endIndex: 29, startContent: '`ss`', endContent: '' },
+      { type: 'hyper', meta: 'emphasis', startIndex: 30, startContent: '_', endIndex: 32, endContent: '_' },
+      { type: 'hyper', meta: 'delete', startIndex: 34, startContent: '~~', endIndex: 39, endContent: '~~' },
+      { type: 'hyper', meta: 'emphasis', startIndex: 42, startContent: '*', endIndex: 57, endContent: '*' },
+      { type: 'hyper', meta: 'strong', startIndex: 46, startContent: '**', endIndex: 51, endContent: '**' }
     ]
     expect(result.length).toBe(1)
     expect(result[0].value).toBe(text)

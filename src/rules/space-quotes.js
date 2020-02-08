@@ -26,7 +26,7 @@ module.exports = (token, index, group, matched, marks) => {
       if (!contentTokenBefore) {
         tokenBefore.spaceAfter = ''
       } else {
-        const isFullWidth = quoteIsFullWidth(token.startChar)
+        const isFullWidth = quoteIsFullWidth(token.startContent)
         if (contentTokenBefore === tokenBefore) {
           tokenBefore.spaceAfter = isFullWidth ? '' : ' '
         } else {
@@ -47,7 +47,7 @@ module.exports = (token, index, group, matched, marks) => {
       if (!contentTokenAfter) {
         token.spaceAfter = ''
       } else {
-        const isFullWidth = quoteIsFullWidth(token.endChar)
+        const isFullWidth = quoteIsFullWidth(token.endContent)
         if (contentTokenAfter === tokenAfter) {
           token.spaceAfter = isFullWidth ? '' : ' '
         } else {
@@ -62,7 +62,7 @@ module.exports = (token, index, group, matched, marks) => {
           }
         }
       }
-      if (quoteIsFullWidth(token.endChar)) {
+      if (quoteIsFullWidth(token.endContent)) {
         token.spaceAfter = ''
       } else {
         token.spaceAfter = ' '

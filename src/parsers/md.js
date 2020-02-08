@@ -64,21 +64,21 @@ const processBlockMark = (blockMark, str) => {
       mark.meta = inline.type
       mark.startIndex = inline.position.start.offset - offset
       mark.endIndex = inline.position.end.offset - offset
-      mark.startChar = str.substring(
+      mark.startContent = str.substring(
         inline.position.start.offset,
         inline.position.end.offset
       )
-      mark.endChar = ''
+      mark.endContent = ''
     } else {
       mark.type = 'hyper'
       mark.meta = inline.type
       mark.startIndex = inline.position.start.offset - offset
-      mark.startChar = str.substring(
+      mark.startContent = str.substring(
         inline.position.start.offset,
         inline.children[0].position.start.offset
       )
       mark.endIndex = inline.children[inline.children.length - 1].position.end.offset - offset
-      mark.endChar = str.substring(
+      mark.endContent = str.substring(
         inline.children[inline.children.length - 1].position.end.offset,
         inline.position.end.offset
       )
@@ -112,9 +112,9 @@ module.exports = str => {
   // - get block.start.offset
   // - for each marks
   // - - startIndex: mark.start.offset - offset
-  // - - startChar: [mark.start.offset - offset, mark.firstChild.start.offset - offset]
+  // - - startContent: [mark.start.offset - offset, mark.firstChild.start.offset - offset]
   // - - endIndex: mark.lastChild.end.offset - offset
-  // - - endChar: [mark.lastChild.end.offset - offset, mark.end.offset]
+  // - - endContent: [mark.lastChild.end.offset - offset, mark.end.offset]
   blockMarks.forEach(blockMark => processBlockMark(blockMark, str))
 
   return blockMarks.map(b => ({ value: b.value, marks: b.hyperMarks }))

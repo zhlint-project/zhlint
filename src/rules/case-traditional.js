@@ -6,10 +6,10 @@ const replaceMap = {
 }
 
 module.exports = (token, index, group, matched, marks) => {
-  if (token.startChar && replaceMap[token.startChar]) {
-    token.startChar = replaceMap[token.startChar]
+  if (token.startContent && replaceMap[token.startContent]) {
+    token.startContent = replaceMap[token.startContent]
   }
-  if (token.endChar && replaceMap[token.endChar]) {
-    token.endChar = replaceMap[token.endChar]
+  if (token.endContent && replaceMap[token.endContent]) {
+    token.endContent = replaceMap[token.endContent]
   }
 }
