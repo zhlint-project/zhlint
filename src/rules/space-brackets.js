@@ -1,33 +1,42 @@
-// todo:
-// - new rule for pre: for hyper marks, should move inside spaces outside
-// - new rule for pre: for raw marks, should ensure spaces out of both sides
-// - add outside space out of marks
+// deps:
+// - for hyper marks, should move inside spaces outside
+// - for raw marks, should ensure spaces out of both sides
 // examples:
-// - a ** (a) ** a -> a **(a)** a
-// - a** (a) **a
-// - a **(a)** a
-// - a**(a)**a
-// - a( ** a ** )a -> a (**a**) a
-// - a(** a **)a
-// - a( **a** )a
-// - a(**a**)a
+// - a ** (a) ** a -> a **(a)** a -> a **(a)** a
+// - a** (a) **a   -> a **(a)** a -> a **(a)** a
+// - a **(a)** a   -> a **(a)** a -> a **(a)** a
+// - a**(a)**a     -> a **(a)** a -> a **(a)** a
+// - a( ** a ** )a -> a( **a** )a -> a (**a**) a
+// - a(** a **)a   -> a( **a** )a -> a (**a**) a
+// - a( **a** )a   -> a( **a** )a -> a (**a**) a
+// - a(**a**)a     -> a( **a** )a -> a (**a**) a
+
+const {
+  findTokenBefore,
+  findTokenAfter,
+  findContentTokenBefore,
+  findContentTokenAfter
+} = require('./util')
 
 module.exports = (token, index, group, matched, marks) => {
   // half-width: one space outside
   // half-width: no space inside
+  // add outside space out of marks
   if (token.type === 'mark-brackets') {
-    const tokenBefore = group[index - 1]
-    const tokenAfter = group[index + 1]
+    const tokenBefore = findTokenBefore(group, token)
+    const contentTokenBefore = findContentTokenBefore(group, token)
+    const tokenAfter = findTokenAfter(group, token)
+    const contentTokenAfter = findContentTokenAfter(group, token)
     const { markSide } = token
     const size = token.content.match(/[\(\)]/) ? 'half-width' : 'full-width'
     if (markSide === 'left') {
-      if (tokenBefore) {
-        if (size === 'half-width' && tokenBefore.type.match(/^content\-/)) {
-          if (tokenBefore.type !== 'content-half') {
-            tokenBefore.spaceAfter = ' '
+      if (contentTokenBefore) {
+        if (size === 'half-width' && contentTokenBefore) {
+          if (contentTokenBefore.type !== 'content-half') {
+            contentTokenBefore.spaceAfter = ' '
           }
         } else {
-          tokenBefore.spaceAfter = ''
+          contentTokenBefore.spaceAfter = ''
         }
       }
       token.spaceAfter = ''
@@ -36,13 +45,14 @@ module.exports = (token, index, group, matched, marks) => {
       if (tokenBefore) {
         tokenBefore.spaceAfter = ''
       }
-      if (tokenAfter) {
-        if (size === 'half-width' && tokenBefore.type.match(/^content\-/)) {
-          if (tokenAfter.type !== 'content-half') {
-            token.spaceAfter = ' '
+      if (contentTokenAfter) {
+        const contentTokenAfterBefore = findTokenBefore(group, contentTokenAfter)
+        if (size === 'half-width') {
+          if (contentTokenAfter.type !== 'content-half') {
+            contentTokenAfterBefore.spaceAfter = ' '
           }
         } else {
-          token.spaceAfter = ''
+          contentTokenAfterBefore.spaceAfter = ''
         }
       }
     }
