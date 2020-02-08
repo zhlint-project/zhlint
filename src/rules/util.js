@@ -44,10 +44,28 @@ const findContentTokenAfter = (group, token) => {
     return findContentTokenBefore(group, group[index + 1])
   }
 }
+const spreadMarkSeq = (group, token, seq) => {
+  const tokenBefore = findTokenBefore(group, token)
+  const tokenAfter = findTokenAfter(group, token)
+  if (seq.indexOf(tokenBefore) < 0 && tokenBefore.type === 'mark-hyper') {
+    seq.unshift(tokenBefore)
+    findMarkSeq(group, tokenBefore, seq)
+  }
+  if (seq.indexOf(tokenAfter) < 0 && tokenAfter.type === 'mark-hyper') {
+    seq.push(tokenAfter)
+    findMarkSeq(group, tokenAfter, seq)
+  }
+}
+const findMarkSeq = (group, token) => {
+  const seq = [token]
+  spreadMarkSeq(group, token, seq)
+  return seq
+}
 
 module.exports = {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
-  findContentTokenAfter
+  findContentTokenAfter,
+  findMarkSeq
 }

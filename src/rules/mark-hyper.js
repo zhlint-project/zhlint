@@ -5,26 +5,13 @@ const {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
-  findContentTokenAfter
+  findContentTokenAfter,
+  findMarkSeq
 } = require('./util')
-
-const findMarkSeq = (group, token, seq) => {
-  const tokenBefore = findTokenBefore(group, token)
-  const tokenAfter = findTokenAfter(group, token)
-  if (seq.indexOf(tokenBefore) < 0 && tokenBefore.type === 'mark-hyper') {
-    seq.unshift(tokenBefore)
-    findMarkSeq(group, tokenBefore, seq)
-  }
-  if (seq.indexOf(tokenAfter) < 0 && tokenAfter.type === 'mark-hyper') {
-    seq.push(tokenAfter)
-    findMarkSeq(group, tokenAfter, seq)
-  }
-}
 
 module.exports = (token, index, group, matched, marks) => {
   if (token.type === 'mark-hyper') {
-    const markSeq = [token]
-    findMarkSeq(group, token, markSeq)
+    const markSeq = findMarkSeq(group, token)
 
     const hasSpace = markSeq.some(markToken => markToken.spaceAfter) || (findTokenBefore(group, markSeq[0]) || {}).spaceAfter
 
