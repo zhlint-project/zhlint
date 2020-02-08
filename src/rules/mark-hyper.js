@@ -4,8 +4,6 @@
 const {
   findTokenBefore,
   findTokenAfter,
-  findContentTokenBefore,
-  findContentTokenAfter,
   findMarkSeq
 } = require('./util')
 

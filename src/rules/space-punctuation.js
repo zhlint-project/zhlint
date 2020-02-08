@@ -1,6 +1,12 @@
 // todo:
 // - new rules: short single quote, datetime, score
-// - add outside space out of marks
+
+const {
+  findTokenBefore,
+  findTokenAfter,
+  findContentTokenBefore,
+  findContentTokenAfter
+} = require('./util')
 
 module.exports = (token, index, group, matched, marks) => {
   // token is a punctuation between 2 contents
@@ -8,22 +14,29 @@ module.exports = (token, index, group, matched, marks) => {
   // full-width -> no space
   // half-width -> one space after
   if (token.type.match(/^punctuation\-/)) {
-    const tokenBefore = group[index - 1]
-    const tokenAfter = group[index + 1]
-    if (tokenBefore && tokenAfter
-      && tokenBefore.type.match(/^content\-/)
-      && tokenAfter.type.match(/^content\-/)
+    const contentTokenBefore = findContentTokenBefore(group, token)
+    const contentTokenAfter = findContentTokenAfter(group, token)
+    if (contentTokenBefore && contentTokenAfter
+      && contentTokenBefore.type.match(/^content\-/)
+      && contentTokenAfter.type.match(/^content\-/)
       && (
-        tokenBefore.type !== 'content-half'
-        || tokenAfter.type !== 'content-half'
+        contentTokenBefore.type !== 'content-half'
+        || contentTokenAfter.type !== 'content-half'
       )
     ) {
-      tokenBefore.spaceAfter = ''
+      contentTokenBefore.spaceAfter = ''
+      findTokenBefore(group, token).spaceAfter = ''
       if (token.type === 'punctuation-half') {
-        token.spaceAfter = ' '
+        const tokenAfter = findTokenAfter(group, token)
+        if (tokenAfter === contentTokenAfter) {
+          token.spaceAfter = ' '
+        } else {
+          findTokenBefore(group, contentTokenAfter).spaceAfter = ' '
+        }
       }
       if (token.type === 'punctuation-full') {
         token.spaceAfter = ''
+        findTokenBefore(group, contentTokenAfter).spaceAfter = ''
       }
     }
   }

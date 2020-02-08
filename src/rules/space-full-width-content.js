@@ -15,9 +15,7 @@
 const {
   findTokenBefore,
   findTokenAfter,
-  findContentTokenBefore,
-  findContentTokenAfter,
-  findMarkSeq
+  findContentTokenAfter
 } = require('./util')
 
 module.exports = (token, index, group, matched, marks) => {
