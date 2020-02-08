@@ -2,6 +2,23 @@
 
 module.exports = (token, index, group, matched, marks) => {
   if (token.type === 'mark-hyper') {
-    // console.log(token)
+    const tokenBefore = group[index - 1]
+    const tokenAfter = group[index + 1]
+    if (token.markSide === 'left') {
+      if (tokenBefore) {
+        tokenBefore.spaceAfter = ' '
+      }
+      if (tokenAfter) {
+        token.spaceAfter = ''
+      }
+    }
+    else if (token.markSide === 'right') {
+      if (tokenBefore) {
+        tokenBefore.spaceAfter = ''
+      }
+      if (tokenAfter) {
+        token.spaceAfter = ' '
+      }
+    }
   }
 }
