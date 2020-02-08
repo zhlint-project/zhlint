@@ -3,6 +3,8 @@ const markdown = require('remark-parse')
 
 const positionToString = position => `${position.start.offset}:${position.end.offset}`
 
+const parsePosition = position => ({ start: position.start.offset, end: position.end.offset })
+
 const blockTypes = [
   'paragraph',
   'heading',
@@ -116,6 +118,9 @@ module.exports = str => {
   // - - endIndex: mark.lastChild.end.offset - offset
   // - - endContent: [mark.lastChild.end.offset - offset, mark.end.offset]
   blockMarks.forEach(blockMark => processBlockMark(blockMark, str))
-
-  return blockMarks.map(b => ({ value: b.value, marks: b.hyperMarks }))
+  return blockMarks.map(b => ({
+    value: b.value,
+    marks: b.hyperMarks,
+    ...parsePosition(b.block.position)
+  }))
 }

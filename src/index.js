@@ -488,6 +488,35 @@ const processRule = (data, rule) => {
   travel(data.tokens, filter, handler, data.marks)
 }
 
+const replaceBlocks = (str, blocks) => {
+  const pieces = blocks.reduce((pieces, block, index) => {
+    const { start, end } = block
+    const lastPiece = pieces[pieces.length - 1]
+    nextStart = lastPiece ? lastPiece.end + 1 : 0
+    if (nextStart < start) {
+      const nonBlockPiece = {
+        nonBlock: true,
+        start: nextStart,
+        end: start - 1,
+      }
+      nonBlockPiece.value = str.substring(nonBlockPiece.start, nonBlockPiece.end)
+      pieces.push(nonBlockPiece)
+    }
+    pieces.push(block)
+    if (index === blocks.length - 1 && end !== str.length) {
+      const nonBlockPiece = {
+        nonBlock: true,
+        start: end + 1,
+        end: str.length - 1
+      }
+      nonBlockPiece.value = str.substring(nonBlockPiece.start, nonBlockPiece.end)
+      pieces.push(nonBlockPiece)
+    }
+    return pieces
+  }, [])
+  return pieces.map(({ value }) => value).join('')
+}
+
 const lint = (str, rules = [
   markHyper,
   markRaw,
@@ -503,11 +532,21 @@ const lint = (str, rules = [
 ], hyperParse = markdownParser) => {
   const blocks =
     typeof hyperParse === 'function'
-      ? hyperParse(str) : [{ value: str }]
-  // todo: support multi-blocks string
-  const data = parse(blocks[0].value, blocks[0].marks)
-  rules.forEach(rule => processRule(data, rule))
-  return join(data.tokens)
+      ? hyperParse(str)
+      : [{
+          value: str,
+          marks: [],
+          start: 0,
+          end: str.length - 1
+        }]
+  return replaceBlocks(str, blocks.map(({ value, marks, start, end }) => {
+    const data = parse(value, marks)
+    rules.forEach(rule => processRule(data, rule))
+    return {
+      start, end,
+      value: join(data.tokens)
+    }
+  })) 
 }
 
 module.exports = lint
