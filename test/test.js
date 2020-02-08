@@ -341,32 +341,17 @@ describe('lint', () => {
       .toBe(`所謂忠恕，也就是“盡己之心，推己及人”的意思。`)
   })
   test('hyper marks', () => {
-    expect(lint('X[ xxx ](xxx)X`hello`world')).toBe('X [xxx](xxx) X `hello` world')
+    expect(lint('X[ xxx ](xxx)X`hello`world'))
+      .toBe('X [xxx](xxx) X `hello` world')
   })
-  test.skip('special cases', () => {
-    const replaceCharMap = {
-      '《': '『',
-      '〈': '「',
-      '〉': '」',
-      '》': '』',
-    }
-    expect(lint('关注《watch》你关心的仓库。', { replaceCharMap }))
-      .toBe('关注『watch』你关心的仓库。')
-    expect(lint('关注〈watch〉你关心的仓库。', { replaceCharMap }))
-      .toBe('关注「watch」你关心的仓库。')
-
-    expect(lint('2019年06月26号 2019-06-26 12:00 3 minite(s) left. 1+1=2', {
-      spaceBetweenLatinAndCjk: true,
-      spaceBesideBrackets: 'outside',
-      spaceBesidePunctuation: 'right-for-latin',
-      replace: [
-        { input: /(\d+) 年 (\d+) 月 (\d+) ([日号])/g, output: '$1年$2月$3$4' },
-        { input: /(\d+)\- (\d+)\- (\d+)/g, output: '$1-$2-$3' },
-        { input: /(\d+)\: (\d+)/g, output: '$1:$2' },
-        { input: /([a-z]) \(s\) /g, output: '$1(s) ' },
-        { input: /(\S)\+(\s)/g, output: '$1 +$2' },
-        { input: /(\S)\=(\s)/g, output: '$1 =$2' }
-      ]
-    })).toBe('2019年06月26号 2019-06-26 12:00 3 minite(s) left. 1 + 1 = 2')
+  test('special cases', () => {
+    // { input: /(\d+) 年 (\d+) 月 (\d+) ([日号])/g, output: '$1年$2月$3$4' },
+    // { input: /(\d+)\- (\d+)\- (\d+)/g, output: '$1-$2-$3' },
+    // { input: /(\d+)\: (\d+)/g, output: '$1:$2' },
+    // { input: /([a-z]) \(s\) /g, output: '$1(s) ' },
+    // { input: /(\S)\+(\s)/g, output: '$1 +$2' },
+    // { input: /(\S)\=(\s)/g, output: '$1 =$2' }
+    expect(lint('2019年06月26号 2019-06-26 12:00 3 minite(s) left. 1+1=2. www.google.com'))
+      .toBe('2019年06月26号 2019-06-26 12:00 3 minite(s) left。1 + 1 = 2，www.google.com')
   })
 })
