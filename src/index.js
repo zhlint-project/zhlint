@@ -327,8 +327,7 @@ const parse = (str, hyperMarks = []) => {
           i += hyperMark.endContent.length - 1
         }
       }
-    }
-    else if (type === 'space') {
+    } else if (type === 'space') {
       // end the last unfinished token
       // jump to the next non-space char
       // record the last space
@@ -392,12 +391,12 @@ const parse = (str, hyperMarks = []) => {
       } else {
         addNormalPunctuation(i, char, type)
       }
-    } else if (type.match(/^content/)) {
+    } else if (type.match(/^content/) || type === 'unknown') {
       // check if type changed and last token unfinished
       // - create new token in the current group
       // - append into current unfinished token
       if (lastUnfinishedToken) {
-        if (lastUnfinishedToken.type !== type) {
+        if (type !== 'unknown' && lastUnfinishedToken.type !== type) {
           endLastUnfinishedToken(i)
           createContent(i, char, type)
         } else {
