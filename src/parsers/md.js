@@ -1,5 +1,6 @@
 const unified = require('unified')
 const markdown = require('remark-parse')
+const frontmatter = require('remark-frontmatter')
 
 const positionToString = position => `${position.start.offset}:${position.end.offset}`
 
@@ -13,6 +14,9 @@ const blockTypes = [
 const travelBlocks = (node, blocks) => {
   if (node.children) {
     node.children.forEach(child => {
+      if (child.type === 'yaml') {
+        return
+      }
       if (blockTypes.indexOf(child.type) >= 0) {
         const blockMark = { block: child, inlineMarks: [] }
         blocks.push(blockMark)
@@ -102,7 +106,7 @@ const processBlockMark = (blockMark, str) => {
 module.exports = str => {
   const blockMarks = []
 
-  const tree = unified().use(markdown).parse(str)
+  const tree = unified().use(markdown).use(frontmatter).parse(str)
 
   // - travel and record all paragraphs/headings/table-cells into blocks
   // - for each block, travel and record all
