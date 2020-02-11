@@ -34,6 +34,18 @@ module.exports = (token, index, group, matched, marks) => {
   if (contentTokenAfter.type === token.type) {
     return
   }
+  if (
+    token.type === 'content-hyper' ||
+    contentTokenAfter.type === 'content-hyper'
+  ) {
+    // todo:
+    // - <.../>: nothing
+    // - <...>: space before if type different
+    // - </...>: space after if type different
+    // if (token.content.match(/<\/.+>/)) {}
+    // if (token.content.match(/<[^\/].+>/)) {}
+    return
+  }
   const tokenAfter = findTokenAfter(group, token)
   if (tokenAfter === contentTokenAfter) {
     token.spaceAfter = ' '
