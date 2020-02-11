@@ -1,6 +1,8 @@
 const lint = require('../src')
 const markdownParser = require('../src/parsers/md')
 
+test.todo = test.skip
+
 describe('parser with markdown', () => {
   test('single paragraph', () => {
     const text = 'X [xxx](xxx) X *y* __x__ `ss` _0_ ~~asd~~ *asf**asf**adsf*'
@@ -30,4 +32,61 @@ describe('lint', () => {
     expect(lint('---\ntitle: 介绍\ntype: guide\norder: 2\n---\n## Vue 是什么\n'))
       .toBe('---\ntitle: 介绍\ntype: guide\norder: 2\n---\n## Vue 是什么\n')
   })
+  test.todo('dots in URL', () => {
+    // ## Vue。js 是什么
+    expect(lint('## Vue.js 是什么'))
+      .toBe('## Vue.js 是什么')
+  })
+  test.todo('dots in URL 2', () => {
+    // www。vuejs。org
+    expect(lint('www.vuejs.org'))
+      .toBe('www.vuejs.org')
+  })
+  test.todo('dots in URL 3', () => {
+    // freeze
+    // expect(lint('https://vuejs.org'))
+    //   .toBe('https://vuejs.org'))
+  })
+  test.todo('slash character', () => {
+    // Vue (读音/ vju/，类似于 **view**)
+    expect(lint('Vue (读音 /vjuː/，类似于 **view**)'))
+      .toBe('Vue (读音 /vjuː/，类似于 **view**)')
+  })
+  test.todo('slash character 2', () => {
+    // 想知道 Vue 与其它库/ 框架有哪些区别
+    expect(lint('想知道 Vue 与其它库/框架有哪些区别'))
+      .toBe('想知道 Vue 与其它库/框架有哪些区别')
+  })
+  test.todo('special characters', () => {
+    // Vue (读音/ vju/，类似于 **view**)
+    expect(lint('Vue (读音 /vjuː/，类似于 **view**)'))
+      .toBe('Vue (读音 /vjuː/，类似于 **view**)')
+  })
+  test.todo('space between raw content', () => {
+    // 我们 <a id="modal-player" href="#"> 制作了一个视频 </a>
+    expect(lint('我们<a id="modal-player" href="#">制作了一个视频</a>'))
+      .toBe('我们<a id="modal-player" href="#">制作了一个视频</a>')
+  })
+  test.todo('space between raw content 2', () => {
+    // 或者你也可以 <a href="https://gist.githubusercontent.com/chrisvfritz/7f8d7d63000b48493c336e48b3db3e52/raw/ed60c4e5d5c6fec48b0921edaed0cb60be30e87c/index.html" target="_blank" download="index.html" rel="noopener noreferrer"> 创建一个 <code>。 html </code> 文件 <a/>
+    expect(lint('或者你也可以<a href="https://gist.githubusercontent.com/chrisvfritz/7f8d7d63000b48493c336e48b3db3e52/raw/ed60c4e5d5c6fec48b0921edaed0cb60be30e87c/index.html" target="_blank" download="index.html" rel="noopener noreferrer">创建一个 <code>.html</code> 文件<a/>'))
+      .toBe('或者你也可以<a href="https://gist.githubusercontent.com/chrisvfritz/7f8d7d63000b48493c336e48b3db3e52/raw/ed60c4e5d5c6fec48b0921edaed0cb60be30e87c/index.html" target="_blank" download="index.html" rel="noopener noreferrer">创建一个 <code>.html</code> 文件<a/>')
+  })
+  test.todo('content in link URL', () => {
+    // crash
+    // [安装教程](/guide/installation。html)
+    // expect(lint('[安装教程](/guide/installation.html)'))
+    //   .toBe('[安装教程](/guide/installation.html)')
+  })
+  test.todo('content in link URL 2', () => {
+    // 你也可以查阅[ 这个 Scrimba 上的系列教程](https：//scrimba。com/g/gvuedocs)
+    // expect(lint('你也可以查阅[这个 Scrimba 上的系列教程](https://scrimba.com/g/gvuedocs)'))
+    //   .toBe('你也可以查阅[这个 Scrimba 上的系列教程](https://scrimba.com/g/gvuedocs)')
+  })
+  test.todo('raw content', () => {
+    // {% raw %}<div id="app" class="demo">...</div>{% raw %}
+    expect(lint('{% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}'))
+      .toBe('{% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}')
+  })
+  test('empty lines', () => {})
 })
