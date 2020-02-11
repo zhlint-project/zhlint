@@ -47,11 +47,11 @@ const findContentTokenAfter = (group, token) => {
 const spreadMarkSeq = (group, token, seq) => {
   const tokenBefore = findTokenBefore(group, token)
   const tokenAfter = findTokenAfter(group, token)
-  if (seq.indexOf(tokenBefore) < 0 && tokenBefore.type === 'mark-hyper') {
+  if (tokenBefore && seq.indexOf(tokenBefore) < 0 && tokenBefore.type === 'mark-hyper') {
     seq.unshift(tokenBefore)
     findMarkSeq(group, tokenBefore, seq)
   }
-  if (seq.indexOf(tokenAfter) < 0 && tokenAfter.type === 'mark-hyper') {
+  if (tokenAfter && seq.indexOf(tokenAfter) < 0 && tokenAfter.type === 'mark-hyper') {
     seq.push(tokenAfter)
     findMarkSeq(group, tokenAfter, seq)
   }
