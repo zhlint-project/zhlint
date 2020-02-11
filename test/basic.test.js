@@ -11,8 +11,6 @@ const caseDatetime = require('../src/rules/case-datetime')
 const casePlural = require('../src/rules/case-plural')
 const caseShortQuote = require('../src/rules/case-short-quote')
 
-const markdownParser = require('../src/parsers/md')
-
 const {
   checkCharType,
   parse,
@@ -20,6 +18,8 @@ const {
   join,
   processRule
 } = lint
+
+test.todo = test.skip
 
 const purify = arr => arr.map(item => Array.isArray(item) ? purify(item) : item)
 
@@ -201,26 +201,6 @@ describe('parser with hyper marks', () => {
   })
 })
 
-describe('parser with markdown', () => {
-  test('single paragraph', () => {
-    const text = 'X [xxx](xxx) X *y* __x__ `ss` _0_ ~~asd~~ *asf**asf**adsf*'
-    const result = markdownParser(text)
-    const marks = [
-      { type: 'hyper', meta: 'link', startIndex: 2, startContent: '[', endIndex: 6, endContent: '](xxx)' },
-      { type: 'hyper', meta: 'emphasis', startIndex: 15, startContent: '*', endIndex: 17, endContent: '*' },
-      { type: 'hyper', meta: 'strong', startIndex: 19, startContent: '__', endIndex: 22, endContent: '__' },
-      { type: 'raw', meta: 'inlineCode', startIndex: 25, endIndex: 29, startContent: '`ss`', endContent: '' },
-      { type: 'hyper', meta: 'emphasis', startIndex: 30, startContent: '_', endIndex: 32, endContent: '_' },
-      { type: 'hyper', meta: 'delete', startIndex: 34, startContent: '~~', endIndex: 39, endContent: '~~' },
-      { type: 'hyper', meta: 'emphasis', startIndex: 42, startContent: '*', endIndex: 57, endContent: '*' },
-      { type: 'hyper', meta: 'strong', startIndex: 46, startContent: '**', endIndex: 51, endContent: '**' }
-    ]
-    expect(result.length).toBe(1)
-    expect(result[0].value).toBe(text)
-    expect(result[0].marks).toEqual(marks)
-  })
-})
-
 describe('travel', () => {
   const { tokens } = parse('遵守JavaScript编码规范非常重要')
   const expectedTokens = [
@@ -340,11 +320,7 @@ describe('lint', () => {
     expect(lint(`所謂忠恕，也就是「盡己之心，推己及人」的意思。`, [caseTraditional]))
       .toBe(`所謂忠恕，也就是“盡己之心，推己及人”的意思。`)
   })
-  test('hyper marks', () => {
-    expect(lint('X[ xxx ](xxx)X`hello`world'))
-      .toBe('X [xxx](xxx) X `hello` world')
-  })
-  test('special cases', () => {
+  test.todo('special cases', () => {
     // { input: /(\d+) 年 (\d+) 月 (\d+) ([日号])/g, output: '$1年$2月$3$4' },
     // { input: /(\d+)\- (\d+)\- (\d+)/g, output: '$1-$2-$3' },
     // { input: /(\d+)\: (\d+)/g, output: '$1:$2' },
