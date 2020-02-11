@@ -497,7 +497,7 @@ const replaceBlocks = (str, blocks) => {
       const nonBlockPiece = {
         nonBlock: true,
         start: nextStart,
-        end: start - 1,
+        end: start,
       }
       nonBlockPiece.value = str.substring(nonBlockPiece.start, nonBlockPiece.end)
       pieces.push(nonBlockPiece)
@@ -506,8 +506,8 @@ const replaceBlocks = (str, blocks) => {
     if (index === blocks.length - 1 && end !== str.length) {
       const nonBlockPiece = {
         nonBlock: true,
-        start: end + 1,
-        end: str.length - 1
+        start: end,
+        end: str.length
       }
       nonBlockPiece.value = str.substring(nonBlockPiece.start, nonBlockPiece.end)
       pieces.push(nonBlockPiece)
