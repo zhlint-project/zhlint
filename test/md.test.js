@@ -32,12 +32,12 @@ describe('lint', () => {
     expect(lint('---\ntitle: 介绍\ntype: guide\norder: 2\n---\n## Vue 是什么\n'))
       .toBe('---\ntitle: 介绍\ntype: guide\norder: 2\n---\n## Vue 是什么\n')
   })
-  test.todo('dots in URL', () => {
+  test('dots in URL', () => {
     // ## Vue。js 是什么
     expect(lint('## Vue.js 是什么'))
       .toBe('## Vue.js 是什么')
   })
-  test.todo('dots in URL 2', () => {
+  test('dots in URL 2', () => {
     // www。vuejs。org
     expect(lint('www.vuejs.org'))
       .toBe('www.vuejs.org')
@@ -47,18 +47,12 @@ describe('lint', () => {
     // expect(lint('https://vuejs.org'))
     //   .toBe('https://vuejs.org'))
   })
-  test.todo('slash character', () => {
-    // Vue (读音/ vju/，类似于 **view**)
-    expect(lint('Vue (读音 /vjuː/，类似于 **view**)'))
-      .toBe('Vue (读音 /vjuː/，类似于 **view**)')
-  })
-  test.todo('slash character 2', () => {
-    // 想知道 Vue 与其它库/ 框架有哪些区别
+  test('slash character', () => {
     expect(lint('想知道 Vue 与其它库/框架有哪些区别'))
       .toBe('想知道 Vue 与其它库/框架有哪些区别')
   })
-  test.todo('special characters', () => {
-    // Vue (读音/ vju/，类似于 **view**)
+  test('special characters', () => {
+    // Vue (读音 /vju/，类似于 **view**)
     expect(lint('Vue (读音 /vjuː/，类似于 **view**)'))
       .toBe('Vue (读音 /vjuː/，类似于 **view**)')
   })
