@@ -71,18 +71,18 @@ describe('lint', () => {
     expect(lint('创建一个 <code>.html</code> 文件'))
       .toBe('创建一个 <code>.html</code> 文件')
   })
-  test.todo('content in link URL', () => {
+  test('content in link URL', () => {
     // crash
     // [安装教程](/guide/installation。html)
-    // expect(lint('[安装教程](/guide/installation.html)'))
-    //   .toBe('[安装教程](/guide/installation.html)')
+    expect(lint('[安装教程](/guide/installation.html)'))
+      .toBe('[安装教程](/guide/installation.html)')
   })
-  test.todo('content in link URL 2', () => {
+  test('content in link URL 2', () => {
     // 你也可以查阅[ 这个 Scrimba 上的系列教程](https：//scrimba。com/g/gvuedocs)
-    // expect(lint('你也可以查阅[这个 Scrimba 上的系列教程](https://scrimba.com/g/gvuedocs)'))
-    //   .toBe('你也可以查阅[这个 Scrimba 上的系列教程](https://scrimba.com/g/gvuedocs)')
+    expect(lint('你也可以查阅[这个 Scrimba 上的系列教程](https://scrimba.com/g/gvuedocs)'))
+      .toBe('你也可以查阅[这个 Scrimba 上的系列教程](https://scrimba.com/g/gvuedocs)')
   })
-  test.todo('raw content', () => {
+  test('raw content', () => {
     // {% raw %}<div id="app" class="demo">...</div>{% raw %}
     expect(lint('{% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}'))
       .toBe('{% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}')
