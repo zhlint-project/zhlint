@@ -61,7 +61,7 @@ describe('lint', () => {
     expect(lint('我们<a id="modal-player" href="#">制作了一个视频</a>'))
       .toBe('我们<a id="modal-player" href="#">制作了一个视频</a>')
   })
-  test.todo('space between raw content 2', () => {
+  test('space between raw content 2', () => {
     // 我们 <a id="modal-player" href="#"> 制作了一个视频 </a>
     expect(lint('Hello<a id="modal-player" href="#">制作了一个视频</a>World'))
       .toBe('Hello <a id="modal-player" href="#">制作了一个视频</a> World')

@@ -15,6 +15,7 @@
 const {
   findTokenBefore,
   findTokenAfter,
+  findContentTokenBefore,
   findContentTokenAfter
 } = require('./util')
 
@@ -27,6 +28,7 @@ module.exports = (token, index, group, matched, marks) => {
   if (!token.type.match(/^content\-/)) {
     return
   }
+  const contentTokenBefore = findContentTokenBefore(group, token)
   const contentTokenAfter = findContentTokenAfter(group, token)
   if (!contentTokenAfter) {
     return
@@ -34,16 +36,36 @@ module.exports = (token, index, group, matched, marks) => {
   if (contentTokenAfter.type === token.type) {
     return
   }
+  if (contentTokenAfter.type === 'content-hyper') {
+    return
+  }
   if (
-    token.type === 'content-hyper' ||
-    contentTokenAfter.type === 'content-hyper'
+    token.type === 'content-hyper'
   ) {
-    // todo:
-    // - <.../>: nothing
-    // - <...>: space before if type different
-    // - </...>: space after if type different
-    // if (token.content.match(/<\/.+>/)) {}
-    // if (token.content.match(/<[^\/].+>/)) {}
+    // <.../>
+    if (token.content.match(/<[^\/].+\/\s*>/)) {
+      // nothing
+    }
+    // <...>
+    else if (token.content.match(/<[^\/].+>/)) {
+      // put space before if type different
+      if (
+        contentTokenBefore &&
+        contentTokenBefore.type !== contentTokenAfter.type
+      ) {
+        contentTokenBefore.spaceAfter = ' '
+      }
+    }
+    // </...>
+    else if (token.content.match(/<\/.+>/)) {
+      // put space after if type different
+      if (
+        contentTokenBefore &&
+        contentTokenBefore.type !== contentTokenAfter.type
+      ) {
+        findTokenBefore(group, contentTokenAfter).spaceAfter = ' '
+      }
+    }
     return
   }
   const tokenAfter = findTokenAfter(group, token)
@@ -53,7 +75,7 @@ module.exports = (token, index, group, matched, marks) => {
     if (tokenAfter.markSide === 'left') {
       token.spaceAfter = ' '
     } else {
-      findTokenBefore(contentTokenAfter).spaceAfter = ' '
+      findTokenBefore(group, contentTokenAfter).spaceAfter = ' '
     }
   }
 }
