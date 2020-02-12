@@ -87,5 +87,8 @@ describe('lint', () => {
     expect(lint('{% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}'))
       .toBe('{% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}')
   })
-  test('empty lines', () => {})
+  test('empty lines', () => {
+    expect(lint('a\n\nb\n\nc'))
+      .toBe('a\n\nb\n\nc')
+  })
 })
