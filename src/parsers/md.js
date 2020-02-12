@@ -62,6 +62,7 @@ const processBlockMark = (blockMark, str) => {
   const { block, inlineMarks } = blockMark
   const offset = block.position.start.offset
   const marks = []
+  const unresolvedCodeMarks = []
   inlineMarks.forEach(inlineMark => {
     const mark = {}
     const { inline } = inlineMark
@@ -75,6 +76,17 @@ const processBlockMark = (blockMark, str) => {
         inline.position.end.offset
       )
       mark.endContent = ''
+      if (mark.startContent.match(/<code.*>/)) {
+        mark.code = 'left'
+        unresolvedCodeMarks.push(mark)
+      }
+      else if (mark.startContent.match(/<\/code.*>/)) {
+        mark.code = 'right'
+        const leftCode = unresolvedCodeMarks.pop()
+        if (leftCode) {
+          leftCode.rightCode = mark
+        }
+      }
     } else {
       mark.type = 'hyper'
       mark.meta = inline.type
@@ -92,7 +104,23 @@ const processBlockMark = (blockMark, str) => {
     marks.push(mark)
   })
   blockMark.value = str.substring(block.position.start.offset, block.position.end.offset)
-  blockMark.hyperMarks = marks
+  blockMark.hyperMarks = marks.map(mark => {
+    if (mark.code === 'right') {
+      return
+    }
+    if (mark.code === 'left') {
+      const { rightCode } = mark
+      mark.endIndex = rightCode.endIndex
+      mark.startContent = str.substring(
+        mark.startIndex + offset,
+        mark.endIndex + offset
+      )
+      mark.endContent = ''
+      delete mark.rightCode
+      delete mark.code
+    }
+    return mark
+  }).filter(Boolean)
 }
 
 /**

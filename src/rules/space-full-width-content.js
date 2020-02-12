@@ -30,42 +30,49 @@ module.exports = (token, index, group, matched, marks) => {
   }
   const contentTokenBefore = findContentTokenBefore(group, token)
   const contentTokenAfter = findContentTokenAfter(group, token)
-  if (!contentTokenAfter) {
+  if (contentTokenAfter && contentTokenAfter.type === token.type) {
     return
   }
-  if (contentTokenAfter.type === token.type) {
-    return
-  }
-  if (contentTokenAfter.type === 'content-hyper') {
+  if (contentTokenAfter && contentTokenAfter.type === 'content-hyper') {
     return
   }
   if (
     token.type === 'content-hyper'
   ) {
-    // <.../>
-    if (token.content.match(/<[^\/].+\/\s*>/)) {
-      // nothing
-    }
-    // <...>
-    else if (token.content.match(/<[^\/].+>/)) {
-      // put space before if type different
+    if (
+      token.content.match(/<[^\/].+\/\s*>/) ||
+      token.content.match(/<code.*>.*<\/code.*>/)
+    ) {
+      // <.../>: nothing
+    } else if (token.content.match(/<[^\/].+>/)) {
+      // <...>: put space before if type different
       if (
-        contentTokenBefore &&
+        contentTokenBefore && contentTokenAfter &&
         contentTokenBefore.type !== contentTokenAfter.type
       ) {
         contentTokenBefore.spaceAfter = ' '
+      } else {
+        if (contentTokenBefore) {
+          contentTokenBefore.spaceAfter = ''
+        }
       }
-    }
-    // </...>
-    else if (token.content.match(/<\/.+>/)) {
-      // put space after if type different
+    } else if (token.content.match(/<\/.+>/)) {
+      // </...>: put space after if type different
+      const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
       if (
-        contentTokenBefore &&
+        contentTokenBefore && contentTokenAfter &&
         contentTokenBefore.type !== contentTokenAfter.type
       ) {
-        findTokenBefore(group, contentTokenAfter).spaceAfter = ' '
+        tokenBeforeContentTokenAfter.spaceAfter = ' '
+      } else {
+        if (tokenBeforeContentTokenAfter) {
+          tokenBeforeContentTokenAfter.spaceAfter = ''
+        }
       }
     }
+    return
+  }
+  if (!contentTokenAfter) {
     return
   }
   const tokenAfter = findTokenAfter(group, token)

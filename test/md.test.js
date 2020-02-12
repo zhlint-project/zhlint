@@ -66,10 +66,10 @@ describe('lint', () => {
     expect(lint('Hello<a id="modal-player" href="#">制作了一个视频</a>World'))
       .toBe('Hello <a id="modal-player" href="#">制作了一个视频</a> World')
   })
-  test.todo('space between raw content 3', () => {
-    // 或者你也可以 <a href="https://gist.githubusercontent.com/chrisvfritz/7f8d7d63000b48493c336e48b3db3e52/raw/ed60c4e5d5c6fec48b0921edaed0cb60be30e87c/index.html" target="_blank" download="index.html" rel="noopener noreferrer"> 创建一个 <code>。 html </code> 文件 <a/>
-    expect(lint('或者你也可以<a href="https://gist.githubusercontent.com/chrisvfritz/7f8d7d63000b48493c336e48b3db3e52/raw/ed60c4e5d5c6fec48b0921edaed0cb60be30e87c/index.html" target="_blank" download="index.html" rel="noopener noreferrer">创建一个 <code>.html</code> 文件<a/>'))
-      .toBe('或者你也可以<a href="https://gist.githubusercontent.com/chrisvfritz/7f8d7d63000b48493c336e48b3db3e52/raw/ed60c4e5d5c6fec48b0921edaed0cb60be30e87c/index.html" target="_blank" download="index.html" rel="noopener noreferrer">创建一个 <code>.html</code> 文件<a/>')
+  test('space between raw content 3', () => {
+    // 创建一个 <code>。 html</code> 文件<a/>
+    expect(lint('创建一个 <code>.html</code> 文件'))
+      .toBe('创建一个 <code>.html</code> 文件')
   })
   test.todo('content in link URL', () => {
     // crash
