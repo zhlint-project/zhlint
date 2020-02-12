@@ -42,10 +42,10 @@ describe('lint', () => {
     expect(lint('www.vuejs.org'))
       .toBe('www.vuejs.org')
   })
-  test.todo('dots in URL 3', () => {
+  test('dots in URL 3', () => {
     // freeze
-    // expect(lint('https://vuejs.org'))
-    //   .toBe('https://vuejs.org'))
+    expect(lint('https://vuejs.org'))
+      .toBe('https://vuejs.org')
   })
   test('slash character', () => {
     expect(lint('想知道 Vue 与其它库/框架有哪些区别'))

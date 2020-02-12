@@ -308,6 +308,8 @@ const parse = (str, hyperMarks = []) => {
     if (hyperMark) {
       // end the last unfinished token
       endLastUnfinishedToken(i)
+      // for hyper mark without startContent
+      delete hyperMarksMap[i]
       // check the next token
       // - if the mark type is raw
       //   - append next token
@@ -545,7 +547,7 @@ const lint = (str, rules = [
       start, end,
       value: join(data.tokens)
     }
-  })) 
+  }))
 }
 
 module.exports = lint
@@ -555,3 +557,4 @@ module.exports.parse = parse
 module.exports.travel = travel
 module.exports.join = join
 module.exports.processRule = processRule
+module.exports.replaceBlocks = replaceBlocks

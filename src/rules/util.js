@@ -44,6 +44,37 @@ const findContentTokenAfter = (group, token) => {
     return findContentTokenBefore(group, group[index + 1])
   }
 }
+const findNonMarkTokenBefore = (group, token) => {
+  const index = group.indexOf(token)
+  if (index < 0) {
+    return
+  }
+  const tokenBefore = findTokenBefore(group, token)
+  if (!tokenBefore) {
+    return
+  }
+  if (tokenBefore.type.match(/^content\-/) || tokenBefore.type.match(/^punctuation\-/)) {
+    return tokenBefore
+  } else if (tokenBefore.type === 'mark-hyper') {
+    return findContentTokenBefore(group, group[index - 1])
+  }
+  return 
+}
+const findNonMarkTokenAfter = (group, token) => {
+  const index = group.indexOf(token)
+  if (index < 0) {
+    return
+  }
+  const tokenAfter = findTokenAfter(group, token)
+  if (!tokenAfter) {
+    return
+  }
+  if (tokenAfter.type.match(/^content\-/) || tokenAfter.type.match(/^punctuation\-/)) {
+    return tokenAfter
+  } else if (tokenAfter.type === 'mark-hyper') {
+    return findContentTokenBefore(group, group[index + 1])
+  }
+}
 const spreadMarkSeq = (group, token, seq) => {
   const tokenBefore = findTokenBefore(group, token)
   const tokenAfter = findTokenAfter(group, token)
@@ -67,5 +98,7 @@ module.exports = {
   findTokenAfter,
   findContentTokenBefore,
   findContentTokenAfter,
+  findNonMarkTokenBefore,
+  findNonMarkTokenAfter,
   findMarkSeq
 }
