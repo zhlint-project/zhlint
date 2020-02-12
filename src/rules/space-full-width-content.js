@@ -40,11 +40,11 @@ module.exports = (token, index, group, matched, marks) => {
     token.type === 'content-hyper'
   ) {
     if (
-      token.content.match(/<[^\/].+\/\s*>/) ||
-      token.content.match(/<code.*>.*<\/code.*>/)
+      token.content.match(/^<[^\/].+\/\s*>$/) ||
+      token.content.match(/^<code.*>.*<\/code.*>$/)
     ) {
       // <.../>: nothing
-    } else if (token.content.match(/<[^\/].+>/)) {
+    } else if (token.content.match(/^<[^\/].+>$/)) {
       // <...>: put space before if type different
       if (
         contentTokenBefore && contentTokenAfter &&
@@ -56,7 +56,7 @@ module.exports = (token, index, group, matched, marks) => {
           contentTokenBefore.spaceAfter = ''
         }
       }
-    } else if (token.content.match(/<\/.+>/)) {
+    } else if (token.content.match(/^<\/.+>$/)) {
       // </...>: put space after if type different
       const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
       if (

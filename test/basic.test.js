@@ -328,7 +328,7 @@ describe('lint', () => {
     // { input: /(\S)\+(\s)/g, output: '$1 +$2' },
     // { input: /(\S)\=(\s)/g, output: '$1 =$2' }
     // what's going on
-    expect(lint('2019年06月26号 2019-06-26 12:00 3 minite(s) left. 1+1=2. www.google.com'))
-      .toBe('2019年06月26号 2019-06-26 12:00 3 minite(s) left。1 + 1 = 2，www.google.com')
+    expect(lint('2019年06月26号 2019-06-26 12:00 3 minite(s) left. 1+1=2. www.google.com what\'s going on'))
+      .toBe('2019年06月26号 2019-06-26 12:00 3 minite(s) left。1 + 1 = 2，www.google.com what\'s going on')
   })
 })

@@ -13,7 +13,7 @@ const addSpaceOutside = (group, token, index) => {
 
 module.exports = (token, index, group, matched, marks) => {
   if (token.type === 'content-hyper') {
-    if (token.content.match(/<code.*>.*<\/code.*>/)) {
+    if (token.content.match(/^<code.*>.*<\/code.*>$/)) {
       addSpaceOutside(group, token, index)
       return
     }

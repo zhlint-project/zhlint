@@ -91,4 +91,8 @@ describe('lint', () => {
     expect(lint('a\n\nb\n\nc'))
       .toBe('a\n\nb\n\nc')
   })
+  test('inline code', () => {
+    expect(lint(`改进 \`<todo-item>\` 组件`))
+      .toBe(`改进 \`<todo-item>\` 组件`)
+  })
 })

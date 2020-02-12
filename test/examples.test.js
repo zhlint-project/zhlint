@@ -5,7 +5,7 @@ const lint = require('../src')
 test.todo = test.skip
 
 describe('lint', () => {
-  test.todo('vuejs guide index', () => {
+  test('vuejs guide index', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './examples.md'),
       { encoding: 'utf8' })
