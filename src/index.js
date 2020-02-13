@@ -9,7 +9,7 @@ const spaceFullWidthContent = require('./rules/space-full-width-content')
 const unifyPunctuation = require('./rules/unify-punctuation')
 const caseTraditional = require('./rules/case-traditional')
 const caseDatetime = require('./rules/case-datetime')
-const casePlural = require('./rules/case-plural')
+const caseDatetimeZh = require('./rules/case-datetime-zh')
 const caseShortQuote = require('./rules/case-short-quote')
 
 /**
@@ -528,7 +528,7 @@ const lint = (str, rules = [
   unifyPunctuation,
   caseTraditional,
   caseDatetime,
-  casePlural,
+  caseDatetimeZh,
   caseShortQuote
 ], hyperParse = markdownParser) => {
   const blocks =
