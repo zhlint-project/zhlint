@@ -147,15 +147,17 @@ const checkCharType = char => {
  * - Token: { type, content, index, length, mark?, markSide?, spaceAfter? }
  * - Mark: { startIndex, startContent, endIndex, endContent, type: 'brackets'|'hyper'|'raw' }
  * - Group: extends Array<Token> { startContent, startIndex, endContent, endIndex, innerSpaceBefore }
- * @param  {string} str
- * @param  {Mark[]} hyperMarks Pre-defined marks like HTML tags
+ * - IngoreCase: { prefix?, textStart, textEnd?, suffix? } https://github.com/WICG/ScrollToTextFragment
+ * @param  {string}        str
+ * @param  {Mark[]}        hyperMarks Pre-defined marks like HTML tags
+ * @param  {IngoredCase[]} ignoredCases string which should be skipped
  * @return {
  *   tokens: Token[],
  *   marks: Mark[],
  *   groups: Group[]
  * }
  */
-const parse = (str, hyperMarks = []) => {
+const parse = (str, hyperMarks = [], ignoredCases) => {
   // constants
   const markChars = {
     left: '(（',
@@ -550,19 +552,24 @@ const replaceBlocks = (str, blocks) => {
   return pieces.map(({ value }) => value).join('')
 }
 
-const lint = (str, rules = [
-  markHyper,
-  markRaw,
-  spaceFullWidthContent,
-  spacePunctuation,
-  caseMathExp,
-  spaceBrackets,
-  spaceQuotes,
-  unifyPunctuation,
-  caseTraditional,
-  caseDatetime,
-  caseDatetimeZh
-], hyperParse = markdownParser) => {
+const lint = (
+  str,
+  rules = [
+    markHyper,
+    markRaw,
+    spaceFullWidthContent,
+    spacePunctuation,
+    caseMathExp,
+    spaceBrackets,
+    spaceQuotes,
+    unifyPunctuation,
+    caseTraditional,
+    caseDatetime,
+    caseDatetimeZh
+  ],
+  hyperParse = markdownParser,
+  ignoredCases = []
+) => {
   const blocks =
     typeof hyperParse === 'function'
       ? hyperParse(str)
@@ -573,7 +580,7 @@ const lint = (str, rules = [
           end: str.length - 1
         }]
   return replaceBlocks(str, blocks.map(({ value, marks, start, end }) => {
-    const data = parse(value, marks)
+    const data = parse(value, marks, ignoredCases)
     rules.forEach(rule => processRule(data, rule))
     return {
       start, end,
