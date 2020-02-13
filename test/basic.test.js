@@ -1,6 +1,5 @@
 const lint = require('../src')
 
-const markHyper = require('../src/rules/mark-hyper')
 const spacePunctuation = require('../src/rules/space-punctuation')
 const spaceBrackets = require('../src/rules/space-brackets')
 const spaceQuotes = require('../src/rules/space-quotes')
@@ -8,8 +7,7 @@ const spaceFullWidthContent = require('../src/rules/space-full-width-content')
 const unifyPunctuation = require('../src/rules/unify-punctuation')
 const caseTraditional = require('../src/rules/case-traditional')
 const caseDatetime = require('../src/rules/case-datetime')
-const casePlural = require('../src/rules/case-plural')
-const caseShortQuote = require('../src/rules/case-short-quote')
+const caseDatetimeZh = require('../src/rules/case-datetime-zh')
 
 const {
   checkCharType,
@@ -280,17 +278,18 @@ describe('process rules', () => {
   })
 })
 
-describe('lint', () => {
+describe('lint by rule', () => {
   test('space between half-width content and full-width content', () => {
-    expect(lint('汉字和English之间需要有空格比如 half width content。'))
+    expect(lint('汉字和English之间需要有空格比如 half width content。', [spaceFullWidthContent]))
       .toBe('汉字和 English 之间需要有空格比如 half width content。')
   })
   test('space beside brackets', () => {
-    expect(lint('汉字和Eng(lish之间)需要有空格比如 half width content。'))
+    const rules = [spaceFullWidthContent, spaceBrackets]
+    expect(lint('汉字和Eng(lish之间)需要有空格比如 half width content。', rules))
       .toBe('汉字和 Eng(lish 之间) 需要有空格比如 half width content。')
-    expect(lint('汉字和Eng（lish之间）需要有空格比如 half width content。'))
+    expect(lint('汉字和Eng（lish之间）需要有空格比如 half width content。', rules))
       .toBe('汉字和 Eng（lish 之间）需要有空格比如 half width content。')
-    expect(lint('汉 (字 ) 和Eng（lish之间）需（ 要）有(空格)比如 half w(i)dth content。'))
+    expect(lint('汉 (字 ) 和Eng（lish之间）需（ 要）有(空格)比如 half w(i)dth content。', rules))
       .toBe('汉 (字) 和 Eng（lish 之间）需（要）有 (空格) 比如 half w(i)dth content。')
   })
   test('unifies full-width/half-width mixed punctuation usage', () => {
@@ -320,15 +319,40 @@ describe('lint', () => {
     expect(lint(`所謂忠恕，也就是「盡己之心，推己及人」的意思。`, [caseTraditional]))
       .toBe(`所謂忠恕，也就是“盡己之心，推己及人”的意思。`)
   })
+  test('datetime', () => {
+    const rules = [spaceFullWidthContent, spacePunctuation, caseDatetime, caseDatetimeZh]
+    expect(lint('2019年06月26号 2019-06-26 12:00'))
+      .toBe('2019年06月26号 2019-06-26 12:00')
+  })
+})
+
+describe('lint special/edge cases', () => {
+  test('URL', () => {
+    expect(lint('Vue.js 是什么'))
+      .toBe('Vue.js 是什么')
+    expect(lint('www.vuejs.org'))
+      .toBe('www.vuejs.org')
+    expect(lint('https://vuejs.org'))
+      .toBe('https://vuejs.org')
+  })
+  test('slash character', () => {
+    expect(lint('想知道 Vue 与其它库/框架有哪些区别'))
+      .toBe('想知道 Vue 与其它库/框架有哪些区别')
+  })
+  test('special characters', () => {
+    expect(lint('Vue (读音 /vjuː/，类似于)'))
+      .toBe('Vue (读音 /vjuː/，类似于)')
+  })
+  test('plural brackets', () => {
+    expect(lint('3 minite(s) left'))
+      .toBe('3 minite(s) left')
+  })
+  test.todo('math exp', () => {
+    expect(lint('1+1=2'))
+      .toBe('1 + 1 = 2')
+  })
   test.todo('special cases', () => {
-    // { input: /(\d+) 年 (\d+) 月 (\d+) ([日号])/g, output: '$1年$2月$3$4' },
-    // { input: /(\d+)\- (\d+)\- (\d+)/g, output: '$1-$2-$3' },
-    // { input: /(\d+)\: (\d+)/g, output: '$1:$2' },
-    // { input: /([a-z]) \(s\) /g, output: '$1(s) ' },
-    // { input: /(\S)\+(\s)/g, output: '$1 +$2' },
-    // { input: /(\S)\=(\s)/g, output: '$1 =$2' }
-    // what's going on
-    expect(lint('2019年06月26号 2019-06-26 12:00 3 minite(s) left. 1+1=2. www.google.com what\'s going on'))
-      .toBe('2019年06月26号 2019-06-26 12:00 3 minite(s) left。1 + 1 = 2，www.google.com what\'s going on')
+    expect(lint('what\'s going on'))
+      .toBe('what\'s going on')
   })
 })
