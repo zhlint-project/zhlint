@@ -6,6 +6,9 @@ const {
 
 module.exports = (token, index, group, matched, marks) => {
   if (token.type === 'content-half') {
+    if (!token.content.match(/^[\d\.]+$/)) {
+      return
+    }
     const contentTokenBefore = findContentTokenBefore(group, token)
     const contentTokenAfter = findContentTokenAfter(group, token)
     if (
