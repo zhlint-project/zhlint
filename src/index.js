@@ -10,7 +10,6 @@ const unifyPunctuation = require('./rules/unify-punctuation')
 const caseTraditional = require('./rules/case-traditional')
 const caseDatetime = require('./rules/case-datetime')
 const caseDatetimeZh = require('./rules/case-datetime-zh')
-const caseShortQuote = require('./rules/case-short-quote')
 
 /**
  * Check whether the character is full-width or half-width,
@@ -166,6 +165,11 @@ const parse = (str, hyperMarks = []) => {
     right: `”’》〉』」】`,
     neutral: `'"`
   }
+  const shorthandChars = `'’`
+  const shorthandPair = {
+    [`'`]: `'`,
+    [`’`]: `‘`
+  }
 
   // states
   let lastUnfinishedToken
@@ -293,6 +297,31 @@ const parse = (str, hyperMarks = []) => {
     lastUnfinishedToken.raw = lastUnfinishedToken.content
     lastUnfinishedToken.length++
   }
+  const isShorthand = (i, char) => {
+    if (shorthandChars.indexOf(char) < 0) {
+      return false
+    }
+    if (
+      !lastUnfinishedToken ||
+      lastUnfinishedToken.type !== 'content-half'
+    ) {
+      return false
+    }
+    const nextChar = str[i + 1]
+    const nextType = checkCharType(nextChar)
+    if (nextType === 'content-half') {
+      return true
+    }
+    if (nextType === 'space') {
+      if (!lastUnfinishedGroup) {
+        return true
+      }
+      if (lastUnfinishedGroup.startContent !== shorthandPair[char]) {
+        return true
+      }
+    }
+    return false
+  }
 
   // travel every character in the string
   for (let i = 0; i < str.length; i++) {
@@ -350,6 +379,8 @@ const parse = (str, hyperMarks = []) => {
       if (spaceLength - 1 > 0) {
         i += spaceLength - 1
       }
+    } else if (isShorthand(i, char)) {
+      appendContent(char)
     } else if (type.match(/^punctuation/)) {
       // end the last unfinished token
       endLastUnfinishedToken(i)
@@ -528,8 +559,7 @@ const lint = (str, rules = [
   unifyPunctuation,
   caseTraditional,
   caseDatetime,
-  caseDatetimeZh,
-  caseShortQuote
+  caseDatetimeZh
 ], hyperParse = markdownParser) => {
   const blocks =
     typeof hyperParse === 'function'

@@ -307,7 +307,7 @@ describe('lint by rule', () => {
   })
   test('space beside quotes', () => {
     expect(lint(`汉"字'和'English之间"需“要‘有’空”格比如 h'a'lf "width" content.`, [spaceQuotes]))
-      .toBe(`汉 "字 '和' English之间" 需“要‘有’空”格比如 h 'a' lf "width" content.`)
+      .toBe(`汉 "字 '和' English之间" 需“要‘有’空”格比如 h'a'lf "width" content.`)
   })
   test('traditional characters', () => {
     expect(lint(`老師說：「你們要記住國父說的『青年要立志做大事，不要做大官』這句話。」`, [caseTraditional]))
@@ -328,31 +328,26 @@ describe('lint by rule', () => {
 
 describe('lint special/edge cases', () => {
   test('URL', () => {
-    expect(lint('Vue.js 是什么'))
-      .toBe('Vue.js 是什么')
-    expect(lint('www.vuejs.org'))
-      .toBe('www.vuejs.org')
-    expect(lint('https://vuejs.org'))
-      .toBe('https://vuejs.org')
+    expect(lint('Vue.js 是什么')).toBe('Vue.js 是什么')
+    expect(lint('www.vuejs.org')).toBe('www.vuejs.org')
+    expect(lint('https://vuejs.org')).toBe('https://vuejs.org')
   })
   test('slash character', () => {
     expect(lint('想知道 Vue 与其它库/框架有哪些区别'))
       .toBe('想知道 Vue 与其它库/框架有哪些区别')
   })
   test('special characters', () => {
-    expect(lint('Vue (读音 /vjuː/，类似于)'))
-      .toBe('Vue (读音 /vjuː/，类似于)')
+    expect(lint('Vue (读音 /vjuː/，类似于)')).toBe('Vue (读音 /vjuː/，类似于)')
   })
   test('plural brackets', () => {
-    expect(lint('3 minite(s) left'))
-      .toBe('3 minite(s) left')
+    expect(lint('3 minite(s) left')).toBe('3 minite(s) left')
+  })
+  test('single quote for shorthand', () => {
+    expect(lint(`how many user's here`)).toBe(`how many user's here`)
+    expect(lint(`how many users' items here`)).toBe(`how many users' items here`)
+    expect(lint(`what's going on`)).toBe(`what's going on`)
   })
   test.todo('math exp', () => {
-    expect(lint('1+1=2'))
-      .toBe('1 + 1 = 2')
-  })
-  test.todo('special cases', () => {
-    expect(lint('what\'s going on'))
-      .toBe('what\'s going on')
+    expect(lint('1+1=2')).toBe('1 + 1 = 2')
   })
 })
