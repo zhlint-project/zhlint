@@ -347,7 +347,7 @@ describe('lint special/edge cases', () => {
     expect(lint(`how many users' items here`)).toBe(`how many users' items here`)
     expect(lint(`what's going on`)).toBe(`what's going on`)
   })
-  test.todo('math exp', () => {
+  test('math exp', () => {
     expect(lint('1+1=2')).toBe('1 + 1 = 2')
   })
 })

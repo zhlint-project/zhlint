@@ -10,6 +10,7 @@ const unifyPunctuation = require('./rules/unify-punctuation')
 const caseTraditional = require('./rules/case-traditional')
 const caseDatetime = require('./rules/case-datetime')
 const caseDatetimeZh = require('./rules/case-datetime-zh')
+const caseMathExp = require('./rules/case-math-exp')
 
 /**
  * Check whether the character is full-width or half-width,
@@ -552,10 +553,11 @@ const replaceBlocks = (str, blocks) => {
 const lint = (str, rules = [
   markHyper,
   markRaw,
+  spaceFullWidthContent,
   spacePunctuation,
+  caseMathExp,
   spaceBrackets,
   spaceQuotes,
-  spaceFullWidthContent,
   unifyPunctuation,
   caseTraditional,
   caseDatetime,
