@@ -1,4 +1,9 @@
 const lint = require('../src')
+const checkCharType = require('../src/check-char-type')
+const parse = require('../src/parse')
+const travel = require('../src/travel')
+const join = require('../src/join')
+const processRule = require('../src/process-rule')
 
 const spacePunctuation = require('../src/rules/space-punctuation')
 const spaceBrackets = require('../src/rules/space-brackets')
@@ -8,14 +13,6 @@ const unifyPunctuation = require('../src/rules/unify-punctuation')
 const caseTraditional = require('../src/rules/case-traditional')
 const caseDatetime = require('../src/rules/case-datetime')
 const caseDatetimeZh = require('../src/rules/case-datetime-zh')
-
-const {
-  checkCharType,
-  parse,
-  travel,
-  join,
-  processRule
-} = lint
 
 test.todo = test.skip
 
