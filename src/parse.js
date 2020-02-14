@@ -12,17 +12,15 @@ const checkCharType = require('./check-char-type')
  * - Token: { type, content, index, length, mark?, markSide?, spaceAfter? }
  * - Mark: { startIndex, startContent, endIndex, endContent, type: 'brackets'|'hyper'|'raw' }
  * - Group: extends Array<Token> { startContent, startIndex, endContent, endIndex, innerSpaceBefore }
- * - IngoreCase: { prefix?, textStart, textEnd?, suffix? } https://github.com/WICG/ScrollToTextFragment
  * @param  {string}        str
  * @param  {Mark[]}        hyperMarks Pre-defined marks like HTML tags
- * @param  {IngoredCase[]} ignoredCases string which should be skipped
  * @return {
  *   tokens: Token[],
  *   marks: Mark[],
  *   groups: Group[]
  * }
  */
-const parse = (str, hyperMarks = [], ignoredCases) => {
+const parse = (str, hyperMarks = []) => {
   // constants
   const markChars = {
     left: '(（',
@@ -98,12 +96,18 @@ const parse = (str, hyperMarks = [], ignoredCases) => {
       markStack.push(lastUnfinishedBracket)
       lastUnfinishedBracket = null
     }
-    lastUnfinishedBracket = { startIndex: index, startContent: char, type }
+    lastUnfinishedBracket = {
+      type,
+      startIndex: index,
+      startContent: char,
+      rawStartContent: char
+    }
     marks.push(lastUnfinishedBracket)
   }
   const endLastUnfinishedBracket = (index, char) => {
     lastUnfinishedBracket.endIndex = index
     lastUnfinishedBracket.endContent = char
+    lastUnfinishedBracket.rawEndContent = char
     if (markStack.length) {
       lastUnfinishedBracket = markStack.pop()
     } else {
@@ -139,13 +143,15 @@ const parse = (str, hyperMarks = [], ignoredCases) => {
     lastUnfinishedGroup = []
     lastUnfinishedGroup.type = 'group'
     lastUnfinishedGroup.startContent = char
+    lastUnfinishedGroup.rawStartContent = char
     lastUnfinishedGroup.startIndex = index
     groupStack[groupStack.length - 1].push(lastUnfinishedGroup)
     groups.push(lastUnfinishedGroup)
   }
   const endLastUnfinishedGroup = (index, char) => {
-    lastUnfinishedGroup.endContent = char
     lastUnfinishedGroup.endIndex = index
+    lastUnfinishedGroup.endContent = char
+    lastUnfinishedGroup.rawEndContent = char
     if (groupStack.length) {
       lastUnfinishedGroup = groupStack.pop()
     } else {

@@ -4,6 +4,7 @@ const parse = require('../src/parse')
 const travel = require('../src/travel')
 const join = require('../src/join')
 const processRule = require('../src/process-rule')
+const findIgnoredMarks = require('../src/find-ignored-marks')
 
 const spacePunctuation = require('../src/rules/space-punctuation')
 const spaceBrackets = require('../src/rules/space-brackets')
@@ -79,8 +80,10 @@ describe('parser', () => {
     const mark = {
       type: 'brackets',
       startContent: `(`,
+      rawStartContent: `(`,
       startIndex: 2,
       endContent: `)`,
+      rawEndContent: `)`,
       endIndex: 8,
     }
     expect(marks).toEqual([mark])
@@ -116,8 +119,10 @@ describe('parser', () => {
     const mark = {
       type: 'brackets',
       startContent: `(`,
+      rawStartContent: `(`,
       startIndex: 27,
       endContent: `)`,
+      rawEndContent: `)`,
       endIndex: 45,
     }
     expect(marks).toEqual([mark])
@@ -193,6 +198,62 @@ describe('parser with hyper marks', () => {
     ])
     expect(marks).toEqual([hyperMark])
     expect(groups.length).toBe(0)
+  })
+})
+
+describe('find ignored marks', () => {
+  test('only start text', () => {
+    expect(findIgnoredMarks('abcdefghijklmn', [{ textStart: 'cde' }]))
+      .toEqual([{ start: 2, end: 5 }])
+    expect(findIgnoredMarks('abcdefghijklmn', [{ textStart: 'cdx' }]))
+      .toEqual([])
+  })
+  test('start text + prefix', () => {
+    expect(findIgnoredMarks('abcdefghijklmn', [{ prefix: 'b', textStart: 'cde' }]))
+      .toEqual([{ start: 2, end: 5 }])
+    expect(findIgnoredMarks('abcdefghijklmn', [{ prefix: 'b', textStart: 'cdx' }]))
+      .toEqual([])
+  })
+  test('start text + end', () => {
+    expect(findIgnoredMarks('abcdefghijklmn', [{ textStart: 'cd', textEnd: 'f' }]))
+      .toEqual([{ start: 2, end: 6 }])
+    expect(findIgnoredMarks('abcdefghijklmn', [{ textStart: 'cd', textEnd: 'x' }]))
+      .toEqual([])
+    expect(findIgnoredMarks('abcdefghijklmn', [{ textStart: 'x', textEnd: 'def' }]))
+      .toEqual([])
+    expect(findIgnoredMarks('abcdefghijklmn', [{ textStart: 'x', textEnd: 'x' }]))
+      .toEqual([])
+  })
+  test('start + end + suffix', () => {
+    expect(findIgnoredMarks('abcdefghijklmn', [{ textStart: 'cd', textEnd: 'f', suffix: 'g' }]))
+      .toEqual([{ start: 2, end: 6 }])
+    expect(findIgnoredMarks('abcdefghijklmn', [{ textStart: 'cd', textEnd: 'f', suffix: 'x' }]))
+      .toEqual([])
+    expect(findIgnoredMarks('abcdefghijklmn', [{ textStart: 'x', textEnd: 'f', suffix: 'g' }]))
+      .toEqual([])
+    expect(findIgnoredMarks('abcdefghijklmn', [{ textStart: 'x', textEnd: 'x', suffix: 'g' }]))
+      .toEqual([])
+  })
+  test('multiple matches', () => {
+    expect(findIgnoredMarks(
+      'abcdefghijklmnabcdefghijklmn',
+      [{ textStart: 'cd', textEnd: 'f', suffix: 'g' }]
+    ))
+      .toEqual([{ start: 2, end: 6 }, { start: 16, end: 20 }])
+  })
+  test('multiple cases', () => {
+    expect(findIgnoredMarks(
+      'abcdefghijklmnabcdefghijklmn',
+      [
+        { textStart: 'cd', textEnd: 'f', suffix: 'g' },
+        { textStart: 'hij' }
+      ]
+    )).toEqual([
+      { start: 2, end: 6 },
+      { start: 7, end: 10 },
+      { start: 16, end: 20 },
+      { start: 21, end: 24 }
+    ])
   })
 })
 

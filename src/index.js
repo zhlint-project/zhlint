@@ -2,6 +2,7 @@ const replaceBlocks = require('./replace-block')
 const parse = require('./parse')
 const processRule = require('./process-rule')
 const join = require('./join')
+const findIgnoredMarks = require('./find-ignored-marks')
 
 const markdownParser = require('./parsers/md')
 
@@ -70,11 +71,12 @@ const lint = (
           end: str.length - 1
         }]
   return replaceBlocks(str, blocks.map(({ value, marks, start, end }) => {
-    const data = parse(value, marks, ignoredCases)
+    const data = parse(value, marks)
+    const ignoredMarks = findIgnoredMarks(ignoredCases)
     matchRules(rules).forEach(rule => processRule(data, rule))
     return {
       start, end,
-      value: join(data.tokens)
+      value: join(data.tokens, ignoredMarks)
     }
   }))
 }
