@@ -17,6 +17,31 @@ const caseDatetime = require('./rules/case-datetime')
 const caseDatetimeZh = require('./rules/case-datetime-zh')
 const caseMathExp = require('./rules/case-math-exp')
 
+const ruleMap = {
+  'mark-hyper': markHyper,
+  'mark-raw': markRaw,
+  'space-punctuation': spacePunctuation,
+  'space-brackets': spaceBrackets,
+  'space-quotes': spaceQuotes,
+  'space-full-width-content': spaceFullWidthContent,
+  'unify-punctuation': unifyPunctuation,
+  'case-traditional': caseTraditional,
+  'case-datetime': caseDatetime,
+  'case-datetime-zh': caseDatetimeZh,
+  'case-math-exp': caseMathExp
+}
+
+const matchRules = rules => rules.map(rule => {
+  switch (typeof rule) {
+    case 'function':
+    return rule
+    case 'string':
+    return ruleMap[rule]
+    default:
+    return
+  }
+}).filter(Boolean)
+
 const lint = (
   str,
   rules = [
@@ -46,7 +71,7 @@ const lint = (
         }]
   return replaceBlocks(str, blocks.map(({ value, marks, start, end }) => {
     const data = parse(value, marks, ignoredCases)
-    rules.forEach(rule => processRule(data, rule))
+    matchRules(rules).forEach(rule => processRule(data, rule))
     return {
       start, end,
       value: join(data.tokens)

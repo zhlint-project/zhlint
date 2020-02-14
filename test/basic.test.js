@@ -348,3 +348,10 @@ describe('lint special/edge cases', () => {
     expect(lint('1+1=2')).toBe('1 + 1 = 2')
   })
 })
+
+describe('lint with different arguments', () => {
+  test('stirng[] argument for rules', () => {
+    expect(lint('汉字和English之间需要有空格比如 half width content。', ['space-full-width-content']))
+      .toBe('汉字和 English 之间需要有空格比如 half width content。')
+  })
+})
