@@ -1,6 +1,10 @@
 /**
  * Check whether the character is full-width or half-width,
  * content or punctuation, or empty, or space, or emoji etc.
+ * Refs:
+ * - https://jrgraphix.net/research/unicode.php
+ * - https://mathiasbynens.be/notes/javascript-unicode
+ * - https://stackoverflow.com/a/21113538
  * @param  {string} char
  * @return {string}
  * - 'empty'
@@ -12,9 +16,6 @@
  * - 'unknown'
  */
 const checkCharType = char => {
-  // console.log(char.charCodeAt(0).toString(16), char)
-  // console.log(char.charCodeAt(1).toString(16), char)
-
   if (!char) {
     return 'empty'
   }
@@ -37,7 +38,6 @@ const checkCharType = char => {
     return 'punctuation-full'
   }
 
-  // https://jrgraphix.net/research/unicode.php
   // Basic Latin
   if (char.match(/[\u0020-\u007F]/)) {
     return 'content-half'
@@ -59,7 +59,6 @@ const checkCharType = char => {
     return 'content-half'
   }
 
-  // https://stackoverflow.com/a/21113538
   // CJK Unified Ideographs
   if (char.match(/[\u4E00-\u9FFF]/)) {
     return 'content-full'
@@ -96,27 +95,19 @@ const checkCharType = char => {
   if (char.match(/[\uE815-\uE864]/)) {
     return 'content-full'
   }
-  // todo: wrong regexp
-  // learn: https://mathiasbynens.be/notes/javascript-unicode
-  // if (char.match(/[\u20000-\u2A6DF]/)) {
-  //   return 'cjk'
-  // }
-  // // CJK Compatibility Ideographs Supplement
-  // if (char.match(/[\u2F800-\u2FA1F]/)) {
-  //   return 'cjk'
-  // }
+  // CJK Unified Ideographs Extension B
+  if (char.match(/[\u{20000}-\u{2A6DF}]/u)) {
+    return 'cjk'
+  }
+  // CJK Compatibility Ideographs Supplement
+  if (char.match(/[\u{2F800}-\u{2FA1F}]/u)) {
+    return 'cjk'
+  }
 
   // CJK Symbols and Punctuation
   if (char.match(/[\u3000-\u303F]/)) {
     return 'punctuation-full'
   }
-
-  // emoji
-  // todo: wrong regexp
-  // learn: https://mathiasbynens.be/notes/javascript-unicode
-  // if (char.match(/[\u1F600-\u1F64F]/)) {
-  //   return 'emoji'
-  // }
 
   return 'unknown'
 }

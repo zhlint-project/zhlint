@@ -54,12 +54,12 @@ describe('check char type', () => {
     expect(checkCharType('五')).toBe('content-full')
     expect(checkCharType('䔷')).toBe('content-full')
     expect(checkCharType('𢙺')).toBe('content-full')
-    // expect(checkCharType('𢙽')).toBe('content-full')
+    expect(checkCharType('𢙽')).toBe('content-full')
     expect(checkCharType('中')).toBe('content-full')
     expect(checkCharType('⻍')).toBe('content-full')
   })
-  test.skip('emoji', () => {
-    expect(checkCharType('😀')).toBe('emoji')
+  test('emoji', () => {
+    expect(checkCharType('😀')).toBe('unknown')
   })
 })
 
