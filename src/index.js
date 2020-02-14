@@ -72,7 +72,7 @@ const lint = (
         }]
   return replaceBlocks(str, blocks.map(({ value, marks, start, end }) => {
     const data = parse(value, marks)
-    const ignoredMarks = findIgnoredMarks(ignoredCases)
+    const ignoredMarks = findIgnoredMarks(value, ignoredCases)
     matchRules(rules).forEach(rule => processRule(data, rule))
     return {
       start, end,

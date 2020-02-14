@@ -415,4 +415,10 @@ describe('lint with different arguments', () => {
     expect(lint('汉字和English之间需要有空格比如 half width content。', ['space-full-width-content']))
       .toBe('汉字和 English 之间需要有空格比如 half width content。')
   })
+  test.only('ignored cases', () => {
+    expect(lint('汉字和English之间需要有空格比如 half width content。',
+      undefined, undefined,
+      [{ textStart: '和English之间' }]
+    )).toBe('汉字和English之间需要有空格比如 half width content。')
+  })
 })

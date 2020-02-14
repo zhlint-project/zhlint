@@ -1,5 +1,6 @@
-const isInRange = (start, end, mark) =>
-  start <= mark.end && end >= mark.start
+const isInRange = (start, end, mark) => {
+  return (start <= mark.end) && (end >= mark.start)
+}
 
 const isIgnored = (token, marks = []) => {
   const result = {}
@@ -17,50 +18,50 @@ const isIgnored = (token, marks = []) => {
   // - single: raw, spaceAfter
   marks.forEach(mark => {
     if (Array.isArray(token)) {
-      if (rawStartContent &&
-        isInRange(index, index + rawStartContent.length, mark)
-      ) {
+      if (isInRange(
+        index,
+        index + (rawStartContent || '').length,
+        mark
+      )) {
         result.startContent = true
       }
-      if (rawInnerSpaceBefore &&
-        isInRange(
-          index + (rawStartContent || '').length,
-          index + (rawStartContent || '').length + rawInnerSpaceBefore.length,
-          mark
-        )
-      ) {
+      if (isInRange(
+        index + (rawStartContent || '').length,
+        index + (rawStartContent || '').length
+          + (rawInnerSpaceBefore || '').length,
+        mark
+      )) {
         result.innerSpaceBefore = true
       }
-      if (rawEndContent &&
-        isInRange(endIndex, endIndex + rawEndContent.length, mark)
-      ) {
+      if (isInRange(
+        endIndex,
+        endIndex + (rawEndContent || '').length,
+        mark
+      )) {
         result.endContent = true
       }
-      if (rawSpaceAfter &&
-        isInRange(
-          endIndex + (rawEndContent || '').length,
-          endIndex + (rawEndContent || '').length + rawSpaceAfter.length,
-          mark
-        )
-      ) {
+      if (isInRange(
+        endIndex + (rawEndContent || '').length,
+        endIndex + (rawEndContent || '').length
+          + (rawSpaceAfter || '').length,
+        mark
+      )) {
         result.spaceAfter = true
       }
     } else {
-      if (raw && isInRange(index, index + raw.length, marks)) {
+      if (isInRange(index, index + (raw || '').length, mark)) {
         result.content = true
       }
-      if (rawSpaceAfter &&
-        isInRange(
-          index + (raw || '').length,
-          index + (raw || '').length + rawSpaceAfter.length,
-          marks
-        )
-      ) {
+      if (isInRange(
+        index + (raw || '').length,
+        index + (raw || '').length
+          + (rawSpaceAfter || '').length,
+        mark
+      )) {
         result.spaceAfter = true
       }
     }
   })
-
   return result
 }
 
