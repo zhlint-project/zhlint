@@ -1,5 +1,5 @@
 {
-  "name": "zh-lint",
+  "name": "zhlint",
   "version": "0.2.0",
   "description": "A linting tool for Chinese language.",
   "main": "src/index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Jinjiang/zh-lint.git"
+    "url": "git+https://github.com/Jinjiang/zhlint.git"
   },
   "keywords": [
     "lint",
@@ -19,9 +19,9 @@
   "author": "Jinjiang <zhaojinjiang@me.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Jinjiang/zh-lint/issues"
+    "url": "https://github.com/Jinjiang/zhlint/issues"
   },
-  "homepage": "https://github.com/Jinjiang/zh-lint#readme",
+  "homepage": "https://github.com/Jinjiang/zhlint#readme",
   "devDependencies": {
     "jest": "^24.8.0"
   },

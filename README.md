@@ -1,4 +1,4 @@
-# zh-lint
+# zhlint
 
 A linting tool for Chinese language.
 
@@ -13,15 +13,15 @@ _WIP (not published yet, currenly can use by `npm link` on this repo)_
 _not implemented yet_
 
 ```bash
-probably-zh-lint --string "自动在中文和English之间加入空格"
-probably-zh-lint --input my-article.md --output output.md
-probably-zh-lint --fix my-article.md
+probably-zhlint --string "自动在中文和English之间加入空格"
+probably-zhlint --input my-article.md --output output.md
+probably-zhlint --fix my-article.md
 ```
 
 ### As Node.js package
 
 ```js
-const lint = require('probably-zh-lint')
+const lint = require('probably-zhlint')
 // `自动在中文和 English 之间加入空格`
 console.log(lint(`自动在中文和English之间加入空格`))
 ```
