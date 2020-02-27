@@ -11,17 +11,25 @@ module.exports = (token, index, group, matched, marks) => {
   // full-width -> no space
   // half-width -> one space after
   if (token.type.match(/^punctuation\-/)) {
-    if (token.content === '/') {
+    if ('/[&%'.indexOf(token.content) >= 0) {
       return
     }
     const contentTokenBefore = findContentTokenBefore(group, token)
     const contentTokenAfter = findContentTokenAfter(group, token)
+    if (
+      contentTokenBefore && contentTokenBefore.type === 'content-half' &&
+      contentTokenAfter && contentTokenAfter.type === 'content-half'
+    ) {
+      return
+    }
+    if (contentTokenBefore) {
+      contentTokenBefore.spaceAfter = ''
+      findTokenBefore(group, token).spaceAfter = ''
+    }
     if (contentTokenBefore && contentTokenAfter
       && (contentTokenBefore.type !== 'content-half'
         || contentTokenAfter.type !== 'content-half')
     ) {
-      contentTokenBefore.spaceAfter = ''
-      findTokenBefore(group, token).spaceAfter = ''
       if (token.type === 'punctuation-half') {
         const tokenAfter = findTokenAfter(group, token)
         if (tokenAfter === contentTokenAfter) {

@@ -60,14 +60,10 @@ module.exports = (token, index, group, matched, marks) => {
       // </...>: put space after if type different
       const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
       if (
-        contentTokenBefore && contentTokenAfter &&
-        contentTokenBefore.type !== contentTokenAfter.type
+        contentTokenBefore && contentTokenAfter
       ) {
-        tokenBeforeContentTokenAfter.spaceAfter = ' '
-      } else {
-        if (tokenBeforeContentTokenAfter) {
-          tokenBeforeContentTokenAfter.spaceAfter = ''
-        }
+        tokenBeforeContentTokenAfter.spaceAfter =
+          contentTokenBefore.type === contentTokenAfter.type ? '' : ' '
       }
     }
     return

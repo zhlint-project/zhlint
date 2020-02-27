@@ -60,4 +60,24 @@ describe('lint', () => {
     expect(lint(`改进 \`<todo-item>\` 组件`))
       .toBe(`改进 \`<todo-item>\` 组件`)
   })
+  test('footnote + inline code at the end', () => {
+    expect(lint('这样写将始终添加 `errorClass`，但是只有在 `isActive` 是 truthy<sup>[[1]](#footnote-1)</sup> 时才添加 `activeClass`。'))
+      .toBe('这样写将始终添加 `errorClass`，但是只有在 `isActive` 是 truthy<sup>[[1]](#footnote-1)</sup> 时才添加 `activeClass`。')
+  })
+  test('space between "&" punctuation', () => {
+    expect(lint('## 访问元素 & 组件'))
+      .toBe('## 访问元素 & 组件')
+  })
+  test('duplicated space outside hyper content', () => {
+    expect(lint('那么你可以通过 [`$forceUpdate`](../api/#vm-forceUpdate) 来做这件事。'))
+      .toBe('那么你可以通过 [`$forceUpdate`](../api/#vm-forceUpdate) 来做这件事。')
+  })
+  test('opposite side of hyper mark and bracket mark', () => {
+    expect(lint('注意 **`v-slot` 只能添加在 `<template>` 上** (只有[一种例外情况](#独占默认插槽的缩写语法))，这一点和已经废弃的 [`slot` 特性](#废弃了的语法)不同。'))
+      .toBe('注意 **`v-slot` 只能添加在 `<template>` 上** (只有[一种例外情况](#独占默认插槽的缩写语法))，这一点和已经废弃的 [`slot` 特性](#废弃了的语法)不同。')
+  })
+  test('space before punctuation', () => {
+    expect(lint('不过在需要时你也可以提供一个 setter ：'))
+      .toBe('不过在需要时你也可以提供一个 setter：')
+  })
 })

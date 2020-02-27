@@ -33,7 +33,15 @@ module.exports = (token, index, group, matched, marks) => {
       if (contentTokenBefore) {
         if (size === 'half-width' && contentTokenBefore) {
           if (contentTokenBefore.type !== 'content-half') {
-            contentTokenBefore.spaceAfter = ' '
+            if (contentTokenBefore !== tokenBefore) {
+              if (tokenBefore.markSide === 'left') {
+                contentTokenBefore.spaceAfter = ' '
+              } else {
+                tokenBefore.spaceAfter = ' '
+              }
+            } else {
+              contentTokenBefore.spaceAfter = ' '
+            }
           }
         } else {
           contentTokenBefore.spaceAfter = ''
@@ -49,7 +57,15 @@ module.exports = (token, index, group, matched, marks) => {
         const contentTokenAfterBefore = findTokenBefore(group, contentTokenAfter)
         if (size === 'half-width') {
           if (contentTokenAfter.type !== 'content-half') {
-            contentTokenAfterBefore.spaceAfter = ' '
+            if (contentTokenAfterBefore !== token) {
+              if (contentTokenAfterBefore.markSide === 'right') {
+                contentTokenAfterBefore.spaceAfter = ' '
+              } else {
+                token.spaceAfter = ' '
+              }
+            } else {
+              contentTokenAfterBefore.spaceAfter = ' '
+            }
           }
         } else {
           contentTokenAfterBefore.spaceAfter = ''

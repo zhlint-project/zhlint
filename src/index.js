@@ -46,8 +46,8 @@ const matchRules = rules => rules.map(rule => {
 const lint = (
   str,
   rules = [
-    markHyper,
     markRaw,
+    markHyper,
     spaceFullWidthContent,
     spacePunctuation,
     caseMathExp,
