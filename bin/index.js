@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+
+const fs = require('fs')
 const lint = require('../')
 const minimist = require('minimist')
 
@@ -7,7 +10,7 @@ const help = () => console.log(`
 This is zhlint!
 
 Usage:
-zhlint --fix <filepath> ...
+zhlint <filepath> ...
 zhlint --help
 `.trim())
 
@@ -16,7 +19,7 @@ if (argv.h || argv.help) {
   return
 }
 
-if (argv.f || argv.fix) {
+if (argv._ && argv._.length) {
   const files = [...argv._]
   files.forEach(file => {
     console.log(`[start] ${file}`)
@@ -29,4 +32,7 @@ if (argv.f || argv.fix) {
       console.error(e)
     }
   })
+  return
 }
+
+help()
