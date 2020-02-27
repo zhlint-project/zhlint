@@ -35,12 +35,18 @@ module.exports = (token, index, group, matched, marks) => {
       && !tokenBeforeContentTokenAfter.spaceAfter) {
       return
     }
-    token.content = fullWidthMap[token.content] || token.content
+    if (fullWidthMap[token.content]) {
+      token.type = 'punctuation-full'
+      token.content = fullWidthMap[token.content]
+    }
   }
-  if (token.type === 'punctuation-width') {
-    token.content = halfWidthMap[token.content] || token.content
+  else if (token.type === 'punctuation-full') {
+    if (halfWidthMap[token.content]) {
+      token.type = 'punctuation-half'
+      token.content = halfWidthMap[token.content]
+    }
   }
-  if (token.type === 'group') {
+  else if (token.type === 'group') {
     if (token.startContent === '"') {
       token.startContent = '“'
     }

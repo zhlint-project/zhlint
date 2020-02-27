@@ -17,6 +17,9 @@ const caseTraditional = require('./rules/case-traditional')
 const caseDatetime = require('./rules/case-datetime')
 const caseDatetimeZh = require('./rules/case-datetime-zh')
 const caseMathExp = require('./rules/case-math-exp')
+const caseEllipsis = require('./rules/case-ellipsis')
+const caseHtmlEntity = require('./rules/case-html-entity')
+const caseRaw = require('./rules/case-raw')
 
 const ruleMap = {
   'mark-hyper': markHyper,
@@ -48,15 +51,18 @@ const lint = (
   rules = [
     markRaw,
     markHyper,
+    unifyPunctuation,
     spaceFullWidthContent,
     spacePunctuation,
     caseMathExp,
     spaceBrackets,
     spaceQuotes,
-    unifyPunctuation,
     caseTraditional,
     caseDatetime,
-    caseDatetimeZh
+    caseDatetimeZh,
+    caseEllipsis,
+    caseHtmlEntity,
+    caseRaw
   ],
   hyperParse = markdownParser,
   ignoredCases = []

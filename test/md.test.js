@@ -80,4 +80,24 @@ describe('lint', () => {
     expect(lint('不过在需要时你也可以提供一个 setter ：'))
       .toBe('不过在需要时你也可以提供一个 setter：')
   })
+  test('periods as ellipsis', () => {
+    expect(lint('你可以使用 [`try`...`catch`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch) 作为替代。'))
+      .toBe('你可以使用 [`try`...`catch`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch) 作为替代。')
+  })
+  test('space between punctuation and hyper content', () => {
+    expect(lint('store 实例不再暴露事件触发器 (event emitter) 接口 (`on`, `off`, `emit`)。'))
+      .toBe('store 实例不再暴露事件触发器 (event emitter) 接口 (`on`，`off`，`emit`)。')
+  })
+  test('html entity', () => {
+    expect(lint('取决于你分心和开始 2.0 最酷的新功能的次数。😉 &nbsp;无法判断时间，'))
+      .toBe('取决于你分心和开始 2.0 最酷的新功能的次数。😉 &nbsp;无法判断时间，')
+  })
+  test('space between dash', () => {
+    expect(lint('可以阅读本页面剩余部分 - 或者从[介绍](index.html)部分'))
+      .toBe('可以阅读本页面剩余部分 - 或者从[介绍](index.html)部分')
+  })
+  test('space between slash', () => {
+    expect(lint('为此还应该引入 `Vue.nextTick`/`vm.$nextTick`。例如：'))
+      .toBe('为此还应该引入 `Vue.nextTick`/`vm.$nextTick`。例如：')
+  })
 })
