@@ -41,7 +41,7 @@ const findContentTokenAfter = (group, token) => {
   if (tokenAfter.type.match(/^content\-/)) {
     return tokenAfter
   } else if (tokenAfter.type === 'mark-hyper') {
-    return findContentTokenBefore(group, group[index + 1])
+    return findContentTokenAfter(group, group[index + 1])
   }
 }
 const findNonMarkTokenBefore = (group, token) => {
@@ -53,7 +53,11 @@ const findNonMarkTokenBefore = (group, token) => {
   if (!tokenBefore) {
     return
   }
-  if (tokenBefore.type.match(/^content\-/) || tokenBefore.type.match(/^punctuation\-/)) {
+  if (
+    tokenBefore.type.match(/^content\-/) ||
+    tokenBefore.type.match(/^punctuation\-/) ||
+    tokenBefore.type === 'mark-brackets'
+  ) {
     return tokenBefore
   } else if (tokenBefore.type === 'mark-hyper') {
     return findContentTokenBefore(group, group[index - 1])
@@ -69,10 +73,14 @@ const findNonMarkTokenAfter = (group, token) => {
   if (!tokenAfter) {
     return
   }
-  if (tokenAfter.type.match(/^content\-/) || tokenAfter.type.match(/^punctuation\-/)) {
+  if (
+    tokenAfter.type.match(/^content\-/) ||
+    tokenAfter.type.match(/^punctuation\-/) ||
+    tokenAfter.type === 'mark-brackets'
+  ) {
     return tokenAfter
   } else if (tokenAfter.type === 'mark-hyper') {
-    return findContentTokenBefore(group, group[index + 1])
+    return findNonMarkTokenAfter(group, group[index + 1])
   }
 }
 const spreadMarkSeq = (group, token, seq) => {

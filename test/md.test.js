@@ -100,4 +100,12 @@ describe('lint', () => {
     expect(lint('为此还应该引入 `Vue.nextTick`/`vm.$nextTick`。例如：'))
       .toBe('为此还应该引入 `Vue.nextTick`/`vm.$nextTick`。例如：')
   })
+  test('space outside hyper mark and hyper content', () => {
+    expect(lint('这种写法的更多优点详见：[`v-model` 示例](#带有-debounce-的-v-model移除)。'))
+      .toBe('这种写法的更多优点详见：[`v-model` 示例](#带有-debounce-的-v-model移除)。')
+  })
+  test('space between punctuation and hyper content', () => {
+    expect(lint('对于布尔特性 (它们只要存在就意味着值为 `true`)，`v-bind` 工作起来略有不同'))
+      .toBe('对于布尔特性 (它们只要存在就意味着值为 `true`)，`v-bind` 工作起来略有不同')
+  })
 })

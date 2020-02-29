@@ -2,7 +2,9 @@ const {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
-  findContentTokenAfter
+  findContentTokenAfter,
+  findNonMarkTokenBefore,
+  findNonMarkTokenAfter
 } = require('./util')
 
 module.exports = (token, index, group, matched, marks) => {
@@ -16,41 +18,39 @@ module.exports = (token, index, group, matched, marks) => {
     }
     const contentTokenBefore = findContentTokenBefore(group, token)
     const contentTokenAfter = findContentTokenAfter(group, token)
+    const nonMarkTokenBefore = findNonMarkTokenBefore(group, token)
+    const nonMarkTokenAfter = findNonMarkTokenAfter(group, token)
+    // no space before punctuation
     if (contentTokenBefore) {
       contentTokenBefore.spaceAfter = ''
       findTokenBefore(group, token).spaceAfter = ''
     }
-    if (
-      contentTokenBefore &&
-      (contentTokenBefore.type === 'content-half' ||
-        contentTokenBefore.type === 'content-hyper') &&
-      contentTokenAfter &&
-      (contentTokenAfter.type === 'content-half' ||
-        contentTokenAfter.type === 'content-hyper')
-    ) {
+    // both sides non-empty
+    if (nonMarkTokenBefore && nonMarkTokenAfter) {
+      // no space when punctuation is full-width
       if (token.type === 'punctuation-full') {
         token.spaceAfter = ''
-        findTokenBefore(group, contentTokenAfter).spaceAfter = ''
-      }
-      return
-    }
-    if (
-      contentTokenBefore &&
-      contentTokenAfter &&
-      (contentTokenBefore.type !== 'content-half' ||
-        contentTokenAfter.type !== 'content-half')
-    ) {
-      if (token.type === 'punctuation-half') {
-        const tokenAfter = findTokenAfter(group, token)
-        if (tokenAfter === contentTokenAfter) {
-          token.spaceAfter = ' '
-        } else {
-          findTokenBefore(group, contentTokenAfter).spaceAfter = ' '
+        if (contentTokenAfter) {
+          findTokenBefore(group, contentTokenAfter).spaceAfter = ''
         }
-      }
-      if (token.type === 'punctuation-full') {
-        token.spaceAfter = ''
-        findTokenBefore(group, contentTokenAfter).spaceAfter = ''
+      } else {
+        if (
+          contentTokenBefore &&
+          contentTokenAfter &&
+          (
+            contentTokenBefore.type === 'content-full' ||
+            contentTokenAfter.type === 'content-full'
+          )
+        ) {
+          // one space when punctuation is half-width and
+          // either side of content is full-width content
+          const tokenAfter = findTokenAfter(group, token)
+          if (tokenAfter === contentTokenAfter) {
+            token.spaceAfter = ' '
+          } else {
+            findTokenBefore(group, contentTokenAfter).spaceAfter = ' '
+          }
+        }
       }
     }
   }
