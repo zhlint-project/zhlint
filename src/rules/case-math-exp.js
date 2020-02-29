@@ -33,11 +33,23 @@ module.exports = (token, index, group, matched, marks) => {
         ) {
           return
         }
-        contentTokenBefore.spaceAfter = ' '
-        findTokenBefore(group, token).spaceAfter = ' '
-        token.spaceAfter = ' '
-        findTokenBefore(group, contentTokenAfter).spaceAfter = ' '
+      } else if (token.content === '-') {
+        return
       }
+      if ('\/%'.indexOf(token.content) >= 0) {
+        return
+      }
+      if (
+        '+-'.indexOf(token.content) >= 0 &&
+        !contentTokenBefore.rawSpaceAfter &&
+        token.rawSpaceAfter
+      ) {
+        return
+      }
+      contentTokenBefore.spaceAfter = ' '
+      findTokenBefore(group, token).spaceAfter = ' '
+      token.spaceAfter = ' '
+      findTokenBefore(group, contentTokenAfter).spaceAfter = ' '
     }
   }
 }
