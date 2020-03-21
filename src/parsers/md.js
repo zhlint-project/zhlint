@@ -132,6 +132,10 @@ const processBlockMark = (blockMark, str) => {
     - marks: emphasis/strong/delete/footnote/link/link ref
  */
 module.exports = str => {
+  const raw = typeof str === 'object' ? str.raw : str
+  const hyperMarks = typeof str === 'object' ? str.marks : []
+  str = typeof str === 'object' ? str.result : str
+
   const blockMarks = []
 
   const tree = unified().use(markdown).use(frontmatter).parse(str)
@@ -149,10 +153,25 @@ module.exports = str => {
   // - - startContent: [mark.start.offset - offset, mark.firstChild.start.offset - offset]
   // - - endIndex: mark.lastChild.end.offset - offset
   // - - endContent: [mark.lastChild.end.offset - offset, mark.end.offset]
-  blockMarks.forEach(blockMark => processBlockMark(blockMark, str))
-  return blockMarks.map(b => ({
-    value: b.value,
-    marks: b.hyperMarks,
-    ...parsePosition(b.block.position)
-  }))
+  blockMarks.forEach(blockMark => processBlockMark(blockMark, raw))
+  return blockMarks.map((b, index) => {
+    const position = parsePosition(b.block.position)
+    hyperMarks.forEach(({ index, length, name, raw }) => {
+      if (position.start <= index && position.end >= index + length) {
+        b.hyperMarks.push({
+          type: 'raw',
+          meta: `hexo-${name}`,
+          startIndex: index - position.start,
+          startContent: raw,
+          endIndex: index - position.start + length,
+          endContent: ''
+        })
+      }
+    })
+    return {
+      value: b.value,
+      marks: b.hyperMarks,
+      ...position
+    }
+  })
 }

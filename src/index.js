@@ -4,6 +4,7 @@ const processRule = require('./process-rule')
 const join = require('./join')
 const findIgnoredMarks = require('./find-ignored-marks')
 
+const hexoParser = require('./parsers/hexo')
 const markdownParser = require('./parsers/md')
 
 const markHyper = require('./rules/mark-hyper')
@@ -21,65 +22,83 @@ const caseEllipsis = require('./rules/case-ellipsis')
 const caseHtmlEntity = require('./rules/case-html-entity')
 const caseRaw = require('./rules/case-raw')
 
+const parserMap = {
+  hexo: hexoParser,
+  markdown: markdownParser
+}
 const ruleMap = {
-  'mark-hyper': markHyper,
   'mark-raw': markRaw,
+  'mark-hyper': markHyper,
+  'unify-punctuation': unifyPunctuation,
+  'space-full-width-content': spaceFullWidthContent,
   'space-punctuation': spacePunctuation,
+  'case-math-exp': caseMathExp,
   'space-brackets': spaceBrackets,
   'space-quotes': spaceQuotes,
-  'space-full-width-content': spaceFullWidthContent,
-  'unify-punctuation': unifyPunctuation,
   'case-traditional': caseTraditional,
   'case-datetime': caseDatetime,
   'case-datetime-zh': caseDatetimeZh,
-  'case-math-exp': caseMathExp
+  'case-ellipsis': caseEllipsis,
+  'case-html-entity': caseHtmlEntity,
+  'case-raw': caseRaw
 }
 
-const matchRules = rules => rules.map(rule => {
-  switch (typeof rule) {
+const matchCallArray = (calls, map) => calls.map(call => {
+  switch (typeof call) {
     case 'function':
-    return rule
+    return call
     case 'string':
-    return ruleMap[rule]
+    return map[call]
     default:
-    return
+    return null
   }
 }).filter(Boolean)
 
 const lint = (
   str,
   rules = [
-    markRaw,
-    markHyper,
-    unifyPunctuation,
-    spaceFullWidthContent,
-    spacePunctuation,
-    caseMathExp,
-    spaceBrackets,
-    spaceQuotes,
-    caseTraditional,
-    caseDatetime,
-    caseDatetimeZh,
-    caseEllipsis,
-    caseHtmlEntity,
-    caseRaw
+    'mark-raw',
+    'mark-hyper',
+    'unify-punctuation',
+    'space-full-width-content',
+    'space-punctuation',
+    'case-math-exp',
+    'space-brackets',
+    'space-quotes',
+    'case-traditional',
+    'case-datetime',
+    'case-datetime-zh',
+    'case-ellipsis',
+    'case-html-entity',
+    'case-raw'
   ],
-  hyperParse = markdownParser,
+  hyperParse = [
+    'hexo',
+    'markdown'
+  ],
   ignoredCases = []
 ) => {
-  const blocks =
-    typeof hyperParse === 'function'
-      ? hyperParse(str)
-      : [{
-          value: str,
-          marks: [],
-          start: 0,
-          end: str.length - 1
-        }]
+  if (typeof hyperParse === 'function') {
+    hyperParse = [hyperParse]
+  }
+  if (!Array.isArray) {
+    hyperParse = [
+      str => [{
+        value: str,
+        marks: [],
+        start: 0,
+        end: str.length - 1
+      }]
+    ]
+  }
+
+  const blocks = matchCallArray(hyperParse, parserMap)
+    .reduce((current, parse) => parse(current), str)
+
   return replaceBlocks(str, blocks.map(({ value, marks, start, end }) => {
     const data = parse(value, marks)
     const ignoredMarks = findIgnoredMarks(value, ignoredCases)
-    matchRules(rules).forEach(rule => processRule(data, rule))
+    matchCallArray(rules, ruleMap).forEach(rule => processRule(data, rule))
     return {
       start, end,
       value: join(data.tokens, ignoredMarks)
