@@ -108,4 +108,12 @@ describe('lint', () => {
     expect(lint('对于布尔特性 (它们只要存在就意味着值为 `true`)，`v-bind` 工作起来略有不同'))
       .toBe('对于布尔特性 (它们只要存在就意味着值为 `true`)，`v-bind` 工作起来略有不同')
   })
+  test('star (not punctuation)', () => {
+    expect(lint('切换到 *Archive* 标签，然后再切换回 *Posts*'))
+      .toBe('切换到 *Archive* 标签，然后再切换回 *Posts*')
+  })
+  test('colon (not datetime)', () => {
+    expect(lint('1. 添加全局方法或者属性。如: [vue-custom-element](https://github.com/karol-f/vue-custom-element)'))
+      .toBe('1. 添加全局方法或者属性。如：[vue-custom-element](https://github.com/karol-f/vue-custom-element)')
+  })
 })

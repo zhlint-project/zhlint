@@ -4,7 +4,7 @@ const {
 } = require('./util')
 
 module.exports = (token, index, group, matched, marks) => {
-  if ('/|'.indexOf(token.content) >= 0) {
+  if (token.type.match(/^punctuation\-/) && '/|'.indexOf(token.content) >= 0) {
     const tokenBefore = findTokenBefore(group, token)
     const tokenAfter = findTokenAfter(group, token)
     if (

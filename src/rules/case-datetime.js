@@ -5,19 +5,19 @@ const {
 } = require('./util')
 
 module.exports = (token, index, group, matched, marks) => {
-  if (token.raw === ':') {
+  if (token.type.match(/^punctuation\-/) && token.raw === ':') {
     const tokenBefore = findTokenBefore(group, token)
     const nonMarkTokenBefore = findNonMarkTokenBefore(group, token)
     const nonMarkTokenAfter = findNonMarkTokenAfter(group, token)
     const tokenBeforeNonMarkTokenAfter = findTokenBefore(group, nonMarkTokenAfter)
     if (nonMarkTokenBefore
-      && !nonMarkTokenBefore.spaceAfter
+      && !nonMarkTokenBefore.rawSpaceAfter
       && tokenBefore
-      && !tokenBefore.spaceAfter
+      && !tokenBefore.rawSpaceAfter
       && nonMarkTokenAfter
       && tokenBeforeNonMarkTokenAfter
-      && !tokenBeforeNonMarkTokenAfter.spaceAfter
-      && !token.spaceAfter
+      && !tokenBeforeNonMarkTokenAfter.rawSpaceAfter
+      && !token.rawSpaceAfter
     ) {
       token.content = ':'
     }
