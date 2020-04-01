@@ -13,6 +13,7 @@ const unifyPunctuation = require('./rules/unify-punctuation')
 const spaceFullWidthContent = require('./rules/space-full-width-content')
 const spacePunctuation = require('./rules/space-punctuation')
 const caseMathExp = require('./rules/case-math-exp')
+const caseBackslash = require('./rules/case-backslash')
 const spaceBrackets = require('./rules/space-brackets')
 const spaceQuotes = require('./rules/space-quotes')
 const caseTraditional = require('./rules/case-traditional')
@@ -33,6 +34,7 @@ const ruleMap = {
   'space-full-width-content': spaceFullWidthContent,
   'space-punctuation': spacePunctuation,
   'case-math-exp': caseMathExp,
+  'case-backslash': caseBackslash,
   'space-brackets': spaceBrackets,
   'space-quotes': spaceQuotes,
   'case-traditional': caseTraditional,
@@ -72,6 +74,9 @@ const matchCallArray = (calls, map) => calls.map(call => {
  * - case-math-exp: punctuation-*: + - * / % =:
  *   - and 4 spaces,
  *   - except 0/0/0, 0-0-0, a-b, /, %, Chrome 53+
+ * - case-backslash: \
+ *   - half width and no raw space after -> no space after
+ *   - full width before -> one space before
  * - space-brackets: mark-brackets:
  *   - half-width -> one space outside
  *   - half-width -> no space inside
@@ -94,6 +99,7 @@ const lint = (
     'space-full-width-content',
     'space-punctuation',
     'case-math-exp',
+    'case-backslash',
     'space-brackets',
     'space-quotes',
     'case-traditional',
