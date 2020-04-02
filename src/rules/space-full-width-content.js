@@ -12,11 +12,14 @@
 // - 啊 *a* -> 啊 *a*
 // - 啊* a* -> 啊 *a*
 
+// TODO: revamp
+
 const {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
-  findContentTokenAfter
+  findContentTokenAfter,
+  getMarkSide
 } = require('./util')
 
 module.exports = (token, index, group, matched, marks) => {
@@ -75,7 +78,7 @@ module.exports = (token, index, group, matched, marks) => {
   if (tokenAfter === contentTokenAfter) {
     token.spaceAfter = ' '
   } else {
-    if (tokenAfter.markSide === 'left') {
+    if (getMarkSide(tokenAfter) === 'left') {
       token.spaceAfter = ' '
     } else {
       findTokenBefore(group, contentTokenAfter).spaceAfter = ' '

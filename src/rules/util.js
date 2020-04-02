@@ -22,10 +22,14 @@ const findContentTokenBefore = (group, token) => {
   if (!tokenBefore) {
     return
   }
+  if (
+    tokenBefore.type === 'mark-hyper' ||
+    (tokenBefore.type === 'content-hyper' && !isInlineCode(tokenBefore))
+  ) {
+    return findContentTokenBefore(group, group[index - 1])
+  }
   if (tokenBefore.type.match(/^content\-/)) {
     return tokenBefore
-  } else if (tokenBefore.type === 'mark-hyper') {
-    return findContentTokenBefore(group, group[index - 1])
   }
   return 
 }
@@ -38,10 +42,14 @@ const findContentTokenAfter = (group, token) => {
   if (!tokenAfter) {
     return
   }
+  if (
+    tokenAfter.type === 'mark-hyper' ||
+    (tokenAfter.type === 'content-hyper' && !isInlineCode(tokenAfter))
+  ) {
+    return findContentTokenAfter(group, group[index + 1])
+  }
   if (tokenAfter.type.match(/^content\-/)) {
     return tokenAfter
-  } else if (tokenAfter.type === 'mark-hyper') {
-    return findContentTokenAfter(group, group[index + 1])
   }
 }
 const findNonMarkTokenBefore = (group, token) => {
@@ -101,6 +109,47 @@ const findMarkSeq = (group, token) => {
   return seq
 }
 
+const isInlineCode = token => {
+  // html tags, raw content
+  if (token.type === 'content-hyper') {
+    if (token.content.match(/^<code.*>.*<\/code.*>$/)) {
+      return true
+    }
+    if (token.content.match(/^<.+>$/)) {
+      return false
+    }
+    return true
+  }
+  return false
+}
+
+const isHyperTag = token => {
+  // markdown tags
+  if (token.type === 'content-hyper') {
+    return !isInlineCode(token)
+  }
+  if (token.type === 'mark-hyper') {
+    return true
+  }
+  return false
+}
+
+const getMarkSide = token => {
+  if (token.markSide) {
+    return token.markSide
+  }
+  if (token.type === 'content-hyper' && !isInlineCode(token)) {
+    // non-inline-code html
+    if (token.content.match(/^<[^\/].+>$/)) {
+      // <...>
+      return 'left'
+    } else if (token.content.match(/^<\/.+>$/)) {
+      // </...>
+      return 'right'
+    }
+  }
+}
+
 module.exports = {
   findTokenBefore,
   findTokenAfter,
@@ -108,5 +157,8 @@ module.exports = {
   findContentTokenAfter,
   findNonMarkTokenBefore,
   findNonMarkTokenAfter,
-  findMarkSeq
+  findMarkSeq,
+  isInlineCode,
+  isHyperTag,
+  getMarkSide
 }

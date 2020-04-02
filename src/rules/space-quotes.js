@@ -2,7 +2,8 @@ const {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
-  findContentTokenAfter
+  findContentTokenAfter,
+  getMarkSide
 } = require('./util')
 
 const quoteIsFullWidth = char => '‘’“”'.indexOf(char) >= 0
@@ -34,7 +35,7 @@ module.exports = (token, index, group, matched, marks) => {
             tokenBefore.spaceAfter = ''
             contentTokenBefore.spaceAfter = ''
           } else {
-            const markSide = findTokenAfter(group, contentTokenBefore).markSide
+            const markSide = getMarkSide(findTokenAfter(group, contentTokenBefore))
             contentTokenBefore.spaceAfter = markSide === 'left' ? ' ' : ''
             tokenBefore.spaceAfter = markSide === 'left' ? '' : ' '
           }
@@ -56,7 +57,7 @@ module.exports = (token, index, group, matched, marks) => {
             token.spaceAfter = ''
             tokenBeforeContentTokenAfter.spaceAfter = ''
           } else {
-            const markSide = tokenAfter.markSide
+            const markSide = getMarkSide(tokenAfter)
             token.spaceAfter = markSide === 'left' ? ' ' : ''
             tokenBeforeContentTokenAfter.spaceAfter = markSide === 'left' ? '' : ' '
           }

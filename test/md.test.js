@@ -124,4 +124,8 @@ describe('lint', () => {
     expect(lint('Chrome 顶部导航 > 窗口 > 任务管理'))
       .toBe('Chrome 顶部导航 > 窗口 > 任务管理')
   })
+  test('bracket x html tag', () => {
+    expect(lint('引入一个<a href="https://zh.wikipedia.org/wiki/工厂方法#工厂">工厂函数 (factory function)</a>使得我们的测试更简洁更易读'))
+      .toBe('引入一个<a href="https://zh.wikipedia.org/wiki/工厂方法#工厂">工厂函数 (factory function)</a> 使得我们的测试更简洁更易读')
+  })
 })

@@ -15,7 +15,8 @@ const {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
-  findContentTokenAfter
+  findContentTokenAfter,
+  getMarkSide
 } = require('./util')
 
 module.exports = (token, index, group, matched, marks) => {
@@ -34,7 +35,7 @@ module.exports = (token, index, group, matched, marks) => {
         if (size === 'half-width' && contentTokenBefore) {
           if (contentTokenBefore.type !== 'content-half') {
             if (contentTokenBefore !== tokenBefore) {
-              if (tokenBefore.markSide === 'left') {
+              if (getMarkSide(tokenBefore) === 'left') {
                 contentTokenBefore.spaceAfter = ' '
               } else {
                 tokenBefore.spaceAfter = ' '
@@ -58,7 +59,7 @@ module.exports = (token, index, group, matched, marks) => {
         if (size === 'half-width') {
           if (contentTokenAfter.type !== 'content-half') {
             if (contentTokenAfterBefore !== token) {
-              if (contentTokenAfterBefore.markSide === 'right') {
+              if (getMarkSide(contentTokenAfterBefore) === 'right') {
                 contentTokenAfterBefore.spaceAfter = ' '
               } else {
                 token.spaceAfter = ' '
