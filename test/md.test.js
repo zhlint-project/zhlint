@@ -136,4 +136,8 @@ describe('lint', () => {
     expect(lint('foo\n\n> `components/icons/IconBox.vue`\n> `components/icons/IconCalendar.vue`\n> `components/icons/IconEnvelope.vue`\n\nbar'))
       .toBe('foo\n\n> `components/icons/IconBox.vue`\n> `components/icons/IconCalendar.vue`\n> `components/icons/IconEnvelope.vue`\n\nbar')
   })
+  test('infinite findMarkSeq bug', () => {
+    expect(lint('注意**局部注册的组件在其子组件中*不可用***。'))
+      .toBe('注意**局部注册的组件在其子组件中*不可用***。')
+  })
 })

@@ -1,4 +1,5 @@
 // utils
+
 const findTokenBefore = (group, token) => {
   const index = group.indexOf(token)
   if (index < 0) {
@@ -6,6 +7,7 @@ const findTokenBefore = (group, token) => {
   }
   return group[index - 1]
 }
+
 const findTokenAfter = (group, token) => {
   const index = group.indexOf(token)
   if (index < 0) {
@@ -13,6 +15,7 @@ const findTokenAfter = (group, token) => {
   }
   return group[index + 1]
 }
+
 const findContentTokenBefore = (group, token) => {
   const index = group.indexOf(token)
   if (index < 0) {
@@ -33,6 +36,7 @@ const findContentTokenBefore = (group, token) => {
   }
   return 
 }
+
 const findContentTokenAfter = (group, token) => {
   const index = group.indexOf(token)
   if (index < 0) {
@@ -52,6 +56,7 @@ const findContentTokenAfter = (group, token) => {
     return tokenAfter
   }
 }
+
 const findNonMarkTokenBefore = (group, token) => {
   const index = group.indexOf(token)
   if (index < 0) {
@@ -72,6 +77,7 @@ const findNonMarkTokenBefore = (group, token) => {
   }
   return 
 }
+
 const findNonMarkTokenAfter = (group, token) => {
   const index = group.indexOf(token)
   if (index < 0) {
@@ -91,18 +97,20 @@ const findNonMarkTokenAfter = (group, token) => {
     return findNonMarkTokenAfter(group, group[index + 1])
   }
 }
+
 const spreadMarkSeq = (group, token, seq) => {
   const tokenBefore = findTokenBefore(group, token)
   const tokenAfter = findTokenAfter(group, token)
-  if (tokenBefore && seq.indexOf(tokenBefore) < 0 && tokenBefore.type === 'mark-hyper') {
+  if (tokenBefore && tokenBefore.type === 'mark-hyper' && seq.indexOf(tokenBefore) < 0) {
     seq.unshift(tokenBefore)
-    findMarkSeq(group, tokenBefore, seq)
+    spreadMarkSeq(group, tokenBefore, seq)
   }
-  if (tokenAfter && seq.indexOf(tokenAfter) < 0 && tokenAfter.type === 'mark-hyper') {
+  if (tokenAfter && tokenAfter.type === 'mark-hyper' && seq.indexOf(tokenAfter) < 0) {
     seq.push(tokenAfter)
-    findMarkSeq(group, tokenAfter, seq)
+    spreadMarkSeq(group, tokenAfter, seq)
   }
 }
+
 const findMarkSeq = (group, token) => {
   const seq = [token]
   spreadMarkSeq(group, token, seq)
