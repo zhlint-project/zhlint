@@ -6,7 +6,7 @@ const {
   getMarkSide
 } = require('./util')
 
-const quoteIsFullWidth = char => '‘’“”'.indexOf(char) >= 0
+const quoteIsFullWidth = char => '‘’“”《》〈〉『』「」【】'.indexOf(char) >= 0
 
 module.exports = (token, index, group, matched, marks) => {
   if (token.type === 'group') {
