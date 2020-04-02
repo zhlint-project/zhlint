@@ -4,46 +4,36 @@ const processRule = require('./process-rule')
 const join = require('./join')
 const findIgnoredMarks = require('./find-ignored-marks')
 
-const hexoParser = require('./parsers/hexo')
-const markdownParser = require('./parsers/md')
+const hyperParseInfo = [
+  { name: 'hexo', value: require('./parsers/hexo') },
+  { name: 'markdown', value: require('./parsers/md') }
+]
+const rulesInfo = [
+  { name: 'mark-raw', value: require('./rules/mark-raw') },
+  { name: 'mark-hyper', value: require('./rules/mark-hyper') },
+  { name: 'unify-punctuation', value: require('./rules/unify-punctuation') },
+  { name: 'space-full-width-content', value: require('./rules/space-full-width-content') },
+  { name: 'space-punctuation', value: require('./rules/space-punctuation') },
+  { name: 'case-math-exp', value: require('./rules/case-math-exp') },
+  { name: 'case-backslash', value: require('./rules/case-backslash') },
+  { name: 'space-brackets', value: require('./rules/space-brackets') },
+  { name: 'space-quotes', value: require('./rules/space-quotes') },
+  { name: 'case-traditional', value: require('./rules/case-traditional') },
+  { name: 'case-datetime', value: require('./rules/case-datetime') },
+  { name: 'case-datetime-zh', value: require('./rules/case-datetime-zh') },
+  { name: 'case-ellipsis', value: require('./rules/case-ellipsis') },
+  { name: 'case-html-entity', value: require('./rules/case-html-entity') },
+  { name: 'case-raw', value: require('./rules/case-raw') },
+  { name: 'case-md-blockquote', value: require('./rules/case-md-blockquote') }
+]
 
-const markRaw = require('./rules/mark-raw')
-const markHyper = require('./rules/mark-hyper')
-const unifyPunctuation = require('./rules/unify-punctuation')
-const spaceFullWidthContent = require('./rules/space-full-width-content')
-const spacePunctuation = require('./rules/space-punctuation')
-const caseMathExp = require('./rules/case-math-exp')
-const caseBackslash = require('./rules/case-backslash')
-const spaceBrackets = require('./rules/space-brackets')
-const spaceQuotes = require('./rules/space-quotes')
-const caseTraditional = require('./rules/case-traditional')
-const caseDatetime = require('./rules/case-datetime')
-const caseDatetimeZh = require('./rules/case-datetime-zh')
-const caseEllipsis = require('./rules/case-ellipsis')
-const caseHtmlEntity = require('./rules/case-html-entity')
-const caseRaw = require('./rules/case-raw')
+const arrToMap = arr => arr.reduce((current, { name, value }) => {
+  current[name] = value
+  return current
+}, {})
 
-const parserMap = {
-  hexo: hexoParser,
-  markdown: markdownParser
-}
-const ruleMap = {
-  'mark-raw': markRaw,
-  'mark-hyper': markHyper,
-  'unify-punctuation': unifyPunctuation,
-  'space-full-width-content': spaceFullWidthContent,
-  'space-punctuation': spacePunctuation,
-  'case-math-exp': caseMathExp,
-  'case-backslash': caseBackslash,
-  'space-brackets': spaceBrackets,
-  'space-quotes': spaceQuotes,
-  'case-traditional': caseTraditional,
-  'case-datetime': caseDatetime,
-  'case-datetime-zh': caseDatetimeZh,
-  'case-ellipsis': caseEllipsis,
-  'case-html-entity': caseHtmlEntity,
-  'case-raw': caseRaw
-}
+const hyperParseMap = arrToMap(hyperParseInfo)
+const ruleMap = arrToMap(rulesInfo)
 
 const matchCallArray = (calls, map) => calls.map(call => {
   switch (typeof call) {
@@ -89,30 +79,12 @@ const matchCallArray = (calls, map) => calls.map(call => {
  * - case-ellipsis: ...
  * - case-html-entity: &{half};
  * - case-raw: AC/DC
+ * - case-md-blockquote: ...> xxx\n> xxx\n...
  */
 const lint = (
   str,
-  rules = [
-    'mark-raw',
-    'mark-hyper',
-    'unify-punctuation',
-    'space-full-width-content',
-    'space-punctuation',
-    'case-math-exp',
-    'case-backslash',
-    'space-brackets',
-    'space-quotes',
-    'case-traditional',
-    'case-datetime',
-    'case-datetime-zh',
-    'case-ellipsis',
-    'case-html-entity',
-    'case-raw'
-  ],
-  hyperParse = [
-    'hexo',
-    'markdown'
-  ],
+  rules = rulesInfo.map(item => item.name),
+  hyperParse = hyperParseInfo.map(item => item.name),
   ignoredCases = []
 ) => {
   if (typeof hyperParse === 'function') {
@@ -129,7 +101,7 @@ const lint = (
     ]
   }
 
-  const blocks = matchCallArray(hyperParse, parserMap)
+  const blocks = matchCallArray(hyperParse, hyperParseMap)
     .reduce((current, parse) => parse(current), str)
 
   return replaceBlocks(str, blocks.map(({ value, marks, start, end }) => {

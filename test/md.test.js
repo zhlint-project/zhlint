@@ -132,4 +132,8 @@ describe('lint', () => {
     expect(lint('更多测试 Vue 组件的知识可翻阅核心团员 [Edd Yerburgh](https://eddyerburgh.me/) 的书[《测试 Vue.js 应用》](https://www.manning.com/books/testing-vuejs-applications)。'))
       .toBe('更多测试 Vue 组件的知识可翻阅核心团员 [Edd Yerburgh](https://eddyerburgh.me/) 的书[《测试 Vue.js 应用》](https://www.manning.com/books/testing-vuejs-applications)。')
   })
+  test('blockquote', () => {
+    expect(lint('foo\n\n> `components/icons/IconBox.vue`\n> `components/icons/IconCalendar.vue`\n> `components/icons/IconEnvelope.vue`\n\nbar'))
+      .toBe('foo\n\n> `components/icons/IconBox.vue`\n> `components/icons/IconCalendar.vue`\n> `components/icons/IconEnvelope.vue`\n\nbar')
+  })
 })
