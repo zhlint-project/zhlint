@@ -52,7 +52,7 @@ module.exports = (token, index, group, matched, marks) => {
         if (contentTokenAfter === tokenAfter) {
           token.spaceAfter = isFullWidth ? '' : ' '
         } else {
-          const tokenBeforeContentTokenAfter = findTokenBefore(contentTokenAfter)
+          const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
           if (isFullWidth) {
             token.spaceAfter = ''
             tokenBeforeContentTokenAfter.spaceAfter = ''
