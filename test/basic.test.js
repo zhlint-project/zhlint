@@ -382,6 +382,10 @@ describe('lint by rule', () => {
     expect(lint('2019年06月26号 2019-06-26 12:00'))
       .toBe('2019年06月26号 2019-06-26 12:00')
   })
+  test('abbr', () => {
+    expect(lint('运行时 + 编译器 vs. 只包含运行时'))
+      .toBe('运行时 + 编译器 vs. 只包含运行时')
+  })
 })
 
 describe('lint special/edge cases', () => {
@@ -407,6 +411,10 @@ describe('lint special/edge cases', () => {
   })
   test('math exp', () => {
     expect(lint('1+1=2')).toBe('1 + 1 = 2')
+  })
+  test('arrow chars', () => {
+    expect(lint('Chrome 顶部导航 > 窗口 > 任务管理'))
+      .toBe('Chrome 顶部导航 > 窗口 > 任务管理')
   })
 })
 

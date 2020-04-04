@@ -16,6 +16,7 @@ const rulesInfo = [
   { name: 'space-punctuation', value: require('./rules/space-punctuation') },
   { name: 'case-math-exp', value: require('./rules/case-math-exp') },
   { name: 'case-backslash', value: require('./rules/case-backslash') },
+  { name: 'case-abbr', value: require('./rules/case-abbr') },
   { name: 'space-brackets', value: require('./rules/space-brackets') },
   { name: 'space-quotes', value: require('./rules/space-quotes') },
   { name: 'case-traditional', value: require('./rules/case-traditional') },
