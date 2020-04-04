@@ -131,14 +131,14 @@ const processBlockMark = (blockMark, str) => {
     - no text: inline code/break/image/image ref/footnote ref/html
     - marks: emphasis/strong/delete/footnote/link/link ref
  */
-module.exports = str => {
-  const raw = typeof str === 'object' ? str.raw : str
-  const hyperMarks = typeof str === 'object' ? str.marks : []
-  str = typeof str === 'object' ? str.result : str
+module.exports = data => {
+  const raw = data.raw
+  const content = data.content
+  const ignoredByParsers = data.ignoredByParsers
 
   const blockMarks = []
 
-  const tree = unified().use(markdown).use(frontmatter).parse(str)
+  const tree = unified().use(markdown).use(frontmatter).parse(content)
 
   // - travel and record all paragraphs/headings/table-cells into blocks
   // - for each block, travel and record all
@@ -154,13 +154,13 @@ module.exports = str => {
   // - - endIndex: mark.lastChild.end.offset - offset
   // - - endContent: [mark.lastChild.end.offset - offset, mark.end.offset]
   blockMarks.forEach(blockMark => processBlockMark(blockMark, raw))
-  return blockMarks.map((b, index) => {
+  data.blocks = blockMarks.map((b, index) => {
     const position = parsePosition(b.block.position)
-    hyperMarks.forEach(({ index, length, name, raw }) => {
+    ignoredByParsers.forEach(({ index, length, name, raw, meta }) => {
       if (position.start <= index && position.end >= index + length) {
         b.hyperMarks.push({
           type: 'raw',
-          meta: `hexo-${name}`,
+          meta,
           startIndex: index - position.start,
           startContent: raw,
           endIndex: index - position.start + length,
@@ -174,4 +174,6 @@ module.exports = str => {
       ...position
     }
   })
+  data.ignoredByParsers = []
+  return data
 }

@@ -4,12 +4,17 @@
 // \{\% end(?:\1) \%\}
 const matcher = /\{\% ([^ ]+?) [^\%]*?\%\}(?:\n|\{(?!\%)|[^\{])*?\{\% end(?:\1) \%\}/g
 
-module.exports = str => {
-  const marks = []
-  const result = str.replace(matcher, (raw, name, index ) => {
+module.exports = data => {
+  data.content = data.content.replace(matcher, (raw, name, index ) => {
       const { length } = raw
-      marks.push({ name, index, length, raw })
+      data.ignoredByParsers.push({
+        name,
+        index,
+        length,
+        raw,
+        meta: `hexo-${name}`
+      })
       return '@'.repeat(length)
   })
-  return { result, raw: str, marks }
+  return data
 }

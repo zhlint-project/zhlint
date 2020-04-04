@@ -94,26 +94,34 @@ const lint = (
     hyperParse = [hyperParse]
   }
   if (!Array.isArray) {
-    hyperParse = [
-      str => [{
-        value: str,
-        marks: [],
-        start: 0,
-        end: str.length - 1
-      }]
-    ]
+    hyperParse = [data => data]
   }
 
-  const blocks = matchCallArray(hyperParse, hyperParseMap)
-    .reduce((current, parse) => parse(current), str)
+  // str -> ignoredByRules, ignoredByParsers
+  // blocks -> marks, ignoredMarks
+  const data = {
+    content: str,
+    raw: str,
+    ignoredByRules: ignoredCases,
+    ignoredByParsers: [],
+    blocks: [{
+      value: str,
+      marks: [],
+      start: 0,
+      end: str.length - 1
+    }]
+  }
 
-  return replaceBlocks(str, blocks.map(({ value, marks, start, end }) => {
-    const data = parse(value, marks)
+  const finalData = matchCallArray(hyperParse, hyperParseMap)
+    .reduce((current, parse) => parse(current), data)
+
+  return replaceBlocks(str, finalData.blocks.map(({ value, marks, start, end }) => {
+    const result = parse(value, marks)
     const ignoredMarks = findIgnoredMarks(value, ignoredCases)
-    matchCallArray(rules, ruleMap).forEach(rule => processRule(data, rule))
+    matchCallArray(rules, ruleMap).forEach(rule => processRule(result, rule))
     return {
       start, end,
-      value: join(data.tokens, ignoredMarks)
+      value: join(result.tokens, ignoredMarks)
     }
   }))
 }

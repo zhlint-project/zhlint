@@ -6,7 +6,19 @@ test.todo = test.skip
 describe('parser with markdown', () => {
   test('single paragraph', () => {
     const text = 'X [xxx](xxx) X *y* __x__ `ss` _0_ ~~asd~~ *asf**asf**adsf*'
-    const result = markdownParser(text)
+    const data = {
+      content: text,
+      raw: text,
+      ignoredByRules: [],
+      ignoredByParsers: [],
+      blocks: [{
+        value: text,
+        marks: [],
+        start: 0,
+        end: text.length - 1
+      }]
+    }
+    const result = markdownParser(data).blocks
     const marks = [
       { type: 'hyper', meta: 'link', startIndex: 2, startContent: '[', endIndex: 6, endContent: '](xxx)' },
       { type: 'hyper', meta: 'emphasis', startIndex: 15, startContent: '*', endIndex: 17, endContent: '*' },
