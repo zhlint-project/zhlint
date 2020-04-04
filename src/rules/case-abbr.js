@@ -68,8 +68,8 @@ module.exports = (token, index, group, matched, marks) => {
         const periodToken = group[index - i * 2]
         periodToken.content = '.'
         periodToken.spaceAfter = ''
+        periodToken.type = 'punctuation-half'
       })
-      token.spaceAfter = token.rawSpaceAfter
     }
   }
 }

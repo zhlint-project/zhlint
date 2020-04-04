@@ -12,11 +12,11 @@ const rulesInfo = [
   { name: 'mark-raw', value: require('./rules/mark-raw') },
   { name: 'mark-hyper', value: require('./rules/mark-hyper') },
   { name: 'unify-punctuation', value: require('./rules/unify-punctuation') },
+  { name: 'case-abbr', value: require('./rules/case-abbr') },
   { name: 'space-full-width-content', value: require('./rules/space-full-width-content') },
   { name: 'space-punctuation', value: require('./rules/space-punctuation') },
   { name: 'case-math-exp', value: require('./rules/case-math-exp') },
   { name: 'case-backslash', value: require('./rules/case-backslash') },
-  { name: 'case-abbr', value: require('./rules/case-abbr') },
   { name: 'space-brackets', value: require('./rules/space-brackets') },
   { name: 'space-quotes', value: require('./rules/space-quotes') },
   { name: 'case-traditional', value: require('./rules/case-traditional') },
@@ -54,6 +54,7 @@ const matchCallArray = (calls, map) => calls.map(call => {
  * - unify-punctuation:
  *   - half-width -> full-width,
  *     - except {half}:{half}
+ * - abbr: e.g. Mr. vs.
  * - space-full-width-content: content-*:
  *   - <>...</> -> space outside,
  *   - different type -> one space
