@@ -140,4 +140,10 @@ describe('lint', () => {
     expect(lint('XXXX\n{% raw %}XXX{% endraw %}\n{% raw %}XXX{% endraw %}\n### XXXX'))
       .toBe('XXXX\n{% raw %}XXX{% endraw %}\n{% raw %}XXX{% endraw %}\n### XXXX')
   })
+  test('space before link', () => {
+    expect(lint('为了替换 `双向` 指令，见 [示例](#双向过滤器-替换)。'))
+      .toBe('为了替换 `双向` 指令，见[示例](#双向过滤器-替换)。')
+    expect(lint('详见 [自定义指令指南](custom-directive.html)。'))
+      .toBe('详见[自定义指令指南](custom-directive.html)。')
+  })
 })

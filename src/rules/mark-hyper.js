@@ -11,7 +11,10 @@ module.exports = (token, index, group, matched, marks) => {
   if (token.type === 'mark-hyper') {
     const markSeq = findMarkSeq(group, token)
 
-    const hasSpace = markSeq.some(markToken => markToken.spaceAfter) || (findTokenBefore(group, markSeq[0]) || {}).spaceAfter
+    const hasSpace = !!(
+      markSeq.some(markToken => markToken.spaceAfter) ||
+      (findTokenBefore(group, markSeq[0]) || {}).spaceAfter
+    )
 
     const tokenBefore = findTokenBefore(group, token)
     const tokenAfter = findTokenAfter(group, token)

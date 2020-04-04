@@ -8,6 +8,43 @@ const hyperParseInfo = [
   { name: 'hexo', value: require('./parsers/hexo') },
   { name: 'markdown', value: require('./parsers/md') }
 ]
+
+/**
+ * rules
+ * - mark-raw: content-hyper: <code>...</code>|`...` -> one space outside
+ * - mark-hyper: hyper-mark: if has space in seq then ensure space outside
+ * - unify-punctuation:
+ *   - half-width -> full-width,
+ *     - except {half}:{half}
+ * - abbr: e.g. Mr. vs.
+ * - space-full-width-content: content-*:
+ *   - <>...</> -> space outside,
+ *   - different type -> one space
+ * - space-punctuation: punctuation-*:
+ *   - /[&%- -> void,
+ *   - content before -> no space before, 
+ *   - full-width -> no space beside
+ *   - half-width -> one space after when either side is full-width content
+ * - case-math-exp: punctuation-*: + - * / % =:
+ *   - and 4 spaces,
+ *   - except 0/0/0, 0-0-0, a-b, /, %, Chrome 53+
+ * - case-backslash: \
+ *   - half width and no raw space after -> no space after
+ *   - full width before -> one space before
+ * - space-brackets: mark-brackets:
+ *   - half-width -> one space outside
+ *   - half-width -> no space inside
+ *     - add outside space out of marks
+ * - space-quotes: group:
+ *   - half-width -> one space outside, out of marks
+ * - case-traditional: 「 『 』 」
+ * - case-datetime: punctuation-*: 00:00:00
+ * - case-datetime-zh: 0年0月0日0天0号0时0分0秒
+ * - case-ellipsis: ...
+ * - case-html-entity: &{half};
+ * - case-raw: AC/DC
+ * - case-linebreak: preserve all rawSpaceAfter includes '\n'
+ */
 const rulesInfo = [
   { name: 'mark-raw', value: require('./rules/mark-raw') },
   { name: 'mark-hyper', value: require('./rules/mark-hyper') },
@@ -47,42 +84,6 @@ const matchCallArray = (calls, map) => calls.map(call => {
   }
 }).filter(Boolean)
 
-/**
- * rules
- * - mark-raw: content-hyper: <code>...</code>|`...` -> one space outside
- * - mark-hyper: hyper-mark: if has space in seq then ensure space outside
- * - unify-punctuation:
- *   - half-width -> full-width,
- *     - except {half}:{half}
- * - abbr: e.g. Mr. vs.
- * - space-full-width-content: content-*:
- *   - <>...</> -> space outside,
- *   - different type -> one space
- * - space-punctuation: punctuation-*:
- *   - /[&%- -> void,
- *   - content before -> no space before, 
- *   - full-width -> no space beside
- *   - half-width -> one space after when either side is full-width content
- * - case-math-exp: punctuation-*: + - * / % =:
- *   - and 4 spaces,
- *   - except 0/0/0, 0-0-0, a-b, /, %, Chrome 53+
- * - case-backslash: \
- *   - half width and no raw space after -> no space after
- *   - full width before -> one space before
- * - space-brackets: mark-brackets:
- *   - half-width -> one space outside
- *   - half-width -> no space inside
- *     - add outside space out of marks
- * - space-quotes: group:
- *   - half-width -> one space outside, out of marks
- * - case-traditional: 「 『 』 」
- * - case-datetime: punctuation-*: 00:00:00
- * - case-datetime-zh: 0年0月0日0天0号0时0分0秒
- * - case-ellipsis: ...
- * - case-html-entity: &{half};
- * - case-raw: AC/DC
- * - case-linebreak: preserve all rawSpaceAfter includes '\n'
- */
 const lint = (
   str,
   rules = rulesInfo.map(item => item.name),

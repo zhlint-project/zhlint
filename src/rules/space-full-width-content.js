@@ -34,6 +34,10 @@ module.exports = (token, index, group, matched, marks) => {
   const contentTokenBefore = findContentTokenBefore(group, token)
   const contentTokenAfter = findContentTokenAfter(group, token)
   if (contentTokenAfter && contentTokenAfter.type === token.type) {
+    if (token.type === 'content-full') {
+      token.spaceAfter = ''
+      findTokenBefore(group, contentTokenAfter).spaceAfter = ''
+    }
     return
   }
   if (contentTokenAfter && contentTokenAfter.type === 'content-hyper') {
