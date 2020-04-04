@@ -5,6 +5,7 @@ const join = require('./join')
 const findIgnoredMarks = require('./find-ignored-marks')
 
 const hyperParseInfo = [
+  { name: 'ignore', value: require('./parsers/ignore') },
   { name: 'hexo', value: require('./parsers/hexo') },
   { name: 'markdown', value: require('./parsers/md') }
 ]
@@ -114,10 +115,9 @@ const lint = (
 
   const finalData = matchCallArray(hyperParse, hyperParseMap)
     .reduce((current, parse) => parse(current), data)
-
   return replaceBlocks(str, finalData.blocks.map(({ value, marks, start, end }) => {
     const result = parse(value, marks)
-    const ignoredMarks = findIgnoredMarks(value, ignoredCases)
+    const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules)
     matchCallArray(rules, ruleMap).forEach(rule => processRule(result, rule))
     return {
       start, end,
