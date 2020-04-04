@@ -140,4 +140,8 @@ describe('lint', () => {
     expect(lint('注意**局部注册的组件在其子组件中*不可用***。'))
       .toBe('注意**局部注册的组件在其子组件中*不可用***。')
   })
+  test('linebreak', () => {
+    expect(lint('XXXX\n{% raw %}XXX{% endraw %}\n{% raw %}XXX{% endraw %}\n### XXXX'))
+      .toBe('XXXX\n{% raw %}XXX{% endraw %}\n{% raw %}XXX{% endraw %}\n### XXXX')
+  })
 })

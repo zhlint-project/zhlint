@@ -24,7 +24,7 @@ const rulesInfo = [
   { name: 'case-ellipsis', value: require('./rules/case-ellipsis') },
   { name: 'case-html-entity', value: require('./rules/case-html-entity') },
   { name: 'case-raw', value: require('./rules/case-raw') },
-  { name: 'case-md-blockquote', value: require('./rules/case-md-blockquote') }
+  { name: 'case-linebreak', value: require('./rules/case-linebreak') }
 ]
 
 const arrToMap = arr => arr.reduce((current, { name, value }) => {
@@ -79,7 +79,7 @@ const matchCallArray = (calls, map) => calls.map(call => {
  * - case-ellipsis: ...
  * - case-html-entity: &{half};
  * - case-raw: AC/DC
- * - case-md-blockquote: ...> xxx\n> xxx\n...
+ * - case-linebreak: preserve all rawSpaceAfter includes '\n'
  */
 const lint = (
   str,
