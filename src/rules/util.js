@@ -98,22 +98,26 @@ const findNonMarkTokenAfter = (group, token) => {
   }
 }
 
-const spreadMarkSeq = (group, token, seq) => {
-  const tokenBefore = findTokenBefore(group, token)
-  const tokenAfter = findTokenAfter(group, token)
-  if (tokenBefore && tokenBefore.type === 'mark-hyper' && seq.indexOf(tokenBefore) < 0) {
-    seq.unshift(tokenBefore)
-    spreadMarkSeq(group, tokenBefore, seq)
-  }
-  if (tokenAfter && tokenAfter.type === 'mark-hyper' && seq.indexOf(tokenAfter) < 0) {
-    seq.push(tokenAfter)
-    spreadMarkSeq(group, tokenAfter, seq)
+const spreadMarkSeq = (group, token, seq, isBackward) => {
+  if (isBackward) {
+    const tokenBefore = findTokenBefore(group, token)
+    if (tokenBefore && tokenBefore.type === 'mark-hyper') {
+      seq.unshift(tokenBefore)
+      spreadMarkSeq(group, tokenBefore, seq, isBackward)
+    }
+  } else {
+    const tokenAfter = findTokenAfter(group, token)
+    if (tokenAfter && tokenAfter.type === 'mark-hyper') {
+      seq.push(tokenAfter)
+      spreadMarkSeq(group, tokenAfter, seq, isBackward)
+    }
   }
 }
 
 const findMarkSeq = (group, token) => {
   const seq = [token]
   spreadMarkSeq(group, token, seq)
+  spreadMarkSeq(group, token, seq, true)
   return seq
 }
 

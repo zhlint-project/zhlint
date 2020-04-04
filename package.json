@@ -26,7 +26,8 @@
   },
   "homepage": "https://github.com/Jinjiang/zhlint#readme",
   "devDependencies": {
-    "jest": "^24.8.0"
+    "jest": "^24.8.0",
+    "v8-profiler-next": "^1.2.2"
   },
   "dependencies": {
     "escape-string-regexp": "^2.0.0",
