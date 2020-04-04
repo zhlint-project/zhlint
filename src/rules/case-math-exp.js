@@ -1,5 +1,6 @@
 const {
   findTokenBefore,
+  findTokenAfter,
   findContentTokenBefore,
   findContentTokenAfter,
   findNonMarkTokenBefore,
@@ -50,6 +51,23 @@ module.exports = (token, index, group, matched, marks) => {
       findTokenBefore(group, token).spaceAfter = ' '
       token.spaceAfter = ' '
       findTokenBefore(group, contentTokenAfter).spaceAfter = ' '
+    }
+  }
+  if (token.type.match(/^punctuation\-half/) && token.content === '|') {
+    const tokenBefore = findTokenBefore(group, token)
+    if (tokenBefore.content !== '|') {
+      const tokens = []
+      let nextToken = token
+      while (nextToken && nextToken.content === '|') {
+        tokens.push(nextToken)
+        nextToken = findTokenAfter(group, nextToken)
+      }
+      const lastToken = tokens[tokens.length - 1]
+      if (tokenBefore.rawSpaceAfter || lastToken.rawSpaceAfter) {
+        tokenBefore.spaceAfter = lastToken.spaceAfter = ' '
+      } else {
+        tokenBefore.spaceAfter = lastToken.spaceAfter = ''
+      }
     }
   }
 }

@@ -411,6 +411,14 @@ describe('lint special/edge cases', () => {
   })
   test('math exp', () => {
     expect(lint('1+1=2')).toBe('1 + 1 = 2')
+    expect(lint('a|b')).toBe('a|b')
+    expect(lint('a| b')).toBe('a | b')
+    expect(lint('a |b')).toBe('a | b')
+    expect(lint('a | b')).toBe('a | b')
+    expect(lint('a||b')).toBe('a||b')
+    expect(lint('a|| b')).toBe('a || b')
+    expect(lint('a ||b')).toBe('a || b')
+    expect(lint('a || b')).toBe('a || b')
   })
   test('arrow chars', () => {
     expect(lint('Chrome 顶部导航 > 窗口 > 任务管理'))
