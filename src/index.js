@@ -113,17 +113,30 @@ const lint = (
     }]
   }
 
+  const validations = []
+
   const finalData = matchCallArray(hyperParse, hyperParseMap)
     .reduce((current, parse) => parse(current), data)
-  return replaceBlocks(str, finalData.blocks.map(({ value, marks, start, end }) => {
+  const result = replaceBlocks(str, finalData.blocks.map(({ value, marks, start, end }) => {
     const result = parse(value, marks)
     const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules)
     matchCallArray(rules, ruleMap).forEach(rule => processRule(result, rule))
     return {
       start, end,
-      value: join(result.tokens, ignoredMarks)
+      value: join(result.tokens, ignoredMarks, validations, start)
     }
   }))
+
+  validations.forEach(v => {
+    const { index, length } = v
+    const offset = 10
+    const start = index - offset < 0 ? 0 : index - offset
+    const end = index + length + offset > str.length - 1 ? str.length : index + length + offset
+    const fragment = str.substring(start, end)
+    console.warn(`${fragment}\n${v.message}`)
+  })
+
+  return result
 }
 
 module.exports = lint

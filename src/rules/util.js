@@ -167,6 +167,8 @@ const addValidation = (token, name, target, message) => {
     token.validations = []
   }
   token.validations.push({
+    index: token.index,
+    length: token.length,
     target,
     name,
     message

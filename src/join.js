@@ -72,15 +72,25 @@ const isIgnored = (token, marks = []) => {
  * - IngoreMark: { start, end }
  * @return {string}
  */
-const join = (tokens, ignoredMarks = []) => {
+const join = (tokens, ignoredMarks = [], validations = [], start = 0) => {
   const ignoredPieces = isIgnored(tokens, ignoredMarks)
+  // validate startContent/endContent/spaceAfter/innerSpaceBefore
+  if (Array.isArray(tokens.validations)) {
+    tokens.validations.forEach(v =>
+      validations.push({ ...v, index: v.index + start }))
+  }
   return [
     ignoredPieces.startContent ? tokens.rawStartContent : tokens.startContent,
     ignoredPieces.innerSpaceBefore ? tokens.rawInnerSpaceBefore : tokens.innerSpaceBefore,
     ...tokens.map(token => {
       const ignoredPieces = isIgnored(token, ignoredMarks)
+      // validate content, spaceAfter
+      if (Array.isArray(token.validations)) {
+        token.validations.forEach(v =>
+          validations.push({ ...v, index: v.index + start }))
+      }
       return Array.isArray(token)
-        ? join(token, ignoredMarks)
+        ? join(token, ignoredMarks, validations, start)
         : [
             ignoredPieces.content ? token.raw : token.content,
             ignoredPieces.spaceAfter ? token.rawSpaceAfter : token.spaceAfter
