@@ -28,8 +28,8 @@ const messages = {
 }
 
 const validate = (token, type, condition) => {
+  removeValidation(token, '', 'spaceAfter')
   if (condition) {
-    removeValidation(token, '', 'spaceAfter')
     addValidation(token, 'space-brackets', 'spaceAfter', messages[type])
   }
 }

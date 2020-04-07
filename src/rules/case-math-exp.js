@@ -15,8 +15,8 @@ const messages = {
 }
 
 const validate = (token, type, condition) => {
+  removeValidation(token, 'space-punctuation', 'spaceAfter')
   if (condition) {
-    removeValidation(token, 'space-punctuation', 'spaceAfter')
     addValidation(token, 'case-math-exp', 'spaceAfter', messages[type](token.content))
   }
 }

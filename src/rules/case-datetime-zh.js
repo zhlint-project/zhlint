@@ -11,8 +11,8 @@ const messages = {
 }
 
 const validate = (token, type, condition) => {
+  removeValidation(token, '', 'spaceAfter')
   if (condition) {
-    removeValidation(token, '', 'spaceAfter')
     addValidation(token, 'case-datetime-zh', 'spaceAfter', messages[type])
   }
 }
