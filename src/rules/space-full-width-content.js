@@ -19,8 +19,20 @@ const {
   findTokenAfter,
   findContentTokenBefore,
   findContentTokenAfter,
-  getMarkSide
+  getMarkSide,
+  addValidation
 } = require('./util')
+
+const messages = {
+  noSpace: 'There should be no space between 2 full-width contents.',
+  oneSpace: 'There should be a space between a half-width content and a full-width content.'
+}
+
+const validate = (token, type, condition) => {
+  if (condition) {
+    addValidation(token, 'space-full-width-content', 'spaceAfter', messages[type])
+  }
+}
 
 module.exports = (token, index, group, matched, marks) => {
   // - if next content width different
@@ -35,8 +47,15 @@ module.exports = (token, index, group, matched, marks) => {
   const contentTokenAfter = findContentTokenAfter(group, token)
   if (contentTokenAfter && contentTokenAfter.type === token.type) {
     if (token.type === 'content-full') {
-      token.spaceAfter = ''
-      findTokenBefore(group, contentTokenAfter).spaceAfter = ''
+      if (token.spaceAfter) {
+        validate(token, 'noSpace', true)
+        token.spaceAfter = ''
+      }
+      const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
+      if (tokenBeforeContentTokenAfter.spaceAfter) {
+        validate(token, 'noSpace', true)
+        tokenBeforeContentTokenAfter.spaceAfter = ''
+      }
     }
     return
   }
@@ -57,9 +76,13 @@ module.exports = (token, index, group, matched, marks) => {
         contentTokenBefore && contentTokenAfter &&
         contentTokenBefore.type !== contentTokenAfter.type
       ) {
-        contentTokenBefore.spaceAfter = ' '
+        if (contentTokenBefore.spaceAfter !== ' ') {
+          validate(contentTokenBefore, 'oneSpace', true)
+          contentTokenBefore.spaceAfter = ' '
+        }
       } else {
-        if (contentTokenBefore) {
+        if (contentTokenBefore && contentTokenBefore.spaceAfter) {
+          validate(contentTokenBefore, 'noSpace', true)
           contentTokenBefore.spaceAfter = ''
         }
       }
@@ -69,8 +92,14 @@ module.exports = (token, index, group, matched, marks) => {
       if (
         contentTokenBefore && contentTokenAfter
       ) {
-        tokenBeforeContentTokenAfter.spaceAfter =
-          contentTokenBefore.type === contentTokenAfter.type ? '' : ' '
+        const spaceAfter = contentTokenBefore.type === contentTokenAfter.type ? '' : ' '
+        if (spaceAfter && tokenBeforeContentTokenAfter.spaceAfter !== spaceAfter) {
+          validate(tokenBeforeContentTokenAfter, 'oneSpace', true)
+        }
+        if (!spaceAfter && tokenBeforeContentTokenAfter.spaceAfter) {
+          validate(tokenBeforeContentTokenAfter, 'noSpace', true)
+        }
+        tokenBeforeContentTokenAfter.spaceAfter = spaceAfter
       }
     }
     return
@@ -80,12 +109,22 @@ module.exports = (token, index, group, matched, marks) => {
   }
   const tokenAfter = findTokenAfter(group, token)
   if (tokenAfter === contentTokenAfter) {
+    if (token.spaceAfter !== ' ') {
+      addValidation(token, 'spaceAfter', 'space-full-width-content', messages.oneSpace)
+    }
     token.spaceAfter = ' '
   } else {
     if (getMarkSide(tokenAfter) === 'left') {
+      if (token.spaceAfter !== ' ') {
+        addValidation(token, 'spaceAfter', 'space-full-width-content', messages.oneSpace)
+      }
       token.spaceAfter = ' '
     } else {
-      findTokenBefore(group, contentTokenAfter).spaceAfter = ' '
+      const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
+      if (tokenBeforeContentTokenAfter.spaceAfter !== ' ') {
+        addValidation(tokenBeforeContentTokenAfter, 'spaceAfter', 'space-full-width-content', messages.oneSpace)
+      }
+      tokenBeforeContentTokenAfter.spaceAfter = ' '
     }
   }
 }

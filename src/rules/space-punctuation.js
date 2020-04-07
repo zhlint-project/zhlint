@@ -4,8 +4,21 @@ const {
   findContentTokenBefore,
   findContentTokenAfter,
   findNonMarkTokenBefore,
-  findNonMarkTokenAfter
+  findNonMarkTokenAfter,
+  addValidation
 } = require('./util')
+
+const messages = {
+  noBefore: 'There should be no space before a punctuation.',
+  noAfter: 'There should be no space after a full-width punctuation.',
+  oneAfter: 'There should be one space after a half-width punctuation.'
+}
+
+const validate = (token, type, condition) => {
+  if (condition) {
+    addValidation(token, 'space-punctuation', 'spaceAfter', messages[type])
+  }
+}
 
 module.exports = (token, index, group, matched, marks) => {
   // token is a punctuation between 2 contents
@@ -22,16 +35,24 @@ module.exports = (token, index, group, matched, marks) => {
     const nonMarkTokenAfter = findNonMarkTokenAfter(group, token)
     // no space before punctuation
     if (contentTokenBefore) {
+      validate(contentTokenBefore, 'noBefore', contentTokenBefore.rawSpaceAfter)
       contentTokenBefore.spaceAfter = ''
-      findTokenBefore(group, token).spaceAfter = ''
+      const tokenBefore = findTokenBefore(group, token)
+      if (tokenBefore !== contentTokenBefore) {
+        validate(tokenBefore, 'noBefore', tokenBefore.rawSpaceAfter)
+        tokenBefore.spaceAfter = ''
+      }
     }
     // both sides non-empty
     if (nonMarkTokenBefore && nonMarkTokenAfter) {
       // no space when punctuation is full-width
       if (token.type === 'punctuation-full') {
+        validate(token, 'noAfter', token.rawSpaceAfter)
         token.spaceAfter = ''
-        if (contentTokenAfter) {
-          findTokenBefore(group, contentTokenAfter).spaceAfter = ''
+        if (contentTokenAfter && contentTokenAfter !== token) {
+          const before = findTokenBefore(group, contentTokenAfter)
+          validate(before, 'noAfter', before.rawSpaceAfter)
+          before.spaceAfter = ''
         }
       } else {
         if (
@@ -46,9 +67,12 @@ module.exports = (token, index, group, matched, marks) => {
           // either side of content is full-width content
           const tokenAfter = findTokenAfter(group, token)
           if (tokenAfter === contentTokenAfter) {
+            validate(token, 'oneAfter', token.rawSpaceAfter !== ' ')
             token.spaceAfter = ' '
           } else {
-            findTokenBefore(group, contentTokenAfter).spaceAfter = ' '
+            const before = findTokenBefore(group, contentTokenAfter)
+            validate(before, 'oneAfter', before.rawSpaceAfter !== ' ')
+            before.spaceAfter = ' '
           }
         }
       }

@@ -4,10 +4,32 @@ const {
   findContentTokenBefore,
   findContentTokenAfter,
   findNonMarkTokenBefore,
-  findNonMarkTokenAfter
+  findNonMarkTokenAfter,
+  addValidation,
+  removeValidation
 } = require('./util')
 
+const messages = {
+  before: char => `There should be a space before the '${char}' character.`,
+  after: char => `There should be a space after the '${char}' character.`
+}
+
+const validate = (token, type, condition) => {
+  if (condition) {
+    removeValidation(token, 'space-punctuation', 'spaceAfter')
+    addValidation(token, 'case-math-exp', 'spaceAfter', messages[type](token.content))
+  }
+}
+
 module.exports = (token, index, group, matched, marks) => {
+  // calculation: space in both sides
+  // - 1 + 1 = 2
+  // x 2020/01/01
+  // x 2020-01-01
+  // x vue-custom-element
+  // x 100%
+  // x a/b
+  // x Chrome 53+
   if (token.type.match(/^punctuation\-/) && token.content && token.content.match(/^(\+|\-|\*|\/|\%|\<|\>|\=)\=?$/)) {
     const contentTokenBefore = findContentTokenBefore(group, token)
     const contentTokenAfter = findContentTokenAfter(group, token)
@@ -47,13 +69,28 @@ module.exports = (token, index, group, matched, marks) => {
       ) {
         return
       }
+      validate(contentTokenBefore, 'before', contentTokenBefore.rawSpaceAfter !== ' ')
       contentTokenBefore.spaceAfter = ' '
-      findTokenBefore(group, token).spaceAfter = ' '
+      const tokenBefore = findTokenBefore(group, token)
+      if (tokenBefore !== contentTokenBefore) {
+        validate(tokenBefore, 'before', tokenBefore.rawSpaceAfter !== ' ')
+        tokenBefore.spaceAfter = ' '
+      }
+      validate(token, 'after', token.rawSpaceAfter !== ' ')
       token.spaceAfter = ' '
-      findTokenBefore(group, contentTokenAfter).spaceAfter = ' '
+      const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
+      if (tokenBeforeContentTokenAfter !== token) {
+        validate(tokenBeforeContentTokenAfter, 'after', tokenBeforeContentTokenAfter.rawSpaceAfter !== ' ')
+        tokenBeforeContentTokenAfter.spaceAfter = ' '
+      }
     }
   }
-  if (token.type.match(/^punctuation\-half/) && token.content === '|') {
+  // vertical lines: space in neither sides (no space detected around)
+  // or both sides (otherwise)
+  // - a | b | c
+  // - a || b || c
+  // x a|b|c
+  if (token.type === 'punctuation-half' && token.content === '|') {
     const tokenBefore = findTokenBefore(group, token)
     if (tokenBefore.content !== '|') {
       const tokens = []
@@ -64,8 +101,12 @@ module.exports = (token, index, group, matched, marks) => {
       }
       const lastToken = tokens[tokens.length - 1]
       if (tokenBefore.rawSpaceAfter || lastToken.rawSpaceAfter) {
+        validate(tokenBefore, 'before', tokenBefore.rawSpaceAfter !== ' ')
+        validate(lastToken, 'after', lastToken.rawSpaceAfter !== ' ')
         tokenBefore.spaceAfter = lastToken.spaceAfter = ' '
       } else {
+        removeValidation(tokenBefore, 'space-punctuation', 'spaceAfter')
+        removeValidation(lastToken, 'space-punctuation', 'spaceAfter')
         tokenBefore.spaceAfter = lastToken.spaceAfter = ''
       }
     }

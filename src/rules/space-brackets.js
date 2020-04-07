@@ -16,8 +16,23 @@ const {
   findTokenAfter,
   findContentTokenBefore,
   findContentTokenAfter,
-  getMarkSide
+  getMarkSide,
+  removeValidation,
+  addValidation
 } = require('./util')
+
+const messages = {
+  'outside-half': 'There should be one space outside half-width brackets',
+  'outside-full': 'There should be on space outside full-width brackets',
+  'inside': 'There should be no space inside brackets',
+}
+
+const validate = (token, type, condition) => {
+  if (condition) {
+    removeValidation(token, '', 'spaceAfter')
+    addValidation(token, 'space-brackets', 'spaceAfter', messages[type])
+  }
+}
 
 module.exports = (token, index, group, matched, marks) => {
   // half-width: one space outside
@@ -36,22 +51,28 @@ module.exports = (token, index, group, matched, marks) => {
           if (contentTokenBefore.type !== 'content-half') {
             if (contentTokenBefore !== tokenBefore) {
               if (getMarkSide(tokenBefore) === 'left') {
+                validate(contentTokenBefore, 'outside-half', contentTokenBefore.rawSpaceAfter !== ' ')
                 contentTokenBefore.spaceAfter = ' '
               } else {
+                validate(tokenBefore, 'outside-half', tokenBefore.rawSpaceAfter !== ' ')
                 tokenBefore.spaceAfter = ' '
               }
             } else {
+              validate(contentTokenBefore, 'outside-half', contentTokenBefore.rawSpaceAfter !== ' ')
               contentTokenBefore.spaceAfter = ' '
             }
           }
         } else {
+          validate(contentTokenBefore, 'outside-full', contentTokenBefore.rawSpaceAfter)
           contentTokenBefore.spaceAfter = ''
         }
       }
+      validate(token, 'inside', token.rawSpaceAfter)
       token.spaceAfter = ''
     }
     if (markSide === 'right') {
       if (tokenBefore) {
+        validate(tokenBefore, 'inside', tokenBefore.rawSpaceAfter)
         tokenBefore.spaceAfter = ''
       }
       if (contentTokenAfter) {
@@ -60,15 +81,19 @@ module.exports = (token, index, group, matched, marks) => {
           if (contentTokenAfter.type !== 'content-half') {
             if (contentTokenAfterBefore !== token) {
               if (getMarkSide(contentTokenAfterBefore) === 'right') {
+                validate(contentTokenAfterBefore, 'outside-half', contentTokenAfterBefore.rawSpaceAfter !== ' ')
                 contentTokenAfterBefore.spaceAfter = ' '
               } else {
+                validate(token, 'outside-half', token.rawSpaceAfter !== ' ')
                 token.spaceAfter = ' '
               }
             } else {
+              validate(contentTokenAfterBefore, 'outside-half', contentTokenAfterBefore.rawSpaceAfter !== ' ')
               contentTokenAfterBefore.spaceAfter = ' '
             }
           }
         } else {
+          validate(contentTokenAfterBefore, 'outside-full', contentTokenAfterBefore.rawSpaceAfter)
           contentTokenAfterBefore.spaceAfter = ''
         }
       }

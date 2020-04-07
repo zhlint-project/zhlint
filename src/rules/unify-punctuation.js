@@ -1,7 +1,8 @@
 const {
   findTokenBefore,
   findContentTokenBefore,
-  findContentTokenAfter
+  findContentTokenAfter,
+  addValidation
 } = require('./util')
 
 const halfWidthMap = {
@@ -16,6 +17,26 @@ const fullWidthMap = {
   ':': `：`,
   '?': `？`,
   '!': `！`,
+}
+
+const messages = {
+  full: ({ origin, result }) => `The puncatuation \`${origin}\` should be full-width as \`${result}\`.`,
+  half: ({ origin, result }) => `The puncatuation \`${origin}\` should be half-width as \`${result}\`.`,
+  bracketStart: ({ origin, result }) => `The left bracket \`${origin}\` should be full-width as \`${result}\`.`,
+  bracketEnd: ({ origin, result }) => `The right bracket \`${origin}\` should be full-width as \`${result}\`.`
+}
+
+const targets = {
+  full: 'content',
+  half: 'content',
+  bracketStart: 'startContent',
+  bracketEnd: 'endContent'
+}
+
+const validate = (token, type, args, condition) => {
+  if (condition) {
+    addValidation(token, 'unify-punctuation', targets[type], messages[type](args))
+  }
 }
 
 module.exports = (token, index, group, matched, marks) => {
@@ -36,27 +57,39 @@ module.exports = (token, index, group, matched, marks) => {
       return
     }
     if (fullWidthMap[token.content]) {
+      validate(token, 'full',
+        { origin: token.content, result: fullWidthMap[token.content] }, true)
       token.type = 'punctuation-full'
       token.content = fullWidthMap[token.content]
     }
   }
   else if (token.type === 'punctuation-full') {
     if (halfWidthMap[token.content]) {
+      validate(token, 'half',
+        { origin: token.content, result: halfWidthMap[token.content] }, true)
       token.type = 'punctuation-half'
       token.content = halfWidthMap[token.content]
     }
   }
   else if (token.type === 'group') {
     if (token.startContent === '"') {
+      validate(token, 'bracketStart',
+        { origin: token.startContent, result: '“' }, true)
       token.startContent = '“'
     }
     if (token.startContent === "'") {
+      validate(token, 'bracketStart',
+        { origin: token.startContent, result: '‘' }, true)
       token.startContent = '‘'
     }
     if (token.endContent === '"') {
+      validate(token, 'bracketEnd',
+        { origin: token.startContent, result: '”' }, true)
       token.endContent = '”'
     }
     if (token.endContent === "'") {
+      validate(token, 'bracketEnd',
+        { origin: token.startContent, result: '’' }, true)
       token.endContent = '’'
     }
   }

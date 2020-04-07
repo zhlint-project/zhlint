@@ -1,6 +1,7 @@
 const {
   findTokenBefore,
-  findTokenAfter
+  findTokenAfter,
+  removeValidation
 } = require('./util')
 
 const abbrs = [
@@ -66,8 +67,10 @@ module.exports = (token, index, group, matched, marks) => {
     if (result) {
       result.forEach((content, i) => {
         const periodToken = group[index - i * 2]
+        if (periodToken.content !== '.') {
+          removeValidation(periodToken, 'content', 'unify-punctuation')
+        }
         periodToken.content = '.'
-        periodToken.spaceAfter = ''
         periodToken.type = 'punctuation-half'
       })
     }

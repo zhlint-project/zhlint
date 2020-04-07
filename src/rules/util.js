@@ -162,6 +162,27 @@ const getMarkSide = token => {
   }
 }
 
+const addValidation = (token, name, target, message) => {
+  if (!token.validations) {
+    token.validations = []
+  }
+  token.validations.push({
+    target,
+    name,
+    message
+  })
+}
+
+const removeValidation = (token, name, target) => {
+  if (!token.validations) {
+    return
+  }
+  token.validations = token.validations.filter(
+    validation =>
+      validation.target ? validation.target === target : true &&
+      validation.name ? validation.name === name : true)
+}
+
 module.exports = {
   findTokenBefore,
   findTokenAfter,
@@ -172,5 +193,7 @@ module.exports = {
   findMarkSeq,
   isInlineCode,
   isHyperTag,
-  getMarkSide
+  getMarkSide,
+  addValidation,
+  removeValidation
 }

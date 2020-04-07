@@ -1,6 +1,7 @@
 const {
   findTokenBefore,
-  findTokenAfter
+  findTokenAfter,
+  removeValidation
 } = require('./util')
 
 module.exports = (token, index, group, matched, marks) => {
@@ -16,6 +17,7 @@ module.exports = (token, index, group, matched, marks) => {
         tokenBeforeBefore.raw === '&' &&
         !tokenBeforeBefore.rawSpaceAfter
       ) {
+        removeValidation(token, 'unify-punctuation', 'content')
         token.content = ';'
       }
     }

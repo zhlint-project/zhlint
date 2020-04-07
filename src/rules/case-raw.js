@@ -1,6 +1,7 @@
 const {
   findTokenBefore,
-  findTokenAfter
+  findTokenAfter,
+  removeValidation
 } = require('./util')
 
 module.exports = (token, index, group, matched, marks) => {
@@ -11,6 +12,8 @@ module.exports = (token, index, group, matched, marks) => {
       tokenBefore && tokenBefore.type === 'content-hyper' &&
       tokenAfter && tokenAfter.type === 'content-hyper'
     ) {
+      removeValidation(tokenBefore, '', 'spaceAfter')
+      removeValidation(token, '', 'spaceAfter')
       tokenBefore.spaceAfter = tokenBefore.rawSpaceAfter
       token.spaceAfter = token.rawSpaceAfter
     }
