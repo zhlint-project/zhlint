@@ -3,6 +3,7 @@ const parse = require('./parse')
 const processRule = require('./process-rule')
 const join = require('./join')
 const findIgnoredMarks = require('./find-ignored-marks')
+const { logger: defaultLogger } = require('./logger')
 
 const hyperParseInfo = [
   { name: 'ignore', value: require('./parsers/ignore') },
@@ -85,11 +86,12 @@ const matchCallArray = (calls, map) => calls.map(call => {
   }
 }).filter(Boolean)
 
-const lint = (
+const run = (
   str,
   rules = rulesInfo.map(item => item.name),
   hyperParse = hyperParseInfo.map(item => item.name),
-  ignoredCases = []
+  ignoredCases = [],
+  logger
 ) => {
   if (typeof hyperParse === 'function') {
     hyperParse = [hyperParse]
@@ -119,7 +121,7 @@ const lint = (
     .reduce((current, parse) => parse(current), data)
   const result = replaceBlocks(str, finalData.blocks.map(({ value, marks, start, end }) => {
     const result = parse(value, marks)
-    const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules)
+    const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules, logger)
     matchCallArray(rules, ruleMap).forEach(rule => processRule(result, rule))
     return {
       start, end,
@@ -127,15 +129,20 @@ const lint = (
     }
   }))
 
+  return { result, validations }
+}
+
+const lint = (str, { rules, hyperParse, ignoredCases, logger } = {}) => {
+  logger = logger || defaultLogger
+  const { result, validations } = run(str, rules, hyperParse, ignoredCases, logger)
   validations.forEach(v => {
     const { index, length } = v
     const offset = 10
     const start = index - offset < 0 ? 0 : index - offset
     const end = index + length + offset > str.length - 1 ? str.length : index + length + offset
     const fragment = str.substring(start, end)
-    console.warn(`${fragment}\n${v.message}`)
+    logger.warn(`${fragment}\n${v.message}`)
   })
-
   return result
 }
 

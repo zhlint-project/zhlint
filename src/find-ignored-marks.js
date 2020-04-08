@@ -1,3 +1,5 @@
+const { logger: defaultLogger } = require('./logger')
+
 /**
  * @param  {string}        str
  * @param  {IgnoredCase[]} ignoredCases string which should be skipped
@@ -5,7 +7,8 @@
  * - IgnoredCase: { prefix?, textStart, textEnd?, suffix? } Ref: https://github.com/WICG/ScrollToTextFragment
  * - IgnoredMark: { start, end }
  */
-const findIgnoredMarks = (str, ignoredCases = []) => {
+const findIgnoredMarks = (str, ignoredCases = [], logger) => {
+  logger = logger || defaultLogger
   const marks = []
   ignoredCases.forEach(({
     prefix,
@@ -25,7 +28,7 @@ const findIgnoredMarks = (str, ignoredCases = []) => {
       const possibleStart = currentIndex + startIndex + startOffset
       const nextPossibleCurrentIndex = possibleStart + textStart.length
       if (!end) {
-        console.log(`ignore: ${str.substring(possibleStart, nextPossibleCurrentIndex)}`)
+        logger.log(`ignore: ${str.substring(possibleStart, nextPossibleCurrentIndex)}`)
         marks.push({
           start: possibleStart,
           end: nextPossibleCurrentIndex
@@ -37,7 +40,7 @@ const findIgnoredMarks = (str, ignoredCases = []) => {
         if (endIndex === -1) {
           return
         } else {
-          console.log(`ignore: ${str.substring(possibleStart, possibleEnd)}`)
+          logger.log(`ignore: ${str.substring(possibleStart, possibleEnd)}`)
           marks.push({
             start: possibleStart,
             end: possibleEnd
