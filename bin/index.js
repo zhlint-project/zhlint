@@ -10,7 +10,8 @@ const help = () => console.log(`
 This is zhlint!
 
 Usage:
-zhlint <filepath> ...
+zhlint <filepath>
+zhlint --fix <input filepath> [<output filepath>]
 zhlint --help
 `.trim())
 
@@ -20,18 +21,19 @@ if (argv.h || argv.help) {
 }
 
 if (argv._ && argv._.length) {
-  const files = [...argv._]
-  files.forEach(file => {
-    console.log(`[start] ${file}`)
-    try {
-      const input = fs.readFileSync(file, { encoding: 'utf8' })
-      const output = lint(input)
-      fs.writeFileSync(file, output)
-      console.log(`[done] ${file}`)
-    } catch (e) {
-      console.error(e)
+  const [inputFilepath, outputFilepath] = [...argv._]
+  console.log(`[start] ${inputFilepath}`)
+  try {
+    const input = fs.readFileSync(inputFilepath, { encoding: 'utf8' })
+    const output = lint(input)
+    if (argv.f || argv.fix) {
+      fs.writeFileSync(outputFilepath || inputFilepath, output)
+      console.log(`[fixed] ${outputFilepath || inputFilepath}`)
     }
-  })
+    console.log(`[done] ${inputFilepath}`)
+  } catch (e) {
+    console.error(e)
+  }
   return
 }
 
