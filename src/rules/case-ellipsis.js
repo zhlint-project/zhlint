@@ -30,7 +30,7 @@ module.exports = (token, index, group, matched, marks) => {
           removeValidation(nextToken, '', 'content')
           removeValidation(nextToken, '', 'spaceAfter')
           const tempToken = findTokenAfter(group, nextToken)
-          if (tempToken.raw !== '.') {
+          if (tempToken && tempToken.raw !== '.') {
             validate(nextToken, 'after', nextToken.rawSpaceAfter)
           }
           nextToken.content = '.'
