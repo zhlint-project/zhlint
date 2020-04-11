@@ -59,6 +59,7 @@ module.exports = (token, index, group, matched, marks) => {
     if (fullWidthMap[token.content]) {
       validate(token, 'full',
         { origin: token.content, result: fullWidthMap[token.content] }, true)
+      token.rawType = token.type
       token.type = 'punctuation-full'
       token.content = fullWidthMap[token.content]
     }

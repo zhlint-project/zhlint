@@ -47,11 +47,11 @@ module.exports = (token, index, group, matched, marks) => {
     if (nonMarkTokenBefore && nonMarkTokenAfter) {
       // no space when punctuation is full-width
       if (token.type === 'punctuation-full') {
-        validate(token, 'noAfter', token.rawSpaceAfter)
+        validate(token, 'noAfter', token.rawSpaceAfter && !token.rawType)
         token.spaceAfter = ''
         if (contentTokenAfter && contentTokenAfter !== token) {
           const before = findTokenBefore(group, contentTokenAfter)
-          validate(before, 'noAfter', before.rawSpaceAfter)
+          validate(before, 'noAfter', before.rawSpaceAfter && !before.rawType)
           before.spaceAfter = ''
         }
       } else {
@@ -67,11 +67,11 @@ module.exports = (token, index, group, matched, marks) => {
           // either side of content is full-width content
           const tokenAfter = findTokenAfter(group, token)
           if (tokenAfter === contentTokenAfter) {
-            validate(token, 'oneAfter', token.rawSpaceAfter !== ' ')
+            validate(token, 'oneAfter', token.rawSpaceAfter !== ' ' && !token.rawType)
             token.spaceAfter = ' '
           } else {
             const before = findTokenBefore(group, contentTokenAfter)
-            validate(before, 'oneAfter', before.rawSpaceAfter !== ' ')
+            validate(before, 'oneAfter', before.rawSpaceAfter !== ' ' && !before.rawType)
             before.spaceAfter = ' '
           }
         }
