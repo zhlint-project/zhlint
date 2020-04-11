@@ -63,11 +63,10 @@ module.exports = (token, index, group, matched, marks) => {
       token.content = fullWidthMap[token.content]
     }
   }
-  else if (token.type === 'punctuation-full') {
+  else if (token.type === 'mark-brackets') {
     if (halfWidthMap[token.content]) {
       validate(token, 'half',
         { origin: token.content, result: halfWidthMap[token.content] }, true)
-      token.type = 'punctuation-half'
       token.content = halfWidthMap[token.content]
     }
   }

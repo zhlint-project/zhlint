@@ -166,13 +166,20 @@ const addValidation = (token, name, target, message) => {
   if (!token.validations) {
     token.validations = []
   }
-  token.validations.push({
+  const validation = {
     index: token.index,
     length: token.length,
     target,
     name,
     message
-  })
+  }
+  if (target === 'startContent') {
+    validation.index = token.startIndex
+  } else if (target === 'endContent') {
+    validation.index = token.startIndex
+    validation.length = token.endIndex - token.startIndex + 1
+  }
+  token.validations.push(validation)
 }
 
 const removeValidation = (token, name, target) => {
@@ -180,9 +187,8 @@ const removeValidation = (token, name, target) => {
     return
   }
   token.validations = token.validations.filter(
-    validation =>
-      validation.target ? validation.target === target : true &&
-      validation.name ? validation.name === name : true)
+    validation => target ? validation.target !== target : true &&
+      name ? validation.name !== name : true)
 }
 
 module.exports = {
