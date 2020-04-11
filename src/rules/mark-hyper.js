@@ -20,36 +20,43 @@ const validate = (token, type, condition) => {
   }
 }
 
+const checkSpace = (group, markSeq) => {
+  if (markSeq.some(markToken => markToken.rawSpaceAfter)) {
+    return true
+  }
+  const tokenBefore = findTokenBefore(group, markSeq[0])
+  if (tokenBefore) {
+    return !!tokenBefore.rawSpaceAfter
+  }
+  return false
+}
+
 module.exports = (token, index, group, matched, marks) => {
   if (token.type === 'mark-hyper') {
     const markSeq = findMarkSeq(group, token)
-
-    const hasSpace = !!(
-      markSeq.some(markToken => markToken.spaceAfter) ||
-      (findTokenBefore(group, markSeq[0]) || {}).spaceAfter
-    )
-
+    const hasSpace = checkSpace(group, markSeq)
     const tokenBefore = findTokenBefore(group, token)
     const tokenAfter = findTokenAfter(group, token)
     if (token.markSide === 'left') {
       if (tokenBefore) {
         const spaceAfter = (hasSpace && token === markSeq[0]) ? ' ' : ''
-        validate(tokenBefore, 'before', tokenBefore.spaceAfter == spaceAfter)
+        validate(tokenBefore, 'before', (tokenBefore.rawSpaceAfter || '') !== spaceAfter)
         tokenBefore.spaceAfter = spaceAfter
       }
       if (tokenAfter) {
-        validate(token, 'inside', token.spaceAfter)
+        validate(token, 'inside', token.rawSpaceAfter)
         token.spaceAfter = ''
       }
     }
     else if (token.markSide === 'right') {
       if (tokenBefore) {
-        validate(tokenBefore, 'inside', tokenBefore.spaceAfter)
+        validate(tokenBefore, 'inside', tokenBefore.rawSpaceAfter)
         tokenBefore.spaceAfter = ''
       }
       if (tokenAfter) {
-        validate(token, 'after', token.spaceAfter)
-        token.spaceAfter = (hasSpace && token === markSeq[markSeq.length - 1]) ? ' ' : ''
+        const spaceAfter = (hasSpace && token === markSeq[markSeq.length - 1]) ? ' ' : ''
+        validate(token, 'after', (token.rawSpaceAfter || '') !== spaceAfter)
+        token.spaceAfter = spaceAfter
       }
     }
   }
