@@ -1,5 +1,7 @@
-const lint = require('../src')
+const run = require('../src/run')
 const markdownParser = require('../src/parsers/md')
+
+const lint = (...args) => run(...args).result
 
 test.todo = test.skip
 

@@ -1,4 +1,4 @@
-const lint = require('../src')
+const run = require('../src/run')
 const checkCharType = require('../src/check-char-type')
 const parse = require('../src/parse')
 const travel = require('../src/travel')
@@ -14,6 +14,8 @@ const unifyPunctuation = require('../src/rules/unify-punctuation')
 const caseTraditional = require('../src/rules/case-traditional')
 const caseDatetime = require('../src/rules/case-datetime')
 const caseDatetimeZh = require('../src/rules/case-datetime-zh')
+
+const lint = (...args) => run(...args).result
 
 test.todo = test.skip
 

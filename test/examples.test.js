@@ -1,6 +1,8 @@
 const fs = require('fs')
 const path = require('path')
-const lint = require('../src')
+const run = require('../src/run')
+
+const lint = (...args) => run(...args).result
 
 test.todo = test.skip
 

@@ -10,18 +10,7 @@ const stderr = global.__DEV__
   ? fs.createWriteStream('./stderr.log', { encoding: 'utf-8' })
   : process.stderr
 
-const outputValidations = (file, str, validations, logger) => {
-  validations.forEach(v => {
-    const { index, length } = v
-    const { row, column, line } = parsePosition(str, index)
-    const offset = 20
-    const start = column - offset < 0 ? 0 : column - offset
-    const end = column + length + offset > line.length - 1 ? line.length : column + length + offset
-    const fragment = line.substring(start, end).replace(/\n/g, '\\n')
-    // logger.error(`${file}${file ? ':' : ''}${index}:${row}:${column} - ${v.message}\n\n${fragment}\n${' '.repeat(index - start)}^\n\n`)
-    logger.error(`${chalk.blue.bgWhite(file)}${file ? ':' : ''}${chalk.yellow(index)}:${chalk.yellow(row)}:${chalk.yellow(column)} - ${v.message}\n\n${fragment}\n${' '.repeat(column - start)}${chalk.red('^')}\n\n`)
-  })
-}
+const defaultLogger = global.__DEV__ ? new Console({ stdout, stderr }) : console
 
 const parsePosition = (str, index) => {
   const rows = str.split('\n')
@@ -43,9 +32,39 @@ const parsePosition = (str, index) => {
   }
 }
 
+const reportSingleResult = (file, str, validations, logger = defaultLogger) => {
+  validations.forEach(v => {
+    const { index, length } = v
+    const { row, column, line } = parsePosition(str, index)
+    const offset = 20
+    const start = column - offset < 0 ? 0 : column - offset
+    const end = column + length + offset > line.length - 1 ? line.length : column + length + offset
+    const fragment = line.substring(start, end).replace(/\n/g, '\\n')
+    logger.error(`${chalk.blue.bgWhite(file)}${file ? ':' : ''}${chalk.yellow(index)}:${chalk.yellow(row)}:${chalk.yellow(column)} - ${v.message}\n\n${fragment}\n${' '.repeat(column - start)}${chalk.red('^')}\n\n`)
+  })
+}
+
+const report = (resultList, logger = defaultLogger) => {
+  let errorCount = 0
+  const invalidFiles = resultList.map(({ file, value, validations }) => {
+    reportSingleResult(file, value, validations, logger)
+    errorCount += validations.length
+    return validations.length ? file : ''
+  }).filter(Boolean)
+  if (errorCount) {
+    logger.error('Invalid files:')
+    logger.error('- ' + invalidFiles.join('\n- ') + '\n')
+    logger.error(`Found ${errorCount} ${errorCount > 1 ? 'errors' : 'error'}.`)
+    return 1
+  } else {
+    logger.log(`No error found.`)
+  }
+}
+
 module.exports = {
-  logger: new Console({ stdout, stderr }),
+  defaultLogger,
   stdout,
   stderr,
-  outputValidations
+  reportSingleResult,
+  report
 }

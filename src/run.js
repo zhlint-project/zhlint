@@ -3,7 +3,7 @@ const parse = require('./parse')
 const processRule = require('./process-rule')
 const join = require('./join')
 const findIgnoredMarks = require('./find-ignored-marks')
-const { logger: defaultLogger } = require('./logger')
+const { defaultLogger } = require('./logger')
 
 const hyperParseInfo = [
   { name: 'ignore', value: require('./parsers/ignore') },
@@ -86,14 +86,12 @@ const matchCallArray = (calls, map) => calls.map(call => {
   }
 }).filter(Boolean)
 
-const run = (
-  str,
-  rules = rulesInfo.map(item => item.name),
-  hyperParse = hyperParseInfo.map(item => item.name),
-  ignoredCases = [],
-  logger
-) => {
-  logger = logger || defaultLogger
+const run = (str, options = {}) => {
+  const rules = options.rules || rulesInfo.map(item => item.name)
+  const hyperParse = options.hyperParse || hyperParseInfo.map(item => item.name)
+  const ignoredCases = options.ignoredCases || []
+  const logger = options.logger || defaultLogger
+
   if (typeof hyperParse === 'function') {
     hyperParse = [hyperParse]
   }

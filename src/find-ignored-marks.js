@@ -1,4 +1,4 @@
-const { logger: defaultLogger } = require('./logger')
+const { defaultLogger } = require('./logger')
 
 /**
  * @param  {string}        str

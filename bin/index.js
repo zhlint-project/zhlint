@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
+// CLI
+// - fix, validate, output
+
 const fs = require('fs')
 const minimist = require('minimist')
 const glob = require('glob')
-const lint = require('../')
-const run = require('../src/run')
-const { outputValidations } = require('../src/logger')
+const { run, report } = require('../')
 
 const argv = minimist(process.argv.slice(2))
 
@@ -13,9 +14,9 @@ const help = () => console.log(`
 This is zhlint!
 
 Usage:
-zhlint <file-path>
-zhlint <file-pattern> --validate
-zhlint <input-file-path> [<output-file-path>] --fix
+zhlint <file-pattern>
+zhlint <file-pattern> --fix
+zhlint <input-file-path> --output=<output-file-path>
 zhlint --help
 `.trim())
 
@@ -25,40 +26,42 @@ if (argv.h || argv.help) {
 }
 
 if (argv._ && argv._.length) {
-  const [inputFilepath, outputFilepath] = [...argv._]
+  const [filePattern] = [...argv._]
   try {
-    if (argv.validate) {
-      const files = glob.sync(inputFilepath)
-      const invalidFiles = []
-      let errorCount = 0
-      files.forEach(file => {
-        console.log(`[validate] ${file}`)
-        const input = fs.readFileSync(file, { encoding: 'utf8' })
-        const { validations } = run(input)
-        if (validations.length) {
-          errorCount += validations.length
-          invalidFiles.push(file)
-          outputValidations(file, input, validations, console)
+    const files = glob.sync(filePattern)
+    const resultList = files.map(file => {
+      console.log(`[start] ${file}`)
+      const value = fs.readFileSync(file, { encoding: 'utf8' })
+      const { result, validations } = run(value)
+      return {
+        file,
+        value,
+        result,
+        validations
+      }
+    })
+    const exitCode = report(resultList)
+    if (argv.o || argv.output) {
+      if (files.length === 1) {
+        const { file, result } = resultList[0]
+        fs.writeFileSync(argv.output, result)
+        console.log(`[output] ${file} -> ${argv.output}`)
+      } else {
+        console.error(`Sorry. If you use argument '--output' or '-o', you could only pass one file as the input.`)
+      }
+    }
+    else if (argv.f || argv.fix) {
+      resultList.forEach(({ file, value, result }) => {
+        if (value !== result) {
+          fs.writeFileSync(file, result)
+          console.log(`[fixed] ${file}`)
         }
       })
-      if (invalidFiles.length) {
-        console.error('Invalid files:')
-        console.error('- ' + invalidFiles.join('\n- ') + '\n')
-        console.error(`Found ${errorCount} ${errorCount > 1 ? 'errors' : 'error'}.`)
-        process.exit(1)
-      } else {
-        console.log(`No error found.`)
+    } else {
+      if (exitCode) {
+        process.exit(exitCode)
       }
-      return
     }
-    console.log(`[start] ${inputFilepath}`)
-    const input = fs.readFileSync(inputFilepath, { encoding: 'utf8' })
-    const output = lint(input)
-    if (argv.f || argv.fix) {
-      fs.writeFileSync(outputFilepath || inputFilepath, output)
-      console.log(`[fixed] ${outputFilepath || inputFilepath}`)
-    }
-    console.log(`[done] ${inputFilepath}`)
   } catch (e) {
     console.error(e)
   }
