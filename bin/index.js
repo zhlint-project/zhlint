@@ -44,8 +44,8 @@ if (argv._ && argv._.length) {
     if (argv.o || argv.output) {
       if (files.length === 1) {
         const { file, result } = resultList[0]
-        fs.writeFileSync(argv.output, result)
-        console.log(`[output] ${file} -> ${argv.output}`)
+        fs.writeFileSync(argv.o || argv.output, result)
+        console.log(`[output] ${file} -> ${argv.o || argv.output}`)
       } else {
         console.error(`Sorry. If you use argument '--output' or '-o', you could only pass one file as the input.`)
       }

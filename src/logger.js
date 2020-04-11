@@ -22,7 +22,7 @@ const parsePosition = (str, index) => {
     row++
     column = index
     line = rows.shift()
-    index -= rowLengthList.shift()
+    index -= rowLengthList.shift() + 1
   }
   return {
     offset: index,
@@ -34,13 +34,22 @@ const parsePosition = (str, index) => {
 
 const reportSingleResult = (file, str, validations, logger = defaultLogger) => {
   validations.forEach(v => {
-    const { index, length } = v
-    const { row, column, line } = parsePosition(str, index)
+    const { index, length, target } = v
+    const finalIndex = target === 'spaceAfter' ? index + length : index
+    const { row, column, line } = parsePosition(str, finalIndex)
     const offset = 20
     const start = column - offset < 0 ? 0 : column - offset
     const end = column + length + offset > line.length - 1 ? line.length : column + length + offset
     const fragment = line.substring(start, end).replace(/\n/g, '\\n')
-    logger.error(`${chalk.blue.bgWhite(file)}${file ? ':' : ''}${chalk.yellow(index)}:${chalk.yellow(row)}:${chalk.yellow(column)} - ${v.message}\n\n${fragment}\n${' '.repeat(column - start)}${chalk.red('^')}\n\n`)
+    const output = {
+      file: `${chalk.blue.bgWhite(file)}${file ? ':' : ''}`,
+      position: `${chalk.yellow(row)}:${chalk.yellow(column)}`,
+      marker: `${chalk.black.bgBlack(fragment.substr(0, column - start))}${chalk.red('^')}`,
+      oldPosition: `${chalk.yellow(finalIndex)}`,
+      oldMarker: `${' '.repeat(column - start)}${chalk.red('^')}`
+    }
+    output.headline = `${output.file}${output.position} - ${v.message}`
+    logger.error(`${output.headline}\n\n${fragment}\n${output.marker}\n`)
   })
 }
 
