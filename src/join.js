@@ -74,11 +74,7 @@ const isIgnored = (token, marks = []) => {
  */
 const join = (tokens, ignoredMarks = [], validations = [], start = 0) => {
   const ignoredPieces = isIgnored(tokens, ignoredMarks)
-  // validate startContent/endContent/spaceAfter/innerSpaceBefore
-  if (Array.isArray(tokens.validations)) {
-    tokens.validations.forEach(v =>
-      validations.push({ ...v, index: v.index + start }))
-  }
+  // innerSpaceBefore
   return [
     ignoredPieces.startContent ? tokens.rawStartContent : tokens.startContent,
     ignoredPieces.innerSpaceBefore ? tokens.rawInnerSpaceBefore : tokens.innerSpaceBefore,

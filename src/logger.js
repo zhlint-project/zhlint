@@ -35,7 +35,7 @@ const parsePosition = (str, index) => {
 const reportSingleResult = (file, str, validations, logger = defaultLogger) => {
   validations.forEach(v => {
     const { index, length, target } = v
-    const finalIndex = target === 'spaceAfter' ? index + length : index
+    const finalIndex = (target === 'spaceAfter' || target === 'endContent') ? index + length : index
     const { row, column, line } = parsePosition(str, finalIndex)
     const offset = 20
     const start = column - offset < 0 ? 0 : column - offset
