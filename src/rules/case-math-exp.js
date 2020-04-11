@@ -14,10 +14,10 @@ const messages = {
   after: char => `There should be a space after the '${char}' character.`
 }
 
-const validate = (token, type, condition) => {
+const validate = (token, type, char, condition) => {
   removeValidation(token, 'space-punctuation', 'spaceAfter')
   if (condition) {
-    addValidation(token, 'case-math-exp', 'spaceAfter', messages[type](token.content))
+    addValidation(token, 'case-math-exp', 'spaceAfter', messages[type](char))
   }
 }
 
@@ -69,18 +69,18 @@ module.exports = (token, index, group, matched, marks) => {
       ) {
         return
       }
-      validate(contentTokenBefore, 'before', contentTokenBefore.rawSpaceAfter !== ' ')
+      validate(contentTokenBefore, 'before', token.content, contentTokenBefore.rawSpaceAfter !== ' ')
       contentTokenBefore.spaceAfter = ' '
       const tokenBefore = findTokenBefore(group, token)
       if (tokenBefore !== contentTokenBefore) {
-        validate(tokenBefore, 'before', tokenBefore.rawSpaceAfter !== ' ')
+        validate(tokenBefore, 'before', token.content, tokenBefore.rawSpaceAfter !== ' ')
         tokenBefore.spaceAfter = ' '
       }
-      validate(token, 'after', token.rawSpaceAfter !== ' ')
+      validate(token, 'after', token.content, token.rawSpaceAfter !== ' ')
       token.spaceAfter = ' '
       const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
       if (tokenBeforeContentTokenAfter !== token) {
-        validate(tokenBeforeContentTokenAfter, 'after', tokenBeforeContentTokenAfter.rawSpaceAfter !== ' ')
+        validate(tokenBeforeContentTokenAfter, 'after', token.content, tokenBeforeContentTokenAfter.rawSpaceAfter !== ' ')
         tokenBeforeContentTokenAfter.spaceAfter = ' '
       }
     }
