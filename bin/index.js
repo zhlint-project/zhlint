@@ -30,18 +30,24 @@ if (argv._ && argv._.length) {
     if (argv.validate) {
       const files = glob.sync(inputFilepath)
       const invalidFiles = []
+      let errorCount = 0
       files.forEach(file => {
         console.log(`[validate] ${file}`)
         const input = fs.readFileSync(file, { encoding: 'utf8' })
         const { validations } = run(input)
         if (validations.length) {
+          errorCount += validations.length
           invalidFiles.push(file)
-          outputValidations(file, validations, console)
+          outputValidations(file, input, validations, console)
         }
       })
       if (invalidFiles.length) {
-        console.error(`[error] ${invalidFiles.join(', ')}`)
+        console.error('Invalid files:')
+        console.error('- ' + invalidFiles.join('\n- ') + '\n')
+        console.error(`Found ${errorCount} ${errorCount > 1 ? 'errors' : 'error'}.`)
         process.exit(1)
+      } else {
+        console.log(`No error found.`)
       }
       return
     }
