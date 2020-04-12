@@ -52,7 +52,6 @@ const rulesInfo = [
   { name: 'mark-hyper', value: require('./rules/mark-hyper') },
   { name: 'unify-punctuation', value: require('./rules/unify-punctuation') },
   { name: 'case-abbr', value: require('./rules/case-abbr') },
-  { name: 'case-html-entity', value: require('./rules/case-html-entity') },
   { name: 'space-full-width-content', value: require('./rules/space-full-width-content') },
   { name: 'space-punctuation', value: require('./rules/space-punctuation') },
   { name: 'case-math-exp', value: require('./rules/case-math-exp') },
@@ -63,6 +62,7 @@ const rulesInfo = [
   { name: 'case-datetime', value: require('./rules/case-datetime') },
   { name: 'case-datetime-zh', value: require('./rules/case-datetime-zh') },
   { name: 'case-ellipsis', value: require('./rules/case-ellipsis') },
+  { name: 'case-html-entity', value: require('./rules/case-html-entity') },
   { name: 'case-raw', value: require('./rules/case-raw') },
   { name: 'case-linebreak', value: require('./rules/case-linebreak') }
 ]

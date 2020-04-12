@@ -35,9 +35,12 @@ const validate = (token, type, condition) => {
   }
 }
 
-const checkSide = (spaceAfterHost, size, isRawContent, isOutside) => {
+const checkSide = (spaceAfterHost, size, isRawContent, isOutside, areBothHalfWidthContent) => {
   if (isOutside) {
     if (size === 'half-width') {
+      if (areBothHalfWidthContent) {
+        return
+      }
       validate(spaceAfterHost, 'outside-half', isRawContent && spaceAfterHost.spaceAfter !== ' ')
       spaceAfterHost.spaceAfter = ' '
     } else {
@@ -59,12 +62,20 @@ module.exports = (token, index, group, matched, marks) => {
     if (contentTokenBefore) {
       const tokenBefore = findTokenBefore(group, token)
       const spaceAfterHost = findSpaceAfterHost(group, contentTokenBefore, tokenBefore)
-      checkSide(spaceAfterHost, size, isRawContent, token.markSide === 'left')
+      checkSide(spaceAfterHost, size, isRawContent, token.markSide === 'left',
+        contentTokenAfter
+        && contentTokenBefore.type === 'content-half'
+        && contentTokenAfter.type === 'content-half'
+        && token.markSide === 'left')
     }
     if (contentTokenAfter) {
       const tokenBeforeContentAfter = findTokenBefore(group, contentTokenAfter)
       const spaceAfterHost = findSpaceAfterHost(group, token, tokenBeforeContentAfter)
-      checkSide(spaceAfterHost, size, isRawContent, token.markSide === 'right')
+      checkSide(spaceAfterHost, size, isRawContent, token.markSide === 'right',
+        contentTokenBefore
+        && contentTokenBefore.type === 'content-half'
+        && contentTokenAfter.type === 'content-half'
+        && token.markSide === 'right')
     }
   }
 }
