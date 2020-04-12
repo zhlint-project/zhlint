@@ -214,6 +214,15 @@ const addValidation = (token, name, target, message) => {
   token.validations.push(validation)
 }
 
+const hasValidation = (token, name, target) => {
+  if (!token.validations || !token.validations.length) {
+    return false
+  }
+  return validations.some(validation =>
+    target ? validation.target === target : true &&
+      name ? validation.name === name : true)
+}
+
 const removeValidation = (token, name, target) => {
   if (!token.validations) {
     return
@@ -236,5 +245,6 @@ module.exports = {
   isHyperTag,
   getMarkSide,
   addValidation,
+  hasValidation,
   removeValidation
 }
