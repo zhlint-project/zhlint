@@ -208,6 +208,8 @@ const addValidation = (token, name, target, message) => {
   } else if (target === 'endContent') {
     validation.index = token.startIndex
     validation.length = token.endIndex - token.startIndex + 1
+  } else if (target === 'innerSpaceBefore') {
+    validation.index = token.startIndex
   }
   token.validations.push(validation)
 }
