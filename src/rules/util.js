@@ -121,6 +121,33 @@ const findMarkSeq = (group, token) => {
   return seq
 }
 
+const findSpaceAfterHost = (group, firstToken, lastToken) => {
+  if (!firstToken || !lastToken) {
+    return null
+  }
+  if (firstToken === lastToken) {
+    return firstToken
+  }
+  const secondToken = findTokenAfter(group, firstToken)
+  const sideSecond = getMarkSide(secondToken)
+  const sideLast = getMarkSide(lastToken)
+  if (sideSecond === sideLast) {
+    return sideSecond === 'left' ? firstToken : lastToken
+  } else {
+    if (sideSecond === 'left') {
+      return null
+    }
+    let tempToken = lastToken
+    while (tempToken !== firstToken) {
+      if (tempToken.markSide === 'right') {
+        return tempToken
+      }
+      tempToken = findTokenBefore(group, tempToken)
+    }
+    return firstToken
+  }
+}
+
 const isInlineCode = token => {
   // html tags, raw content
   if (token.type === 'content-hyper') {
@@ -199,6 +226,7 @@ module.exports = {
   findNonMarkTokenBefore,
   findNonMarkTokenAfter,
   findMarkSeq,
+  findSpaceAfterHost,
   isInlineCode,
   isHyperTag,
   getMarkSide,

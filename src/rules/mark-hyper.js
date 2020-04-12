@@ -5,12 +5,14 @@ const {
   findTokenBefore,
   findTokenAfter,
   findMarkSeq,
+  findSpaceAfterHost,
   addValidation
 } = require('./util')
 
 const messages = {
-  before: 'There should be a space before a Markdown mark.',
   inside: 'There should be no space inside a Markdown mark.',
+  outside: 'There should be a space outside a Markdown mark.',
+  before: 'There should be a space before a Markdown mark.',
   after: 'There should be a space after a Markdown mark.'
 }
 
@@ -34,30 +36,26 @@ const checkSpace = (group, markSeq) => {
 module.exports = (token, index, group, matched, marks) => {
   if (token.type === 'mark-hyper') {
     const markSeq = findMarkSeq(group, token)
+    const tokenBeforeMarkSeq = findTokenBefore(group, markSeq[0])
     const hasSpace = checkSpace(group, markSeq)
-    const tokenBefore = findTokenBefore(group, token)
     const tokenAfter = findTokenAfter(group, token)
-    if (token.markSide === 'left') {
-      if (tokenBefore) {
-        const spaceAfter = (hasSpace && token === markSeq[0]) ? ' ' : ''
-        validate(tokenBefore, 'before', (tokenBefore.rawSpaceAfter || '') !== spaceAfter)
-        tokenBefore.spaceAfter = spaceAfter
-      }
-      if (tokenAfter) {
-        validate(token, 'inside', token.rawSpaceAfter)
-        token.spaceAfter = ''
-      }
-    }
-    else if (token.markSide === 'right') {
-      if (tokenBefore) {
-        validate(tokenBefore, 'inside', tokenBefore.rawSpaceAfter)
-        tokenBefore.spaceAfter = ''
-      }
-      if (tokenAfter) {
-        const spaceAfter = (hasSpace && token === markSeq[markSeq.length - 1]) ? ' ' : ''
-        validate(token, 'after', (token.rawSpaceAfter || '') !== spaceAfter)
-        token.spaceAfter = spaceAfter
-      }
+
+    if (token === markSeq[0]) {
+      const spaceAfterHost = tokenBeforeMarkSeq && tokenAfter
+        ? findSpaceAfterHost(group, tokenBeforeMarkSeq, markSeq[markSeq.length - 1])
+        : null
+      const seq = [tokenBeforeMarkSeq, ...markSeq].filter(Boolean)
+      seq.forEach(token => {
+        if (hasSpace) {
+          if (token === spaceAfterHost) {
+            validate(token, 'outside', token.rawSpaceAfter !== ' ')
+            token.spaceAfter = ' '
+          } else {
+            validate(token, 'inside', token.rawSpaceAfter)
+            token.spaceAfter = ''
+          }
+        }
+      })
     }
   }
 }

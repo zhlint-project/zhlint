@@ -19,6 +19,7 @@ const {
   findTokenAfter,
   findContentTokenBefore,
   findContentTokenAfter,
+  findSpaceAfterHost,
   getMarkSide,
   addValidation
 } = require('./util')
@@ -43,28 +44,32 @@ module.exports = (token, index, group, matched, marks) => {
   if (!token.type.match(/^content\-/)) {
     return
   }
-  const contentTokenBefore = findContentTokenBefore(group, token)
+
+  const tokenAfter = findTokenAfter(group, token)
   const contentTokenAfter = findContentTokenAfter(group, token)
+  const spaceAfterHost = findSpaceAfterHost(group, token, contentTokenAfter)
+
+  // same width content besides: no space
   if (contentTokenAfter && contentTokenAfter.type === token.type) {
     if (token.type === 'content-full') {
-      if (token.spaceAfter) {
-        validate(token, 'noSpace', true)
-        token.spaceAfter = ''
-      }
-      const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
-      if (tokenBeforeContentTokenAfter.spaceAfter) {
-        validate(token, 'noSpace', true)
-        tokenBeforeContentTokenAfter.spaceAfter = ''
+      // no space between 2 full-width content
+      if (spaceAfterHost) {
+        validate(spaceAfterHost, 'noSpace', spaceAfterHost.spaceAfter)
+        spaceAfterHost.spaceAfter = ''
       }
     }
     return
   }
+  // special case: content-hyper
+  // converge before&after cases into one
   if (contentTokenAfter && contentTokenAfter.type === 'content-hyper') {
     return
   }
   if (
     token.type === 'content-hyper'
   ) {
+    const tokenBefore = findTokenBefore(group, token)
+    const contentTokenBefore = findContentTokenBefore(group, token)
     if (
       token.content.match(/^<[^\/].+\/\s*>$/) ||
       token.content.match(/^<code.*>.*<\/code.*>$/)
@@ -72,22 +77,22 @@ module.exports = (token, index, group, matched, marks) => {
       // <.../>: nothing
     } else if (token.content.match(/^<[^\/].+>$/)) {
       // <...>: put space before if type different
+      // todo: ensure spaceAfterHost
       if (
         contentTokenBefore && contentTokenAfter &&
         contentTokenBefore.type !== contentTokenAfter.type
       ) {
-        if (contentTokenBefore.spaceAfter !== ' ') {
-          validate(contentTokenBefore, 'oneSpace', true)
-          contentTokenBefore.spaceAfter = ' '
-        }
+        validate(contentTokenBefore, 'oneSpace', contentTokenBefore.spaceAfter !== ' ')
+        contentTokenBefore.spaceAfter = ' '
       } else {
-        if (contentTokenBefore && contentTokenBefore.spaceAfter) {
-          validate(contentTokenBefore, 'noSpace', true)
+        if (contentTokenBefore) {
+          validate(contentTokenBefore, 'noSpace', contentTokenBefore.spaceAfter)
           contentTokenBefore.spaceAfter = ''
         }
       }
     } else if (token.content.match(/^<\/.+>$/)) {
       // </...>: put space after if type different
+      // todo: ensure spaceAfterHost
       const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
       if (
         contentTokenBefore && contentTokenAfter
@@ -104,27 +109,14 @@ module.exports = (token, index, group, matched, marks) => {
     }
     return
   }
+  // special case: no content after
   if (!contentTokenAfter) {
     return
   }
-  const tokenAfter = findTokenAfter(group, token)
-  if (tokenAfter === contentTokenAfter) {
-    if (token.spaceAfter !== ' ') {
-      addValidation(token, 'spaceAfter', 'space-full-width-content', messages.oneSpace)
-    }
-    token.spaceAfter = ' '
-  } else {
-    if (getMarkSide(tokenAfter) === 'left') {
-      if (token.spaceAfter !== ' ') {
-        addValidation(token, 'spaceAfter', 'space-full-width-content', messages.oneSpace)
-      }
-      token.spaceAfter = ' '
-    } else {
-      const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
-      if (tokenBeforeContentTokenAfter.spaceAfter !== ' ') {
-        addValidation(tokenBeforeContentTokenAfter, 'spaceAfter', 'space-full-width-content', messages.oneSpace)
-      }
-      tokenBeforeContentTokenAfter.spaceAfter = ' '
-    }
+  // different content width
+  // spaceAfterHost -> ' '
+  if (spaceAfterHost) {
+    validate(spaceAfterHost, 'oneSpace', spaceAfterHost.spaceAfter !== ' ')
+    spaceAfterHost.spaceAfter = ' '
   }
 }

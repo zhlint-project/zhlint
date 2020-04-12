@@ -49,10 +49,12 @@ module.exports = (token, index, group, matched, marks) => {
       if (token.type === 'punctuation-full') {
         validate(token, 'noAfter', token.rawSpaceAfter && !token.rawType)
         token.spaceAfter = ''
-        if (contentTokenAfter && contentTokenAfter !== token) {
+        if (contentTokenAfter) {
           const before = findTokenBefore(group, contentTokenAfter)
-          validate(before, 'noAfter', before.rawSpaceAfter && !before.rawType)
-          before.spaceAfter = ''
+          if (before !== token) {
+            validate(before, 'noAfter', before.rawSpaceAfter && !before.rawType)
+            before.spaceAfter = ''
+          }
         }
       } else {
         if (
