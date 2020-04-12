@@ -47,7 +47,8 @@ module.exports = (token, index, group, matched, marks) => {
 
   const tokenAfter = findTokenAfter(group, token)
   const contentTokenAfter = findContentTokenAfter(group, token)
-  const spaceAfterHost = findSpaceAfterHost(group, token, contentTokenAfter)
+  const tokenBeforeContentTokenAfter = contentTokenAfter ? findTokenBefore(group, contentTokenAfter) : null
+  const spaceAfterHost = findSpaceAfterHost(group, token, tokenBeforeContentTokenAfter)
 
   // same width content besides: no space
   if (contentTokenAfter && contentTokenAfter.type === token.type) {
@@ -79,7 +80,7 @@ module.exports = (token, index, group, matched, marks) => {
       // <...>: put space before if type different
       // todo: ensure spaceAfterHost
       if (
-        contentTokenBefore && contentTokenAfter &&
+        contentTokenBefore && contentTokenAfter && tokenBeforeContentTokenAfter &&
         contentTokenBefore.type !== contentTokenAfter.type
       ) {
         validate(contentTokenBefore, 'oneSpace', contentTokenBefore.spaceAfter !== ' ')
@@ -93,7 +94,6 @@ module.exports = (token, index, group, matched, marks) => {
     } else if (token.content.match(/^<\/.+>$/)) {
       // </...>: put space after if type different
       // todo: ensure spaceAfterHost
-      const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
       if (
         contentTokenBefore && contentTokenAfter
       ) {

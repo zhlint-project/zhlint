@@ -18,7 +18,12 @@ module.exports = (token, index, group, matched, marks) => {
         !tokenBeforeBefore.rawSpaceAfter
       ) {
         removeValidation(token, 'unify-punctuation', 'content')
+        tokenBeforeBefore.type = 'mark-hyper'
+        tokenBeforeBefore.markSide = 'left'
+        token.type = 'mark-hyper'
+        token.markSide = 'right'
         token.content = ';'
+        token.spaceAfter = token.rawSpaceAfter
       }
     }
   }

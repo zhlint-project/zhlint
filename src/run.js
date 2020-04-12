@@ -19,6 +19,7 @@ const hyperParseInfo = [
  *   - half-width -> full-width,
  *     - except {half}:{half}
  * - abbr: e.g. Mr. vs.
+ * - case-html-entity: &{half};
  * - space-full-width-content: content-*:
  *   - <>...</> -> space outside,
  *   - different type -> one space
@@ -43,7 +44,6 @@ const hyperParseInfo = [
  * - case-datetime: punctuation-*: 00:00:00
  * - case-datetime-zh: 0年0月0日0天0号0时0分0秒
  * - case-ellipsis: ...
- * - case-html-entity: &{half};
  * - case-raw: AC/DC
  * - case-linebreak: preserve all rawSpaceAfter includes '\n'
  */
@@ -52,6 +52,7 @@ const rulesInfo = [
   { name: 'mark-hyper', value: require('./rules/mark-hyper') },
   { name: 'unify-punctuation', value: require('./rules/unify-punctuation') },
   { name: 'case-abbr', value: require('./rules/case-abbr') },
+  { name: 'case-html-entity', value: require('./rules/case-html-entity') },
   { name: 'space-full-width-content', value: require('./rules/space-full-width-content') },
   { name: 'space-punctuation', value: require('./rules/space-punctuation') },
   { name: 'case-math-exp', value: require('./rules/case-math-exp') },
@@ -62,7 +63,6 @@ const rulesInfo = [
   { name: 'case-datetime', value: require('./rules/case-datetime') },
   { name: 'case-datetime-zh', value: require('./rules/case-datetime-zh') },
   { name: 'case-ellipsis', value: require('./rules/case-ellipsis') },
-  { name: 'case-html-entity', value: require('./rules/case-html-entity') },
   { name: 'case-raw', value: require('./rules/case-raw') },
   { name: 'case-linebreak', value: require('./rules/case-linebreak') }
 ]
