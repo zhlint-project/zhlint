@@ -151,6 +151,9 @@ const findSpaceAfterHost = (group, firstToken, lastToken) => {
 const isInlineCode = token => {
   // html tags, raw content
   if (token.type === 'content-hyper') {
+    if (token.content.match(/\n/)) {
+      return false
+    }
     if (token.content.match(/^<code.*>.*<\/code.*>$/)) {
       return true
     }
