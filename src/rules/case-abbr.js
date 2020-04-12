@@ -41,7 +41,7 @@ const hasAbbr = (token, group, abbrs) => {
           }
         }
       } else {
-        return [tokenBefore.content]
+        return [tokenBefore]
       }
     }
   }
@@ -68,7 +68,7 @@ module.exports = (token, index, group, matched, marks) => {
       result.forEach((content, i) => {
         const periodToken = group[index - i * 2]
         if (periodToken.content !== '.') {
-          removeValidation(periodToken, 'content', 'unify-punctuation')
+          removeValidation(periodToken, 'unify-punctuation', 'content')
         }
         periodToken.content = '.'
         periodToken.type = 'punctuation-half'
