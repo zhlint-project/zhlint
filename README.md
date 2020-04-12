@@ -10,20 +10,26 @@ _WIP (not published yet, currenly can use by `npm link` on this repo)_
 
 ### As CLI
 
-_not implemented yet_
-
 ```bash
-probably-zhlint --string "自动在中文和English之间加入空格"
-probably-zhlint --input my-article.md --output output.md
-probably-zhlint --fix my-article.md
+zhlint <file-pattern>
+zhlint <file-pattern> --fix
+zhlint <input-file-path> --output=<output-file-path>
+zhlint --help
 ```
 
 ### As Node.js package
 
 ```js
-const lint = require('probably-zhlint')
-// `自动在中文和 English 之间加入空格`
-console.log(lint(`自动在中文和English之间加入空格`))
+const { run, report } = require('zhlint')
+
+const value = '自动在中文和English之间加入空格'
+const { result, validations } = run(value)
+
+// print '自动在中文和 English 之间加入空格''
+console.log(result)
+
+// print validation logs
+report([{ file: 'foo.md', value, validations }])
 ```
 
 ## API
