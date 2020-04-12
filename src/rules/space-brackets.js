@@ -16,6 +16,7 @@ const {
   findTokenAfter,
   findContentTokenBefore,
   findContentTokenAfter,
+  findSpaceAfterHost,
   getMarkSide,
   removeValidation,
   addValidation
@@ -34,69 +35,36 @@ const validate = (token, type, condition) => {
   }
 }
 
-module.exports = (token, index, group, matched, marks) => {
-  // half-width: one space outside
-  // half-width: no space inside
-  // add outside space out of marks
-  if (token.type === 'mark-brackets') {
-    const tokenBefore = findTokenBefore(group, token)
-    const contentTokenBefore = findContentTokenBefore(group, token)
-    const tokenAfter = findTokenAfter(group, token)
-    const contentTokenAfter = findContentTokenAfter(group, token)
-    const { markSide } = token
-    const size = token.content.match(/[\(\)]/) ? 'half-width' : 'full-width'
-    if (markSide === 'left') {
-      if (contentTokenBefore) {
-        if (size === 'half-width' && contentTokenBefore) {
-          if (contentTokenBefore.type !== 'content-half') {
-            if (contentTokenBefore !== tokenBefore) {
-              if (getMarkSide(tokenBefore) === 'left') {
-                validate(contentTokenBefore, 'outside-half', contentTokenBefore.rawSpaceAfter !== ' ')
-                contentTokenBefore.spaceAfter = ' '
-              } else {
-                validate(tokenBefore, 'outside-half', tokenBefore.rawSpaceAfter !== ' ')
-                tokenBefore.spaceAfter = ' '
-              }
-            } else {
-              validate(contentTokenBefore, 'outside-half', contentTokenBefore.rawSpaceAfter !== ' ')
-              contentTokenBefore.spaceAfter = ' '
-            }
-          }
-        } else {
-          validate(contentTokenBefore, 'outside-full', contentTokenBefore.rawSpaceAfter)
-          contentTokenBefore.spaceAfter = ''
-        }
-      }
-      validate(token, 'inside', token.rawSpaceAfter)
-      token.spaceAfter = ''
+const checkSide = (spaceAfterHost, size, isRawContent, isOutside) => {
+  if (isOutside) {
+    if (size === 'half-width') {
+      validate(spaceAfterHost, 'outside-half', isRawContent && spaceAfterHost.spaceAfter !== ' ')
+      spaceAfterHost.spaceAfter = ' '
+    } else {
+      validate(spaceAfterHost, 'outside-full', isRawContent && spaceAfterHost.spaceAfter)
+      spaceAfterHost.spaceAfter = ''
     }
-    if (markSide === 'right') {
-      if (tokenBefore) {
-        validate(tokenBefore, 'inside', tokenBefore.rawSpaceAfter)
-        tokenBefore.spaceAfter = ''
-      }
-      if (contentTokenAfter) {
-        const contentTokenAfterBefore = findTokenBefore(group, contentTokenAfter)
-        if (size === 'half-width') {
-          if (contentTokenAfter.type !== 'content-half') {
-            if (contentTokenAfterBefore !== token) {
-              if (getMarkSide(contentTokenAfterBefore) === 'right') {
-                validate(contentTokenAfterBefore, 'outside-half', contentTokenAfterBefore.rawSpaceAfter !== ' ')
-                contentTokenAfterBefore.spaceAfter = ' '
-              } else {
-                validate(token, 'outside-half', token.rawSpaceAfter !== ' ')
-                token.spaceAfter = ' '
-              }
-            } else {
-              validate(contentTokenAfterBefore, 'outside-half', contentTokenAfterBefore.rawSpaceAfter !== ' ')
-              contentTokenAfterBefore.spaceAfter = ' '
-            }
-          }
-        } else {
-          validate(contentTokenAfterBefore, 'outside-full', contentTokenAfterBefore.rawSpaceAfter)
-          contentTokenAfterBefore.spaceAfter = ''
-        }
-      }
+  } else {
+    validate(spaceAfterHost, 'inside', isRawContent && spaceAfterHost.spaceAfter)
+    spaceAfterHost.spaceAfter = ''
+  }
+}
+
+module.exports = (token, index, group, matched, marks) => {
+  if (token.type === 'mark-brackets') {
+    const isRawContent = token.content === token.raw
+    const size = token.content.match(/[\(\)]/) ? 'half-width' : 'full-width'
+    const contentTokenBefore = findContentTokenBefore(group, token)
+    const contentTokenAfter = findContentTokenAfter(group, token)
+    if (contentTokenBefore) {
+      const tokenBefore = findTokenBefore(group, token)
+      const spaceAfterHost = findSpaceAfterHost(group, contentTokenBefore, tokenBefore)
+      checkSide(spaceAfterHost, size, isRawContent, token.markSide === 'left')
+    }
+    if (contentTokenAfter) {
+      const tokenBeforeContentAfter = findTokenBefore(group, contentTokenAfter)
+      const spaceAfterHost = findSpaceAfterHost(group, token, tokenBeforeContentAfter)
+      checkSide(spaceAfterHost, size, isRawContent, token.markSide === 'right')
     }
   }
 }
