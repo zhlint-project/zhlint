@@ -2,6 +2,7 @@ const {
   findTokenBefore,
   findTokenAfter,
   addValidation,
+  hasValidation,
   removeValidation
 } = require('./util')
 
@@ -19,22 +20,49 @@ const validate = (token, type, condition) => {
 module.exports = (token, index, group, matched, marks) => {
   if (token.raw === '.') {
     const tokenBefore = findTokenBefore(group, token)
+
+    // beginning of dot(s)
     if (!tokenBefore || tokenBefore.raw !== '.') {
-      validate(tokenBefore, 'before', tokenBefore.rawSpaceAfter)
-      tokenBefore.spaceAfter = ''
       let nextToken = findTokenAfter(group, token)
+
+      // make sure the dot(s) are ellipsis
       if (nextToken && nextToken.raw === '.') {
-        token.content = '.'
+
+        // reset the space before dots
+        removeValidation(tokenBefore, '', 'spaceAfter')
+        validate(tokenBefore, 'before',
+          !hasValidation(tokenBefore, 'spaceAfter')
+            && tokenBefore.rawSpaceAfter)
+        tokenBefore.spaceAfter = ''
+
+        // restore the dot
         removeValidation(token, '', 'content')
+        removeValidation(token, '', 'spaceAfter')
+        token.content = '.'
+        token.spaceAfter = ''
+
+        // restore next token
+        // - if next next is dot: restore next space, update next next to next
+        // - else: remove space after
         while (nextToken && nextToken.raw === '.') {
+
+          // restore next token content
           removeValidation(nextToken, '', 'content')
-          removeValidation(nextToken, '', 'spaceAfter')
-          const tempToken = findTokenAfter(group, nextToken)
-          if (tempToken && tempToken.raw !== '.') {
-            validate(nextToken, 'after', nextToken.rawSpaceAfter)
-          }
           nextToken.content = '.'
-          nextToken.spaceAfter = ''
+
+          const tempToken = findTokenAfter(group, nextToken)
+          if (tempToken) {
+            if (tempToken.raw === '.') {
+              // restore space
+              removeValidation(nextToken, '', 'spaceAfter')
+              nextToken.spaceAfter = ''
+            } else {
+              // remove space
+              validate(nextToken, 'after', nextToken.rawSpaceAfter)
+              nextToken.spaceAfter = ''
+            }
+          }
+
           nextToken = tempToken
         }
       }
