@@ -2,6 +2,7 @@ const {
   findTokenBefore,
   findContentTokenBefore,
   findContentTokenAfter,
+  findSpaceAfterHost,
   addValidation,
   removeValidation
 } = require('./util')
@@ -25,29 +26,19 @@ module.exports = (token, index, group, matched, marks) => {
     const contentTokenBefore = findContentTokenBefore(group, token)
     const contentTokenAfter = findContentTokenAfter(group, token)
     if (
-      (
-        !contentTokenBefore ||
-        contentTokenBefore.type === 'content-full'
-      ) &&
       contentTokenAfter &&
       contentTokenAfter.content.match(/^[年月日天号时分秒]$/)
     ) {
-      if (contentTokenBefore) {
+      if (contentTokenBefore && contentTokenBefore.type === 'content-full') {
         const before = findTokenBefore(group, token)
-        validate(contentTokenBefore, 'noSpace', contentTokenBefore.rawSpaceAfter)
-        contentTokenBefore.spaceAfter = ''
-        if (contentTokenBefore !== before) {
-          validate(before, 'noSpace', before.rawSpaceAfter)
-          before.spaceAfter = ''
-        }
+        const spaceAfterHost = findSpaceAfterHost(group, contentTokenBefore, before)
+        validate(spaceAfterHost, 'noSpace', contentTokenBefore.rawSpaceAfter)
+        spaceAfterHost.spaceAfter = ''
       }
       const before = findTokenBefore(group, contentTokenAfter)
-      validate(token, 'noSpace', token.rawSpaceAfter)
-      token.spaceAfter = ''
-      if (before !== token) {
-        validate(before, 'noSpace', before.rawSpaceAfter)
-        before.spaceAfter = ''
-      }
+      const spaceAfterHost = findSpaceAfterHost(group, token, before)
+      validate(spaceAfterHost, 'noSpace', token.rawSpaceAfter)
+      spaceAfterHost.spaceAfter = ''
     }
   }
 }
