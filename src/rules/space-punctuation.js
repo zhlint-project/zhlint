@@ -5,7 +5,8 @@ const {
   findContentTokenAfter,
   findNonMarkTokenBefore,
   findNonMarkTokenAfter,
-  addValidation
+  addValidation,
+  removeValidation
 } = require('./util')
 
 const messages = {
@@ -35,10 +36,12 @@ module.exports = (token, index, group, matched, marks) => {
     const nonMarkTokenAfter = findNonMarkTokenAfter(group, token)
     // no space before punctuation
     if (contentTokenBefore) {
+      removeValidation(contentTokenBefore, 'mark-raw', 'spaceAfter')
       validate(contentTokenBefore, 'noBefore', contentTokenBefore.rawSpaceAfter)
       contentTokenBefore.spaceAfter = ''
       const tokenBefore = findTokenBefore(group, token)
       if (tokenBefore !== contentTokenBefore) {
+        removeValidation(tokenBefore, 'mark-raw', 'spaceAfter')
         validate(tokenBefore, 'noBefore', tokenBefore.rawSpaceAfter)
         tokenBefore.spaceAfter = ''
       }
@@ -47,11 +50,13 @@ module.exports = (token, index, group, matched, marks) => {
     if (nonMarkTokenBefore && nonMarkTokenAfter) {
       // no space when punctuation is full-width
       if (token.type === 'punctuation-full') {
+        removeValidation(token, 'mark-raw', 'spaceAfter')
         validate(token, 'noAfter', token.rawSpaceAfter && !token.rawType)
         token.spaceAfter = ''
         if (contentTokenAfter) {
           const before = findTokenBefore(group, contentTokenAfter)
           if (before !== token) {
+            removeValidation(before, 'mark-raw', 'spaceAfter')
             validate(before, 'noAfter', before.rawSpaceAfter && !before.rawType)
             before.spaceAfter = ''
           }
@@ -69,10 +74,12 @@ module.exports = (token, index, group, matched, marks) => {
           // either side of content is full-width content
           const tokenAfter = findTokenAfter(group, token)
           if (tokenAfter === contentTokenAfter) {
+            removeValidation(token, 'mark-raw', 'spaceAfter')
             validate(token, 'oneAfter', token.rawSpaceAfter !== ' ' && !token.rawType)
             token.spaceAfter = ' '
           } else {
             const before = findTokenBefore(group, contentTokenAfter)
+            removeValidation(before, 'mark-raw', 'spaceAfter')
             validate(before, 'oneAfter', before.rawSpaceAfter !== ' ' && !before.rawType)
             before.spaceAfter = ' '
           }
