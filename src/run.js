@@ -19,7 +19,6 @@ const hyperParseInfo = [
  *   - half-width -> full-width,
  *     - except {half}:{half}
  * - abbr: e.g. Mr. vs.
- * - case-html-entity: &{half};
  * - space-full-width-content: content-*:
  *   - <>...</> -> space outside,
  *   - different type -> one space
@@ -44,6 +43,7 @@ const hyperParseInfo = [
  * - case-datetime: punctuation-*: 00:00:00
  * - case-datetime-zh: 0年0月0日0天0号0时0分0秒
  * - case-ellipsis: ...
+ * - case-html-entity: &{half};
  * - case-raw: AC/DC
  * - case-linebreak: preserve all rawSpaceAfter includes '\n'
  */

@@ -350,7 +350,7 @@ describe('lint by rule', () => {
       .toBe('汉字和 Eng(lish 之间) 需要有空格比如 half width content。')
     expect(lint('汉字和Eng（lish之间）需要有空格比如 half width content。', { rules }))
       .toBe('汉字和 Eng（lish 之间）需要有空格比如 half width content。')
-    expect(lint('汉 (字 ) 和Eng（lish之间）需（ 要）有(空格)比如 half w(i)dth content。', rules))
+    expect(lint('汉 (字 ) 和Eng（lish之间）需（ 要）有(空格)比如 half w(i)dth content。', { rules }))
       .toBe('汉 (字) 和 Eng（lish 之间）需（要）有 (空格) 比如 half w(i)dth content。')
   })
   test('unifies full-width/half-width mixed punctuation usage', () => {

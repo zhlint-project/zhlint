@@ -7,9 +7,18 @@ const lint = (...args) => run(...args).result
 test.todo = test.skip
 
 describe('lint', () => {
-  test('vuejs guide index', () => {
+  test('vuejs guide article', () => {
     const input = fs.readFileSync(
-      path.resolve(__dirname, './examples.md'),
+      path.resolve(__dirname, './example-units.md'),
+      { encoding: 'utf8' })
+    const output = fs.readFileSync(
+      path.resolve(__dirname, './example-units-fixed.md'),
+      { encoding: 'utf8' })
+    expect(lint(input)).toBe(output)
+  })
+  test('vuejs guide article', () => {
+    const input = fs.readFileSync(
+      path.resolve(__dirname, './example-article.md'),
       { encoding: 'utf8' })
     expect(lint(input)).toBe(input)
   })
