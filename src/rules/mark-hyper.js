@@ -6,7 +6,8 @@ const {
   findTokenAfter,
   findMarkSeq,
   findSpaceAfterHost,
-  addValidation
+  addValidation,
+  removeValidation
 } = require('./util')
 
 const messages = {
@@ -51,6 +52,7 @@ module.exports = (token, index, group, matched, marks) => {
             validate(token, 'outside', token.rawSpaceAfter !== ' ')
             token.spaceAfter = ' '
           } else {
+            removeValidation(token, '', 'spaceAfter')
             validate(token, 'inside', token.rawSpaceAfter)
             token.spaceAfter = ''
           }

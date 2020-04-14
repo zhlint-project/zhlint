@@ -46,6 +46,7 @@ const hyperParseInfo = [
  * - case-html-entity: &{half};
  * - case-raw: AC/DC
  * - case-linebreak: preserve all rawSpaceAfter includes '\n'
+ * - mark-raw-review: remove unnecessary validations
  */
 const rulesInfo = [
   { name: 'mark-raw', value: require('./rules/mark-raw') },
@@ -64,7 +65,8 @@ const rulesInfo = [
   { name: 'case-ellipsis', value: require('./rules/case-ellipsis') },
   { name: 'case-html-entity', value: require('./rules/case-html-entity') },
   { name: 'case-raw', value: require('./rules/case-raw') },
-  { name: 'case-linebreak', value: require('./rules/case-linebreak') }
+  { name: 'case-linebreak', value: require('./rules/case-linebreak') },
+  // { name: 'mark-raw-review', value: require('./rules/mark-raw-review') }
 ]
 
 const arrToMap = arr => arr.reduce((current, { name, value }) => {

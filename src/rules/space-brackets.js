@@ -41,14 +41,14 @@ const checkSide = (spaceAfterHost, size, isRawContent, isOutside, areBothHalfWid
       if (areBothHalfWidthContent) {
         return
       }
-      validate(spaceAfterHost, 'outside-half', isRawContent && spaceAfterHost.spaceAfter !== ' ')
+      validate(spaceAfterHost, 'outside-half', isRawContent && spaceAfterHost.rawSpaceAfter !== ' ')
       spaceAfterHost.spaceAfter = ' '
     } else {
-      validate(spaceAfterHost, 'outside-full', isRawContent && spaceAfterHost.spaceAfter)
+      validate(spaceAfterHost, 'outside-full', isRawContent && spaceAfterHost.rawSpaceAfter)
       spaceAfterHost.spaceAfter = ''
     }
   } else {
-    validate(spaceAfterHost, 'inside', isRawContent && spaceAfterHost.spaceAfter)
+    validate(spaceAfterHost, 'inside', isRawContent && spaceAfterHost.rawSpaceAfter)
     spaceAfterHost.spaceAfter = ''
   }
 }

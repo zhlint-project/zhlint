@@ -92,7 +92,7 @@ module.exports = (token, index, group, matched, marks) => {
   // x a|b|c
   if (token.type === 'punctuation-half' && token.content === '|') {
     const tokenBefore = findTokenBefore(group, token)
-    if (tokenBefore.content !== '|') {
+    if (tokenBefore && tokenBefore.content !== '|') {
       const tokens = []
       let nextToken = token
       while (nextToken && nextToken.content === '|') {
