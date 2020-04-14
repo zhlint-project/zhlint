@@ -116,7 +116,8 @@ const run = (str, options = {}) => {
     }]
   }
 
-  const validations = []
+  const allValidations = []
+  const allIgnoredMarks = []
 
   const finalData = matchCallArray(hyperParse, hyperParseMap)
     .reduce((current, parse) => parse(current), data)
@@ -124,11 +125,18 @@ const run = (str, options = {}) => {
     const result = parse(value, marks)
     const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules, logger)
     matchCallArray(rules, ruleMap).forEach(rule => processRule(result, rule))
+    ignoredMarks.forEach(mark => allIgnoredMarks.push(mark))
     return {
       start, end,
-      value: join(result.tokens, ignoredMarks, validations, start)
+      value: join(result.tokens, ignoredMarks, allValidations, start)
     }
   }))
+
+  const validations = allValidations.filter(({ index }) =>
+    allIgnoredMarks.length
+      ? allIgnoredMarks.some(
+        ({ start, end }) => index >= start && index <= end)
+      : true)
 
   return { result, validations }
 }
