@@ -122,8 +122,14 @@ const findMarkSeq = (group, token) => {
 }
 
 const findSpaceAfterHost = (group, firstToken, lastToken) => {
-  if (!firstToken || !lastToken) {
+  if (!firstToken && !lastToken) {
     return null
+  }
+  if (!firstToken) {
+    return lastToken
+  }
+  if (!lastToken) {
+    return firstToken
   }
   if (firstToken === lastToken) {
     return firstToken

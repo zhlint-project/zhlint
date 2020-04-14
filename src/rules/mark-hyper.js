@@ -39,12 +39,9 @@ module.exports = (token, index, group, matched, marks) => {
     const markSeq = findMarkSeq(group, token)
     const tokenBeforeMarkSeq = findTokenBefore(group, markSeq[0])
     const hasSpace = checkSpace(group, markSeq)
-    const tokenAfter = findTokenAfter(group, token)
 
     if (token === markSeq[0]) {
-      const spaceAfterHost = tokenBeforeMarkSeq && tokenAfter
-        ? findSpaceAfterHost(group, tokenBeforeMarkSeq, markSeq[markSeq.length - 1])
-        : null
+      const spaceAfterHost = findSpaceAfterHost(group, tokenBeforeMarkSeq, markSeq[markSeq.length - 1])
       const seq = [tokenBeforeMarkSeq, ...markSeq].filter(Boolean)
       seq.forEach(token => {
         if (hasSpace) {
@@ -56,6 +53,9 @@ module.exports = (token, index, group, matched, marks) => {
             validate(token, 'inside', token.rawSpaceAfter)
             token.spaceAfter = ''
           }
+        } else {
+          removeValidation(token, '', 'spaceAfter')
+          token.spaceAfter = ''
         }
       })
     }
