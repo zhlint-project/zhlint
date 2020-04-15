@@ -4,7 +4,15 @@ A linting tool for Chinese text content.
 
 ## How to install
 
-_WIP (not published yet, currenly can use by `npm link` on this repo, or use the standalone version from `dist/zhlint.js`, which need you to run `yarn build` first)_
+You could easily install `zhlint` through `npm` or `yarn`:
+
+```bash
+# install through npm
+npm install zhlint -g
+
+# or through yarn
+yarn global add zhlint
+```
 
 ## Usage
 
