@@ -4,7 +4,7 @@ A linting tool for Chinese text content.
 
 ## How to install
 
-_WIP (not published yet, currenly can use by `npm link` on this repo)_
+_WIP (not published yet, currenly can use by `npm link` on this repo, or use the standalone version from `dist/zhlint.js`, which need you to run `yarn build` first)_
 
 ## Usage
 
@@ -25,29 +25,33 @@ zhlint <input-file-path> --output=<output-file-path>
 zhlint --help
 ```
 
+The validation report might look like this:
+
+![](./screenshot-cli.png)
+
 ### As Node.js package
 
 ```js
 const { run, report } = require('zhlint')
 
 const value = '自动在中文和English之间加入空格'
-const { result, validations } = run(value)
+const output = run(value)
 
 // print '自动在中文和 English 之间加入空格''
-console.log(result)
+console.log(output.result)
 
 // print validation report
-report([{ file: 'foo.md', value, validations }])
+report([output])
 ```
 
 And the format of validation report is more like this:
 
 ```bash
-foo.md:1:6 - There should be a space between a half-width content and a full-width content
+1:6 - There should be a space between a half-width content and a full-width content
 
 自动在中文和English之间加入空格
            ^
-foo.md:1:13 - There should be a space between a half-width content and a full-width content
+1:13 - There should be a space between a half-width content and a full-width content
 
 自动在中文和English之间加入空格
                   ^
@@ -56,6 +60,12 @@ Invalid files:
 
 Found 2 errors.
 ```
+
+### As a standalone package
+
+You could find a JavaScript file `dist/zhlint.js` as a standalone version. To use it, for example, you can directly add it into your browser as a `<script>` tag. Then there would be a global variable `zhlint` for you.
+
+![](./screenshot-browser.png)
 
 #### API
 
@@ -72,19 +82,20 @@ Found 2 errors.
 
 #### Other type defs and advanced usage
 
-- `Result`: `{ file?: string, value: string, validations: Validation[] }`
+- `Result`: `{ file?: string, origin: string, result: string, validations: Validation[] }`
     - `file`: The file name. It's an optional field which is only used in CLI.
-    - `value`: the finally fixed text content.
+    - `origin`: the original text content.
+    - `result`: the finally fixed text content.
     - `validations`: All the validation information.
 - `Validation`: `{ index: number, length: number, name: string, target: string, message: string }`
   - `index`: The index of the target token in the input string.
   - `length`: The length of the target token in the input string.
-  - `name`: The name of the rule that the token disobeys to.
-  - `target`: The target part of the target token, like the `content` or the `spaceAfter` that, etc.
+  <!-- - `name`: The name of the rule that the token disobeys to. -->
+  <!-- - `target`: The target part of the target token, like the `content` or the `spaceAfter` that, etc. -->
   - `message`: The description of this validation in natural language.
 - `Options`: `{ rules?: string[], hyperParse?: string[], ignoredCases?: IgnoredCase[], logger?: Console }`: Customize your own rules and 
-    - `rules`: customize the linting rules by their names, could be `undefined` which means just use the default [rules](./src/rules).
-    - `hyperParse`: customize the hyper parser by their names, could be `undefined` which means just use default [Markdown parser](./src/parsers) and the [Hexo variables parser](./src/parsers).
+    - `rules`: customize the linting rules by their names, could be `undefined` which means just use the default [rules](https://github.com/Jinjiang/zhlint/tree/master/src/rules).
+    - `hyperParse`: customize the hyper parser by their names, could be `undefined` which means just use default [ignored cases parser](https://github.com/Jinjiang/zhlint/tree/master/src/parsers/ignore.js), [Markdown parser](https://github.com/Jinjiang/zhlint/tree/master/src/parsers/md.js) and the [Hexo tags parser](https://github.com/Jinjiang/zhlint/tree/master/src/parsers/hexo.js).
     - `ignoredCases`: provide exception cases which you would like to skip.
     - `logger`: same to the parameter in `report(...)`.
 - `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
@@ -141,7 +152,9 @@ run(str, { ignoredCases: { textStart: '( ', textEnd: ' )' }})
 
 ## Supported rules
 
-Almost the rules come from [the Wiki page of Vue.js Chinese website](https://github.com/vuejs/cn.vuejs.org/wiki).
+_Almost the rules come from the past translation experiences in [W3C HTML Chinese interest group](https://www.w3.org/html/ig/zh/wiki/Main_Page) and [Vue.js Chinese docsite](https://github.com/vuejs/cn.vuejs.org/wiki)._
+
+_... and this part might be controversial. So if you don't feel well at some point, we definitely would love to know and improve. Opening an [issue](https://github.com/jinjiang/zhlint/issues) is always welcome. Then we could discuss about the possible better option or decision._
 
 - `mark-raw`: keep one space out of the inline code in markdown
     - ``text`text`text`` -> ``text `text` text``
@@ -174,7 +187,3 @@ Almost the rules come from [the Wiki page of Vue.js Chinese website](https://git
 - `case-raw`: deal with the inline code in markdown specially to avoid unpredictable result
     - `` `Vue.nextTick`/`vm.$nextTick` ``
 - `case-linebreak`: deal with the linebreak (2 spaces at the end of a line) in markdown specially to avoid unpredictable result
-
-## Contribute
-
-Feel free to contribute in any way.
