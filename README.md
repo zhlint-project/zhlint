@@ -135,6 +135,8 @@ run(str, { ignoredCases: { textStart: '( ', textEnd: ' )' }})
 
 ## Supported linting rules
 
+Almost the rules come from [the Wiki page of Vue.js Chinese website](https://github.com/vuejs/cn.vuejs.org/wiki).
+
 - `mark-raw`: keep one space out of the inline code in markdown
     - ``text`text`text`` -> ``text `text` text``
 - `mark-hyper`: move the space outside of the markdown marks
@@ -166,10 +168,6 @@ run(str, { ignoredCases: { textStart: '( ', textEnd: ' )' }})
 - `case-raw`: deal with the inline code in markdown specially to avoid unpredictable result
     - `` `Vue.nextTick`/`vm.$nextTick` ``
 - `case-linebreak`: deal with the linebreak (2 spaces at the end of a line) in markdown specially to avoid unpredictable result
-
-## Reference
-
-[The Wiki page of Vue.js Chinese website](https://github.com/vuejs/cn.vuejs.org/wiki)
 
 ## Contribute
 
