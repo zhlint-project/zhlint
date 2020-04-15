@@ -133,7 +133,13 @@ or just pass it through as an option:
 run(str, { ignoredCases: { textStart: '( ', textEnd: ' )' }})
 ```
 
-## Supported linting rules
+## Supported preproccessors
+
+- `ignore`: find all ignored pieces by the HTML comment `<!-- zhlint ignore: ... -->`
+- `hexo`: find all Hexo tags to avoid them being parsed.
+- `markdown`: parse by markdown syntax and find all block-level texts and inline-level marks.
+
+## Supported rules
 
 Almost the rules come from [the Wiki page of Vue.js Chinese website](https://github.com/vuejs/cn.vuejs.org/wiki).
 
