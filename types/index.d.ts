@@ -25,6 +25,6 @@ type Validation = {
   message: string;
 }
 
-export type run = (str: string, options: Options) => Result
+export function run (str: string, options?: Options): Result
 
-export type report = (resultList: Result[], logger: Console) => number | void
+export function report(resultList: Result[], logger?: Console): number | void
