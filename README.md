@@ -1,4 +1,4 @@
-# zhlint
+# <img src="./logo.svg" style="vertical-align: middle;"> zhlint
 
 A linting tool for Chinese text content.
 
