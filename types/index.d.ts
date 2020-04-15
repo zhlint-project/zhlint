@@ -1,7 +1,8 @@
 type Options = {
-  rules: string[];
-  hyperParse: string[];
-  ignoredCases: IgnoredCase[];
+  rules?: string[];
+  hyperParse?: string[];
+  ignoredCases?: IgnoredCase[];
+  logger?: Console;
 }
 
 type IgnoredCase = {
@@ -12,8 +13,9 @@ type IgnoredCase = {
 }
 
 type Result = {
-  file: string;
-  value: string;
+  file?: string;
+  origin: string;
+  result: string;
   validations: Validation[];
 }
 
@@ -23,6 +25,6 @@ type Validation = {
   message: string;
 }
 
-export const run = (file: string, str: string, options: Options): string
+export type run = (str: string, options: Options) => Result
 
-export const report = (resultList: Result[], logger: Console): number | void
+export type report = (resultList: Result[], logger: Console) => number | void

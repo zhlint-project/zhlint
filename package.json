@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "jest --watchAll",
     "test": "jest",
+    "build": "webpack",
     "docs": "vuepress dev",
     "docs:build": "rm -Rf docs && vuepress build -d docs"
   },
@@ -30,7 +31,9 @@
   "homepage": "https://github.com/Jinjiang/zhlint#readme",
   "devDependencies": {
     "jest": "^24.8.0",
-    "vuepress": "^1.4.1"
+    "vuepress": "^1.4.1",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   },
   "dependencies": {
     "chalk": "^4.0.0",

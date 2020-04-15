@@ -138,7 +138,7 @@ const run = (str, options = {}) => {
         ({ start, end }) => index >= start && index <= end)
       : true)
 
-  return { result, validations }
+  return { origin: str, result, validations }
 }
 
 module.exports = run

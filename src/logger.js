@@ -1,16 +1,16 @@
-const fs = require('fs')
-const { Console } = require('console')
 const chalk = require('chalk')
 
-const stdout = global.__DEV__
-  ? fs.createWriteStream('./stdout.log', { encoding: 'utf-8' })
-  : process.stdout
+let stdout = process.stdout
+let stderr = process.stderr
+let defaultLogger = console
 
-const stderr = global.__DEV__
-  ? fs.createWriteStream('./stderr.log', { encoding: 'utf-8' })
-  : process.stderr
-
-const defaultLogger = global.__DEV__ ? new Console({ stdout, stderr }) : console
+if (global.__DEV__) {
+  const fs = require('fs')
+  const { Console } = require('console')
+  stdout = fs.createWriteStream('./stdout.log', { encoding: 'utf-8' })
+  stderr = fs.createWriteStream('./stderr.log', { encoding: 'utf-8' })
+  defaultLogger = new Console({ stdout, stderr })
+}
 
 const parsePosition = (str, index) => {
   const rows = str.split('\n')
@@ -42,7 +42,7 @@ const reportSingleResult = (file, str, validations, logger = defaultLogger) => {
     const end = column + length + offset > line.length - 1 ? line.length : column + length + offset
     const fragment = line.substring(start, end).replace(/\n/g, '\\n')
     const output = {
-      file: `${chalk.blue.bgWhite(file)}${file ? ':' : ''}`,
+      file: `${chalk.blue.bgWhite(file || '')}${file ? ':' : ''}`,
       position: `${chalk.yellow(row)}:${chalk.yellow(column)}`,
       marker: `${chalk.black.bgBlack(fragment.substr(0, column - start))}${chalk.red('^')}`,
       oldPosition: `${chalk.yellow(finalIndex)}`,
@@ -55,8 +55,8 @@ const reportSingleResult = (file, str, validations, logger = defaultLogger) => {
 
 const report = (resultList, logger = defaultLogger) => {
   let errorCount = 0
-  const invalidFiles = resultList.map(({ file, value, validations }) => {
-    reportSingleResult(file, value, validations, logger)
+  const invalidFiles = resultList.map(({ file, origin, validations }) => {
+    reportSingleResult(file, origin, validations, logger)
     errorCount += validations.length
     return validations.length ? file : ''
   }).filter(Boolean)

@@ -31,11 +31,11 @@ if (argv._ && argv._.length) {
     const files = glob.sync(filePattern)
     const resultList = files.map(file => {
       console.log(`[start] ${file}`)
-      const value = fs.readFileSync(file, { encoding: 'utf8' })
-      const { result, validations } = run(value)
+      const origin = fs.readFileSync(file, { encoding: 'utf8' })
+      const { result, validations } = run(origin)
       return {
         file,
-        value,
+        origin,
         result,
         validations
       }
