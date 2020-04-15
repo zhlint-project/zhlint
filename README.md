@@ -133,7 +133,7 @@ or just pass it through as an option:
 run(str, { ignoredCases: { textStart: '( ', textEnd: ' )' }})
 ```
 
-## Supported preproccessors
+## Supported preproccessors (hyper parsers)
 
 - `ignore`: find all ignored pieces by the HTML comment `<!-- zhlint ignore: ... -->`
 - `hexo`: find all Hexo tags to avoid them being parsed.
