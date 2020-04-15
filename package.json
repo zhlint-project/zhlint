@@ -9,7 +9,9 @@
   "types": "types/index.d.ts",
   "scripts": {
     "dev": "jest --watchAll",
-    "test": "jest"
+    "test": "jest",
+    "docs": "vuepress dev",
+    "docs:build": "rm -Rf docs && vuepress build -d docs"
   },
   "repository": {
     "type": "git",
@@ -27,7 +29,8 @@
   },
   "homepage": "https://github.com/Jinjiang/zhlint#readme",
   "devDependencies": {
-    "jest": "^24.8.0"
+    "jest": "^24.8.0",
+    "vuepress": "^1.4.1"
   },
   "dependencies": {
     "chalk": "^4.0.0",
