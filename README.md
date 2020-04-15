@@ -1,6 +1,6 @@
 # zhlint
 
-A linting tool for Chinese language.
+A linting tool for Chinese text content.
 
 ## How to install
 
@@ -11,9 +11,17 @@ _WIP (not published yet, currenly can use by `npm link` on this repo)_
 ### As CLI
 
 ```bash
+# glob files, lint them, and print validation report,
+# and exit with code `1` if there is any error found. 
 zhlint <file-pattern>
+
+# glob files and fix their all possilbly found errors.
 zhlint <file-pattern> --fix
+
+# lint the file and output fixed content into another file
 zhlint <input-file-path> --output=<output-file-path>
+
+# print usage info
 zhlint --help
 ```
 
@@ -28,80 +36,68 @@ const { result, validations } = run(value)
 // print '自动在中文和 English 之间加入空格''
 console.log(result)
 
-// print validation logs
+// print validation report
 report([{ file: 'foo.md', value, validations }])
 ```
 
-## API
+And the format of validation report is more like this:
 
-_lack documentation here_
+```
+foo.md:1:6 - There should be a space between a half-width content and a full-width content
 
-`lint(str, rules, hyperParse, ignoredCases)`
+自动在中文和English之间加入空格
+           ^
+foo.md:1:13 - There should be a space between a half-width content and a full-width content
 
-- `str`: The text content you want to lint.
-- `rules`: customize your own linting rules, could be `undefined` which means just use the default [rules](./src/rules).
-- `hyperParse`: customize your own hyper parser, could be `undefined` which means just use default [Markdown parser](./src/parsers/md.js).
-- `ignoredCases`: provide exception cases which you would like to skip, which follows format `{ prefix?, textStart, textEnd?, suffix? }` inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
+自动在中文和English之间加入空格
+                  ^
+Invalid files:
+- foo.md
 
-## Supported cases by default
-
-_lack documentation here_
-
-参考自 [Vue.js 中文官网翻译约定](https://github.com/vuejs/cn.vuejs.org/wiki)
-
-```js
-// `自动在中文和 English 之间加入空格`
-lint(`自动在中文和English之间加入空格`)
-// `自动将半角标点符号统一为全角标点符号，并且去掉空格。`
-lint(`自动将半角标点符号统一为全角标点符号, 并且去掉空格.`)
-// `为括号特殊统一为半角 (并确保外侧和其它文字之间加入空格)。`
-lint(`为括号特殊统一为半角（并确保外侧和其它文字之间加入空格）。`)
-// `为‘引号’保留全角/半角状态，半角 '引号' 外侧和其它文字之间加入空格。`
-lint(`为‘引号’保留全角/半角状态，半角'引号'外侧和其它文字之间加入空格。`)
-// `支持 [Markdown](https://en.wikipedia.org/wiki/Markdown) 语法`
-lint(`支持[Markdown](https://en.wikipedia.org/wiki/Markdown)语法`)
-// `统一多种引号字符：“你們要記住國父說的‘青年要立志做大事，不要做大官’這句話。”`
-lint(`统一多种引号字符：「你們要記住國父說的『青年要立志做大事，不要做大官』這句話。」`)
-// `特殊案例之数学公式和日期中的空格：1 + 1 = 2、8 / 4 = 2、1/2、15/02/2020`
-lint(`特殊案例之数学公式和日期中的空格：1+1=2、8/4=2、1/2、15/02/2020`)
-// `特殊案例之中文单位的日期中的空格：2020年2月15日`
-lint(`特殊案例之中文单位的日期中的空格：2020 年 2 月 15 日`)
-// `特殊案例之英文时间中的冒号：2020/2/15 12:00`
-lint(`特殊案例之英文时间中的冒号：2020/2/15 12:00`)
-// `可以忽略某些规则，比如：汉字和English之间需要有空格`
+Found 2 errors.
 ```
 
-## Other features
+#### API
 
-### Customizing own linting rules
+- `run(str: string, options: Options): { result: string, validations: Validation[] }`: Lint a certain file.
+    - `str`: The text content you want to lint.
+    - `Options`: `{ rules: string[], hyperParse: string[], ignoredCases: IgnoredCase[], logger: Console }`: Customize your own rules and 
+        - `rules`: customize the linting rules by their names, could be `undefined` which means just use the default [rules](./src/rules).
+        - `hyperParse`: customize the hyper parser by their names, could be `undefined` which means just use default [Markdown parser](./src/parsers) and the [Hexo variables parser](./src/parsers).
+        - `ignoredCases`: provide exception cases which you would like to skip, which follows a certain format inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
+        - `logger`: the `Console` object which would print things out about the validation report, etc. By default it would be the default `console` object.
 
-_lack documentation here_
+- `report(results: Result[]): void`: Print out the validation reports for each file.
+    - `results`: An array for all linted results.
 
-```js
-lint(`...`, ['space-full-width-content'])
-lint(`...`, [(group, token, index) => {...}])
-```
+- other TypeScript defs
+    - `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
+    - `Result`: `{ file: string, value: string, validations: Validation[] }`
+    - `Validation`: `{ index: number, length: number, name: string, target: string, message: string }`
 
-### Customizing own hyper parser
-
-_lack documentation here_
-
-```js
-lint(`...`, undefined,
-  str => [
-    { value, start, end, marks: [...] },
-    ...
-  ]
-)
-```
-
-### Customizing ignored cases
+## Features
 
 _lack documentation here_
 
-```js
+- setup ignored cases
+- markdown syntax support
+- hexo template syntax support
+
+## Supported linting rules
+
+_lack documentation here_
+
+<!-- ```js
 lint(`可以忽略某些规则，比如：汉字和English之间需要有空格`,
   undefined, undefined,
   [{ textStart: `和English之间` }]
 )
-```
+``` -->
+
+## Reference
+
+[The Wiki page of Vue.js Chinese website](https://github.com/vuejs/cn.vuejs.org/wiki)
+
+## Contribute
+
+Feel free to contribute in any way.
