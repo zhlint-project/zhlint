@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // CLI
-// - fix, validate, output
+// - validate (by default), fix, output, help
 
 const fs = require('fs')
 const minimist = require('minimist')
