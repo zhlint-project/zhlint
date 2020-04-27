@@ -20,8 +20,8 @@ const fullWidthMap = {
 }
 
 const messages = {
-  full: ({ origin, result }) => `The puncatuation \`${origin}\` should be full-width as \`${result}\`.`,
-  half: ({ origin, result }) => `The puncatuation \`${origin}\` should be half-width as \`${result}\`.`,
+  full: ({ origin, result }) => `The punctuation \`${origin}\` should be full-width as \`${result}\`.`,
+  half: ({ origin, result }) => `The punctuation \`${origin}\` should be half-width as \`${result}\`.`,
   bracketStart: ({ origin, result }) => `The left bracket \`${origin}\` should be full-width as \`${result}\`.`,
   bracketEnd: ({ origin, result }) => `The right bracket \`${origin}\` should be full-width as \`${result}\`.`
 }
@@ -42,7 +42,7 @@ const validate = (token, type, args, condition) => {
 module.exports = (token, index, group, matched, marks) => {
   // full-width: comma, full stop, colon, quotes
   // half-width: brackets
-  // no change for half-width puncatuation between half-width content without space
+  // no change for half-width punctuation between half-width content without space
   if (token.type === 'punctuation-half') {
     const contentTokenBefore = findContentTokenBefore(group, token)
     const contentTokenAfter = findContentTokenAfter(group, token)
