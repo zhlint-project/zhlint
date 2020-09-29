@@ -20,7 +20,7 @@ const parseIngoredCase = text => {
 
 module.exports = data => {
   const { ignoredByRules, raw } = data
-  const matcher = /<\!\-\-\szhlint\signore\:\s*(.+?)\s*\-\-\>/g
+  const matcher = /<\!\-\-\s*zhlint\s*ignore\:\s*(.+?)\s*\-\-\>/g
   let result
   while ((result = matcher.exec(raw)) !== null) {
     const ignoredCase = parseIngoredCase(result[1])
