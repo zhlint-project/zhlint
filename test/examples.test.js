@@ -42,15 +42,16 @@ const expectedValidationsInfo = {
 }
 
 describe('lint', () => {
-  test('vuejs guide article', () => {
+  test('units', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-units.md'),
       { encoding: 'utf8' })
     const output = fs.readFileSync(
       path.resolve(__dirname, './example-units-fixed.md'),
       { encoding: 'utf8' })
-    const { result, validations } = run(input)
+    const { result, validations, disabled } = run(input)
     expect(result).toBe(output)
+    expect(!disabled).toBeTruthy()
     const validationsByLine = {}
     validations.forEach(v => {
       const { index, length, target } = v
@@ -65,6 +66,24 @@ describe('lint', () => {
       expect(Object.keys(lineValidations).length).toBe(info.length)
       info.forEach(column => expect(lineValidations[column]).toBeTruthy())
     })
+  })
+  test('ignore HTML comment', () => {
+    const input = fs.readFileSync(
+      path.resolve(__dirname, './example-ignore.md'),
+      { encoding: 'utf8' })
+    const { result, validations, disabled } = run(input)
+    expect(result).toBe(input)
+    expect(validations.length).toBe(0)
+    expect(!disabled).toBeTruthy()
+  })
+  test('disabled HTML comment', () => {
+    const input = fs.readFileSync(
+      path.resolve(__dirname, './example-disabled.md'),
+      { encoding: 'utf8' })
+    const { result, validations, disabled } = run(input)
+    expect(result).toBe(input)
+    expect(validations.length).toBe(0)
+    expect(disabled).toBe(true)
   })
   test('vuejs guide article', () => {
     const input = fs.readFileSync(

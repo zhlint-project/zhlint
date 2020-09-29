@@ -89,10 +89,16 @@ const matchCallArray = (calls, map) => calls.map(call => {
 }).filter(Boolean)
 
 const run = (str, options = {}) => {
+  const logger = options.logger || defaultLogger
+
+  const disabledMatcher = /<\!\-\-\s*zhlint\s*disabled\s*\-\-\>/g
+  if (str.match(disabledMatcher)) {
+    return { origin: str, result: str, validations: [], disabled: true }
+  }
+
   const rules = options.rules || rulesInfo.map(item => item.name)
   const hyperParse = options.hyperParse || hyperParseInfo.map(item => item.name)
   const ignoredCases = options.ignoredCases || []
-  const logger = options.logger || defaultLogger
 
   if (typeof hyperParse === 'function') {
     hyperParse = [hyperParse]
