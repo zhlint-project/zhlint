@@ -101,7 +101,7 @@ You could find a JavaScript file `dist/zhlint.js` as a standalone version. To us
   <!-- - `name`: The name of the rule that the token disobeys to. -->
   <!-- - `target`: The target part of the target token, like the `content` or the `spaceAfter` that, etc. -->
   - `message`: The description of this validation in natural language.
-- `Options`: `{ rules?: string[], hyperParse?: string[], ignoredCases?: IgnoredCase[], logger?: Console }`: Customize your own rules and 
+- `Options`: `{ rules?: string[], hyperParse?: string[], ignoredCases?: IgnoredCase[], logger?: Console }`: Customize your own rules and other advanced options.
     - `rules`: customize the linting rules by their names, could be `undefined` which means just use the default [rules](https://github.com/Jinjiang/zhlint/tree/master/src/rules).
     - `hyperParse`: customize the hyper parser by their names, could be `undefined` which means just use default [ignored cases parser](https://github.com/Jinjiang/zhlint/tree/master/src/parsers/ignore.js), [Markdown parser](https://github.com/Jinjiang/zhlint/tree/master/src/parsers/md.js) and the [Hexo tags parser](https://github.com/Jinjiang/zhlint/tree/master/src/parsers/hexo.js).
     - `ignoredCases`: provide exception cases which you would like to skip.
