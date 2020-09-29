@@ -1,3 +1,0 @@
-files:
-  - source: README.md
-    translation: /%file_name%.%locale%.md
