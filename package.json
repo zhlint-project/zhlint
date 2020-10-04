@@ -1,6 +1,6 @@
 {
   "name": "zhlint",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "A linting tool for Chinese language.",
   "bin": {
     "zhlint": "bin/index.js"
