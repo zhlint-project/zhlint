@@ -38,11 +38,13 @@ module.exports = (token, index, group, matched, marks) => {
         contentTokenBefore.content.match(/^[\d\.]+$/) &&
         contentTokenAfter.content.match(/^[\d\.]+$/)
       ) {
+        const nonMarkTokenBefore = findNonMarkTokenBefore(group, contentTokenBefore)
+        const nonMarkTokenAfter = findNonMarkTokenAfter(group, contentTokenAfter)
         if (
           token.content === '/' &&
           (
-            findNonMarkTokenBefore(group, contentTokenBefore).content === '/' ||
-            findNonMarkTokenAfter(group, contentTokenAfter).content === '/'
+            nonMarkTokenBefore && nonMarkTokenBefore.content === '/' ||
+            nonMarkTokenAfter && nonMarkTokenAfter.content === '/'
           )
         ) {
           return
@@ -50,8 +52,8 @@ module.exports = (token, index, group, matched, marks) => {
         if (
           token.content === '-' &&
           (
-            findNonMarkTokenBefore(group, contentTokenBefore).content === '-' ||
-            findNonMarkTokenAfter(group, contentTokenAfter).content === '-'
+            nonMarkTokenBefore && nonMarkTokenBefore.content === '-' ||
+            nonMarkTokenAfter && nonMarkTokenAfter.content === '-'
           )
         ) {
           return
