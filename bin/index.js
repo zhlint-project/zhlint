@@ -14,15 +14,38 @@ const help = () => console.log(`
 This is zhlint!
 
 Usage:
-zhlint <file-pattern>
-zhlint <file-pattern> --fix
-zhlint <input-file-path> --output=<output-file-path>
-zhlint --help
+  zhlint <file-pattern>[, ...]
+  zhlint <file-pattern>[, ...] --fix
+  zhlint --fix <file-pattern>
+  zhlint --fix=<file-pattern>
+  zhlint <input-file-path> --output <output-file-path>
+  zhlint <input-file-path> --output=<output-file-path>
+  zhlint --help
+
+Examples:
+  zhlint foo.md
+  zhlint foo.md --fix
+  zhlint *.md
+  zhlint *.md --fix
+  zhlint foo.md bar.md
+  zhlint foo.md bar.md --fix
+  zhlint --fix foo.md
+  zhlint --fix=foo.md
+  zhlint --fix *.md
+  zhlint --fix=*.md
+  zhlint foo.md --output dest.md
+  zhlint foo.md --output=dest.md
 `.trim())
 
 if (argv.h || argv.help) {
   help()
   return
+}
+
+// To support other CLI conventions like `lint-staged`.
+if (typeof argv.fix === 'string') {
+  argv._.push(argv.fix)
+  argv.fix = true
 }
 
 if (argv._ && argv._.length) {
