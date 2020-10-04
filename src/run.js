@@ -8,6 +8,7 @@ const { defaultLogger } = require('./logger')
 const hyperParseInfo = [
   { name: 'ignore', value: require('./parsers/ignore') },
   { name: 'hexo', value: require('./parsers/hexo') },
+  { name: 'vuepress', value: require('./parsers/vuepress') },
   { name: 'markdown', value: require('./parsers/md') }
 ]
 

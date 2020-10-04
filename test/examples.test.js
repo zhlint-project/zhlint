@@ -85,6 +85,17 @@ describe('lint', () => {
     expect(validations.length).toBe(0)
     expect(disabled).toBe(true)
   })
+  test('support vuepress-special syntax', () => {
+    const input = fs.readFileSync(
+      path.resolve(__dirname, './example-vuepress.md'),
+      { encoding: 'utf8' })
+    const output = fs.readFileSync(
+      path.resolve(__dirname, './example-vuepress-fixed.md'),
+      { encoding: 'utf8' })
+    const { result, validations } = run(input)
+    expect(result).toBe(output)
+    expect(validations.length).toBe(10)
+  })
   test('vuejs guide article', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-article.md'),
