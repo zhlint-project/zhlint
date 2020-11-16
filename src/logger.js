@@ -55,6 +55,7 @@ const reportSingleResult = (file, str, validations, logger = defaultLogger) => {
 
 const report = (resultList, logger = defaultLogger) => {
   let errorCount = 0
+  const invalidFiles = []
   resultList
     .filter(({ file, disabled }) => {
       if (disabled) {
@@ -62,11 +63,13 @@ const report = (resultList, logger = defaultLogger) => {
         return false
       }
       return true
-    }).map(({ file, origin, validations }) => {
+    }).forEach(({ file, origin, validations }) => {
       reportSingleResult(file, origin, validations, logger)
       errorCount += validations.length
-      return validations.length ? file : ''
-    }).filter(Boolean)
+      if (validations.length) {
+        invalidFiles.push(file)
+      }
+    })
   if (errorCount) {
     logger.error('Invalid files:')
     logger.error('- ' + invalidFiles.join('\n- ') + '\n')
