@@ -1,4 +1,4 @@
-# <img src="./docs/logo.svg" style="vertical-align: middle;"> zhlint
+# <img src="./logo.svg" style="vertical-align: middle;"> zhlint
 
 A linting tool for Chinese text content.
 
@@ -35,7 +35,7 @@ zhlint --help
 
 The validation report might look like this:
 
-![](./docs/screenshot-cli.png)
+![](./screenshot-cli.png)
 
 ### As Node.js package
 
@@ -73,7 +73,7 @@ Found 2 errors.
 
 You could find a JavaScript file `dist/zhlint.js` as a standalone version. To use it, for example, you can directly add it into your browser as a `<script>` tag. Then there would be a global variable `zhlint` for you.
 
-![](./docs/screenshot-browser.png)
+![](./screenshot-browser.png)
 
 #### API
 

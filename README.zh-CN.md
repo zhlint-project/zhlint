@@ -1,4 +1,4 @@
-# <img src="./logo.svg" style="vertical-align: middle;" /> zhlint
+# <img src="./docs/logo.svg" style="vertical-align: middle;" /> zhlint
 
 一个中文内容的格式化工具。
 
@@ -35,7 +35,7 @@ zhlint --help
 
 错误报告看起来像这样：
 
-![](./screenshot-cli.png)
+![](./docs/screenshot-cli.png)
 
 ### 作为 Node.js 包
 
@@ -73,7 +73,7 @@ Found 2 errors.
 
 您可以找到一个 JavaScript 文件 `dist/zhlint.js` 作为独立版本。 例如，要使用它，您可以直接将它添加到您的浏览器中作为 `<script>` 标签。 即可访问全局变量 `zhlint`。
 
-![](./screenshot-browser.png)
+![](./docs/screenshot-browser.png)
 
 #### API
 
