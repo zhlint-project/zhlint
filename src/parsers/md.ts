@@ -2,18 +2,18 @@ import unified from 'unified'
 import markdown from 'remark-parse'
 import frontmatter from 'remark-frontmatter'
 
-const positionToString = position => `${position.start.offset}:${position.end.offset}`
+const positionToString = (position) =>
+  `${position.start.offset}:${position.end.offset}`
 
-const parsePosition = position => ({ start: position.start.offset, end: position.end.offset })
+const parsePosition = (position) => ({
+  start: position.start.offset,
+  end: position.end.offset
+})
 
-const blockTypes = [
-  'paragraph',
-  'heading',
-  'table-cell'
-]
+const blockTypes = ['paragraph', 'heading', 'table-cell']
 const travelBlocks = (node, blocks) => {
   if (node.children) {
-    node.children.forEach(child => {
+    node.children.forEach((child) => {
       if (child.type === 'yaml') {
         return
       }
@@ -46,7 +46,7 @@ const rawMarkTypes = [
 ]
 const travelPhrasings = (node, blockMark) => {
   if (node.children) {
-    node.children.forEach(child => {
+    node.children.forEach((child) => {
       if (inlineMarkTypes.indexOf(child.type) >= 0) {
         blockMark.inlineMarks.push({ inline: child })
         travelPhrasings(child, blockMark)
@@ -63,7 +63,7 @@ const processBlockMark = (blockMark, str) => {
   const offset = block.position.start.offset
   const marks = []
   const unresolvedCodeMarks = []
-  inlineMarks.forEach(inlineMark => {
+  inlineMarks.forEach((inlineMark) => {
     // TODO: any
     const mark: any = {}
     const { inline } = inlineMark
@@ -80,8 +80,7 @@ const processBlockMark = (blockMark, str) => {
       if (mark.startContent.match(/<code.*>/)) {
         mark.code = 'left'
         unresolvedCodeMarks.push(mark)
-      }
-      else if (mark.startContent.match(/<\/code.*>/)) {
+      } else if (mark.startContent.match(/<\/code.*>/)) {
         mark.code = 'right'
         const leftCode = unresolvedCodeMarks.pop()
         if (leftCode) {
@@ -96,7 +95,8 @@ const processBlockMark = (blockMark, str) => {
         inline.position.start.offset,
         inline.children[0].position.start.offset
       )
-      mark.endIndex = inline.children[inline.children.length - 1].position.end.offset - offset
+      mark.endIndex =
+        inline.children[inline.children.length - 1].position.end.offset - offset
       mark.endContent = str.substring(
         inline.children[inline.children.length - 1].position.end.offset,
         inline.position.end.offset
@@ -104,24 +104,29 @@ const processBlockMark = (blockMark, str) => {
     }
     marks.push(mark)
   })
-  blockMark.value = str.substring(block.position.start.offset, block.position.end.offset)
-  blockMark.hyperMarks = marks.map(mark => {
-    if (mark.code === 'right') {
-      return
-    }
-    if (mark.code === 'left') {
-      const { rightCode } = mark
-      mark.endIndex = rightCode.endIndex
-      mark.startContent = str.substring(
-        mark.startIndex + offset,
-        mark.endIndex + offset
-      )
-      mark.endContent = ''
-      delete mark.rightCode
-      delete mark.code
-    }
-    return mark
-  }).filter(Boolean)
+  blockMark.value = str.substring(
+    block.position.start.offset,
+    block.position.end.offset
+  )
+  blockMark.hyperMarks = marks
+    .map((mark) => {
+      if (mark.code === 'right') {
+        return
+      }
+      if (mark.code === 'left') {
+        const { rightCode } = mark
+        mark.endIndex = rightCode.endIndex
+        mark.startContent = str.substring(
+          mark.startIndex + offset,
+          mark.endIndex + offset
+        )
+        mark.endContent = ''
+        delete mark.rightCode
+        delete mark.code
+      }
+      return mark
+    })
+    .filter(Boolean)
 }
 
 /**
@@ -132,7 +137,7 @@ const processBlockMark = (blockMark, str) => {
     - no text: inline code/break/image/image ref/footnote ref/html
     - marks: emphasis/strong/delete/footnote/link/link ref
  */
-export default data => {
+export default (data) => {
   const raw = data.raw
   const content = data.content
   const ignoredByParsers = data.ignoredByParsers
@@ -154,7 +159,7 @@ export default data => {
   // - - startContent: [mark.start.offset - offset, mark.firstChild.start.offset - offset]
   // - - endIndex: mark.lastChild.end.offset - offset
   // - - endContent: [mark.lastChild.end.offset - offset, mark.end.offset]
-  blockMarks.forEach(blockMark => processBlockMark(blockMark, raw))
+  blockMarks.forEach((blockMark) => processBlockMark(blockMark, raw))
   data.blocks = blockMarks.map((b, index) => {
     const position = parsePosition(b.block.position)
     ignoredByParsers.forEach(({ index, length, name, raw, meta }) => {

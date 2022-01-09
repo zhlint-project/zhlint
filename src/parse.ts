@@ -56,7 +56,7 @@ const parse = (str, hyperMarks = []) => {
 
   // pre-process hyper marks
   const hyperMarksMap = {}
-  hyperMarks.forEach(mark => {
+  hyperMarks.forEach((mark) => {
     hyperMarksMap[mark.startIndex] = mark
     if (mark.type !== 'raw') {
       hyperMarksMap[mark.endIndex] = mark
@@ -64,17 +64,17 @@ const parse = (str, hyperMarks = []) => {
   })
 
   // helpers
-  const getSpaceLength = start => {
+  const getSpaceLength = (start) => {
     for (let i = start + 1; i < str.length; i++) {
       const char = str[i]
       const type = checkCharType(char)
       if (type !== 'space') {
-        return i - start;
+        return i - start
       }
     }
-    return str.length - start;
+    return str.length - start
   }
-  const endLastUnfinishedToken = index => {
+  const endLastUnfinishedToken = (index) => {
     if (lastUnfinishedToken) {
       lastUnfinishedToken.length = index - lastUnfinishedToken.index
       lastUnfinishedGroup.push(lastUnfinishedToken)
@@ -111,7 +111,7 @@ const parse = (str, hyperMarks = []) => {
     lastUnfinishedBracket.endIndex = index
     lastUnfinishedBracket.endContent = char
     lastUnfinishedBracket.rawEndContent = char
-    if (markStack.length) {
+    if (markStack.length > 0) {
       lastUnfinishedBracket = markStack.pop()
     } else {
       lastUnfinishedBracket = null
@@ -155,7 +155,7 @@ const parse = (str, hyperMarks = []) => {
     lastUnfinishedGroup.endIndex = index
     lastUnfinishedGroup.endContent = char
     lastUnfinishedGroup.rawEndContent = char
-    if (groupStack.length) {
+    if (groupStack.length > 0) {
       lastUnfinishedGroup = groupStack.pop()
     } else {
       lastUnfinishedGroup = null
@@ -178,10 +178,7 @@ const parse = (str, hyperMarks = []) => {
     if (shorthandChars.indexOf(char) < 0) {
       return false
     }
-    if (
-      !lastUnfinishedToken ||
-      lastUnfinishedToken.type !== 'content-half'
-    ) {
+    if (!lastUnfinishedToken || lastUnfinishedToken.type !== 'content-half') {
       return false
     }
     const nextChar = str[i + 1]
@@ -223,8 +220,10 @@ const parse = (str, hyperMarks = []) => {
       //   - start mark: append token
       //   - end mark: append token, append mark
       if (hyperMark.type === 'raw') {
-        appendHyperContent(i,
-          str.substring(hyperMark.startIndex, hyperMark.endIndex))
+        appendHyperContent(
+          i,
+          str.substring(hyperMark.startIndex, hyperMark.endIndex)
+        )
         i = hyperMark.endIndex - 1
       } else {
         if (i === hyperMark.startIndex) {
@@ -320,13 +319,17 @@ const parse = (str, hyperMarks = []) => {
   endLastUnfinishedToken(str.length)
 
   // throw error if `markStack` or `groupStack` not fully flushed
-  if (markStack.length) {
+  if (markStack.length > 0) {
     const mark = markStack[markStack.length - 1]
-    throw new Error(`Unmatched closed bracket ${mark.startContent} at ${mark.startIndex}`)
+    throw new Error(
+      `Unmatched closed bracket ${mark.startContent} at ${mark.startIndex}`
+    )
   }
-  if (groupStack.length) {
+  if (groupStack.length > 0) {
     const group = groupStack[groupStack.length - 1]
-    throw new Error(`Unmatched closed quote ${group.startContent} at ${group.startIndex}`)
+    throw new Error(
+      `Unmatched closed quote ${group.startContent} at ${group.startIndex}`
+    )
   }
 
   return { tokens, groups, marks }

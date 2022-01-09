@@ -6,7 +6,7 @@ import run from '../src/run'
 
 const parsePosition = (str, index) => {
   const rows = str.split('\n')
-  const rowLengthList = rows.map(substr => substr.length)
+  const rowLengthList = rows.map((substr) => substr.length)
   let row = 0
   let column = 0
   let line = ''
@@ -25,19 +25,19 @@ const parsePosition = (str, index) => {
 }
 
 const expectedValidationsInfo = {
-  1: [20,21,26,29],
-  3: [22,25,27,34],
-  5: [20,24,27,31,35,37,41,44,47,48,51,55,58],
+  1: [20, 21, 26, 29],
+  3: [22, 25, 27, 34],
+  5: [20, 24, 27, 31, 35, 37, 41, 44, 47, 48, 51, 55, 58],
   7: [],
   9: [],
-  11: [20,22,25,29,34,35,39,42,45],
-  13: [15,16,17,18,35,36],
-  15: [24,53,55,57],
-  17: [26,30,37,39,43,45,48,50,57,59,66,72],
-  19: [15,30,28],
-  21: [18,25,20,23],
-  23: [36,41],
-  25: [32,35,39,42,46,48,52,54],
+  11: [20, 22, 25, 29, 34, 35, 39, 42, 45],
+  13: [15, 16, 17, 18, 35, 36],
+  15: [24, 53, 55, 57],
+  17: [26, 30, 37, 39, 43, 45, 48, 50, 57, 59, 66, 72],
+  19: [15, 30, 28],
+  21: [18, 25, 20, 23],
+  23: [36, 41],
+  25: [32, 35, 39, 42, 46, 48, 52, 54],
   27: []
 }
 
@@ -45,32 +45,38 @@ describe('lint', () => {
   test('units', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-units.md'),
-      { encoding: 'utf8' })
+      { encoding: 'utf8' }
+    )
     const output = fs.readFileSync(
       path.resolve(__dirname, './example-units-fixed.md'),
-      { encoding: 'utf8' })
+      { encoding: 'utf8' }
+    )
     const { result, validations, disabled } = run(input)
     expect(result).toBe(output)
     expect(!disabled).toBeTruthy()
     const validationsByLine = {}
-    validations.forEach(v => {
+    validations.forEach((v) => {
       const { index, length, target } = v
-      const finalIndex = (target === 'spaceAfter' || target === 'endContent') ? index + length : index
+      const finalIndex =
+        target === 'spaceAfter' || target === 'endContent'
+          ? index + length
+          : index
       const { row, column } = parsePosition(input, finalIndex)
       validationsByLine[row] = validationsByLine[row] || {}
       validationsByLine[row][column] = v
     })
-    Object.keys(expectedValidationsInfo).forEach(row => {
+    Object.keys(expectedValidationsInfo).forEach((row) => {
       const info = expectedValidationsInfo[row]
       const lineValidations = validationsByLine[row] || {}
       expect(Object.keys(lineValidations).length).toBe(info.length)
-      info.forEach(column => expect(lineValidations[column]).toBeTruthy())
+      info.forEach((column) => expect(lineValidations[column]).toBeTruthy())
     })
   })
   test('ignore HTML comment', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-ignore.md'),
-      { encoding: 'utf8' })
+      { encoding: 'utf8' }
+    )
     const { result, validations, disabled } = run(input)
     expect(result).toBe(input)
     expect(validations.length).toBe(0)
@@ -79,7 +85,8 @@ describe('lint', () => {
   test('disabled HTML comment', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-disabled.md'),
-      { encoding: 'utf8' })
+      { encoding: 'utf8' }
+    )
     const { result, validations, disabled } = run(input)
     expect(result).toBe(input)
     expect(validations.length).toBe(0)
@@ -88,10 +95,12 @@ describe('lint', () => {
   test('support vuepress-special syntax', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-vuepress.md'),
-      { encoding: 'utf8' })
+      { encoding: 'utf8' }
+    )
     const output = fs.readFileSync(
       path.resolve(__dirname, './example-vuepress-fixed.md'),
-      { encoding: 'utf8' })
+      { encoding: 'utf8' }
+    )
     const { result, validations } = run(input)
     expect(result).toBe(output)
     expect(validations.length).toBe(10)
@@ -99,7 +108,8 @@ describe('lint', () => {
   test('vuejs guide article', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-article.md'),
-      { encoding: 'utf8' })
+      { encoding: 'utf8' }
+    )
     expect(run(input).result).toBe(input)
   })
 })

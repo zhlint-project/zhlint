@@ -10,17 +10,12 @@ import { env } from './logger'
 const findIgnoredMarks = (str, ignoredCases = [], logger) => {
   logger = logger || env.defaultLogger
   const marks = []
-  ignoredCases.forEach(({
-    prefix,
-    textStart,
-    textEnd,
-    suffix
-  }) => {
+  ignoredCases.forEach(({ prefix, textStart, textEnd, suffix }) => {
     const start = (prefix || '') + textStart
     const end = (textEnd || '') + (suffix || '')
     const startOffset = prefix ? prefix.length : 0
     const endOffset = suffix ? suffix.length : 0
-    const findNextMatch = currentIndex => {
+    const findNextMatch = (currentIndex) => {
       const startIndex = str.substr(currentIndex).indexOf(start)
       if (startIndex === -1) {
         return
@@ -28,7 +23,9 @@ const findIgnoredMarks = (str, ignoredCases = [], logger) => {
       const possibleStart = currentIndex + startIndex + startOffset
       const nextPossibleCurrentIndex = possibleStart + textStart.length
       if (!end) {
-        logger.log(`ignore: ${str.substring(possibleStart, nextPossibleCurrentIndex)}`)
+        logger.log(
+          `ignore: ${str.substring(possibleStart, nextPossibleCurrentIndex)}`
+        )
         marks.push({
           start: possibleStart,
           end: nextPossibleCurrentIndex

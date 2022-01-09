@@ -8,7 +8,7 @@ import {
   addValidation
 } from './util'
 
-const quoteIsFullWidth = char => '‘’“”《》〈〉『』「」【】'.indexOf(char) >= 0
+const quoteIsFullWidth = (char) => '‘’“”《》〈〉『』「」【】'.indexOf(char) >= 0
 
 const messages = {
   inside: 'There should be no space inside quotes',
@@ -25,10 +25,20 @@ const validate = (token, type, target, condition) => {
 const checkOutside = (spaceAfterHost, quoteContent, isRawQuoteContent) => {
   if (spaceAfterHost) {
     if (quoteIsFullWidth(quoteContent)) {
-      validate(spaceAfterHost, 'outside-full', 'spaceAfter', isRawQuoteContent && spaceAfterHost.spaceAfter)
+      validate(
+        spaceAfterHost,
+        'outside-full',
+        'spaceAfter',
+        isRawQuoteContent && spaceAfterHost.spaceAfter
+      )
       spaceAfterHost.spaceAfter = ''
     } else {
-      validate(spaceAfterHost, 'outside-half', 'spaceAfter', isRawQuoteContent && spaceAfterHost.spaceAfter !== ' ')
+      validate(
+        spaceAfterHost,
+        'outside-half',
+        'spaceAfter',
+        isRawQuoteContent && spaceAfterHost.spaceAfter !== ' '
+      )
       spaceAfterHost.spaceAfter = ' '
     }
   }
@@ -36,13 +46,17 @@ const checkOutside = (spaceAfterHost, quoteContent, isRawQuoteContent) => {
 
 export default (token, index, group, matched, marks) => {
   if (token.type === 'group') {
-
     // no space inside
     validate(token, 'inside', 'innerSpaceBefore', token.rawInnerSpaceBefore)
     token.innerSpaceBefore = ''
     const lastInnerToken = token[token.length - 1]
     if (lastInnerToken) {
-      validate(lastInnerToken, 'inside', 'spaceAfter', lastInnerToken.rawSpaceAfter)
+      validate(
+        lastInnerToken,
+        'inside',
+        'spaceAfter',
+        lastInnerToken.rawSpaceAfter
+      )
       lastInnerToken.spaceAfter = ''
     }
 
@@ -52,8 +66,16 @@ export default (token, index, group, matched, marks) => {
     const contentTokenBefore = findContentTokenBefore(group, token)
     if (contentTokenBefore) {
       const tokenBefore = findTokenBefore(group, token)
-      const spaceAfterHost = findSpaceAfterHost(group, contentTokenBefore, tokenBefore)
-      checkOutside(spaceAfterHost, token.startContent, token.startContent === token.rawStartContent)
+      const spaceAfterHost = findSpaceAfterHost(
+        group,
+        contentTokenBefore,
+        tokenBefore
+      )
+      checkOutside(
+        spaceAfterHost,
+        token.startContent,
+        token.startContent === token.rawStartContent
+      )
     }
 
     // content after:
@@ -62,8 +84,16 @@ export default (token, index, group, matched, marks) => {
     const contentTokenAfter = findContentTokenAfter(group, token)
     if (contentTokenAfter) {
       const tokenBeforeContentAfter = findTokenBefore(group, contentTokenAfter)
-      const spaceAfterHost = findSpaceAfterHost(group, token, tokenBeforeContentAfter)
-      checkOutside(spaceAfterHost, token.endContent, token.endContent === token.rawEndContent)
+      const spaceAfterHost = findSpaceAfterHost(
+        group,
+        token,
+        tokenBeforeContentAfter
+      )
+      checkOutside(
+        spaceAfterHost,
+        token.endContent,
+        token.endContent === token.rawEndContent
+      )
     }
   }
 }

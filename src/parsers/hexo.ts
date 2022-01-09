@@ -2,10 +2,11 @@
 // \{\% ([^ ]+?) [^\%]*?\%\}    ([^ ]+?)        [^\%]*?
 // (?:\n|\{(?!\%)|[^\{])*?      \n              \{(?!\%)        [^\{]
 // \{\% end(?:\1) \%\}
-const matcher = /\{\% ([^ ]+?) [^\%]*?\%\}(?:\n|\{(?!\%)|[^\{])*?\{\% end(?:\1) \%\}/g
+const matcher =
+  /\{\% ([^ ]+?) [^\%]*?\%\}(?:\n|\{(?!\%)|[^\{])*?\{\% end(?:\1) \%\}/g
 
-export default data => {
-  data.content = data.content.replace(matcher, (raw, name, index ) => {
+export default (data) => {
+  data.content = data.content.replace(matcher, (raw, name, index) => {
     const { length } = raw
     data.ignoredByParsers.push({
       name,

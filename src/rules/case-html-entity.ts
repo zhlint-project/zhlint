@@ -1,8 +1,4 @@
-import {
-  findTokenBefore,
-  findTokenAfter,
-  removeValidation
-} from './util'
+import { findTokenBefore, findTokenAfter, removeValidation } from './util'
 
 export default (token, index, group, matched, marks) => {
   if (token.raw === ';') {
@@ -13,10 +9,7 @@ export default (token, index, group, matched, marks) => {
       !tokenBefore.rawSpaceAfter
     ) {
       const tokenBeforeBefore = findTokenBefore(group, tokenBefore)
-      if (
-        tokenBeforeBefore.raw === '&' &&
-        !tokenBeforeBefore.rawSpaceAfter
-      ) {
+      if (tokenBeforeBefore.raw === '&' && !tokenBeforeBefore.rawSpaceAfter) {
         removeValidation(token, 'unify-punctuation', 'content')
         token.content = ';'
         token.spaceAfter = token.rawSpaceAfter

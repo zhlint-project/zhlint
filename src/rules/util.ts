@@ -34,7 +34,7 @@ export const findContentTokenBefore = (group, token) => {
   if (tokenBefore.type.match(/^content\-/)) {
     return tokenBefore
   }
-  return 
+  return
 }
 
 export const findContentTokenAfter = (group, token) => {
@@ -75,7 +75,7 @@ export const findNonMarkTokenBefore = (group, token) => {
   } else if (tokenBefore.type === 'mark-hyper') {
     return findContentTokenBefore(group, group[index - 1])
   }
-  return 
+  return
 }
 
 export const findNonMarkTokenAfter = (group, token) => {
@@ -154,7 +154,7 @@ export const findSpaceAfterHost = (group, firstToken, lastToken) => {
   }
 }
 
-export const isInlineCode = token => {
+export const isInlineCode = (token) => {
   // html tags, raw content
   if (token.type === 'content-hyper') {
     if (token.content.match(/\n/)) {
@@ -171,7 +171,7 @@ export const isInlineCode = token => {
   return false
 }
 
-export const isHyperTag = token => {
+export const isHyperTag = (token) => {
   // markdown tags
   if (token.type === 'content-hyper') {
     return !isInlineCode(token)
@@ -182,7 +182,7 @@ export const isHyperTag = token => {
   return false
 }
 
-export const getMarkSide = token => {
+export const getMarkSide = (token) => {
   if (token.markSide) {
     return token.markSide
   }
@@ -224,16 +224,24 @@ export const hasValidation = (token, name, target) => {
   if (!token.validations || !token.validations.length) {
     return false
   }
-  return token.validations.some(validation =>
-    target ? validation.target === target : true &&
-      name ? validation.name === name : true)
+  return token.validations.some((validation) =>
+    target
+      ? validation.target === target
+      : true && name
+      ? validation.name === name
+      : true
+  )
 }
 
 export const removeValidation = (token, name, target) => {
   if (!token.validations) {
     return
   }
-  token.validations = token.validations.filter(
-    validation => target ? validation.target !== target : true &&
-      name ? validation.name !== name : true)
+  token.validations = token.validations.filter((validation) =>
+    target
+      ? validation.target !== target
+      : true && name
+      ? validation.name !== name
+      : true
+  )
 }

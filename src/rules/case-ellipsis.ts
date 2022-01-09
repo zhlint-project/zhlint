@@ -27,12 +27,14 @@ export default (token, index, group, matched, marks) => {
 
       // make sure the dot(s) are ellipsis
       if (nextToken && nextToken.raw === '.') {
-
         // reset the space before dots
         removeValidation(tokenBefore, '', 'spaceAfter')
-        validate(tokenBefore, 'before',
-          !hasValidation(tokenBefore, 'spaceAfter', null)
-            && tokenBefore.rawSpaceAfter)
+        validate(
+          tokenBefore,
+          'before',
+          !hasValidation(tokenBefore, 'spaceAfter', null) &&
+            tokenBefore.rawSpaceAfter
+        )
         tokenBefore.spaceAfter = ''
 
         // restore the dot
@@ -45,7 +47,6 @@ export default (token, index, group, matched, marks) => {
         // - if next next is dot: restore next space, update next next to next
         // - else: remove space after
         while (nextToken && nextToken.raw === '.') {
-
           // restore next token content
           removeValidation(nextToken, '', 'content')
           nextToken.content = '.'

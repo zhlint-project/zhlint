@@ -1,14 +1,14 @@
 /// <reference types="vitest" />
 
-import { resolve } from "path";
-import { defineConfig } from "vite";
+import { resolve } from 'path'
+import { defineConfig } from 'vite'
 
 export default defineConfig(({ mode }) => ({
   build: {
     lib: {
       entry: resolve(__dirname, 'src', 'index.ts'),
       name: 'zhlint',
-      fileName: format => `zhlint.${format}.js`
+      fileName: (format) => `zhlint.${format}.js`
     },
     sourcemap: true
   },
@@ -16,4 +16,4 @@ export default defineConfig(({ mode }) => ({
     'global.__DEV__': JSON.stringify(mode === 'development')
   },
   test: {}
-}));
+}))

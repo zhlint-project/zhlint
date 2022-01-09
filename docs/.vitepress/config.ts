@@ -6,11 +6,9 @@ export default defineConfig({
   description: 'A linting tool for Chinese text content.',
 
   themeConfig: {
-    nav: [
-      { text: 'Home', link: '/' }
-    ],
+    nav: [{ text: 'Home', link: '/' }],
 
-    sidebar: [{ link: '/', text: 'zhlint'}],
+    sidebar: [{ link: '/', text: 'zhlint' }],
 
     repo: 'jinjiang/zhlint',
     repoLabel: 'GitHub',

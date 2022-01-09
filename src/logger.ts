@@ -1,13 +1,13 @@
 import chalk from 'chalk'
 
 export const env: {
-  stdout: NodeJS.WritableStream;
-  stderr: NodeJS.WritableStream;
-  defaultLogger: any;
+  stdout: NodeJS.WritableStream
+  stderr: NodeJS.WritableStream
+  defaultLogger: any
 } = {
   stdout: process.stdout,
   stderr: process.stderr,
-  defaultLogger: console,
+  defaultLogger: console
 }
 
 if (global.__DEV__) {
@@ -20,7 +20,7 @@ if (global.__DEV__) {
 
 const parsePosition = (str, index) => {
   const rows = str.split('\n')
-  const rowLengthList = rows.map(substr => substr.length)
+  const rowLengthList = rows.map((substr) => substr.length)
   let row = 0
   let column = 0
   let line = ''
@@ -38,20 +38,33 @@ const parsePosition = (str, index) => {
   }
 }
 
-export const reportSingleResult = (file, str, validations, logger = env.defaultLogger) => {
-  validations.forEach(v => {
+export const reportSingleResult = (
+  file,
+  str,
+  validations,
+  logger = env.defaultLogger
+) => {
+  validations.forEach((v) => {
     const { index, length, target } = v
-    const finalIndex = (target === 'spaceAfter' || target === 'endContent') ? index + length : index
+    const finalIndex =
+      target === 'spaceAfter' || target === 'endContent'
+        ? index + length
+        : index
     const { row, column, line } = parsePosition(str, finalIndex)
     const offset = 20
     const start = column - offset < 0 ? 0 : column - offset
-    const end = column + length + offset > line.length - 1 ? line.length : column + length + offset
+    const end =
+      column + length + offset > line.length - 1
+        ? line.length
+        : column + length + offset
     const fragment = line.substring(start, end).replace(/\n/g, '\\n')
     // TODO: any
     const output: any = {
       file: `${chalk.blue.bgWhite(file || '')}${file ? ':' : ''}`,
       position: `${chalk.yellow(row)}:${chalk.yellow(column)}`,
-      marker: `${chalk.black.bgBlack(fragment.substr(0, column - start))}${chalk.red('^')}`,
+      marker: `${chalk.black.bgBlack(
+        fragment.substr(0, column - start)
+      )}${chalk.red('^')}`,
       oldPosition: `${chalk.yellow(finalIndex)}`,
       oldMarker: `${' '.repeat(column - start)}${chalk.red('^')}`
     }
@@ -66,11 +79,14 @@ export const report = (resultList, logger = env.defaultLogger) => {
   resultList
     .filter(({ file, disabled }) => {
       if (disabled) {
-        logger.log(`${chalk.blue.bgWhite(file || '')}${file ? ':' : ''} disabled`)
+        logger.log(
+          `${chalk.blue.bgWhite(file || '')}${file ? ':' : ''} disabled`
+        )
         return false
       }
       return true
-    }).forEach(({ file, origin, validations }) => {
+    })
+    .forEach(({ file, origin, validations }) => {
       reportSingleResult(file, origin, validations, logger)
       errorCount += validations.length
       if (validations.length) {

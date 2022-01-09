@@ -10,7 +10,9 @@ const { run, report } = require('../')
 
 const argv = minimist(process.argv.slice(2))
 
-const help = () => console.log(`
+const help = () =>
+  console.log(
+    `
 This is zhlint!
 
 Usage:
@@ -35,7 +37,8 @@ Examples:
   zhlint --fix=*.md
   zhlint foo.md --output dest.md
   zhlint foo.md --output=dest.md
-`.trim())
+`.trim()
+  )
 
 if (argv.h || argv.help) {
   help()
@@ -52,7 +55,7 @@ if (argv._ && argv._.length) {
   const [filePattern] = [...argv._]
   try {
     const files = glob.sync(filePattern)
-    const resultList = files.map(file => {
+    const resultList = files.map((file) => {
       console.log(`[start] ${file}`)
       const origin = fs.readFileSync(file, { encoding: 'utf8' })
       const { result, validations } = run(origin)
@@ -70,10 +73,11 @@ if (argv._ && argv._.length) {
         fs.writeFileSync(argv.o || argv.output, result)
         console.log(`[output] ${file} -> ${argv.o || argv.output}`)
       } else {
-        console.error(`Sorry. If you use argument '--output' or '-o', you could only pass one file as the input.`)
+        console.error(
+          `Sorry. If you use argument '--output' or '-o', you could only pass one file as the input.`
+        )
       }
-    }
-    else if (argv.f || argv.fix) {
+    } else if (argv.f || argv.fix) {
       resultList.forEach(({ file, value, result }) => {
         if (value !== result) {
           fs.writeFileSync(file, result)

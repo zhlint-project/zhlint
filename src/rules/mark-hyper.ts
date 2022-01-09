@@ -24,7 +24,7 @@ const validate = (token, type, condition) => {
 }
 
 const checkSpace = (group, markSeq) => {
-  if (markSeq.some(markToken => markToken.rawSpaceAfter)) {
+  if (markSeq.some((markToken) => markToken.rawSpaceAfter)) {
     return true
   }
   const tokenBefore = findTokenBefore(group, markSeq[0])
@@ -41,9 +41,13 @@ export default (token, index, group, matched, marks) => {
     const hasSpace = checkSpace(group, markSeq)
 
     if (token === markSeq[0]) {
-      const spaceAfterHost = findSpaceAfterHost(group, tokenBeforeMarkSeq, markSeq[markSeq.length - 1])
+      const spaceAfterHost = findSpaceAfterHost(
+        group,
+        tokenBeforeMarkSeq,
+        markSeq[markSeq.length - 1]
+      )
       const seq = [tokenBeforeMarkSeq, ...markSeq].filter(Boolean)
-      seq.forEach(token => {
+      seq.forEach((token) => {
         if (hasSpace) {
           if (token === spaceAfterHost) {
             validate(token, 'outside', token.rawSpaceAfter !== ' ')

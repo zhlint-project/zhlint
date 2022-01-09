@@ -5,7 +5,4 @@ import { report } from './logger'
 // - run(str, options): { origin, result, validations, disabled }
 // - report(result[{ file, origin, validations, disabled }], logger?)
 
-export {
-  run,
-  report
-}
+export { run, report }

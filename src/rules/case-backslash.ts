@@ -11,7 +11,8 @@ import {
 } from './util'
 
 const messages = {
-  before: 'There should be a space between full-width content and half-width content.'
+  before:
+    'There should be a space between full-width content and half-width content.'
 }
 
 const validate = (token, type, condition) => {
@@ -33,17 +34,22 @@ export default (token, index, group, matched, marks) => {
         token.spaceAfter = ''
         if (contentTokenBefore) {
           const tokenBefore = findTokenBefore(group, token)
-          const spaceAfterHost = findSpaceAfterHost(group, contentTokenBefore, tokenBefore)
+          const spaceAfterHost = findSpaceAfterHost(
+            group,
+            contentTokenBefore,
+            tokenBefore
+          )
           if (spaceAfterHost) {
             removeValidation(spaceAfterHost, 'space-punctuation', 'spaceAfter')
             spaceAfterHost.spaceAfter = spaceAfterHost.rawSpaceAfter
           }
-          if (
-            contentTokenBefore &&
-            contentTokenBefore.type.match(/\-full*/)
-          ) {
+          if (contentTokenBefore && contentTokenBefore.type.match(/\-full*/)) {
             if (spaceAfterHost) {
-              validate(spaceAfterHost, 'before', spaceAfterHost.rawSpaceAfter !== ' ')
+              validate(
+                spaceAfterHost,
+                'before',
+                spaceAfterHost.rawSpaceAfter !== ' '
+              )
               spaceAfterHost.spaceAfter = ' '
             }
           }

@@ -1,14 +1,10 @@
-const ignoredCaseMatcher = /^(?:(?<prefix>.+?)\-,)?(?<textStart>.+?)(?:,(?<textEnd>.+?))?(?:,\-(?<suffix>.+?))?$/
+const ignoredCaseMatcher =
+  /^(?:(?<prefix>.+?)\-,)?(?<textStart>.+?)(?:,(?<textEnd>.+?))?(?:,\-(?<suffix>.+?))?$/
 
-const parseIngoredCase = text => {
+const parseIngoredCase = (text) => {
   const matchResult = text.match(ignoredCaseMatcher)
   if (matchResult) {
-    const {
-      prefix,
-      textStart,
-      textEnd,
-      suffix
-    } = matchResult.groups
+    const { prefix, textStart, textEnd, suffix } = matchResult.groups
     return {
       prefix,
       textStart,
@@ -18,7 +14,7 @@ const parseIngoredCase = text => {
   }
 }
 
-export default data => {
+export default (data) => {
   const { ignoredByRules, raw } = data
   const matcher = /<\!\-\-\s*zhlint\s*ignore\:\s*(.+?)\s*\-\-\>/g
   let result

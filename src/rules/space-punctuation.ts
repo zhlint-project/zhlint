@@ -65,22 +65,28 @@ export default (token, index, group, matched, marks) => {
         if (
           contentTokenBefore &&
           contentTokenAfter &&
-          (
-            contentTokenBefore.type === 'content-full' ||
-            contentTokenAfter.type === 'content-full'
-          )
+          (contentTokenBefore.type === 'content-full' ||
+            contentTokenAfter.type === 'content-full')
         ) {
           // one space when punctuation is half-width and
           // either side of content is full-width content
           const tokenAfter = findTokenAfter(group, token)
           if (tokenAfter === contentTokenAfter) {
             removeValidation(token, 'mark-raw', 'spaceAfter')
-            validate(token, 'oneAfter', token.rawSpaceAfter !== ' ' && !token.rawType)
+            validate(
+              token,
+              'oneAfter',
+              token.rawSpaceAfter !== ' ' && !token.rawType
+            )
             token.spaceAfter = ' '
           } else {
             const before = findTokenBefore(group, contentTokenAfter)
             removeValidation(before, 'mark-raw', 'spaceAfter')
-            validate(before, 'oneAfter', before.rawSpaceAfter !== ' ' && !before.rawType)
+            validate(
+              before,
+              'oneAfter',
+              before.rawSpaceAfter !== ' ' && !before.rawType
+            )
             before.spaceAfter = ' '
           }
         }

@@ -1,8 +1,4 @@
-import {
-  findTokenBefore,
-  findTokenAfter,
-  removeValidation
-} from './util'
+import { findTokenBefore, findTokenAfter, removeValidation } from './util'
 
 const abbrs = [
   'Mr.',
@@ -15,17 +11,14 @@ const abbrs = [
   'i.e.',
   'e.g.',
   'a.k.a.'
-].map(str => str.split('.').reverse().slice(1))
+].map((str) => str.split('.').reverse().slice(1))
 
 const hasAbbr = (token, group, abbrs) => {
   const tokenBefore = findTokenBefore(group, token)
-  if (
-    tokenBefore &&
-    !tokenBefore.rawSpaceAfter
-  ) {
+  if (tokenBefore && !tokenBefore.rawSpaceAfter) {
     const matchedAbbrs = abbrs
-      .filter(abbr => abbr[0] === tokenBefore.content)
-      .map(abbr => abbr.slice(1))
+      .filter((abbr) => abbr[0] === tokenBefore.content)
+      .map((abbr) => abbr.slice(1))
     if (matchedAbbrs && matchedAbbrs.length) {
       const lastMatched = matchedAbbrs[matchedAbbrs.length - 1]
       if (lastMatched.length) {
@@ -49,7 +42,6 @@ const hasAbbr = (token, group, abbrs) => {
 
 export default (token, index, group, matched, marks) => {
   if (token.raw === '.') {
-
     // end of the content or has space after or full-width content after
     const tokenAfter = findTokenAfter(group, token)
     if (

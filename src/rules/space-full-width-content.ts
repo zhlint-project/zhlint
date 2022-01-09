@@ -26,12 +26,18 @@ import {
 
 const messages = {
   noSpace: 'There should be no space between 2 full-width contents.',
-  oneSpace: 'There should be a space between a half-width content and a full-width content.'
+  oneSpace:
+    'There should be a space between a half-width content and a full-width content.'
 }
 
 const validate = (token, type, condition) => {
   if (condition) {
-    addValidation(token, 'space-full-width-content', 'spaceAfter', messages[type])
+    addValidation(
+      token,
+      'space-full-width-content',
+      'spaceAfter',
+      messages[type]
+    )
   }
 }
 
@@ -47,8 +53,14 @@ export default (token, index, group, matched, marks) => {
 
   const tokenAfter = findTokenAfter(group, token)
   const contentTokenAfter = findContentTokenAfter(group, token)
-  const tokenBeforeContentTokenAfter = contentTokenAfter ? findTokenBefore(group, contentTokenAfter) : null
-  const spaceAfterHost = findSpaceAfterHost(group, token, tokenBeforeContentTokenAfter)
+  const tokenBeforeContentTokenAfter = contentTokenAfter
+    ? findTokenBefore(group, contentTokenAfter)
+    : null
+  const spaceAfterHost = findSpaceAfterHost(
+    group,
+    token,
+    tokenBeforeContentTokenAfter
+  )
 
   // same width content besides: no space
   if (contentTokenAfter && contentTokenAfter.type === token.type) {
@@ -66,9 +78,7 @@ export default (token, index, group, matched, marks) => {
   if (contentTokenAfter && contentTokenAfter.type === 'content-hyper') {
     return
   }
-  if (
-    token.type === 'content-hyper'
-  ) {
+  if (token.type === 'content-hyper') {
     const tokenBefore = findTokenBefore(group, token)
     const contentTokenBefore = findContentTokenBefore(group, token)
     if (
@@ -80,10 +90,16 @@ export default (token, index, group, matched, marks) => {
       // <...>: put space before if type different
       // todo: ensure spaceAfterHost
       if (
-        contentTokenBefore && contentTokenAfter && tokenBeforeContentTokenAfter &&
+        contentTokenBefore &&
+        contentTokenAfter &&
+        tokenBeforeContentTokenAfter &&
         contentTokenBefore.type !== contentTokenAfter.type
       ) {
-        validate(contentTokenBefore, 'oneSpace', contentTokenBefore.spaceAfter !== ' ')
+        validate(
+          contentTokenBefore,
+          'oneSpace',
+          contentTokenBefore.spaceAfter !== ' '
+        )
         contentTokenBefore.spaceAfter = ' '
       } else {
         if (contentTokenBefore) {
@@ -94,11 +110,13 @@ export default (token, index, group, matched, marks) => {
     } else if (token.content.match(/^<\/.+>$/)) {
       // </...>: put space after if type different
       // todo: ensure spaceAfterHost
-      if (
-        contentTokenBefore && contentTokenAfter
-      ) {
-        const spaceAfter = contentTokenBefore.type === contentTokenAfter.type ? '' : ' '
-        if (spaceAfter && tokenBeforeContentTokenAfter.spaceAfter !== spaceAfter) {
+      if (contentTokenBefore && contentTokenAfter) {
+        const spaceAfter =
+          contentTokenBefore.type === contentTokenAfter.type ? '' : ' '
+        if (
+          spaceAfter &&
+          tokenBeforeContentTokenAfter.spaceAfter !== spaceAfter
+        ) {
           validate(tokenBeforeContentTokenAfter, 'oneSpace', true)
         }
         if (!spaceAfter && tokenBeforeContentTokenAfter.spaceAfter) {

@@ -15,7 +15,7 @@
  * - 'punctuation-width'
  * - 'unknown'
  */
-const checkCharType = char => {
+const checkCharType = (char) => {
   if (!char) {
     return 'empty'
   }
@@ -72,7 +72,11 @@ const checkCharType = char => {
     return 'content-full'
   }
   // CJK Unified Ideographs Extension C
-  if (char.match(/\ud869[\udf00-\udfff]|[\ud86a-\ud86c][\udc00-\udfff]|\ud86d[\udc00-\udf34]/)) {
+  if (
+    char.match(
+      /\ud869[\udf00-\udfff]|[\ud86a-\ud86c][\udc00-\udfff]|\ud86d[\udc00-\udf34]/
+    )
+  ) {
     return 'content-full'
   }
   // CJK Unified Ideographs Extension D

@@ -8,9 +8,12 @@ const replaceBlocks = (str, blocks) => {
       const nonBlockPiece: any = {
         nonBlock: true,
         start: nextStart,
-        end: start,
+        end: start
       }
-      nonBlockPiece.value = str.substring(nonBlockPiece.start, nonBlockPiece.end)
+      nonBlockPiece.value = str.substring(
+        nonBlockPiece.start,
+        nonBlockPiece.end
+      )
       pieces.push(nonBlockPiece)
     }
     pieces.push(block)
@@ -21,7 +24,10 @@ const replaceBlocks = (str, blocks) => {
         start: end,
         end: str.length
       }
-      nonBlockPiece.value = str.substring(nonBlockPiece.start, nonBlockPiece.end)
+      nonBlockPiece.value = str.substring(
+        nonBlockPiece.start,
+        nonBlockPiece.end
+      )
       pieces.push(nonBlockPiece)
     }
     return pieces

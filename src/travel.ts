@@ -9,9 +9,9 @@ const travel = (group, filter, handler, marks) => {
   // TODO: any
   let normalizedFilter: any = () => false
   if (typeof filter === 'object' && filter.type) {
-    normalizedFilter = token => token.type === filter.type
+    normalizedFilter = (token) => token.type === filter.type
   } else if (filter instanceof RegExp || typeof filter === 'string') {
-    normalizedFilter = token => token.content.match(filter)
+    normalizedFilter = (token) => token.content.match(filter)
   } else if (typeof filter === 'function') {
     normalizedFilter = (token, i, group) => filter(token, i, group)
   }

@@ -10,8 +10,8 @@ import {
 } from './util'
 
 const messages = {
-  before: char => `There should be a space before the '${char}' character.`,
-  after: char => `There should be a space after the '${char}' character.`
+  before: (char) => `There should be a space before the '${char}' character.`,
+  after: (char) => `There should be a space after the '${char}' character.`
 }
 
 const validate = (token, type, char, condition) => {
@@ -30,7 +30,11 @@ export default (token, index, group, matched, marks) => {
   // x 100%
   // x a/b
   // x Chrome 53+
-  if (token.type.match(/^punctuation\-/) && token.content && token.content.match(/^(\+|\-|\*|\/|\%|\<|\>|\=)\=?$/)) {
+  if (
+    token.type.match(/^punctuation\-/) &&
+    token.content &&
+    token.content.match(/^(\+|\-|\*|\/|\%|\<|\>|\=)\=?$/)
+  ) {
     const contentTokenBefore = findContentTokenBefore(group, token)
     const contentTokenAfter = findContentTokenAfter(group, token)
     if (contentTokenBefore && contentTokenAfter) {
@@ -38,30 +42,32 @@ export default (token, index, group, matched, marks) => {
         contentTokenBefore.content.match(/^[\d\.]+$/) &&
         contentTokenAfter.content.match(/^[\d\.]+$/)
       ) {
-        const nonMarkTokenBefore = findNonMarkTokenBefore(group, contentTokenBefore)
-        const nonMarkTokenAfter = findNonMarkTokenAfter(group, contentTokenAfter)
+        const nonMarkTokenBefore = findNonMarkTokenBefore(
+          group,
+          contentTokenBefore
+        )
+        const nonMarkTokenAfter = findNonMarkTokenAfter(
+          group,
+          contentTokenAfter
+        )
         if (
           token.content === '/' &&
-          (
-            nonMarkTokenBefore && nonMarkTokenBefore.content === '/' ||
-            nonMarkTokenAfter && nonMarkTokenAfter.content === '/'
-          )
+          ((nonMarkTokenBefore && nonMarkTokenBefore.content === '/') ||
+            (nonMarkTokenAfter && nonMarkTokenAfter.content === '/'))
         ) {
           return
         }
         if (
           token.content === '-' &&
-          (
-            nonMarkTokenBefore && nonMarkTokenBefore.content === '-' ||
-            nonMarkTokenAfter && nonMarkTokenAfter.content === '-'
-          )
+          ((nonMarkTokenBefore && nonMarkTokenBefore.content === '-') ||
+            (nonMarkTokenAfter && nonMarkTokenAfter.content === '-'))
         ) {
           return
         }
       } else if (token.content === '-') {
         return
       }
-      if ('\/%'.indexOf(token.content) >= 0) {
+      if ('/%'.indexOf(token.content) >= 0) {
         return
       }
       if (
@@ -71,18 +77,36 @@ export default (token, index, group, matched, marks) => {
       ) {
         return
       }
-      validate(contentTokenBefore, 'before', token.content, contentTokenBefore.rawSpaceAfter !== ' ')
+      validate(
+        contentTokenBefore,
+        'before',
+        token.content,
+        contentTokenBefore.rawSpaceAfter !== ' '
+      )
       contentTokenBefore.spaceAfter = ' '
       const tokenBefore = findTokenBefore(group, token)
       if (tokenBefore !== contentTokenBefore) {
-        validate(tokenBefore, 'before', token.content, tokenBefore.rawSpaceAfter !== ' ')
+        validate(
+          tokenBefore,
+          'before',
+          token.content,
+          tokenBefore.rawSpaceAfter !== ' '
+        )
         tokenBefore.spaceAfter = ' '
       }
       validate(token, 'after', token.content, token.rawSpaceAfter !== ' ')
       token.spaceAfter = ' '
-      const tokenBeforeContentTokenAfter = findTokenBefore(group, contentTokenAfter)
+      const tokenBeforeContentTokenAfter = findTokenBefore(
+        group,
+        contentTokenAfter
+      )
       if (tokenBeforeContentTokenAfter !== token) {
-        validate(tokenBeforeContentTokenAfter, 'after', token.content, tokenBeforeContentTokenAfter.rawSpaceAfter !== ' ')
+        validate(
+          tokenBeforeContentTokenAfter,
+          'after',
+          token.content,
+          tokenBeforeContentTokenAfter.rawSpaceAfter !== ' '
+        )
         tokenBeforeContentTokenAfter.spaceAfter = ' '
       }
     }
@@ -103,7 +127,12 @@ export default (token, index, group, matched, marks) => {
       }
       const lastToken = tokens[tokens.length - 1]
       if (tokenBefore.rawSpaceAfter || lastToken.rawSpaceAfter) {
-        validate(tokenBefore, 'before', tokenBefore.rawSpaceAfter !== ' ', false)
+        validate(
+          tokenBefore,
+          'before',
+          tokenBefore.rawSpaceAfter !== ' ',
+          false
+        )
         validate(lastToken, 'after', lastToken.rawSpaceAfter !== ' ', false)
         tokenBefore.spaceAfter = lastToken.spaceAfter = ' '
       } else {

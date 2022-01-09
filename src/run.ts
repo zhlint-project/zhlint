@@ -49,7 +49,7 @@ const hyperParseInfo = [
  *   - different type -> one space
  * - space-punctuation: punctuation-*:
  *   - /[&%- -> void,
- *   - content before -> no space before, 
+ *   - content before -> no space before,
  *   - full-width -> no space beside
  *   - half-width -> one space after when either side is full-width content
  * - case-math-exp: punctuation-*: + - * / % =:
@@ -90,27 +90,31 @@ const rulesInfo = [
   { name: 'case-ellipsis', value: caseEllipsis },
   { name: 'case-html-entity', value: caseHtmlEntity },
   { name: 'case-raw', value: caseRaw },
-  { name: 'case-linebreak', value: caseLinebreak },
+  { name: 'case-linebreak', value: caseLinebreak }
 ]
 
-const arrToMap = arr => arr.reduce((current, { name, value }) => {
-  current[name] = value
-  return current
-}, {})
+const arrToMap = (arr) =>
+  arr.reduce((current, { name, value }) => {
+    current[name] = value
+    return current
+  }, {})
 
 const hyperParseMap = arrToMap(hyperParseInfo)
 const ruleMap = arrToMap(rulesInfo)
 
-const matchCallArray = (calls, map) => calls.map(call => {
-  switch (typeof call) {
-    case 'function':
-    return call
-    case 'string':
-    return map[call]
-    default:
-    return null
-  }
-}).filter(Boolean)
+const matchCallArray = (calls, map) =>
+  calls
+    .map((call) => {
+      switch (typeof call) {
+        case 'function':
+          return call
+        case 'string':
+          return map[call]
+        default:
+          return null
+      }
+    })
+    .filter(Boolean)
 
 // TODO: any
 const run = (str, options: any = {}) => {
@@ -121,15 +125,15 @@ const run = (str, options: any = {}) => {
     return { origin: str, result: str, validations: [], disabled: true }
   }
 
-  const rules = options.rules || rulesInfo.map(item => item.name)
-  let hyperParse = options.hyperParse || hyperParseInfo.map(item => item.name)
+  const rules = options.rules || rulesInfo.map((item) => item.name)
+  let hyperParse = options.hyperParse || hyperParseInfo.map((item) => item.name)
   const ignoredCases = options.ignoredCases || []
 
   if (typeof hyperParse === 'function') {
     hyperParse = [hyperParse]
   }
   if (!Array.isArray) {
-    hyperParse = [data => data]
+    hyperParse = [(data) => data]
   }
 
   // str -> ignoredByRules, ignoredByParsers
@@ -139,37 +143,47 @@ const run = (str, options: any = {}) => {
     raw: str,
     ignoredByRules: ignoredCases,
     ignoredByParsers: [],
-    blocks: [{
-      value: str,
-      marks: [],
-      start: 0,
-      end: str.length - 1
-    }]
+    blocks: [
+      {
+        value: str,
+        marks: [],
+        start: 0,
+        end: str.length - 1
+      }
+    ]
   }
 
   const allValidations = []
   const allIgnoredMarks = []
 
-  const finalData = matchCallArray(hyperParse, hyperParseMap)
-    .reduce((current, parse) => parse(current), data)
-  const result = replaceBlocks(str, finalData.blocks.map(({ value, marks, start, end }) => {
-    const result = parse(value, marks)
-    const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules, logger)
-    matchCallArray(rules, ruleMap).forEach(rule => processRule(result, rule))
-    ignoredMarks.forEach(mark => allIgnoredMarks.push(mark))
-    return {
-      start, end,
-      value: join(result.tokens, ignoredMarks, allValidations, start)
-    }
-  }))
+  const finalData = matchCallArray(hyperParse, hyperParseMap).reduce(
+    (current, parse) => parse(current),
+    data
+  )
+  const result = replaceBlocks(
+    str,
+    finalData.blocks.map(({ value, marks, start, end }) => {
+      const result = parse(value, marks)
+      const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules, logger)
+      matchCallArray(rules, ruleMap).forEach((rule) =>
+        processRule(result, rule)
+      )
+      ignoredMarks.forEach((mark) => allIgnoredMarks.push(mark))
+      return {
+        start,
+        end,
+        value: join(result.tokens, ignoredMarks, allValidations, start)
+      }
+    })
+  )
 
   const validations = allValidations.filter(({ index }) =>
-    allIgnoredMarks.length
-      ? allIgnoredMarks.some(
-        ({ start, end }) => index >= start && index <= end)
-      : true)
+    allIgnoredMarks.length > 0
+      ? allIgnoredMarks.some(({ start, end }) => index >= start && index <= end)
+      : true
+  )
 
   return { origin: str, result, validations }
 }
 
-export default run;
+export default run

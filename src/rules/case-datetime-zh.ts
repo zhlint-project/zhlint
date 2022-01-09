@@ -31,7 +31,11 @@ export default (token, index, group, matched, marks) => {
     ) {
       if (contentTokenBefore && contentTokenBefore.type === 'content-full') {
         const before = findTokenBefore(group, token)
-        const spaceAfterHost = findSpaceAfterHost(group, contentTokenBefore, before)
+        const spaceAfterHost = findSpaceAfterHost(
+          group,
+          contentTokenBefore,
+          before
+        )
         validate(spaceAfterHost, 'noSpace', contentTokenBefore.rawSpaceAfter)
         spaceAfterHost.spaceAfter = ''
       }
