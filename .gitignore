@@ -61,11 +61,6 @@ typings/
 # next.js build output
 .next
 
-# ignore lock files temporarily
-packages-lock.json
-yarn.lock
-pnpm-lock.yaml
-
 # personal plan
 todo
 
