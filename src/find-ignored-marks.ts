@@ -1,4 +1,4 @@
-const { defaultLogger } = require('./logger')
+import { env } from './logger'
 
 /**
  * @param  {string}        str
@@ -8,7 +8,7 @@ const { defaultLogger } = require('./logger')
  * - IgnoredMark: { start, end }
  */
 const findIgnoredMarks = (str, ignoredCases = [], logger) => {
-  logger = logger || defaultLogger
+  logger = logger || env.defaultLogger
   const marks = []
   ignoredCases.forEach(({
     prefix,
@@ -55,4 +55,4 @@ const findIgnoredMarks = (str, ignoredCases = [], logger) => {
   return marks.sort((a, b) => a.start - b.start)
 }
 
-module.exports = findIgnoredMarks
+export default findIgnoredMarks

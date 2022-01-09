@@ -1,11 +1,11 @@
-const {
+import {
   findTokenBefore,
   findNonMarkTokenBefore,
   findNonMarkTokenAfter,
   removeValidation
-} = require('./util')
+} from './util'
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   if (token.type.match(/^punctuation\-/) && token.raw === ':') {
     const tokenBefore = findTokenBefore(group, token)
     const nonMarkTokenBefore = findNonMarkTokenBefore(group, token)

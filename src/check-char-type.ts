@@ -112,4 +112,4 @@ const checkCharType = char => {
   return 'unknown'
 }
 
-module.exports = checkCharType
+export default checkCharType

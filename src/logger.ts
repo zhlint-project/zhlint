@@ -1,15 +1,21 @@
-const chalk = require('chalk')
+import chalk from 'chalk'
 
-let stdout = process.stdout
-let stderr = process.stderr
-let defaultLogger = console
+export const env: {
+  stdout: NodeJS.WritableStream;
+  stderr: NodeJS.WritableStream;
+  defaultLogger: any;
+} = {
+  stdout: process.stdout,
+  stderr: process.stderr,
+  defaultLogger: console,
+}
 
 if (global.__DEV__) {
   const fs = require('fs')
   const { Console } = require('console')
-  stdout = fs.createWriteStream('./stdout.log', { encoding: 'utf-8' })
-  stderr = fs.createWriteStream('./stderr.log', { encoding: 'utf-8' })
-  defaultLogger = new Console({ stdout, stderr })
+  env.stdout = fs.createWriteStream('./stdout.log', { encoding: 'utf-8' })
+  env.stderr = fs.createWriteStream('./stderr.log', { encoding: 'utf-8' })
+  env.defaultLogger = new Console(env.stdout, env.stderr)
 }
 
 const parsePosition = (str, index) => {
@@ -32,7 +38,7 @@ const parsePosition = (str, index) => {
   }
 }
 
-const reportSingleResult = (file, str, validations, logger = defaultLogger) => {
+export const reportSingleResult = (file, str, validations, logger = env.defaultLogger) => {
   validations.forEach(v => {
     const { index, length, target } = v
     const finalIndex = (target === 'spaceAfter' || target === 'endContent') ? index + length : index
@@ -41,7 +47,8 @@ const reportSingleResult = (file, str, validations, logger = defaultLogger) => {
     const start = column - offset < 0 ? 0 : column - offset
     const end = column + length + offset > line.length - 1 ? line.length : column + length + offset
     const fragment = line.substring(start, end).replace(/\n/g, '\\n')
-    const output = {
+    // TODO: any
+    const output: any = {
       file: `${chalk.blue.bgWhite(file || '')}${file ? ':' : ''}`,
       position: `${chalk.yellow(row)}:${chalk.yellow(column)}`,
       marker: `${chalk.black.bgBlack(fragment.substr(0, column - start))}${chalk.red('^')}`,
@@ -53,7 +60,7 @@ const reportSingleResult = (file, str, validations, logger = defaultLogger) => {
   })
 }
 
-const report = (resultList, logger = defaultLogger) => {
+export const report = (resultList, logger = env.defaultLogger) => {
   let errorCount = 0
   const invalidFiles = []
   resultList
@@ -78,12 +85,4 @@ const report = (resultList, logger = defaultLogger) => {
   } else {
     logger.log(`No error found.`)
   }
-}
-
-module.exports = {
-  defaultLogger,
-  stdout,
-  stderr,
-  reportSingleResult,
-  report
 }

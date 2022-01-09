@@ -1,10 +1,10 @@
-const {
+import {
   findTokenBefore,
   findTokenAfter,
   addValidation,
   hasValidation,
   removeValidation
-} = require('./util')
+} from './util'
 
 const messages = {
   before: 'There should be no space before ellipsis',
@@ -17,7 +17,7 @@ const validate = (token, type, condition) => {
   }
 }
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   if (token.raw === '.') {
     const tokenBefore = findTokenBefore(group, token)
 
@@ -31,7 +31,7 @@ module.exports = (token, index, group, matched, marks) => {
         // reset the space before dots
         removeValidation(tokenBefore, '', 'spaceAfter')
         validate(tokenBefore, 'before',
-          !hasValidation(tokenBefore, 'spaceAfter')
+          !hasValidation(tokenBefore, 'spaceAfter', null)
             && tokenBefore.rawSpaceAfter)
         tokenBefore.spaceAfter = ''
 

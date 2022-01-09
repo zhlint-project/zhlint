@@ -1,11 +1,11 @@
-const {
+import {
   findTokenBefore,
   findContentTokenBefore,
   findContentTokenAfter,
   findSpaceAfterHost,
   addValidation,
   removeValidation
-} = require('./util')
+} from './util'
 
 const messages = {
   noSpace: 'There should be no space between a number and a date/time unit.'
@@ -18,7 +18,7 @@ const validate = (token, type, condition) => {
   }
 }
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   if (token.type === 'content-half') {
     if (!token.content.match(/^[\d\.]+$/)) {
       return

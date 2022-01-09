@@ -1,4 +1,4 @@
-const {
+import {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
@@ -7,7 +7,7 @@ const {
   findNonMarkTokenAfter,
   addValidation,
   removeValidation
-} = require('./util')
+} from './util'
 
 const messages = {
   noBefore: 'There should be no space before a punctuation.',
@@ -21,7 +21,7 @@ const validate = (token, type, condition) => {
   }
 }
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   // token is a punctuation between 2 contents
   // (exception: between 2 half-width content)
   // full-width -> no space

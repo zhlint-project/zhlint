@@ -1,4 +1,4 @@
-const {
+import {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
@@ -7,7 +7,7 @@ const {
   findNonMarkTokenAfter,
   addValidation,
   removeValidation
-} = require('./util')
+} from './util'
 
 const messages = {
   before: char => `There should be a space before the '${char}' character.`,
@@ -21,7 +21,7 @@ const validate = (token, type, char, condition) => {
   }
 }
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   // calculation: space in both sides
   // - 1 + 1 = 2
   // x 2020/01/01
@@ -103,8 +103,8 @@ module.exports = (token, index, group, matched, marks) => {
       }
       const lastToken = tokens[tokens.length - 1]
       if (tokenBefore.rawSpaceAfter || lastToken.rawSpaceAfter) {
-        validate(tokenBefore, 'before', tokenBefore.rawSpaceAfter !== ' ')
-        validate(lastToken, 'after', lastToken.rawSpaceAfter !== ' ')
+        validate(tokenBefore, 'before', tokenBefore.rawSpaceAfter !== ' ', false)
+        validate(lastToken, 'after', lastToken.rawSpaceAfter !== ' ', false)
         tokenBefore.spaceAfter = lastToken.spaceAfter = ' '
       } else {
         removeValidation(tokenBefore, 'space-punctuation', 'spaceAfter')

@@ -1,4 +1,4 @@
-const {
+import {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
@@ -6,7 +6,7 @@ const {
   findSpaceAfterHost,
   getMarkSide,
   addValidation
-} = require('./util')
+} from './util'
 
 const quoteIsFullWidth = char => '‘’“”《》〈〉『』「」【】'.indexOf(char) >= 0
 
@@ -34,7 +34,7 @@ const checkOutside = (spaceAfterHost, quoteContent, isRawQuoteContent) => {
   }
 }
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   if (token.type === 'group') {
 
     // no space inside

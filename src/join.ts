@@ -3,7 +3,8 @@ const isInRange = (start, end, mark) => {
 }
 
 const isIgnored = (token, marks = []) => {
-  const result = {}
+  // TODO: any
+  const result: any = {}
   const {
     index,
     rawStartContent,
@@ -97,4 +98,4 @@ const join = (tokens, ignoredMarks = [], validations = [], start = 0) => {
   ].filter(Boolean).join('')
 }
 
-module.exports = join
+export default join

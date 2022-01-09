@@ -2,9 +2,10 @@ const replaceBlocks = (str, blocks) => {
   const pieces = blocks.reduce((pieces, block, index) => {
     const { start, end } = block
     const lastPiece = pieces[pieces.length - 1]
-    nextStart = lastPiece ? lastPiece.end : 0
+    const nextStart = lastPiece ? lastPiece.end : 0
     if (nextStart < start) {
-      const nonBlockPiece = {
+      // TODO: any
+      const nonBlockPiece: any = {
         nonBlock: true,
         start: nextStart,
         end: start,
@@ -14,7 +15,8 @@ const replaceBlocks = (str, blocks) => {
     }
     pieces.push(block)
     if (index === blocks.length - 1 && end !== str.length) {
-      const nonBlockPiece = {
+      // TODO: any
+      const nonBlockPiece: any = {
         nonBlock: true,
         start: end,
         end: str.length
@@ -27,4 +29,4 @@ const replaceBlocks = (str, blocks) => {
   return pieces.map(({ value }) => value).join('')
 }
 
-module.exports = replaceBlocks
+export default replaceBlocks

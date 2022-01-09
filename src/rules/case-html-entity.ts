@@ -1,10 +1,10 @@
-const {
+import {
   findTokenBefore,
   findTokenAfter,
   removeValidation
-} = require('./util')
+} from './util'
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   if (token.raw === ';') {
     const tokenBefore = findTokenBefore(group, token)
     if (

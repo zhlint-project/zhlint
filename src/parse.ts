@@ -1,4 +1,7 @@
-const checkCharType = require('./check-char-type')
+// TODO: TokenGroup
+type TokenGroup = Record<string, any> & Array<any>
+
+import checkCharType from './check-char-type'
 
 /**
  * Parse a string into several tokens.
@@ -39,7 +42,7 @@ const parse = (str, hyperMarks = []) => {
 
   // states
   let lastUnfinishedToken
-  let lastUnfinishedGroup = []
+  let lastUnfinishedGroup: TokenGroup = [] // TODO: TokenGroup
   let lastUnfinishedBracket
 
   // temp stacks
@@ -329,4 +332,4 @@ const parse = (str, hyperMarks = []) => {
   return { tokens, groups, marks }
 }
 
-module.exports = parse
+export default parse

@@ -1,14 +1,14 @@
 // space besides hyper mark:
 // add 1 space outside the most outside mark if there is any space besides mark or mark group
 
-const {
+import {
   findTokenBefore,
   findTokenAfter,
   findMarkSeq,
   findSpaceAfterHost,
   addValidation,
   removeValidation
-} = require('./util')
+} from './util'
 
 const messages = {
   inside: 'There should be no space inside a Markdown mark.',
@@ -34,7 +34,7 @@ const checkSpace = (group, markSeq) => {
   return false
 }
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   if (token.type === 'mark-hyper') {
     const markSeq = findMarkSeq(group, token)
     const tokenBeforeMarkSeq = findTokenBefore(group, markSeq[0])

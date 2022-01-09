@@ -1,6 +1,6 @@
 // utils
 
-const findTokenBefore = (group, token) => {
+export const findTokenBefore = (group, token) => {
   const index = group.indexOf(token)
   if (index < 0) {
     return
@@ -8,7 +8,7 @@ const findTokenBefore = (group, token) => {
   return group[index - 1]
 }
 
-const findTokenAfter = (group, token) => {
+export const findTokenAfter = (group, token) => {
   const index = group.indexOf(token)
   if (index < 0) {
     return
@@ -16,7 +16,7 @@ const findTokenAfter = (group, token) => {
   return group[index + 1]
 }
 
-const findContentTokenBefore = (group, token) => {
+export const findContentTokenBefore = (group, token) => {
   const index = group.indexOf(token)
   if (index < 0) {
     return
@@ -37,7 +37,7 @@ const findContentTokenBefore = (group, token) => {
   return 
 }
 
-const findContentTokenAfter = (group, token) => {
+export const findContentTokenAfter = (group, token) => {
   const index = group.indexOf(token)
   if (index < 0) {
     return
@@ -57,7 +57,7 @@ const findContentTokenAfter = (group, token) => {
   }
 }
 
-const findNonMarkTokenBefore = (group, token) => {
+export const findNonMarkTokenBefore = (group, token) => {
   const index = group.indexOf(token)
   if (index < 0) {
     return
@@ -78,7 +78,7 @@ const findNonMarkTokenBefore = (group, token) => {
   return 
 }
 
-const findNonMarkTokenAfter = (group, token) => {
+export const findNonMarkTokenAfter = (group, token) => {
   const index = group.indexOf(token)
   if (index < 0) {
     return
@@ -98,7 +98,7 @@ const findNonMarkTokenAfter = (group, token) => {
   }
 }
 
-const spreadMarkSeq = (group, token, seq, isBackward) => {
+export const spreadMarkSeq = (group, token, seq, isBackward) => {
   if (isBackward) {
     const tokenBefore = findTokenBefore(group, token)
     if (tokenBefore && tokenBefore.type === 'mark-hyper') {
@@ -114,14 +114,14 @@ const spreadMarkSeq = (group, token, seq, isBackward) => {
   }
 }
 
-const findMarkSeq = (group, token) => {
+export const findMarkSeq = (group, token) => {
   const seq = [token]
-  spreadMarkSeq(group, token, seq)
+  spreadMarkSeq(group, token, seq, false)
   spreadMarkSeq(group, token, seq, true)
   return seq
 }
 
-const findSpaceAfterHost = (group, firstToken, lastToken) => {
+export const findSpaceAfterHost = (group, firstToken, lastToken) => {
   if (!firstToken && !lastToken) {
     return null
   }
@@ -154,7 +154,7 @@ const findSpaceAfterHost = (group, firstToken, lastToken) => {
   }
 }
 
-const isInlineCode = token => {
+export const isInlineCode = token => {
   // html tags, raw content
   if (token.type === 'content-hyper') {
     if (token.content.match(/\n/)) {
@@ -171,7 +171,7 @@ const isInlineCode = token => {
   return false
 }
 
-const isHyperTag = token => {
+export const isHyperTag = token => {
   // markdown tags
   if (token.type === 'content-hyper') {
     return !isInlineCode(token)
@@ -182,7 +182,7 @@ const isHyperTag = token => {
   return false
 }
 
-const getMarkSide = token => {
+export const getMarkSide = token => {
   if (token.markSide) {
     return token.markSide
   }
@@ -198,7 +198,7 @@ const getMarkSide = token => {
   }
 }
 
-const addValidation = (token, name, target, message) => {
+export const addValidation = (token, name, target, message) => {
   if (!token.validations) {
     token.validations = []
   }
@@ -220,37 +220,20 @@ const addValidation = (token, name, target, message) => {
   token.validations.push(validation)
 }
 
-const hasValidation = (token, name, target) => {
+export const hasValidation = (token, name, target) => {
   if (!token.validations || !token.validations.length) {
     return false
   }
-  return validations.some(validation =>
+  return token.validations.some(validation =>
     target ? validation.target === target : true &&
       name ? validation.name === name : true)
 }
 
-const removeValidation = (token, name, target) => {
+export const removeValidation = (token, name, target) => {
   if (!token.validations) {
     return
   }
   token.validations = token.validations.filter(
     validation => target ? validation.target !== target : true &&
       name ? validation.name !== name : true)
-}
-
-module.exports = {
-  findTokenBefore,
-  findTokenAfter,
-  findContentTokenBefore,
-  findContentTokenAfter,
-  findNonMarkTokenBefore,
-  findNonMarkTokenAfter,
-  findMarkSeq,
-  findSpaceAfterHost,
-  isInlineCode,
-  isHyperTag,
-  getMarkSide,
-  addValidation,
-  hasValidation,
-  removeValidation
 }

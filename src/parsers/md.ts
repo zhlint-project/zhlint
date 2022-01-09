@@ -1,6 +1,6 @@
-const unified = require('unified')
-const markdown = require('remark-parse')
-const frontmatter = require('remark-frontmatter')
+import unified from 'unified'
+import markdown from 'remark-parse'
+import frontmatter from 'remark-frontmatter'
 
 const positionToString = position => `${position.start.offset}:${position.end.offset}`
 
@@ -64,7 +64,8 @@ const processBlockMark = (blockMark, str) => {
   const marks = []
   const unresolvedCodeMarks = []
   inlineMarks.forEach(inlineMark => {
-    const mark = {}
+    // TODO: any
+    const mark: any = {}
     const { inline } = inlineMark
     if (inlineMark.raw) {
       mark.type = 'raw'
@@ -131,7 +132,7 @@ const processBlockMark = (blockMark, str) => {
     - no text: inline code/break/image/image ref/footnote ref/html
     - marks: emphasis/strong/delete/footnote/link/link ref
  */
-module.exports = data => {
+export default data => {
   const raw = data.raw
   const content = data.content
   const ignoredByParsers = data.ignoredByParsers

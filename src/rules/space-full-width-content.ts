@@ -14,7 +14,7 @@
 
 // TODO: revamp
 
-const {
+import {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
@@ -22,7 +22,7 @@ const {
   findSpaceAfterHost,
   getMarkSide,
   addValidation
-} = require('./util')
+} from './util'
 
 const messages = {
   noSpace: 'There should be no space between 2 full-width contents.',
@@ -35,7 +35,7 @@ const validate = (token, type, condition) => {
   }
 }
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   // - if next content width different
   //   - if there is a mark
   //     - add a space outside mark

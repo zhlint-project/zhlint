@@ -1,6 +1,6 @@
-const { removeValidation } = require('./util')
+import { removeValidation } from './util'
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   if (token.rawSpaceAfter && token.rawSpaceAfter.match(/\n/)) {
     removeValidation(token, '', 'spaceAfter')
     token.spaceAfter = token.rawSpaceAfter

@@ -1,4 +1,4 @@
-const {
+import {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
@@ -8,7 +8,7 @@ const {
   findSpaceAfterHost,
   addValidation,
   removeValidation
-} = require('./util')
+} from './util'
 
 const messages = {
   before: 'There should be a space between full-width content and half-width content.'
@@ -21,7 +21,7 @@ const validate = (token, type, condition) => {
   }
 }
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   // half width and no raw space after -> no space after
   // full width before -> one space before
   if (token.type.match(/^punctuation\-/) && token.content === '\\') {

@@ -18,7 +18,7 @@ const parseIngoredCase = text => {
   }
 }
 
-module.exports = data => {
+export default data => {
   const { ignoredByRules, raw } = data
   const matcher = /<\!\-\-\s*zhlint\s*ignore\:\s*(.+?)\s*\-\-\>/g
   let result

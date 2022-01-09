@@ -1,10 +1,10 @@
-const {
+import {
   findTokenBefore,
   findContentTokenBefore,
   findContentTokenAfter
-} = require('./util')
+} from './util'
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   if (token.type === 'content-hyper') {
     const contentTokenBefore = findContentTokenBefore(group, token)
     const contentTokenAfter = findContentTokenAfter(group, token)

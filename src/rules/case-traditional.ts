@@ -1,4 +1,4 @@
-const { addValidation } = require("./util")
+import { addValidation } from './util'
 
 const replaceMap = {
   '「': '“',
@@ -14,7 +14,7 @@ const messages = {
 const validate = (token, type, args) =>
   addValidation(token, 'case-traditional', type, messages.default(args))
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   if (token.startContent && replaceMap[token.startContent]) {
     validate(token, 'startContent',
       { origin: token.startContent, result: replaceMap[token.startContent] })

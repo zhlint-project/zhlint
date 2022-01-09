@@ -6,7 +6,8 @@
  * @param  {Array<Mark>}                                   marks
  */
 const travel = (group, filter, handler, marks) => {
-  let normalizedFilter = () => false
+  // TODO: any
+  let normalizedFilter: any = () => false
   if (typeof filter === 'object' && filter.type) {
     normalizedFilter = token => token.type === filter.type
   } else if (filter instanceof RegExp || typeof filter === 'string') {
@@ -26,4 +27,4 @@ const travel = (group, filter, handler, marks) => {
   }
 }
 
-module.exports = travel
+export default travel

@@ -1,9 +1,9 @@
-const replaceBlocks = require('./replace-block')
-const parse = require('./parse')
-const processRule = require('./process-rule')
-const join = require('./join')
-const findIgnoredMarks = require('./find-ignored-marks')
-const { defaultLogger } = require('./logger')
+import replaceBlocks from './replace-block'
+import parse from './parse'
+import processRule from './process-rule'
+import join from './join'
+import findIgnoredMarks from './find-ignored-marks'
+import { env } from './logger'
 
 const hyperParseInfo = [
   { name: 'ignore', value: require('./parsers/ignore') },
@@ -89,8 +89,9 @@ const matchCallArray = (calls, map) => calls.map(call => {
   }
 }).filter(Boolean)
 
-const run = (str, options = {}) => {
-  const logger = options.logger || defaultLogger
+// TODO: any
+const run = (str, options: any = {}) => {
+  const logger = options.logger || env.defaultLogger
 
   const disabledMatcher = /<\!\-\-\s*zhlint\s*disabled\s*\-\-\>/g
   if (str.match(disabledMatcher)) {
@@ -98,7 +99,7 @@ const run = (str, options = {}) => {
   }
 
   const rules = options.rules || rulesInfo.map(item => item.name)
-  const hyperParse = options.hyperParse || hyperParseInfo.map(item => item.name)
+  let hyperParse = options.hyperParse || hyperParseInfo.map(item => item.name)
   const ignoredCases = options.ignoredCases || []
 
   if (typeof hyperParse === 'function') {
@@ -148,4 +149,4 @@ const run = (str, options = {}) => {
   return { origin: str, result, validations }
 }
 
-module.exports = run
+export default run;

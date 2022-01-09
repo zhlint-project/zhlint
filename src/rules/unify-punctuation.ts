@@ -1,9 +1,9 @@
-const {
+import {
   findTokenBefore,
   findContentTokenBefore,
   findContentTokenAfter,
   addValidation
-} = require('./util')
+} from './util'
 
 const halfWidthMap = {
   '（': `(`,
@@ -39,7 +39,7 @@ const validate = (token, type, args, condition) => {
   }
 }
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   // full-width: comma, full stop, colon, quotes
   // half-width: brackets
   // no change for half-width punctuation between half-width content without space

@@ -11,7 +11,7 @@
 // - a( **a** )a   -> a( **a** )a -> a (**a**) a
 // - a(**a**)a     -> a( **a** )a -> a (**a**) a
 
-const {
+import {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
@@ -20,7 +20,7 @@ const {
   getMarkSide,
   removeValidation,
   addValidation
-} = require('./util')
+} from './util'
 
 const messages = {
   'outside-half': 'There should be one space outside half-width brackets',
@@ -53,7 +53,7 @@ const checkSide = (spaceAfterHost, size, isRawContent, isOutside, areBothHalfWid
   }
 }
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   if (token.type === 'mark-brackets') {
     const isRawContent = token.content === token.raw
     const size = token.content.match(/[\(\)]/) ? 'half-width' : 'full-width'

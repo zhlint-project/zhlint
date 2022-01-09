@@ -1,4 +1,4 @@
-const travel = require('./travel')
+import travel from './travel'
 
 /**
  * Process a single lint rule
@@ -17,4 +17,4 @@ const processRule = (data, rule) => {
   travel(data.tokens, filter, handler, data.marks)
 }
 
-module.exports = processRule
+export default processRule

@@ -6,7 +6,7 @@
 // - `(\:\:\:)` + `(?=\n|$)`
 const matcher = /(?<=^|\n)(\:\:\:.*)\n(.+)\n(\:\:\:)(?=\n|$)/g
 
-module.exports = data => {
+export default data => {
   data.content = data.content.replace(matcher, (raw, start, content, end, index) => {
     const { length } = raw
     const name = start.substr(3).trim()

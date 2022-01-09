@@ -1,8 +1,8 @@
-const {
+import {
   findTokenBefore,
   findTokenAfter,
   removeValidation
-} = require('./util')
+} from './util'
 
 const abbrs = [
   'Mr.',
@@ -47,7 +47,7 @@ const hasAbbr = (token, group, abbrs) => {
   }
 }
 
-module.exports = (token, index, group, matched, marks) => {
+export default (token, index, group, matched, marks) => {
   if (token.raw === '.') {
 
     // end of the content or has space after or full-width content after

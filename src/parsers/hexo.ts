@@ -4,7 +4,7 @@
 // \{\% end(?:\1) \%\}
 const matcher = /\{\% ([^ ]+?) [^\%]*?\%\}(?:\n|\{(?!\%)|[^\{])*?\{\% end(?:\1) \%\}/g
 
-module.exports = data => {
+export default data => {
   data.content = data.content.replace(matcher, (raw, name, index ) => {
     const { length } = raw
     data.ignoredByParsers.push({
