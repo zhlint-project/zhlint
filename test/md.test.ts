@@ -1,9 +1,9 @@
-const run = require('../src/run')
-const markdownParser = require('../src/parsers/md')
+import { describe, test, expect } from 'vitest'
 
-const lint = (...args) => run(...args).result
+import run from '../src/run'
+import markdownParser from '../src/parsers/md'
 
-test.todo = test.skip
+const lint = (...args: [any]) => run(...args).result
 
 describe('parser with markdown', () => {
   test('single paragraph', () => {

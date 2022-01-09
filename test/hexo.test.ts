@@ -1,8 +1,8 @@
-const run = require('../src/run')
+import { describe, test, expect } from 'vitest'
 
-const lint = (...args) => run(...args).result
+import run from '../src/run'
 
-test.todo = test.skip
+const lint = (...args: [any]) => run(...args).result
 
 describe('lint', () => {
   test('one-line raw', () => {

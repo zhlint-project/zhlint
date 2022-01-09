@@ -1,8 +1,8 @@
-const run = require('../src/run')
+import { describe, test, expect } from 'vitest'
 
-const lint = (...args) => run(...args).result
+import run from '../src/run'
 
-test.todo = test.skip
+const lint = (...args: [any]) => run(...args).result
 
 const simpleInput = `:::
 自动在中文和English之间加入空格

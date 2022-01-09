@@ -1,7 +1,8 @@
-const run = require('../src/run')
-const lint = (...args) => run(...args).result
+import { describe, test, expect } from 'vitest'
 
-test.todo = test.skip
+import run from '../src/run'
+
+const lint = (...args: [any]) => run(...args).result
 
 describe('uncategorized cases', () => {
   test('#11: hyphen between number', () => {

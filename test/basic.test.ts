@@ -1,23 +1,23 @@
-const run = require('../src/run')
-const checkCharType = require('../src/check-char-type')
-const parse = require('../src/parse')
-const travel = require('../src/travel')
-const join = require('../src/join')
-const processRule = require('../src/process-rule')
-const findIgnoredMarks = require('../src/find-ignored-marks')
+import { describe, test, expect } from 'vitest'
 
-const spacePunctuation = require('../src/rules/space-punctuation')
-const spaceBrackets = require('../src/rules/space-brackets')
-const spaceQuotes = require('../src/rules/space-quotes')
-const spaceFullWidthContent = require('../src/rules/space-full-width-content')
-const unifyPunctuation = require('../src/rules/unify-punctuation')
-const caseTraditional = require('../src/rules/case-traditional')
-const caseDatetime = require('../src/rules/case-datetime')
-const caseDatetimeZh = require('../src/rules/case-datetime-zh')
+import run from '../src/run'
+import checkCharType from '../src/check-char-type'
+import parse from '../src/parse'
+import travel from '../src/travel'
+import join from '../src/join'
+import processRule from '../src/process-rule'
+import findIgnoredMarks from '../src/find-ignored-marks'
+
+import spacePunctuation from '../src/rules/space-punctuation'
+import spaceBrackets from '../src/rules/space-brackets'
+import spaceQuotes from '../src/rules/space-quotes'
+import spaceFullWidthContent from '../src/rules/space-full-width-content'
+import unifyPunctuation from '../src/rules/unify-punctuation'
+import caseTraditional from '../src/rules/case-traditional'
+import caseDatetime from '../src/rules/case-datetime'
+import caseDatetimeZh from '../src/rules/case-datetime-zh'
 
 const lint = (...args) => run(...args).result
-
-test.todo = test.skip
 
 const purify = arr => arr.map(item => Array.isArray(item) ? purify(item) : item)
 

@@ -1,8 +1,8 @@
-const fs = require('fs')
-const path = require('path')
-const run = require('../src/run')
+import { describe, test, expect } from 'vitest'
 
-test.todo = test.skip
+import fs from 'fs'
+import path from 'path'
+import run from '../src/run'
 
 const parsePosition = (str, index) => {
   const rows = str.split('\n')

@@ -5,11 +5,35 @@ import join from './join'
 import findIgnoredMarks from './find-ignored-marks'
 import { env } from './logger'
 
+import ignore from './parsers/ignore'
+import hexo from './parsers/hexo'
+import vuepress from './parsers/vuepress'
+import md from './parsers/md'
+
+import markRaw from './rules/mark-raw'
+import markHyper from './rules/mark-hyper'
+import unifyPunctuation from './rules/unify-punctuation'
+import caseAbbr from './rules/case-abbr'
+import spaceFullWidthContent from './rules/space-full-width-content'
+import spacePunctuation from './rules/space-punctuation'
+import caseMathExp from './rules/case-math-exp'
+import caseBackslash from './rules/case-backslash'
+import spaceBrackets from './rules/space-brackets'
+import spaceQuotes from './rules/space-quotes'
+import caseTraditional from './rules/case-traditional'
+import caseDatetime from './rules/case-datetime'
+import caseDatetimeZh from './rules/case-datetime-zh'
+import caseEllipsis from './rules/case-ellipsis'
+import caseHtmlEntity from './rules/case-html-entity'
+import caseRaw from './rules/case-raw'
+import caseLinebreak from './rules/case-linebreak'
+// import markRawReview from './rules/mark-raw-review'
+
 const hyperParseInfo = [
-  { name: 'ignore', value: require('./parsers/ignore') },
-  { name: 'hexo', value: require('./parsers/hexo') },
-  { name: 'vuepress', value: require('./parsers/vuepress') },
-  { name: 'markdown', value: require('./parsers/md') }
+  { name: 'ignore', value: ignore },
+  { name: 'hexo', value: hexo },
+  { name: 'vuepress', value: vuepress },
+  { name: 'markdown', value: md }
 ]
 
 /**
@@ -50,24 +74,23 @@ const hyperParseInfo = [
  * - mark-raw-review: remove unnecessary validations
  */
 const rulesInfo = [
-  { name: 'mark-raw', value: require('./rules/mark-raw') },
-  { name: 'mark-hyper', value: require('./rules/mark-hyper') },
-  { name: 'unify-punctuation', value: require('./rules/unify-punctuation') },
-  { name: 'case-abbr', value: require('./rules/case-abbr') },
-  { name: 'space-full-width-content', value: require('./rules/space-full-width-content') },
-  { name: 'space-punctuation', value: require('./rules/space-punctuation') },
-  { name: 'case-math-exp', value: require('./rules/case-math-exp') },
-  { name: 'case-backslash', value: require('./rules/case-backslash') },
-  { name: 'space-brackets', value: require('./rules/space-brackets') },
-  { name: 'space-quotes', value: require('./rules/space-quotes') },
-  { name: 'case-traditional', value: require('./rules/case-traditional') },
-  { name: 'case-datetime', value: require('./rules/case-datetime') },
-  { name: 'case-datetime-zh', value: require('./rules/case-datetime-zh') },
-  { name: 'case-ellipsis', value: require('./rules/case-ellipsis') },
-  { name: 'case-html-entity', value: require('./rules/case-html-entity') },
-  { name: 'case-raw', value: require('./rules/case-raw') },
-  { name: 'case-linebreak', value: require('./rules/case-linebreak') },
-  // { name: 'mark-raw-review', value: require('./rules/mark-raw-review') }
+  { name: 'mark-raw', value: markRaw },
+  { name: 'mark-hyper', value: markHyper },
+  { name: 'unify-punctuation', value: unifyPunctuation },
+  { name: 'case-abbr', value: caseAbbr },
+  { name: 'space-full-width-content', value: spaceFullWidthContent },
+  { name: 'space-punctuation', value: spacePunctuation },
+  { name: 'case-math-exp', value: caseMathExp },
+  { name: 'case-backslash', value: caseBackslash },
+  { name: 'space-brackets', value: spaceBrackets },
+  { name: 'space-quotes', value: spaceQuotes },
+  { name: 'case-traditional', value: caseTraditional },
+  { name: 'case-datetime', value: caseDatetime },
+  { name: 'case-datetime-zh', value: caseDatetimeZh },
+  { name: 'case-ellipsis', value: caseEllipsis },
+  { name: 'case-html-entity', value: caseHtmlEntity },
+  { name: 'case-raw', value: caseRaw },
+  { name: 'case-linebreak', value: caseLinebreak },
 ]
 
 const arrToMap = arr => arr.reduce((current, { name, value }) => {
