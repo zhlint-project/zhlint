@@ -34,7 +34,8 @@
     "coverage": "vitest --coverage",
     "docs": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:serve": "vitepress serve docs"
+    "docs:serve": "vitepress serve docs",
+    "docs:deploy": "./deploy.sh"
   },
   "repository": {
     "type": "git",
