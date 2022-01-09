@@ -22,6 +22,8 @@ jobs:
     - run: pnpm run docs:build
     - run: cd docs/.vitepress/dist
     - run: git init
+    - run: git config user.name "${GITHUB_ACTOR}"
+    - run: git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
     - run: git add -A
     - run: git commit -m 'deploy'
     - run: git push -f https://jinjiang:${{secrets.ACCESS_TOKEN}}@github.com/Jinjiang/zhlint.git master:gh-pages
