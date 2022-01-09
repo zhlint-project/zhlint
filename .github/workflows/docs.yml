@@ -20,6 +20,7 @@ jobs:
         cache: 'pnpm'
     - run: pnpm install
     - run: pnpm run docs:build
+    - run: set -e
     - run: cd docs/.vitepress/dist
     - run: git init
     - run: git config user.name "${GITHUB_ACTOR}"
