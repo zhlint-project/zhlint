@@ -4,7 +4,5 @@
     "target": "es2017",
     "module": "commonjs"
   },
-  "include": [
-    "./types"
-  ]
+  "include": ["./src", "./test", "./types"]
 }

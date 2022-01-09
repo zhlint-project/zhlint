@@ -1,0 +1,4 @@
+dist
+docs-legacy
+node_modules
+test/*.md
