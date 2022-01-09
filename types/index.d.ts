@@ -1,3 +1,5 @@
+type Console = any;
+
 type Options = {
   rules?: string[];
   hyperParse?: string[];

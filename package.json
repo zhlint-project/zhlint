@@ -3,21 +3,26 @@
   "version": "0.3.0",
   "description": "A linting tool for Chinese language.",
   "bin": {
-    "zhlint": "bin/index.js"
+    "zhlint": "./bin/index.js"
   },
-  "main": "src/index.js",
-  "types": "types/index.d.ts",
-  "unpkg": "dist/zhlint.js",
-  "jsdelivr": "dist/zhlint.js",
+  "exports": {
+    "import": "./dist/zhlint.es.js",
+    "require": "./dist/zhlint.umd.js"
+  },
+  "main": "./dist/zhlint.umd.js",
+  "module": "./dist/zhlint.es.js",
+  "unpkg": "./dist/zhlint.umd.js",
+  "jsdelivr": "./dist/zhlint.umd.js",
+  "types": "./types/index.d.ts",
   "files": [
-    "src/*",
-    "types/*",
-    "bin/*",
-    "dist/*",
-    "tsconfig.json",
-    "*.png",
-    "logo.svg",
-    "README.md"
+    "./src/*",
+    "./types/*",
+    "./tsconfig.json",
+    "./dist/*",
+    "./bin/*",
+    "./docs/*.png",
+    "./docs/logo.svg",
+    "./README.md"
   ],
   "scripts": {
     "dev": "vitest",
