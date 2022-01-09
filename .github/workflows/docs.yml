@@ -19,8 +19,8 @@ jobs:
         node-version: 16
         cache: 'pnpm'
     - run: pnpm install
+    - run: rm -Rf docs/.vitepress/dist
     - run: pnpm run docs:build
-    - run: set -e
     - run: cd docs/.vitepress/dist
     - run: git init
     - run: git config user.name "${GITHUB_ACTOR}"
