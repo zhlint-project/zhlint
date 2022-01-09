@@ -20,11 +20,6 @@
     "README.md"
   ],
   "scripts": {
-    "dev": "jest --watchAll",
-    "test": "jest",
-    "build": "webpack",
-    "docs": "vuepress dev",
-    "docs:build": "rm -Rf docs && vuepress build -d docs"
   },
   "repository": {
     "type": "git",
@@ -53,10 +48,5 @@
     "remark-frontmatter": "^1.3.2",
     "remark-parse": "^7.0.2",
     "unified": "^8.4.2"
-  },
-  "jest": {
-    "globals": {
-      "__DEV__": true
-    }
   }
 }
