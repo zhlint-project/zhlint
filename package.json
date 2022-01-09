@@ -42,10 +42,9 @@
   },
   "homepage": "https://github.com/Jinjiang/zhlint#readme",
   "devDependencies": {
-    "jest": "^24.8.0",
-    "vuepress": "^1.4.1",
-    "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11"
+    "vite": "^2.7.10",
+    "vitepress": "^0.21.4",
+    "vitest": "^0.0.139"
   },
   "dependencies": {
     "chalk": "^4.0.0",
