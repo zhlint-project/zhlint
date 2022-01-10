@@ -23,18 +23,18 @@ const SHORTHAND_PAIR_SET: CharSet = {
 
 // Mark
 
-enum MarkType {
+export enum MarkType {
   BRACKETS = 'brackets',
   HYPER = 'hyper',
   RAW = 'raw'
 }
 
-enum MarkSideType {
+export enum MarkSideType {
   LEFT = 'left',
   RIGHT = 'right'
 }
 
-type Mark = {
+export type Mark = {
   type: MarkType
   startIndex: number
   startContent: string
@@ -50,15 +50,19 @@ type MarkMap = {
 
 // Token
 
-enum SingleTokenType {
+export enum SingleTokenType {
   MARK_BRACKETS = 'mark-brackets',
   MARK_HYPER = 'mark-hyper',
   MARK_RAW = 'mark-raw',
   CONTENT_HYPER = 'content-hyper'
 }
-enum GroupType {
+
+export enum GroupTokenType {
   GROUP = 'group'
 }
+
+export type TokenType = CharType | SingleTokenType | GroupTokenType
+
 type CommonToken = {
   index: number
   length: number
@@ -73,13 +77,13 @@ type CommonToken = {
   rawSpaceAfter?: string
 }
 
-type SingleToken = CommonToken & {
+export type SingleToken = CommonToken & {
   type: CharType | SingleTokenType
 }
 
-type GroupToken = Array<Token> &
+export type GroupToken = Array<Token> &
   CommonToken & {
-    type: GroupType
+    type: GroupTokenType
 
     startIndex?: number
     startContent?: string
@@ -93,11 +97,11 @@ type GroupToken = Array<Token> &
     rawInnerSpaceBefore?: string
   }
 
-type Token = SingleToken | GroupToken
+export type Token = SingleToken | GroupToken
 
 // Output
 
-type ParseResult = {
+export type ParseResult = {
   tokens: Token[]
   marks: Mark[]
   groups: GroupToken[]
@@ -242,7 +246,7 @@ const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
   const createNewGroup = (index: number, char: string) => {
     lastUnfinishedGroup && groupStack.push(lastUnfinishedGroup)
     lastUnfinishedGroup = [] as unknown as GroupToken
-    lastUnfinishedGroup.type = GroupType.GROUP
+    lastUnfinishedGroup.type = GroupTokenType.GROUP
     lastUnfinishedGroup.startContent = char
     lastUnfinishedGroup.rawStartContent = char
     lastUnfinishedGroup.startIndex = index

@@ -1,17 +1,35 @@
+import { GroupToken, Mark, Token, TokenType } from './parse'
+
+export type FilterFunction = (
+  token: Token,
+  index: number,
+  group: GroupToken
+) => boolean | RegExpMatchArray | null
+
+export type Filter = FilterFunction | string | RegExp | { type: TokenType }
+
+export type Handler = (
+  token: Token,
+  index: number,
+  group: GroupToken,
+  matched: boolean | RegExpMatchArray | null,
+  marks: Mark[]
+) => void
+
 /**
  * Travel through a group nestedly
- * @param  {Group}                                         group
- * @param  {function | string | RegExp | { type: stirng }} filter
- * @param  {function(token, index, group, matched, marks)} handler
- * @param  {Array<Mark>}                                   marks
  */
-const travel = (group, filter, handler, marks) => {
-  // TODO: any
-  let normalizedFilter: any = () => false
-  if (typeof filter === 'object' && filter.type) {
-    normalizedFilter = (token) => token.type === filter.type
-  } else if (filter instanceof RegExp || typeof filter === 'string') {
+const travel = (
+  group: GroupToken,
+  filter: Filter,
+  handler: Handler,
+  marks: Mark[]
+): void => {
+  let normalizedFilter: FilterFunction = () => null
+  if (filter instanceof RegExp || typeof filter === 'string') {
     normalizedFilter = (token) => token.content.match(filter)
+  } else if (typeof filter === 'object' && filter.type) {
+    normalizedFilter = (token) => token.type === filter.type
   } else if (typeof filter === 'function') {
     normalizedFilter = (token, i, group) => filter(token, i, group)
   }
