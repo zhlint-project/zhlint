@@ -1,18 +1,25 @@
-import travel from './travel'
+import { GroupToken, Mark } from './parse'
+import travel, { Filter, Handler } from './travel'
+
+type Data = {
+  tokens: GroupToken
+  groups: GroupToken[]
+  marks: Mark[]
+}
+
+type Rule = Handler | { filter: Filter; handler: Handler }
 
 /**
  * Process a single lint rule
- * @param  {{ tokens, groups, marks }}      data
- * @param  {function | { filter, handler }} rule
  */
-const processRule = (data, rule) => {
+const processRule = (data: Data, rule: Rule): void => {
   if (!rule) {
-    return data
+    return
   }
   const handler = typeof rule === 'function' ? rule : rule.handler
   const filter = typeof rule === 'function' ? () => true : rule.filter
   if (!handler) {
-    return data
+    return
   }
   travel(data.tokens, filter, handler, data.marks)
 }

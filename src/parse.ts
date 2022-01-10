@@ -102,9 +102,9 @@ export type Token = SingleToken | GroupToken
 // Output
 
 export type ParseResult = {
-  tokens: Token[]
-  marks: Mark[]
+  tokens: GroupToken
   groups: GroupToken[]
+  marks: Mark[]
 }
 
 /**
@@ -135,6 +135,7 @@ const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
 
   // results
   const tokens = lastUnfinishedGroup
+  tokens.type = GroupTokenType.GROUP
   const marks = [...hyperMarks]
   const groups: GroupToken[] = []
 
