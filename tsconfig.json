@@ -2,7 +2,8 @@
   "compilerOptions": {
     "lib": ["es2017"],
     "target": "es2017",
-    "module": "commonjs"
+    "module": "commonjs",
+    "strictNullChecks": true
   },
   "include": ["./src", "./test", "./types"]
 }
