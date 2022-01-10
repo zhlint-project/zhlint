@@ -1,10 +1,14 @@
-const ignoredCaseMatcher =
-  /^(?:(?<prefix>.+?)\-,)?(?<textStart>.+?)(?:,(?<textEnd>.+?))?(?:,\-(?<suffix>.+?))?$/
+import { IgnoredCase } from '../find-ignored-marks'
+import { Data } from './types'
 
-const parseIngoredCase = (text) => {
+const ignoredCaseMatcher =
+  /^(?:(?<prefix>.+?)-,)?(?<textStart>.+?)(?:,(?<textEnd>.+?))?(?:,-(?<suffix>.+?))?$/
+
+const parseIngoredCase = (text: string): IgnoredCase | undefined => {
   const matchResult = text.match(ignoredCaseMatcher)
   if (matchResult) {
-    const { prefix, textStart, textEnd, suffix } = matchResult.groups
+    const { prefix, textStart, textEnd, suffix } =
+      matchResult.groups as IgnoredCase
     return {
       prefix,
       textStart,
@@ -14,10 +18,10 @@ const parseIngoredCase = (text) => {
   }
 }
 
-export default (data) => {
+export default (data: Data): Data => {
   const { ignoredByRules, raw } = data
-  const matcher = /<\!\-\-\s*zhlint\s*ignore\:\s*(.+?)\s*\-\-\>/g
-  let result
+  const matcher = /<!--\s*zhlint\s*ignore:\s*(.+?)\s*-->/g
+  let result: RegExpExecArray | null
   while ((result = matcher.exec(raw)) !== null) {
     const ignoredCase = parseIngoredCase(result[1])
     if (ignoredCase) {
