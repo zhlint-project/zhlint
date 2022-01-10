@@ -102,7 +102,9 @@ export const reportItem = (
     }
     normalized.headline = `${normalized.file}${normalized.position} - ${v.message}`
 
-    logger.error(`${normalized.headline}\n\n${fragment}\n${normalized.marker}\n`)
+    logger.error(
+      `${normalized.headline}\n\n${fragment}\n${normalized.marker}\n`
+    )
   })
 }
 

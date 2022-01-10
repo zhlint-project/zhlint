@@ -6,7 +6,7 @@ export enum CharType {
   CJK = 'cjk', // TODO
   PUNCTUATION_HALF = 'punctuation-half',
   PUNCTUATION_FULL = 'punctuation-full',
-  UNKNOWN = 'unknown',
+  UNKNOWN = 'unknown'
 }
 
 /**
@@ -80,7 +80,9 @@ const checkCharType = (char: string): CharType => {
     return CharType.CONTENT_FULL
   }
   // CJK Unified Ideographs Extension B
-  if (char.match(/[\ud840-\ud868][\udc00-\udfff]|\ud869[\udc00-\uded6]/) != null) {
+  if (
+    char.match(/[\ud840-\ud868][\udc00-\udfff]|\ud869[\udc00-\uded6]/) != null
+  ) {
     return CharType.CONTENT_FULL
   }
   // CJK Unified Ideographs Extension C

@@ -2,3 +2,4 @@ dist
 docs-legacy
 node_modules
 test/*.md
+pnpm-lock.yaml

@@ -2,31 +2,30 @@ name: Docs deployment
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: pnpm/action-setup@v2.0.1
-      with:
-        version: 6.20.3
-    - uses: actions/setup-node@v2
-      with:
-        node-version: 16
-        cache: 'pnpm'
-    - run: |
-        pnpm install
-        pnpm run docs:build
-        cd docs/.vitepress/dist
-        git init
-        git config user.name "${GITHUB_ACTOR}"
-        git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-        git add -A
-        git status
-        git commit -m 'deploy'
-        git push -f https://jinjiang:${{secrets.ACCESS_TOKEN}}@github.com/Jinjiang/zhlint.git master:gh-pages
-        cd -
+      - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 6.20.3
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: 'pnpm'
+      - run: |
+          pnpm install
+          pnpm run docs:build
+          cd docs/.vitepress/dist
+          git init
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git add -A
+          git status
+          git commit -m 'deploy'
+          git push -f https://jinjiang:${{secrets.ACCESS_TOKEN}}@github.com/Jinjiang/zhlint.git master:gh-pages
+          cd -

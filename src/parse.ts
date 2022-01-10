@@ -1,7 +1,107 @@
-// TODO: TokenGroup
-type TokenGroup = Record<string, any> & Array<any>
+import checkCharType, { CharType } from './check-char-type'
 
-import checkCharType from './check-char-type'
+// Constants
+
+type CharSet = {
+  [setName: string]: string
+}
+
+const MARK_CHAR_SET: CharSet = {
+  left: '(（',
+  right: ')）'
+}
+const GROUP_CHAR_SET: CharSet = {
+  left: `“‘《〈『「【`,
+  right: `”’》〉』」】`,
+  neutral: `'"`
+}
+const SHORTHAND_CHARS = `'’`
+const SHORTHAND_PAIR_SET: CharSet = {
+  [`'`]: `'`,
+  [`’`]: `‘`
+}
+
+// Mark
+
+enum MarkType {
+  BRACKETS = 'brackets',
+  HYPER = 'hyper',
+  RAW = 'raw'
+}
+
+enum MarkSideType {
+  LEFT = 'left',
+  RIGHT = 'right'
+}
+
+type Mark = {
+  type: MarkType
+  startIndex: number
+  startContent: string
+  endIndex: number
+  endContent: string
+  rawStartContent?: string
+  rawEndContent?: string
+}
+
+type MarkMap = {
+  [index: number]: Mark
+}
+
+// Token
+
+enum SingleTokenType {
+  MARK_BRACKETS = 'mark-brackets',
+  MARK_HYPER = 'mark-hyper',
+  MARK_RAW = 'mark-raw',
+  CONTENT_HYPER = 'content-hyper'
+}
+enum GroupType {
+  GROUP = 'group'
+}
+type CommonToken = {
+  index: number
+  length: number
+
+  content: string
+  raw?: string
+
+  mark?: Mark
+  markSide?: MarkSideType
+
+  spaceAfter?: string
+  rawSpaceAfter?: string
+}
+
+type SingleToken = CommonToken & {
+  type: CharType | SingleTokenType
+}
+
+type GroupToken = Array<Token> &
+  CommonToken & {
+    type: GroupType
+
+    startIndex?: number
+    startContent?: string
+    rawStartContent?: string
+
+    endIndex?: number
+    endContent?: string
+    rawEndContent?: string
+
+    innerSpaceBefore?: string
+    rawInnerSpaceBefore?: string
+  }
+
+type Token = SingleToken | GroupToken
+
+// Output
+
+type ParseResult = {
+  tokens: Token[]
+  marks: Mark[]
+  groups: GroupToken[]
+}
 
 /**
  * Parse a string into several tokens.
@@ -11,79 +111,63 @@ import checkCharType from './check-char-type'
  * - width-width punctuation
  * - punctuation pair as special marks: brackets
  * - punctuation pair as a group: quotes
- * Types
- * - Token: { type, content, index, length, mark?, markSide?, spaceAfter? }
- * - Mark: { startIndex, startContent, endIndex, endContent, type: 'brackets'|'hyper'|'raw' }
- * - Group: extends Array<Token> { startContent, startIndex, endContent, endIndex, innerSpaceBefore }
- * @param  {string}        str
- * @param  {Mark[]}        hyperMarks Pre-defined marks like HTML tags
+ * @param  {string}   str
+ * @param  {Mark[]}   hyperMarks Pre-defined marks like HTML tags
  * @return {
  *   tokens: Token[],
  *   marks: Mark[],
  *   groups: Group[]
  * }
  */
-const parse = (str, hyperMarks = []) => {
-  // constants
-  const markChars = {
-    left: '(（',
-    right: ')）'
-  }
-  const groupChars = {
-    left: `“‘《〈『「【`,
-    right: `”’》〉』」】`,
-    neutral: `'"`
-  }
-  const shorthandChars = `'’`
-  const shorthandPair = {
-    [`'`]: `'`,
-    [`’`]: `‘`
-  }
-
+const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
   // states
-  let lastUnfinishedToken
-  let lastUnfinishedGroup: TokenGroup = [] // TODO: TokenGroup
-  let lastUnfinishedBracket
+  let lastUnfinishedToken: Token | undefined
+  let lastUnfinishedGroup: GroupToken | undefined = [] as unknown as GroupToken
+  let lastUnfinishedBracket: Mark | undefined
 
   // temp stacks
-  const groupStack = []
-  const markStack = []
+  const groupStack: GroupToken[] = []
+  const markStack: Mark[] = []
 
   // results
   const tokens = lastUnfinishedGroup
   const marks = [...hyperMarks]
-  const groups = []
+  const groups: GroupToken[] = []
 
   // pre-process hyper marks
-  const hyperMarksMap = {}
+  const hyperMarksMap: MarkMap = {}
   hyperMarks.forEach((mark) => {
     hyperMarksMap[mark.startIndex] = mark
-    if (mark.type !== 'raw') {
+    if (mark.type !== MarkType.RAW) {
       hyperMarksMap[mark.endIndex] = mark
     }
   })
 
   // helpers
-  const getSpaceLength = (start) => {
+  const getSpaceLength = (start: number): number => {
     for (let i = start + 1; i < str.length; i++) {
       const char = str[i]
       const type = checkCharType(char)
-      if (type !== 'space') {
+      if (type !== CharType.SPACE) {
         return i - start
       }
     }
     return str.length - start
   }
-  const endLastUnfinishedToken = (index) => {
+  const endLastUnfinishedToken = (index: number): void => {
     if (lastUnfinishedToken) {
       lastUnfinishedToken.length = index - lastUnfinishedToken.index
-      lastUnfinishedGroup.push(lastUnfinishedToken)
-      lastUnfinishedToken = null
+      lastUnfinishedGroup && lastUnfinishedGroup.push(lastUnfinishedToken)
+      lastUnfinishedToken = undefined
     }
   }
-  const appendBracket = (index, char, markSide) => {
+  const appendBracket = (
+    index: number,
+    char: string,
+    markSide: MarkSideType
+  ) => {
     lastUnfinishedToken = {
-      type: 'mark-brackets',
+      type: SingleTokenType.MARK_BRACKETS,
       content: char,
       raw: char,
       index,
@@ -91,35 +175,49 @@ const parse = (str, hyperMarks = []) => {
       mark: lastUnfinishedBracket,
       markSide
     }
-    lastUnfinishedGroup.push(lastUnfinishedToken)
-    lastUnfinishedToken = null
+    lastUnfinishedGroup && lastUnfinishedGroup.push(lastUnfinishedToken)
+    lastUnfinishedToken = undefined
   }
-  const createBracket = (index, char, type = 'brackets') => {
+  const createBracket = (
+    index: number,
+    char: string,
+    type: MarkType = MarkType.BRACKETS
+  ) => {
     if (lastUnfinishedBracket) {
       markStack.push(lastUnfinishedBracket)
-      lastUnfinishedBracket = null
+      lastUnfinishedBracket = undefined
     }
     lastUnfinishedBracket = {
       type,
       startIndex: index,
       startContent: char,
+      endIndex: -1,
+      endContent: '',
       rawStartContent: char
     }
     marks.push(lastUnfinishedBracket)
   }
-  const endLastUnfinishedBracket = (index, char) => {
+  const endLastUnfinishedBracket = (index: number, char: string) => {
+    if (!lastUnfinishedBracket) {
+      return
+    }
     lastUnfinishedBracket.endIndex = index
     lastUnfinishedBracket.endContent = char
     lastUnfinishedBracket.rawEndContent = char
     if (markStack.length > 0) {
       lastUnfinishedBracket = markStack.pop()
     } else {
-      lastUnfinishedBracket = null
+      lastUnfinishedBracket = undefined
     }
   }
-  const appendHyperMark = (index, mark, content, markSide) => {
+  const appendHyperMark = (
+    index: number,
+    mark: Mark,
+    content: string,
+    markSide: MarkSideType
+  ) => {
     lastUnfinishedToken = {
-      type: `mark-${mark.type}`,
+      type: `mark-${mark.type}` as SingleTokenType, // TODO enum
       content: content,
       raw: content,
       index,
@@ -127,70 +225,81 @@ const parse = (str, hyperMarks = []) => {
       mark: mark,
       markSide
     }
-    lastUnfinishedGroup.push(lastUnfinishedToken)
-    lastUnfinishedToken = null
+    lastUnfinishedGroup && lastUnfinishedGroup.push(lastUnfinishedToken)
+    lastUnfinishedToken = undefined
   }
-  const appendHyperContent = (index, content) => {
+  const appendHyperContent = (index: number, content: string) => {
     lastUnfinishedToken = {
-      type: 'content-hyper',
+      type: SingleTokenType.CONTENT_HYPER,
       content: content,
       raw: content,
       index,
       length: content.length
     }
-    lastUnfinishedGroup.push(lastUnfinishedToken)
-    lastUnfinishedToken = null
+    lastUnfinishedGroup && lastUnfinishedGroup.push(lastUnfinishedToken)
+    lastUnfinishedToken = undefined
   }
-  const createNewGroup = (index, char) => {
-    groupStack.push(lastUnfinishedGroup)
-    lastUnfinishedGroup = []
-    lastUnfinishedGroup.type = 'group'
+  const createNewGroup = (index: number, char: string) => {
+    lastUnfinishedGroup && groupStack.push(lastUnfinishedGroup)
+    lastUnfinishedGroup = [] as unknown as GroupToken
+    lastUnfinishedGroup.type = GroupType.GROUP
     lastUnfinishedGroup.startContent = char
     lastUnfinishedGroup.rawStartContent = char
     lastUnfinishedGroup.startIndex = index
     groupStack[groupStack.length - 1].push(lastUnfinishedGroup)
     groups.push(lastUnfinishedGroup)
   }
-  const endLastUnfinishedGroup = (index, char) => {
-    lastUnfinishedGroup.endIndex = index
-    lastUnfinishedGroup.endContent = char
-    lastUnfinishedGroup.rawEndContent = char
+  const endLastUnfinishedGroup = (index: number, char: string) => {
+    if (lastUnfinishedGroup) {
+      lastUnfinishedGroup.endIndex = index
+      lastUnfinishedGroup.endContent = char
+      lastUnfinishedGroup.rawEndContent = char
+    }
     if (groupStack.length > 0) {
       lastUnfinishedGroup = groupStack.pop()
     } else {
-      lastUnfinishedGroup = null
+      lastUnfinishedGroup = undefined
     }
   }
-  const addNormalPunctuation = (index, char, type) => {
+  const addNormalPunctuation = (
+    index: number,
+    char: string,
+    type: CharType
+  ) => {
     lastUnfinishedToken = { type, content: char, raw: char, index, length: 1 }
-    lastUnfinishedGroup.push(lastUnfinishedToken)
-    lastUnfinishedToken = null
+    lastUnfinishedGroup && lastUnfinishedGroup.push(lastUnfinishedToken)
+    lastUnfinishedToken = undefined
   }
-  const createContent = (index, char, type) => {
+  const createContent = (index: number, char: string, type: CharType) => {
     lastUnfinishedToken = { type, content: char, raw: char, index, length: 1 }
   }
-  const appendContent = (char) => {
-    lastUnfinishedToken.content += char
-    lastUnfinishedToken.raw = lastUnfinishedToken.content
-    lastUnfinishedToken.length++
+  const appendContent = (char: string) => {
+    if (lastUnfinishedToken) {
+      lastUnfinishedToken.content += char
+      lastUnfinishedToken.raw = lastUnfinishedToken.content
+      lastUnfinishedToken.length++
+    }
   }
-  const isShorthand = (i, char) => {
-    if (shorthandChars.indexOf(char) < 0) {
+  const isShorthand = (index: number, char: string): boolean => {
+    if (SHORTHAND_CHARS.indexOf(char) < 0) {
       return false
     }
-    if (!lastUnfinishedToken || lastUnfinishedToken.type !== 'content-half') {
+    if (
+      !lastUnfinishedToken ||
+      lastUnfinishedToken.type !== CharType.CONTENT_HALF
+    ) {
       return false
     }
-    const nextChar = str[i + 1]
+    const nextChar = str[index + 1]
     const nextType = checkCharType(nextChar)
-    if (nextType === 'content-half') {
+    if (nextType === CharType.CONTENT_HALF) {
       return true
     }
-    if (nextType === 'space') {
+    if (nextType === CharType.SPACE) {
       if (!lastUnfinishedGroup) {
         return true
       }
-      if (lastUnfinishedGroup.startContent !== shorthandPair[char]) {
+      if (lastUnfinishedGroup.startContent !== SHORTHAND_PAIR_SET[char]) {
         return true
       }
     }
@@ -219,7 +328,7 @@ const parse = (str, hyperMarks = []) => {
       // - else
       //   - start mark: append token
       //   - end mark: append token, append mark
-      if (hyperMark.type === 'raw') {
+      if (hyperMark.type === MarkType.RAW) {
         appendHyperContent(
           i,
           str.substring(hyperMark.startIndex, hyperMark.endIndex)
@@ -227,14 +336,24 @@ const parse = (str, hyperMarks = []) => {
         i = hyperMark.endIndex - 1
       } else {
         if (i === hyperMark.startIndex) {
-          appendHyperMark(i, hyperMark, hyperMark.startContent, 'left')
+          appendHyperMark(
+            i,
+            hyperMark,
+            hyperMark.startContent,
+            MarkSideType.LEFT
+          )
           i += hyperMark.startContent.length - 1
         } else if (i === hyperMark.endIndex) {
-          appendHyperMark(i, hyperMark, hyperMark.endContent, 'right')
+          appendHyperMark(
+            i,
+            hyperMark,
+            hyperMark.endContent,
+            MarkSideType.RIGHT
+          )
           i += hyperMark.endContent.length - 1
         }
       }
-    } else if (type === 'space') {
+    } else if (type === CharType.SPACE) {
       // end the last unfinished token
       // jump to the next non-space char
       // record the last space
@@ -244,10 +363,12 @@ const parse = (str, hyperMarks = []) => {
       const spaceLength = getSpaceLength(i)
       if (lastUnfinishedGroup.length) {
         const lastToken = lastUnfinishedGroup[lastUnfinishedGroup.length - 1]
+        // TODO: str.substr()
         const spaceAfter = str.substr(i, spaceLength)
         lastToken.spaceAfter = spaceAfter
         lastToken.rawSpaceAfter = spaceAfter
       } else {
+        // TODO: str.substr()
         const innerSpaceBefore = str.substr(i, spaceLength)
         lastUnfinishedGroup.innerSpaceBefore = innerSpaceBefore
         lastUnfinishedGroup.rawInnerSpaceBefore = innerSpaceBefore
@@ -257,7 +378,10 @@ const parse = (str, hyperMarks = []) => {
       }
     } else if (isShorthand(i, char)) {
       appendContent(char)
-    } else if (type.match(/^punctuation/)) {
+    } else if (
+      type === CharType.PUNCTUATION_FULL ||
+      type === CharType.PUNCTUATION_HALF
+    ) {
       // end the last unfinished token
       endLastUnfinishedToken(i)
       // check the current token type
@@ -267,22 +391,22 @@ const parse = (str, hyperMarks = []) => {
       // - left quote: start a new unfinished group
       // - right quote: end the current unfinished group
       // - other punctuation: add and end the current token
-      if (markChars.left.indexOf(char) >= 0) {
+      if (MARK_CHAR_SET.left.indexOf(char) >= 0) {
         // push (save) the current unfinished mark if have
         createBracket(i, char)
         // generate a new token and mark it as a mark punctuation by left
         // and finish the token
-        appendBracket(i, char, 'left')
-      } else if (markChars.right.indexOf(char) >= 0) {
+        appendBracket(i, char, MarkSideType.LEFT)
+      } else if (MARK_CHAR_SET.right.indexOf(char) >= 0) {
         if (!lastUnfinishedBracket) {
           throw new Error(`Unmatched closed bracket ${char} at ${i}`)
         }
         // generate token as a punctuation
-        appendBracket(i, char, 'right')
+        appendBracket(i, char, MarkSideType.RIGHT)
         // end the last unfinished mark
         // and pop the previous one if exists
         endLastUnfinishedBracket(i, char)
-      } else if (groupChars.neutral.indexOf(char) >= 0) {
+      } else if (GROUP_CHAR_SET.neutral.indexOf(char) >= 0) {
         // - end the last unfinished group
         // - start a new group
         if (lastUnfinishedGroup && char === lastUnfinishedGroup.startContent) {
@@ -290,9 +414,9 @@ const parse = (str, hyperMarks = []) => {
         } else {
           createNewGroup(i, char)
         }
-      } else if (groupChars.left.indexOf(char) >= 0) {
+      } else if (GROUP_CHAR_SET.left.indexOf(char) >= 0) {
         createNewGroup(i, char)
-      } else if (groupChars.right.indexOf(char) >= 0) {
+      } else if (GROUP_CHAR_SET.right.indexOf(char) >= 0) {
         if (!lastUnfinishedGroup) {
           throw new Error(`Unmatched closed quote ${char} at ${i}`)
         }
@@ -300,12 +424,16 @@ const parse = (str, hyperMarks = []) => {
       } else {
         addNormalPunctuation(i, char, type)
       }
-    } else if (type.match(/^content/) || type === 'unknown') {
+    } else if (
+      type === CharType.CONTENT_FULL ||
+      type === CharType.CONTENT_HALF ||
+      type === CharType.UNKNOWN
+    ) {
       // check if type changed and last token unfinished
       // - create new token in the current group
       // - append into current unfinished token
       if (lastUnfinishedToken) {
-        if (type !== 'unknown' && lastUnfinishedToken.type !== type) {
+        if (type !== CharType.UNKNOWN && lastUnfinishedToken.type !== type) {
           endLastUnfinishedToken(i)
           createContent(i, char, type)
         } else {

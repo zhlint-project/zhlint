@@ -18,7 +18,11 @@ export type IgnoredMark = {
  * @param  {IgnoredCase[]} ignoredCases string which should be skipped
  * @return {IgnoredMark[]}
  */
-const findIgnoredMarks = (str: string, ignoredCases: IgnoredCase[] = [], logger: Console): IgnoredMark[] => {
+const findIgnoredMarks = (
+  str: string,
+  ignoredCases: IgnoredCase[] = [],
+  logger: Console
+): IgnoredMark[] => {
   logger = logger || env.defaultLogger
   const marks: IgnoredMark[] = []
   ignoredCases.forEach(({ prefix, textStart, textEnd, suffix }): void => {
@@ -47,7 +51,8 @@ const findIgnoredMarks = (str: string, ignoredCases: IgnoredCase[] = [], logger:
         findNextMatch(nextPossibleCurrentIndex)
       } else {
         const endIndex = str.substring(nextPossibleCurrentIndex).indexOf(end)
-        const possibleEnd = nextPossibleCurrentIndex + endIndex + (textEnd || '').length
+        const possibleEnd =
+          nextPossibleCurrentIndex + endIndex + (textEnd || '').length
 
         if (endIndex === -1) {
           return
