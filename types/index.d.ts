@@ -1,7 +1,3 @@
-// TODO: any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Console = any
-
 type Options = {
   rules?: string[]
   hyperParse?: string[]

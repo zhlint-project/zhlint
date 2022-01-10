@@ -1,4 +1,3 @@
-import { Console } from '../types'
 import chalk from 'chalk'
 
 export const env: {
@@ -16,10 +15,10 @@ if (global.__DEV__ != null) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const fs = require('fs')
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { Console } = require('console')
+  const { Console: NativeConsole } = require('console')
   env.stdout = fs.createWriteStream('./stdout.log', { encoding: 'utf-8' })
   env.stderr = fs.createWriteStream('./stderr.log', { encoding: 'utf-8' })
-  env.defaultLogger = new Console(env.stdout, env.stderr)
+  env.defaultLogger = new NativeConsole(env.stdout, env.stderr)
 }
 
 type Position = {
