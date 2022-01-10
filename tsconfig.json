@@ -3,6 +3,7 @@
     "lib": ["es2017"],
     "target": "es2017",
     "module": "commonjs",
+    "esModuleInterop": true,
     "strictNullChecks": true
   },
   "include": ["./src", "./test", "./types"]

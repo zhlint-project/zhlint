@@ -1,47 +1,78 @@
+import { Console } from '../types'
 import chalk from 'chalk'
 
 export const env: {
   stdout: NodeJS.WritableStream
   stderr: NodeJS.WritableStream
-  defaultLogger: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  defaultLogger: Console
 } = {
   stdout: process.stdout,
   stderr: process.stderr,
   defaultLogger: console
 }
 
-if (global.__DEV__) {
+if (global.__DEV__ != null) {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const fs = require('fs')
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { Console } = require('console')
   env.stdout = fs.createWriteStream('./stdout.log', { encoding: 'utf-8' })
   env.stderr = fs.createWriteStream('./stderr.log', { encoding: 'utf-8' })
   env.defaultLogger = new Console(env.stdout, env.stderr)
 }
 
-const parsePosition = (str, index) => {
-  const rows = str.split('\n')
-  const rowLengthList = rows.map((substr) => substr.length)
-  let row = 0
-  let column = 0
-  let line = ''
-  while (index >= 0 && rows.length) {
-    row++
-    column = index
-    line = rows.shift()
-    index -= rowLengthList.shift() + 1
-  }
-  return {
-    offset: index,
-    row,
-    column,
-    line
-  }
+type Position = {
+  offset: number
+  row: number
+  column: number
+  line: string
 }
 
-export const reportSingleResult = (
-  file,
-  str,
-  validations,
+const parsePosition = (str: string, offset: number): Position => {
+  const rows = str.split('\n')
+  const rowLengthList = rows.map((substr) => substr.length)
+  const position = {
+    offset,
+    row: 0,
+    column: 0,
+    line: ''
+  }
+  while (position.offset >= 0 && rows.length) {
+    position.row++
+    position.column = position.offset
+    position.line = rows.shift() || ''
+    position.offset -= (rowLengthList.shift() || 0) + 1
+  }
+  return position
+}
+
+export enum ValidationTarget {
+  SPACE_AFTER = 'spaceAfter',
+  END_CONTENT = 'endContent'
+  // TODO: more
+}
+
+export type Validation = {
+  index: number
+  length: number
+  target: ValidationTarget
+  message: string
+}
+
+type NormalizedValidation = {
+  file: string
+  position: string
+  marker: string
+  oldPosition: string
+  oldMarker: string
+  headline: string
+}
+
+export const reportItem = (
+  file: string | null,
+  str: string,
+  validations: Validation[],
   logger = env.defaultLogger
 ) => {
   validations.forEach((v) => {
@@ -51,6 +82,7 @@ export const reportSingleResult = (
         ? index + length
         : index
     const { row, column, line } = parsePosition(str, finalIndex)
+
     const offset = 20
     const start = column - offset < 0 ? 0 : column - offset
     const end =
@@ -58,24 +90,33 @@ export const reportSingleResult = (
         ? line.length
         : column + length + offset
     const fragment = line.substring(start, end).replace(/\n/g, '\\n')
-    // TODO: any
-    const output: any = {
+
+    const normalized: NormalizedValidation = {
       file: `${chalk.blue.bgWhite(file || '')}${file ? ':' : ''}`,
       position: `${chalk.yellow(row)}:${chalk.yellow(column)}`,
       marker: `${chalk.black.bgBlack(
-        fragment.substr(0, column - start)
+        fragment.substring(0, column - start)
       )}${chalk.red('^')}`,
       oldPosition: `${chalk.yellow(finalIndex)}`,
-      oldMarker: `${' '.repeat(column - start)}${chalk.red('^')}`
+      oldMarker: `${' '.repeat(column - start)}${chalk.red('^')}`,
+      headline: ''
     }
-    output.headline = `${output.file}${output.position} - ${v.message}`
-    logger.error(`${output.headline}\n\n${fragment}\n${output.marker}\n`)
+    normalized.headline = `${normalized.file}${normalized.position} - ${v.message}`
+
+    logger.error(`${normalized.headline}\n\n${fragment}\n${normalized.marker}\n`)
   })
 }
 
-export const report = (resultList, logger = env.defaultLogger) => {
+export type Result = {
+  file: string | null
+  disabled: boolean
+  origin: string
+  validations: Validation[]
+}
+
+export const report = (resultList: Result[], logger = env.defaultLogger) => {
   let errorCount = 0
-  const invalidFiles = []
+  const invalidFiles: string[] = []
   resultList
     .filter(({ file, disabled }) => {
       if (disabled) {
@@ -86,10 +127,10 @@ export const report = (resultList, logger = env.defaultLogger) => {
       }
       return true
     })
-    .forEach(({ file, origin, validations }) => {
-      reportSingleResult(file, origin, validations, logger)
+    .forEach(({ file, origin, validations }: Result) => {
+      reportItem(file, origin, validations, logger)
       errorCount += validations.length
-      if (validations.length) {
+      if (file && validations.length) {
         invalidFiles.push(file)
       }
     })
