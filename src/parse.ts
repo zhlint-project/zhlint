@@ -36,6 +36,9 @@ export enum MarkSideType {
 
 export type Mark = {
   type: MarkType
+  meta?: string
+  code?: string
+  rightCode?: Mark
   startIndex: number
   startContent: string
   endIndex: number

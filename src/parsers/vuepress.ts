@@ -1,17 +1,19 @@
+import { Data } from "./types"
+
 // ::: xxx\nyyy\nzzz\n:::\n
 // - `(?<=^|\n)` + `(\:\:\:.*)`
 // - `\n`
 // - `(.+)`
 // - `\n`
 // - `(\:\:\:)` + `(?=\n|$)`
-const matcher = /(?<=^|\n)(\:\:\:.*)\n(.+)\n(\:\:\:)(?=\n|$)/g
+const matcher = /(?<=^|\n)(:::.*)\n(.+)\n(:::)(?=\n|$)/g
 
-export default (data) => {
+export default (data: Data): Data => {
   data.content = data.content.replace(
     matcher,
     (raw, start, content, end, index) => {
       const { length } = raw
-      const name = start.substr(3).trim()
+      const name = start.substring(3).trim()
       data.ignoredByParsers.push({
         name,
         index,
