@@ -120,7 +120,7 @@ const matchCallArray = (calls, map) =>
 const run = (str, options: any = {}) => {
   const logger = options.logger || env.defaultLogger
 
-  const disabledMatcher = /<\!\-\-\s*zhlint\s*disabled\s*\-\-\>/g
+  const disabledMatcher = /<!--\s*zhlint\s*disabled\s*-->/g
   if (str.match(disabledMatcher)) {
     return { origin: str, result: str, validations: [], disabled: true }
   }
