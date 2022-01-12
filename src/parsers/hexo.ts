@@ -6,7 +6,7 @@ import { Data } from './types'
 // \{\% end(?:\1) \%\}
 const matcher = /\{% ([^ ]+?) [^%]*?%\}(?:\n|\{(?!%)|[^{])*?\{% end(?:\1) %\}/g
 
-export default (data: Data): Data => {
+const parser = (data: Data): Data => {
   data.content = data.content.replace(matcher, (raw, name, index) => {
     const { length } = raw
     data.ignoredByParsers.push({
@@ -20,3 +20,5 @@ export default (data: Data): Data => {
   })
   return data
 }
+
+export default parser

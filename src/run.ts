@@ -1,3 +1,8 @@
+import { Block, Data } from './parsers/types'
+import { Handler } from './travel'
+import { Validation } from './logger'
+import { IgnoredCase, IgnoredMark } from './find-ignored-marks'
+
 import replaceBlocks from './replace-block'
 import parse from './parse'
 import processRule from './process-rule'
@@ -93,16 +98,18 @@ const rulesInfo = [
   { name: 'case-linebreak', value: caseLinebreak }
 ]
 
-const arrToMap = (arr) =>
+const arrToMap = <T>(
+  arr: { name: string; value: T }[]
+): { [name: string]: T } =>
   arr.reduce((current, { name, value }) => {
     current[name] = value
     return current
   }, {})
 
-const hyperParseMap = arrToMap(hyperParseInfo)
-const ruleMap = arrToMap(rulesInfo)
+const hyperParseMap = arrToMap<(data: Data) => Data>(hyperParseInfo)
+const ruleMap = arrToMap<Handler>(rulesInfo)
 
-const matchCallArray = (calls, map) =>
+const matchCallArray = <T>(calls: unknown[], map: { [name: string]: T }): T[] =>
   calls
     .map((call) => {
       switch (typeof call) {
@@ -114,10 +121,24 @@ const matchCallArray = (calls, map) =>
           return null
       }
     })
-    .filter(Boolean)
+    .filter(Boolean) as T[]
 
-// TODO: any
-const run = (str, options: any = {}) => {
+type Options = {
+  logger?: Console
+  rules?: (string | Handler)[]
+  hyperParse?: (string | ((data: Data) => Data))[] | ((data: Data) => Data)
+  ignoredCases?: IgnoredCase[]
+}
+
+type Result = {
+  file?: string
+  disabled?: boolean
+  origin: string
+  result: string
+  validations: Validation[]
+}
+
+const run = (str: string, options: Options = {}): Result => {
   const logger = options.logger || env.defaultLogger
 
   const disabledMatcher = /<!--\s*zhlint\s*disabled\s*-->/g
@@ -125,20 +146,18 @@ const run = (str, options: any = {}) => {
     return { origin: str, result: str, validations: [], disabled: true }
   }
 
-  const rules = options.rules || rulesInfo.map((item) => item.name)
-  let hyperParse = options.hyperParse || hyperParseInfo.map((item) => item.name)
+  const rulesInput = options.rules || rulesInfo.map((item) => item.name)
+  let hyperParseInput =
+    options.hyperParse || hyperParseInfo.map((item) => item.name)
   const ignoredCases = options.ignoredCases || []
 
-  if (typeof hyperParse === 'function') {
-    hyperParse = [hyperParse]
-  }
-  if (!Array.isArray) {
-    hyperParse = [(data) => data]
+  if (typeof hyperParseInput === 'function') {
+    hyperParseInput = [hyperParseInput]
   }
 
   // str -> ignoredByRules, ignoredByParsers
   // blocks -> marks, ignoredMarks
-  const data = {
+  const data: Data = {
     content: str,
     raw: str,
     ignoredByRules: ignoredCases,
@@ -153,19 +172,19 @@ const run = (str, options: any = {}) => {
     ]
   }
 
-  const allValidations = []
-  const allIgnoredMarks = []
+  const allValidations: Validation[] = []
+  const allIgnoredMarks: IgnoredMark[] = []
 
-  const finalData = matchCallArray(hyperParse, hyperParseMap).reduce(
-    (current, parse) => parse(current),
-    data
-  )
+  const finalData = matchCallArray<(data: Data) => Data>(
+    hyperParseInput,
+    hyperParseMap
+  ).reduce((current, parse) => parse(current), data)
   const result = replaceBlocks(
     str,
     finalData.blocks.map(({ value, marks, start, end }) => {
       const result = parse(value, marks)
       const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules, logger)
-      matchCallArray(rules, ruleMap).forEach((rule) =>
+      matchCallArray(rulesInput, ruleMap).forEach((rule) =>
         processRule(result, rule)
       )
       ignoredMarks.forEach((mark) => allIgnoredMarks.push(mark))
@@ -173,7 +192,7 @@ const run = (str, options: any = {}) => {
         start,
         end,
         value: join(result.tokens, ignoredMarks, allValidations, start)
-      }
+      } as Block
     })
   )
 

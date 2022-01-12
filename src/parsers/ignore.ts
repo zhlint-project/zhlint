@@ -18,7 +18,7 @@ const parseIngoredCase = (text: string): IgnoredCase | undefined => {
   }
 }
 
-export default (data: Data): Data => {
+const parser = (data: Data): Data => {
   const { ignoredByRules, raw } = data
   const matcher = /<!--\s*zhlint\s*ignore:\s*(.+?)\s*-->/g
   let result: RegExpExecArray | null
@@ -30,3 +30,5 @@ export default (data: Data): Data => {
   }
   return data
 }
+
+export default parser

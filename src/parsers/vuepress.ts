@@ -8,7 +8,7 @@ import { Data } from './types'
 // - `(\:\:\:)` + `(?=\n|$)`
 const matcher = /(?<=^|\n)(:::.*)\n(.+)\n(:::)(?=\n|$)/g
 
-export default (data: Data): Data => {
+const parser = (data: Data): Data => {
   data.content = data.content.replace(
     matcher,
     (raw, start, content, end, index) => {
@@ -33,3 +33,5 @@ export default (data: Data): Data => {
   )
   return data
 }
+
+export default parser

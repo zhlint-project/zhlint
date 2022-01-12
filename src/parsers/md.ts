@@ -185,7 +185,7 @@ const processBlockMark = (blockMark: BlockMark, str) => {
     - no text: inline code/break/image/image ref/footnote ref/html
     - marks: emphasis/strong/delete/footnote/link/link ref
  */
-export default (data: Data): Data => {
+const parser = (data: Data): Data => {
   const raw = data.raw
   const content = data.content
   const ignoredByParsers = data.ignoredByParsers
@@ -234,3 +234,5 @@ export default (data: Data): Data => {
   data.ignoredByParsers = []
   return data
 }
+
+export default parser
