@@ -3,7 +3,7 @@ import markdown from 'remark-parse'
 import frontmatter from 'remark-frontmatter'
 import { Block, Data } from './types'
 import * as Ast from 'mdast'
-import { Node, Position } from 'unist';
+import { Node, Position } from 'unist'
 import { Mark, MarkType } from '../parse'
 
 type NormalizedPosition = {
@@ -17,7 +17,7 @@ const parsePosition = (position?: Position): NormalizedPosition => ({
 })
 
 const isParent = (node: Node): node is Ast.Parent => {
-  return (node as Ast.Parent).children !== undefined;
+  return (node as Ast.Parent).children !== undefined
 }
 
 const blockTypes: string[] = ['paragraph', 'heading', 'table-cell']
@@ -43,7 +43,10 @@ const travelBlocks = (node: Node, blocks: BlockMark[]) => {
         return
       }
       if (blockTypes.indexOf(child.type) >= 0) {
-        const blockMark: BlockMark = { block: child as BlockType, inlineMarks: [] }
+        const blockMark: BlockMark = {
+          block: child as BlockType,
+          inlineMarks: []
+        }
         blocks.push(blockMark)
         travelPhrasings(child as BlockType, blockMark)
       } else {
@@ -61,7 +64,13 @@ const inlineMarkTypes: string[] = [
   'link',
   'linkReference'
 ]
-type InlineType = Ast.Emphasis | Ast.Strong | Ast.Delete | Ast.Footnote | Ast.Link | Ast.LinkReference
+type InlineType =
+  | Ast.Emphasis
+  | Ast.Strong
+  | Ast.Delete
+  | Ast.Footnote
+  | Ast.Link
+  | Ast.LinkReference
 
 const rawMarkTypes: string[] = [
   'inlineCode',
@@ -71,16 +80,24 @@ const rawMarkTypes: string[] = [
   'footnoteReference',
   'html'
 ]
-type RawType = Ast.InlineCode | Ast.Break | Ast.Image | Ast.ImageReference | Ast.FootnoteDefinition | Ast.HTML
+type RawType =
+  | Ast.InlineCode
+  | Ast.Break
+  | Ast.Image
+  | Ast.ImageReference
+  | Ast.FootnoteDefinition
+  | Ast.HTML
 
 const travelPhrasings = (node: BlockType, blockMark: BlockMark) => {
   if (node.children) {
     node.children.forEach((child) => {
-      if (inlineMarkTypes.indexOf(child.type) >= 0) { // TODO
+      if (inlineMarkTypes.indexOf(child.type) >= 0) {
+        // TODO
         blockMark.inlineMarks.push({ inline: child as InlineType })
         travelPhrasings(child as unknown as BlockType, blockMark) // TODO
       }
-      if (rawMarkTypes.indexOf(child.type) >= 0) { // TODO
+      if (rawMarkTypes.indexOf(child.type) >= 0) {
+        // TODO
         blockMark.inlineMarks.push({ inline: child as RawType, raw: true })
       }
     })
@@ -125,9 +142,11 @@ const processBlockMark = (blockMark: BlockMark, str) => {
         parentInline.children[0]?.position?.start?.offset
       )
       mark.endIndex =
-        (parentInline.children[parentInline.children.length - 1]?.position?.end?.offset || 0) - (offset || 0)
+        (parentInline.children[parentInline.children.length - 1]?.position?.end
+          ?.offset || 0) - (offset || 0)
       mark.endContent = str.substring(
-        parentInline.children[parentInline.children.length - 1]?.position?.end?.offset,
+        parentInline.children[parentInline.children.length - 1]?.position?.end
+          ?.offset,
         parentInline?.position?.end?.offset
       )
     }
@@ -173,7 +192,10 @@ export default (data: Data): Data => {
 
   const blockMarks: BlockMark[] = []
 
-  const tree: Ast.Root = unified().use(markdown).use(frontmatter).parse(content) as Ast.Root
+  const tree: Ast.Root = unified()
+    .use(markdown)
+    .use(frontmatter)
+    .parse(content) as Ast.Root
 
   // - travel and record all paragraphs/headings/table-cells into blocks
   // - for each block, travel and record all
@@ -193,7 +215,7 @@ export default (data: Data): Data => {
     const position = parsePosition(b.block.position)
     ignoredByParsers.forEach(({ index, length, raw, meta }) => {
       if (position.start <= index && position.end >= index + length) {
-        (b.hyperMarks || []).push({
+        ;(b.hyperMarks || []).push({
           type: MarkType.RAW,
           meta,
           startIndex: index - position.start,

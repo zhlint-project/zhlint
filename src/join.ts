@@ -1,24 +1,38 @@
-const isInRange = (start, end, mark) => {
+import { IgnoredMark } from './find-ignored-marks'
+import { Validation } from './logger'
+import { GroupToken, Token } from './parse'
+
+type ValidatedToken = Token & {
+  validations: Validation[]
+}
+
+const isInRange = (start: number, end: number, mark: IgnoredMark) => {
   return start <= mark.end && end >= mark.start
 }
 
-const isIgnored = (token, marks = []) => {
-  // TODO: any
-  const result: any = {}
-  const {
-    index,
-    rawStartContent,
-    rawInnerSpaceBefore,
-    raw,
-    endIndex,
-    rawEndContent,
-    rawSpaceAfter
-  } = token
+type IgnoredPiece = {
+  startContent: boolean
+  innerSpaceBefore: boolean
+  content: true
+  endContent: true
+  spaceAfter: true
+}
+
+const isIgnored = (token: Token, marks: IgnoredMark[] = []) => {
+  const result = {} as IgnoredPiece
 
   // - group: startContent, innerSpaceBefore, endContent, spaceAfter
   // - single: raw, spaceAfter
   marks.forEach((mark) => {
     if (Array.isArray(token)) {
+      const {
+        index,
+        rawStartContent,
+        rawInnerSpaceBefore,
+        endIndex = 0,
+        rawEndContent,
+        rawSpaceAfter
+      } = token
       if (isInRange(index, index + (rawStartContent || '').length, mark)) {
         result.startContent = true
       }
@@ -48,6 +62,7 @@ const isIgnored = (token, marks = []) => {
         result.spaceAfter = true
       }
     } else {
+      const { index, raw, rawSpaceAfter } = token
       if (isInRange(index, index + (raw || '').length, mark)) {
         result.content = true
       }
@@ -67,12 +82,13 @@ const isIgnored = (token, marks = []) => {
 
 /**
  * Join tokens back into string
- * @param  {Array<Token>} tokens
- * @param  {IngoredMark[]} ignoredMarks string which should be skipped
- * - IngoreMark: { start, end }
- * @return {string}
  */
-const join = (tokens, ignoredMarks = [], validations = [], start = 0) => {
+const join = (
+  tokens: GroupToken,
+  ignoredMarks: IgnoredMark[] = [],
+  validations: Validation[] = [],
+  start = 0
+): string => {
   const ignoredPieces = isIgnored(tokens, ignoredMarks)
   // innerSpaceBefore
   return [
@@ -80,7 +96,7 @@ const join = (tokens, ignoredMarks = [], validations = [], start = 0) => {
     ignoredPieces.innerSpaceBefore
       ? tokens.rawInnerSpaceBefore
       : tokens.innerSpaceBefore,
-    ...tokens.map((token) => {
+    ...tokens.map((token: ValidatedToken) => {
       const ignoredPieces = isIgnored(token, ignoredMarks)
       // validate content, spaceAfter
       if (Array.isArray(token.validations)) {

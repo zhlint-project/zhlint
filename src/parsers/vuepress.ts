@@ -1,4 +1,4 @@
-import { Data } from "./types"
+import { Data } from './types'
 
 // ::: xxx\nyyy\nzzz\n:::\n
 // - `(?<=^|\n)` + `(\:\:\:.*)`

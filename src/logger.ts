@@ -53,6 +53,7 @@ export enum ValidationTarget {
 }
 
 export type Validation = {
+  name: string
   index: number
   length: number
   target: ValidationTarget

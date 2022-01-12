@@ -1,4 +1,4 @@
-import { Block } from "./parsers/types"
+import { Block } from './parsers/types'
 
 type Piece = Block & {
   nonBlock?: boolean
