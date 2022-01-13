@@ -13,16 +13,16 @@
   "module": "./dist/zhlint.es.js",
   "unpkg": "./dist/zhlint.umd.js",
   "jsdelivr": "./dist/zhlint.umd.js",
-  "types": "./types/index.d.ts",
+  "types": "types/index.d.ts",
   "files": [
-    "./src/*",
-    "./types/*",
-    "./tsconfig.json",
-    "./dist/*",
-    "./bin/*",
-    "./docs/*.png",
-    "./docs/logo.svg",
-    "./README.md"
+    "src/*",
+    "types/*",
+    "tsconfig.json",
+    "dist/*",
+    "bin/*",
+    "docs/*.png",
+    "docs/logo.svg",
+    "README.md"
   ],
   "scripts": {
     "dev": "vitest",
