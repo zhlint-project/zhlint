@@ -13,7 +13,7 @@
   "module": "./dist/zhlint.es.js",
   "unpkg": "./dist/zhlint.umd.js",
   "jsdelivr": "./dist/zhlint.umd.js",
-  "types": "types/index.d.ts",
+  "types": "./dist/zhlint.d.ts",
   "files": [
     "src/*",
     "types/*",
@@ -27,7 +27,9 @@
   "scripts": {
     "dev": "vitest",
     "dev:ui": "vitest --ui",
-    "build": "vite build",
+    "build": "pnpm run build:js && pnpm run build:type",
+    "build:js": "vite build",
+    "build:type": "api-extractor run --local --verbose",
     "format": "prettier --write .",
     "lint": "eslint {src,test,types}/** --fix",
     "test": "vitest run",
@@ -54,6 +56,7 @@
   "homepage": "https://github.com/Jinjiang/zhlint#readme",
   "devDependencies": {
     "@algolia/client-search": "^4.12.0",
+    "@microsoft/api-extractor": "^7.19.4",
     "@types/mdast": "^3.0.10",
     "@types/node": "^17.0.8",
     "@types/react": "^17.0.38",

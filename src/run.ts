@@ -123,14 +123,14 @@ const matchCallArray = <T>(calls: unknown[], map: { [name: string]: T }): T[] =>
     })
     .filter(Boolean) as T[]
 
-type Options = {
+export type Options = {
   logger?: Console
   rules?: (string | Handler)[]
   hyperParse?: (string | ((data: Data) => Data))[] | ((data: Data) => Data)
   ignoredCases?: IgnoredCase[]
 }
 
-type Result = {
+export type Result = {
   file?: string
   disabled?: boolean
   origin: string
