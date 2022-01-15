@@ -1,4 +1,4 @@
-import { IgnoredCase } from '../find-ignored-marks'
+import { IgnoredCase } from '../ignore'
 import { Data } from './types'
 
 const ignoredCaseMatcher =

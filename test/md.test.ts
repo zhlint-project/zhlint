@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest'
 
 import run from '../src/run'
-import markdownParser from '../src/parsers/md'
+import markdownParser from '../src/hypers/md'
 
 const lint = (...args: [any]) => run(...args).result
 

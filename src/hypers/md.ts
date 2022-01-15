@@ -1,10 +1,10 @@
 import unified from 'unified'
 import markdown from 'remark-parse'
 import frontmatter from 'remark-frontmatter'
-import { Block, Data } from './types'
 import * as Ast from 'mdast'
 import { Node, Position } from 'unist'
-import { Mark, MarkType } from '../parse'
+import { Mark, MarkType } from '../parser/types'
+import { Block, Data } from './types'
 
 type NormalizedPosition = {
   start: number

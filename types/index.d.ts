@@ -1,9 +1,17 @@
 import { Options, Result } from '../src/run'
-import { Handler } from '../src/travel'
 import { Validation, ValidationTarget } from '../src/logger'
-import { IgnoredCase } from '../src/find-ignored-marks'
-import { Data, Block, ParserIgnoredCase } from '../src/parsers/types'
-import { Token, GroupToken, GroupTokenType, SingleToken, SingleTokenType, Mark, MarkType } from '../src/parse'
+import { IgnoredCase } from '../src/ignore'
+import { Data, Block, ParserIgnoredCase } from '../src/hypers/types'
+import {
+  Handler,
+  Token,
+  GroupToken,
+  GroupTokenType,
+  SingleToken,
+  SingleTokenType,
+  Mark,
+  MarkType
+} from '../src/parser/index'
 
 export {
   Options,

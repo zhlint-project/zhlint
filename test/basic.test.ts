@@ -1,12 +1,10 @@
 import { describe, test, expect } from 'vitest'
 
 import run from '../src/run'
-import checkCharType from '../src/check-char-type'
-import parse from '../src/parse'
-import travel from '../src/travel'
+import { checkCharType, parse, travel } from '../src/parser/index'
 import join from '../src/join'
 import processRule from '../src/process-rule'
-import findIgnoredMarks from '../src/find-ignored-marks'
+import findIgnoredMarks from '../src/ignore'
 
 import spacePunctuation from '../src/rules/space-punctuation'
 import spaceBrackets from '../src/rules/space-brackets'

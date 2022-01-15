@@ -1,6 +1,6 @@
-import { IgnoredMark } from './find-ignored-marks'
+import { IgnoredMark } from './ignore'
 import { Validation } from './logger'
-import { GroupToken, Token } from './parse'
+import { GroupToken, Token } from './parser/types'
 
 type ValidatedToken = Token & {
   validations: Validation[]

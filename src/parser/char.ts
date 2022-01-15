@@ -1,13 +1,4 @@
-export enum CharType {
-  EMPTY = 'empty',
-  SPACE = 'space',
-  CONTENT_HALF = 'content-half',
-  CONTENT_FULL = 'content-full',
-  CJK = 'cjk', // TODO
-  PUNCTUATION_HALF = 'punctuation-half',
-  PUNCTUATION_FULL = 'punctuation-full',
-  UNKNOWN = 'unknown'
-}
+import { CharType } from './types'
 
 /**
  * Check whether the character is full-width or half-width,
@@ -16,18 +7,8 @@ export enum CharType {
  * - https://jrgraphix.net/research/unicode.php
  * - https://mathiasbynens.be/notes/javascript-unicode
  * - https://stackoverflow.com/a/21113538
- * @param  {string} char
- * @return {string}
- * - 'empty'
- * - 'space'
- * - 'content-half'
- * - 'content-full'
- * - 'cjk'?
- * - 'punctuation-half'
- * - 'punctuation-full'
- * - 'unknown'
  */
-const checkCharType = (char: string): CharType => {
+export const checkCharType = (char: string): CharType => {
   if (char === '') {
     return CharType.EMPTY
   }
@@ -129,5 +110,3 @@ const checkCharType = (char: string): CharType => {
 
   return CharType.UNKNOWN
 }
-
-export default checkCharType

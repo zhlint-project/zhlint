@@ -1,25 +1,9 @@
-import { GroupToken, Mark, Token, TokenType } from './parse'
-
-export type FilterFunction = (
-  token: Token,
-  index: number,
-  group: GroupToken
-) => boolean | RegExpMatchArray | null
-
-export type Filter = FilterFunction | string | RegExp | { type: TokenType }
-
-export type Handler = (
-  token: Token,
-  index: number,
-  group: GroupToken,
-  matched: boolean | RegExpMatchArray | null,
-  marks: Mark[]
-) => void
+import { Filter, FilterFunction, GroupToken, Handler, Mark } from './types'
 
 /**
  * Travel through a group nestedly
  */
-const travel = (
+export const travel = (
   group: GroupToken,
   filter: Filter,
   handler: Handler,
@@ -44,5 +28,3 @@ const travel = (
     }
   }
 }
-
-export default travel

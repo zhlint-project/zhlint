@@ -28,7 +28,7 @@ type Position = {
   line: string
 }
 
-const parsePosition = (str: string, offset: number): Position => {
+const getPositionByOffset = (str: string, offset: number): Position => {
   const rows = str.split('\n')
   const rowLengthList = rows.map((substr) => substr.length)
   const position = {
@@ -49,68 +49,57 @@ const parsePosition = (str: string, offset: number): Position => {
 export enum ValidationTarget {
   SPACE_AFTER = 'spaceAfter',
   END_CONTENT = 'endContent'
-  // TODO: more
 }
 
 export type Validation = {
   name: string
+  target: ValidationTarget
   index: number
   length: number
-  target: ValidationTarget
   message: string
 }
 
-type NormalizedValidation = {
-  file: string
-  position: string
-  marker: string
-  oldPosition: string
-  oldMarker: string
-  headline: string
-}
-
 export const reportItem = (
-  file: string | null,
+  file: string | undefined = '',
   str: string,
   validations: Validation[],
   logger = env.defaultLogger
 ) => {
-  validations.forEach((v) => {
-    const { index, length, target } = v
+  validations.forEach(({ index, length, target, message }) => {
+    // 0. final index and position
     const finalIndex =
       target === 'spaceAfter' || target === 'endContent'
         ? index + length
         : index
-    const { row, column, line } = parsePosition(str, finalIndex)
+    const { row, column, line } = getPositionByOffset(str, finalIndex)
 
-    const offset = 20
-    const start = column - offset < 0 ? 0 : column - offset
-    const end =
-      column + length + offset > line.length - 1
+    // 1. headline
+    const fileDisplay = `${chalk.blue.bgWhite(file)}${file ? ':' : ''}`
+    const positionDisplay = `${chalk.yellow(row)}:${chalk.yellow(column)}`
+    const headline = `${fileDisplay}${positionDisplay} - ${message}`
+
+    // 2. display fragment
+    const displayRange = 20
+    const displayStart = column - displayRange < 0 ? 0 : column - displayRange
+    const displayEnd =
+      column + length + displayRange > line.length - 1
         ? line.length
-        : column + length + offset
-    const fragment = line.substring(start, end).replace(/\n/g, '\\n')
+        : column + length + displayRange
+    const displayFragment = line
+      .substring(displayStart, displayEnd)
+      .replace(/\n/g, '\\n')
 
-    const normalized: NormalizedValidation = {
-      file: `${chalk.blue.bgWhite(file || '')}${file ? ':' : ''}`,
-      position: `${chalk.yellow(row)}:${chalk.yellow(column)}`,
-      marker: `${chalk.black.bgBlack(
-        fragment.substring(0, column - start)
-      )}${chalk.red('^')}`,
-      oldPosition: `${chalk.yellow(finalIndex)}`,
-      oldMarker: `${' '.repeat(column - start)}${chalk.red('^')}`,
-      headline: ''
-    }
-    normalized.headline = `${normalized.file}${normalized.position} - ${v.message}`
+    // 3. marker below
+    const markerBelow = `${chalk.black.bgBlack(
+      displayFragment.substring(0, column - displayStart)
+    )}${chalk.red('^')}`
 
-    logger.error(
-      `${normalized.headline}\n\n${fragment}\n${normalized.marker}\n`
-    )
+    logger.error(`${headline}\n\n${displayFragment}\n${markerBelow}\n`)
   })
 }
 
 export type Result = {
-  file: string | null
+  file?: string
   disabled: boolean
   origin: string
   validations: Validation[]
@@ -122,9 +111,11 @@ export const report = (resultList: Result[], logger = env.defaultLogger) => {
   resultList
     .filter(({ file, disabled }) => {
       if (disabled) {
-        logger.log(
-          `${chalk.blue.bgWhite(file || '')}${file ? ':' : ''} disabled`
-        )
+        if (file) {
+          logger.log(`${chalk.blue.bgWhite(file)}: disabled`)
+        } else {
+          logger.log(`disabled`)
+        }
         return false
       }
       return true
