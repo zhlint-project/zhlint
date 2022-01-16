@@ -5,7 +5,6 @@ export enum CharType {
   SPACE = 'space',
   CONTENT_HALF = 'content-half',
   CONTENT_FULL = 'content-full',
-  CJK = 'cjk', // TODO
   PUNCTUATION_HALF = 'punctuation-half',
   PUNCTUATION_FULL = 'punctuation-full',
   UNKNOWN = 'unknown'

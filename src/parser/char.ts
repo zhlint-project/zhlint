@@ -96,11 +96,11 @@ export const checkCharType = (char: string): CharType => {
   }
   // CJK Unified Ideographs Extension B
   if (char.match(/[\u{20000}-\u{2A6DF}]/u) != null) {
-    return CharType.CJK
+    return CharType.CONTENT_FULL
   }
   // CJK Compatibility Ideographs Supplement
   if (char.match(/[\u{2F800}-\u{2FA1F}]/u) != null) {
-    return CharType.CJK
+    return CharType.CONTENT_FULL
   }
 
   // CJK Symbols and Punctuation
