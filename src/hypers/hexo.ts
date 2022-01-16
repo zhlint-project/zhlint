@@ -11,10 +11,10 @@ const parser = (data: Data): Data => {
     const { length } = raw
     data.ignoredByParsers.push({
       name,
+      meta: `hexo-${name}`,
       index,
       length,
-      raw,
-      meta: `hexo-${name}`
+      originContent: raw
     })
     return '@'.repeat(length)
   })

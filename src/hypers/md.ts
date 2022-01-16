@@ -224,7 +224,7 @@ const parser = (data: Data): Data => {
   blockMarks.forEach((blockMark) => processBlockMark(blockMark, raw))
   data.blocks = blockMarks.map((b): Block => {
     const position = parsePosition(b.block.position)
-    ignoredByParsers.forEach(({ index, length, raw, meta }) => {
+    ignoredByParsers.forEach(({ index, length, originContent: raw, meta }) => {
       if (position.start <= index && position.end >= index + length) {
         ;(b.hyperMarks || []).push({
           type: MarkType.RAW,

@@ -3,10 +3,10 @@ import { Mark } from '../parser/types'
 
 export type ParserIgnoredCase = {
   name: string
+  meta: string
   index: number
   length: number
-  raw: string
-  meta: string
+  originContent: string
 }
 
 export type Block = {

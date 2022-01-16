@@ -1,5 +1,7 @@
 import { Data } from './types'
 
+// TODO: ::: tips 提示...
+//
 // ::: xxx\nyyy\nzzz\n:::\n
 // - `(?<=^|\n)` + `(\:\:\:.*)`
 // - `\n`
@@ -18,14 +20,14 @@ const parser = (data: Data): Data => {
         name,
         index,
         length: start.length,
-        raw: start,
+        originContent: start,
         meta: `vuepress-${name}-start`
       })
       data.ignoredByParsers.push({
         name,
         index: index + length - 3,
         length: 3,
-        raw: end,
+        originContent: end,
         meta: `vuepress-${name}-end`
       })
       return '@'.repeat(start.length) + '\n' + content + '\n' + '@'.repeat(3)
