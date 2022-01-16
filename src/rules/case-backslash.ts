@@ -1,10 +1,9 @@
+import { ValidationTarget } from '../logger'
+import { Handler, ModifiedToken as Token } from '../parser'
 import {
   findTokenBefore,
   findTokenAfter,
   findContentTokenBefore,
-  findContentTokenAfter,
-  findNonMarkTokenBefore,
-  findNonMarkTokenAfter,
   findSpaceAfterHost,
   addValidation,
   removeValidation
@@ -15,23 +14,23 @@ const messages = {
     'There should be a space between full-width content and half-width content.'
 }
 
-const validate = (token, type, condition) => {
-  removeValidation(token, 'space-punctuation', 'spaceAfter')
+const validate = (token: Token, type: string, condition: boolean): void => {
+  removeValidation(token, 'space-punctuation', ValidationTarget.SPACE_AFTER)
   if (condition) {
-    addValidation(token, 'case-backslash', 'spaceAfter', messages[type])
+    addValidation(token, 'case-backslash', ValidationTarget.SPACE_AFTER, messages[type])
   }
 }
 
-export default (token, index, group, matched, marks) => {
+const handler: Handler = (token, _, group) => {
   // half width and no raw space after -> no space after
   // full width before -> one space before
-  if (token.type.match(/^punctuation\-/) && token.content === '\\') {
+  if (token.type.match(/^punctuation-/) && token.content === '\\') {
     const tokenAfter = findTokenAfter(group, token)
     const contentTokenBefore = findContentTokenBefore(group, token)
     if (tokenAfter) {
-      if (tokenAfter.type.match(/\-half*/) && !token.rawSpaceAfter) {
-        removeValidation(token, 'space-punctuation', 'spaceAfter')
-        token.spaceAfter = ''
+      if (tokenAfter.type.match(/-half*/) && !token.spaceAfter) {
+        removeValidation(token, 'space-punctuation', ValidationTarget.SPACE_AFTER)
+        token.modifiedSpaceAfter = ''
         if (contentTokenBefore) {
           const tokenBefore = findTokenBefore(group, token)
           const spaceAfterHost = findSpaceAfterHost(
@@ -40,17 +39,17 @@ export default (token, index, group, matched, marks) => {
             tokenBefore
           )
           if (spaceAfterHost) {
-            removeValidation(spaceAfterHost, 'space-punctuation', 'spaceAfter')
-            spaceAfterHost.spaceAfter = spaceAfterHost.rawSpaceAfter
+            removeValidation(spaceAfterHost, 'space-punctuation', ValidationTarget.SPACE_AFTER)
+            spaceAfterHost.modifiedSpaceAfter = spaceAfterHost.spaceAfter
           }
-          if (contentTokenBefore && contentTokenBefore.type.match(/\-full*/)) {
+          if (contentTokenBefore && contentTokenBefore.type.match(/-full*/)) {
             if (spaceAfterHost) {
               validate(
                 spaceAfterHost,
                 'before',
-                spaceAfterHost.rawSpaceAfter !== ' '
+                spaceAfterHost.spaceAfter !== ' '
               )
-              spaceAfterHost.spaceAfter = ' '
+              spaceAfterHost.modifiedSpaceAfter = ' '
             }
           }
         }
@@ -58,3 +57,5 @@ export default (token, index, group, matched, marks) => {
     }
   }
 }
+
+export default handler

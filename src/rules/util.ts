@@ -10,8 +10,11 @@ import {
 
 export const findTokenBefore = (
   group: GroupToken,
-  token: Token
+  token: Token | undefined
 ): Token | undefined => {
+  if (!token) {
+    return
+  }
   const index = group.indexOf(token)
   if (index < 0) {
     return
@@ -21,8 +24,11 @@ export const findTokenBefore = (
 
 export const findTokenAfter = (
   group: GroupToken,
-  token: Token
+  token: Token | undefined
 ): Token | undefined => {
+  if (!token) {
+    return
+  }
   const index = group.indexOf(token)
   if (index < 0) {
     return
@@ -32,8 +38,12 @@ export const findTokenAfter = (
 
 export const findContentTokenBefore = (
   group: GroupToken,
-  token: Token
+  token: Token | undefined
 ): SingleToken | undefined => {
+  if (!token) {
+    return
+  }
+
   const index = group.indexOf(token)
   if (index < 0) {
     return
@@ -59,8 +69,12 @@ export const findContentTokenBefore = (
 
 export const findContentTokenAfter = (
   group: GroupToken,
-  token: Token
+  token: Token | undefined
 ): SingleToken | undefined => {
+  if (!token) {
+    return
+  }
+
   const index = group.indexOf(token)
   if (index < 0) {
     return
@@ -85,8 +99,12 @@ export const findContentTokenAfter = (
 
 export const findNonMarkTokenBefore = (
   group: GroupToken,
-  token: Token
+  token: Token | undefined
 ): Token | undefined => {
+  if (!token) {
+    return
+  }
+
   const index = group.indexOf(token)
   if (index < 0) {
     return
@@ -110,8 +128,12 @@ export const findNonMarkTokenBefore = (
 
 export const findNonMarkTokenAfter = (
   group: GroupToken,
-  token: Token
+  token: Token | undefined
 ): Token | undefined => {
+  if (!token) {
+    return
+  }
+
   const index = group.indexOf(token)
   if (index < 0) {
     return
@@ -162,6 +184,8 @@ export const findMarkSeq = (group: GroupToken, token: Token): Token[] => {
   spreadMarkSeq(group, token, seq, true)
   return seq
 }
+
+// others
 
 export const findSpaceAfterHost = (
   group: GroupToken,

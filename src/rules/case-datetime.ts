@@ -1,3 +1,5 @@
+import { ValidationTarget } from '../logger'
+import { Handler } from '../parser'
 import {
   findTokenBefore,
   findNonMarkTokenBefore,
@@ -5,8 +7,8 @@ import {
   removeValidation
 } from './util'
 
-export default (token, index, group, matched, marks) => {
-  if (token.type.match(/^punctuation\-/) && token.raw === ':') {
+const handler: Handler = (token, _, group) => {
+  if (token.type.match(/^punctuation-/) && token.content === ':') {
     const tokenBefore = findTokenBefore(group, token)
     const nonMarkTokenBefore = findNonMarkTokenBefore(group, token)
     const nonMarkTokenAfter = findNonMarkTokenAfter(group, token)
@@ -16,16 +18,21 @@ export default (token, index, group, matched, marks) => {
     )
     if (
       nonMarkTokenBefore &&
-      !nonMarkTokenBefore.rawSpaceAfter &&
+      !nonMarkTokenBefore.spaceAfter &&
+
       tokenBefore &&
-      !tokenBefore.rawSpaceAfter &&
+      !tokenBefore.spaceAfter &&
+
       nonMarkTokenAfter &&
       tokenBeforeNonMarkTokenAfter &&
-      !tokenBeforeNonMarkTokenAfter.rawSpaceAfter &&
-      !token.rawSpaceAfter
+      !tokenBeforeNonMarkTokenAfter.spaceAfter &&
+
+      !token.spaceAfter
     ) {
-      removeValidation(token, 'unify-punctuation', 'content')
-      token.content = ':'
+      removeValidation(token, 'unify-punctuation', ValidationTarget.CONTENT)
+      token.modifiedContent = ':'
     }
   }
 }
+
+export default handler

@@ -47,6 +47,7 @@ const getPositionByOffset = (str: string, offset: number): Position => {
 }
 
 export enum ValidationTarget {
+  CONTENT = 'content',
   START_CONTENT = 'startContent',
   END_CONTENT = 'endContent',
   SPACE_AFTER = 'spaceAfter',
