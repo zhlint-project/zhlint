@@ -19,7 +19,7 @@ const parseIngoredCase = (text: string): IgnoredCase | undefined => {
 }
 
 const parser = (data: Data): Data => {
-  const { ignoredByRules, raw } = data
+  const { ignoredByRules, content: raw } = data
   const matcher = /<!--\s*zhlint\s*ignore:\s*(.+?)\s*-->/g
   let result: RegExpExecArray | null
   while ((result = matcher.exec(raw)) !== null) {

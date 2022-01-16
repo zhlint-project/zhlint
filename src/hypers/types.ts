@@ -18,7 +18,7 @@ export type Block = {
 
 export type Data = {
   content: string
-  raw: string
+  modifiedContent: string
   ignoredByRules: IgnoredCase[]
   ignoredByParsers: ParserIgnoredCase[]
   blocks: Block[]

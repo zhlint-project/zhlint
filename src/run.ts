@@ -139,27 +139,31 @@ export type Result = {
 }
 
 const run = (str: string, options: Options = {}): Result => {
-  const logger = options.logger || env.defaultLogger
-
+  // return if the file is totally ignored
   const disabledMatcher = /<!--\s*zhlint\s*disabled\s*-->/g
   if (str.match(disabledMatcher)) {
     return { origin: str, result: str, validations: [], disabled: true }
   }
 
-  const rulesInput = options.rules || rulesInfo.map((item) => item.name)
-  let hyperParseInput =
-    options.hyperParse || hyperParseInfo.map((item) => item.name)
-  const ignoredCases = options.ignoredCases || []
+  // init logger
+  const logger = options.logger || env.defaultLogger
 
-  if (typeof hyperParseInput === 'function') {
-    hyperParseInput = [hyperParseInput]
+  // init rules, hyper parsers, and ignored cases
+  const ignoredCases = options.ignoredCases || []
+  const rulesInput = options.rules || rulesInfo.map((item) => item.name)
+  let hyperParserList: (string | ((data: Data) => Data))[]
+  if (typeof options.hyperParse === 'function') {
+    hyperParserList = [options.hyperParse]
+  } else {
+    hyperParserList = options.hyperParse || hyperParseInfo.map((item) => item.name)
   }
 
+  // init data
   // str -> ignoredByRules, ignoredByParsers
   // blocks -> marks, ignoredMarks
   const data: Data = {
     content: str,
-    raw: str,
+    modifiedContent: str,
     ignoredByRules: ignoredCases,
     ignoredByParsers: [],
     blocks: [
@@ -175,10 +179,18 @@ const run = (str: string, options: Options = {}): Result => {
   const allValidations: Validation[] = []
   const allIgnoredMarks: IgnoredMark[] = []
 
+  // Run all the hyper parsers
   const finalData = matchCallArray<(data: Data) => Data>(
-    hyperParseInput,
+    hyperParserList,
     hyperParseMap
   ).reduce((current, parse) => parse(current), data)
+
+  // 1. Parse each block without ignoredByParsers
+  // 2. Parse all ignoredByRules into marks for each block
+  // 3. Run all rule processes for each block
+  // 4. Push all ignored marks into allIgnoredMarks for each block
+  // 5. Join all tokens with ignoredMarks and allValidations for each block
+  // 6. Replace each block back to the string
   const result = replaceBlocks(
     str,
     finalData.blocks.map(({ value, marks, start, end }) => {
@@ -196,6 +208,7 @@ const run = (str: string, options: Options = {}): Result => {
     })
   )
 
+  // filter allValidations with allIgnoredMarks
   const validations = allValidations.filter(({ index }) =>
     allIgnoredMarks.length > 0
       ? allIgnoredMarks.some(({ start, end }) => index >= start && index <= end)

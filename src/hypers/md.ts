@@ -197,8 +197,8 @@ const processBlockMark = (blockMark: BlockMark, str) => {
     - marks: emphasis/strong/delete/footnote/link/link ref
  */
 const parser = (data: Data): Data => {
-  const raw = data.raw
-  const content = data.content
+  const raw = data.content
+  const content = data.modifiedContent
   const ignoredByParsers = data.ignoredByParsers
 
   const blockMarks: BlockMark[] = []

@@ -11,7 +11,7 @@ import { Data } from './types'
 const matcher = /(?<=^|\n)(:::.*)\n(.+)\n(:::)(?=\n|$)/g
 
 const parser = (data: Data): Data => {
-  data.content = data.content.replace(
+  data.modifiedContent = data.modifiedContent.replace(
     matcher,
     (raw, start, content, end, index) => {
       const { length } = raw

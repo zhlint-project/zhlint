@@ -7,7 +7,7 @@ import { Data } from './types'
 const matcher = /\{% ([^ ]+?) [^%]*?%\}(?:\n|\{(?!%)|[^{])*?\{% end(?:\1) %\}/g
 
 const parser = (data: Data): Data => {
-  data.content = data.content.replace(matcher, (raw, name, index) => {
+  data.modifiedContent = data.modifiedContent.replace(matcher, (raw, name, index) => {
     const { length } = raw
     data.ignoredByParsers.push({
       name,
