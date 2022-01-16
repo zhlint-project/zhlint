@@ -29,6 +29,20 @@ export const SHORTHAND_PAIR_SET: CharSet = {
   [`’`]: `‘`
 }
 
+// Reusable
+
+type Pair = {
+  startIndex: number
+  startContent: string
+  endIndex: number
+  endContent: string
+}
+
+type ModifiedPair = {
+  modifiedStartContent: string
+  modifiedEndContent?: string
+}
+
 // Mark
 
 export enum MarkType {
@@ -42,21 +56,26 @@ export enum MarkSideType {
   RIGHT = 'right'
 }
 
-export type Mark = {
+export type Mark = Pair & {
   type: MarkType
-  meta?: string
-  code?: string
-  rightCode?: Mark
-  startIndex: number
-  startContent: string
-  endIndex: number
-  endContent: string
-  rawStartContent?: string
-  rawEndContent?: string
+  meta?: string // AST type enum
 }
+
+export type RawMark = Mark & {
+  code: MarkSideType
+  rightPair?: RawMark
+}
+
+export type ModifiedMark = Mark & ModifiedPair
+
+export type ModifiedRawMark = RawMark & ModifiedPair
 
 export type MarkMap = {
   [index: number]: Mark
+}
+
+export const isRawMark = (mark: Mark): mark is RawMark => {
+  return (mark as RawMark).code !== undefined
 }
 
 // Token
@@ -79,36 +98,43 @@ type CommonToken = {
   length: number
 
   content: string
-  raw?: string
+  spaceAfter: string
 
   mark?: Mark
   markSide?: MarkSideType
+}
 
-  spaceAfter?: string
-  rawSpaceAfter?: string
+type ModifiedCommonToken = {
+  modifiedContent?: string
+  modifiedSpaceAfter?: string
 }
 
 export type SingleToken = CommonToken & {
   type: CharType | SingleTokenType
 }
 
+export type ModifiedSingleToken = SingleToken & ModifiedCommonToken
+
 export type GroupToken = Array<Token> &
-  CommonToken & {
+  CommonToken &
+  Pair & {
     type: GroupTokenType
+    innerSpaceBefore: string
+  }
 
-    startIndex?: number
-    startContent?: string
-    rawStartContent?: string
-
-    endIndex?: number
-    endContent?: string
-    rawEndContent?: string
-
-    innerSpaceBefore?: string
-    rawInnerSpaceBefore?: string
+export type ModifiedGroupToken = Array<ModifiedToken> &
+  CommonToken &
+  ModifiedCommonToken &
+  Pair &
+  ModifiedPair & {
+    type: GroupTokenType
+    innerSpaceBefore: string
+    modifiedInnerSpaceBefore?: string
   }
 
 export type Token = SingleToken | GroupToken
+
+export type ModifiedToken = ModifiedSingleToken | ModifiedGroupToken
 
 // Status
 
@@ -128,17 +154,17 @@ export type ParseStatus = {
 // Travel
 
 export type FilterFunction = (
-  token: Token,
+  token: ModifiedToken,
   index: number,
-  group: GroupToken
+  group: ModifiedGroupToken
 ) => boolean | RegExpMatchArray | null
 
 export type Filter = FilterFunction | string | RegExp | { type: TokenType }
 
 export type Handler = (
-  token: Token,
+  token: ModifiedToken,
   index: number,
-  group: GroupToken,
+  group: ModifiedGroupToken,
   matched: boolean | RegExpMatchArray | null,
-  marks: Mark[]
+  marks: ModifiedMark[]
 ) => void

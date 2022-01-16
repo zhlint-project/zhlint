@@ -2,7 +2,6 @@ import { checkCharType } from './char'
 import {
   CharType,
   GroupToken,
-  GroupTokenType,
   GROUP_CHAR_SET,
   Mark,
   MarkSideType,
@@ -12,7 +11,8 @@ import {
   SHORTHAND_CHARS,
   SHORTHAND_PAIR_SET,
   SingleToken,
-  SingleTokenType
+  SingleTokenType,
+  Token
 } from './types'
 
 export const handlePunctuation = (
@@ -112,7 +112,6 @@ export const finalizeCurrentMark = (
   }
   status.lastMark.endIndex = index
   status.lastMark.endContent = char
-  status.lastMark.rawEndContent = char
   if (status.markStack.length > 0) {
     status.lastMark = status.markStack.pop()
   } else {
@@ -126,9 +125,9 @@ export const finalizeCurrentGroup = (
   char: string
 ) => {
   if (status.lastGroup) {
+    // index, length, content
     status.lastGroup.endIndex = index
     status.lastGroup.endContent = char
-    status.lastGroup.rawEndContent = char
   }
   if (status.groupStack.length > 0) {
     status.lastGroup = status.groupStack.pop()
@@ -153,9 +152,8 @@ export const createBracket = (
     type,
     startIndex: index,
     startContent: char,
-    rawStartContent: char,
-    endIndex: -1,
-    endContent: ''
+    endIndex: -1, // to be finalized
+    endContent: '' // to be finalized
   }
   status.marks.push(mark)
   status.lastMark = mark
@@ -169,10 +167,10 @@ export const appendBracket = (
 ) => {
   const token: SingleToken = {
     type: SingleTokenType.MARK_BRACKETS,
-    content: char,
-    raw: char,
     index,
     length: 1,
+    content: char,
+    spaceAfter: '', // to be finalized
     mark: status.lastMark,
     markSide
   }
@@ -191,10 +189,10 @@ export const appendHyperMark = (
 ) => {
   const token: SingleToken = {
     type: `mark-${mark.type}` as SingleTokenType, // TODO enum
-    content: content,
-    raw: content,
     index,
     length: content.length,
+    content: content,
+    spaceAfter: '', // to be finalized
     mark: mark,
     markSide
   }
@@ -209,10 +207,10 @@ export const appendHyperContent = (
 ) => {
   status.lastToken = {
     type: SingleTokenType.CONTENT_HYPER,
-    content: content,
-    raw: content,
     index,
-    length: content.length
+    length: content.length,
+    content: content,
+    spaceAfter: '' // to be finalized
   }
   status.lastGroup && status.lastGroup.push(status.lastToken)
   status.lastToken = undefined
@@ -227,10 +225,20 @@ export const createNewGroup = (
 ) => {
   status.lastGroup && status.groupStack.push(status.lastGroup)
   const lastGroup = [] as unknown as GroupToken
-  lastGroup.type = GroupTokenType.GROUP
-  lastGroup.startContent = char
-  lastGroup.rawStartContent = char
-  lastGroup.startIndex = index
+
+  Object.assign(lastGroup, {
+    index,
+    length: -1, // TODO: placeholder
+    content: '', // TODO: placeholder
+    spaceAfter: '', // to be finalized
+    startIndex: index,
+    startContent: char,
+    endIndex: -1, // to be finalized
+    endContent: '', // to be finalized
+    innerSpaceBefore: '' // to be finalized
+  })
+
+  // TODO: previous group in stack
   status.groupStack[status.groupStack.length - 1].push(lastGroup)
   status.lastGroup = lastGroup
   status.groups.push(lastGroup)
@@ -244,13 +252,18 @@ export const createContent = (
   char: string,
   type: CharType
 ) => {
-  status.lastToken = { type, content: char, raw: char, index, length: 1 }
+  status.lastToken = {
+    type,
+    index,
+    length: 1, // to be finalized
+    content: char, // to be finalized
+    spaceAfter: '' // to be finalized
+  }
 }
 
 export const appendContent = (status: ParseStatus, char: string) => {
   if (status.lastToken) {
     status.lastToken.content += char
-    status.lastToken.raw = status.lastToken.content
     status.lastToken.length++
   }
 }
@@ -288,9 +301,21 @@ const addNormalPunctuation = (
   char: string,
   type: CharType
 ) => {
-  status.lastToken = { type, content: char, raw: char, index, length: 1 }
+  status.lastToken = {
+    type,
+    index,
+    length: 1,
+    content: char,
+    spaceAfter: '' // to be finalized
+  }
   status.lastGroup && status.lastGroup.push(status.lastToken)
   status.lastToken = undefined
+}
+
+export const getPreviousToken = (status: ParseStatus): Token | undefined => {
+  if (status.lastGroup) {
+    return status.lastGroup[status.lastGroup.length - 1]
+  }
 }
 
 export const isShorthand = (

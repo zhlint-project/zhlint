@@ -3,7 +3,13 @@ import markdown from 'remark-parse'
 import frontmatter from 'remark-frontmatter'
 import * as Ast from 'mdast'
 import { Node, Position } from 'unist'
-import { Mark, MarkType } from '../parser/types'
+import {
+  isRawMark,
+  Mark,
+  MarkSideType,
+  MarkType,
+  RawMark
+} from '../parser/types'
 import { Block, Data } from './types'
 
 type NormalizedPosition = {
@@ -108,71 +114,76 @@ const processBlockMark = (blockMark: BlockMark, str) => {
   const { block, inlineMarks } = blockMark
   const offset = block?.position?.start?.offset
   const marks: Mark[] = []
-  const unresolvedCodeMarks: Mark[] = []
+  const unresolvedCodeMarks: RawMark[] = []
   inlineMarks.forEach((inlineMark) => {
-    const mark: Mark = {} as Mark
     const { inline } = inlineMark
     if (inlineMark.raw) {
-      mark.type = MarkType.RAW
-      mark.meta = inline.type
-      mark.startIndex = (inline?.position?.start?.offset || 0) - (offset || 0)
-      mark.endIndex = (inline?.position?.end?.offset || 0) - (offset || 0)
-      mark.startContent = str.substring(
-        inline?.position?.start?.offset,
-        inline?.position?.end?.offset
-      )
-      mark.endContent = ''
+      const mark: RawMark = {
+        type: MarkType.RAW,
+        meta: inline.type,
+        startIndex: (inline?.position?.start?.offset || 0) - (offset || 0),
+        endIndex: (inline?.position?.end?.offset || 0) - (offset || 0),
+        startContent: str.substring(
+          inline?.position?.start?.offset,
+          inline?.position?.end?.offset
+        ),
+        endContent: '',
+        code: MarkSideType.LEFT
+      }
       if (mark.startContent.match(/<code.*>/)) {
-        mark.code = 'left'
         unresolvedCodeMarks.push(mark)
       } else if (mark.startContent.match(/<\/code.*>/)) {
-        mark.code = 'right'
+        mark.code = MarkSideType.RIGHT
         const leftCode = unresolvedCodeMarks.pop()
         if (leftCode) {
-          leftCode.rightCode = mark
+          leftCode.rightPair = mark
         }
       }
+      marks.push(mark)
     } else {
       const parentInline = inline as Ast.Parent
-      mark.type = MarkType.HYPER
-      mark.meta = inline.type
-      mark.startIndex = (inline?.position?.start?.offset || 0) - (offset || 0)
-      mark.startContent = str.substring(
-        parentInline?.position?.start?.offset,
-        parentInline.children[0]?.position?.start?.offset
-      )
-      mark.endIndex =
-        (parentInline.children[parentInline.children.length - 1]?.position?.end
-          ?.offset || 0) - (offset || 0)
-      mark.endContent = str.substring(
-        parentInline.children[parentInline.children.length - 1]?.position?.end
-          ?.offset,
-        parentInline?.position?.end?.offset
-      )
+      const mark: Mark = {
+        type: MarkType.HYPER,
+        meta: inline.type,
+        startIndex: (inline?.position?.start?.offset || 0) - (offset || 0),
+        startContent: str.substring(
+          parentInline?.position?.start?.offset,
+          parentInline.children[0]?.position?.start?.offset
+        ),
+        endIndex:
+          (parentInline.children[parentInline.children.length - 1]?.position
+            ?.end?.offset || 0) - (offset || 0),
+        endContent: str.substring(
+          parentInline.children[parentInline.children.length - 1]?.position?.end
+            ?.offset,
+          parentInline?.position?.end?.offset
+        )
+      }
+      marks.push(mark)
     }
-    marks.push(mark)
   })
   blockMark.value = str.substring(
     block?.position?.start?.offset,
     block?.position?.end?.offset
   )
   blockMark.hyperMarks = marks
-    .map((mark): Mark | undefined => {
-      if (mark.code === 'right') {
-        return
+    .map((mark) => {
+      if (isRawMark(mark)) {
+        if (mark.code === MarkSideType.RIGHT) {
+          return
+        }
+        if (mark.code === MarkSideType.LEFT) {
+          const { rightPair: rightCode } = mark
+          mark.startContent = str.substring(
+            mark.startIndex + (offset || 0),
+            mark.endIndex + (offset || 0)
+          )
+          mark.endIndex = rightCode?.endIndex || 0
+          mark.endContent = ''
+          delete mark.rightPair
+          return mark
+        }
       }
-      if (mark.code === 'left') {
-        const { rightCode } = mark
-        mark.endIndex = rightCode?.endIndex || 0
-        mark.startContent = str.substring(
-          mark.startIndex + (offset || 0),
-          mark.endIndex + (offset || 0)
-        )
-        mark.endContent = ''
-        delete mark.rightCode
-        delete mark.code
-      }
-      return mark
     })
     .filter(Boolean) as Mark[]
 }

@@ -15,6 +15,7 @@ import {
   appendHyperMark,
   finalizeCurrentToken,
   getConnectingSpaceLength,
+  getPreviousToken,
   handleContent,
   handlePunctuation,
   isShorthand
@@ -38,7 +39,18 @@ export type ParseResult = {
 export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
   // init top-level tokens
   const tokens = [] as unknown as GroupToken
-  tokens.type = GroupTokenType.GROUP
+  Object.assign(tokens, {
+    type: GroupTokenType.GROUP,
+    index: 0,
+    length: -1, // TODO: placeholder
+    content: '', // TODO: placeholder
+    spaceAfter: '',
+    startIndex: 0,
+    endIndex: str.length - 1,
+    startContent: '',
+    endContent: '',
+    innerSpaceBefore: ''
+  })
 
   // pre-process hyper marks
   const hyperMarkMap: MarkMap = {}
@@ -126,11 +138,12 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
       const spaceLength = getConnectingSpaceLength(str, i)
       const space = str.substring(i, i + spaceLength)
       if (status.lastGroup.length) {
-        const lastToken = status.lastGroup[status.lastGroup.length - 1]
-        lastToken.spaceAfter = lastToken.rawSpaceAfter = space
+        const lastToken = getPreviousToken(status)
+        if (lastToken) {
+          lastToken.spaceAfter = space
+        }
       } else {
-        status.lastGroup.innerSpaceBefore =
-          status.lastGroup.rawInnerSpaceBefore = space
+        status.lastGroup.innerSpaceBefore = space
       }
       if (spaceLength - 1 > 0) {
         i += spaceLength - 1
