@@ -155,7 +155,8 @@ const run = (str: string, options: Options = {}): Result => {
   if (typeof options.hyperParse === 'function') {
     hyperParserList = [options.hyperParse]
   } else {
-    hyperParserList = options.hyperParse || hyperParseInfo.map((item) => item.name)
+    hyperParserList =
+      options.hyperParse || hyperParseInfo.map((item) => item.name)
   }
 
   // init data

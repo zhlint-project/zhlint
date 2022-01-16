@@ -2,7 +2,6 @@ import { checkCharType } from './char'
 import {
   CharType,
   GroupToken,
-  GroupTokenType,
   Mark,
   MarkMap,
   MarkSideType,
@@ -11,13 +10,15 @@ import {
 } from './types'
 import {
   appendContent,
-  appendHyperContent,
-  appendHyperMark,
-  finalizeCurrentToken,
+  addHyperContent,
+  addHyperToken,
+  finalizeLastToken,
   getConnectingSpaceLength,
+  getHyperMarkMap,
   getPreviousToken,
   handleContent,
   handlePunctuation,
+  initNewStatus,
   isShorthand
 } from './util'
 
@@ -29,51 +30,22 @@ export type ParseResult = {
 
 /**
  * Parse a string into several tokens.
- * - half-width content x {1,n} (letter)
- * - full-width content x {1,n}
+ * - half-width content x {1,n} (English words)
+ * - full-width content x {1,n} (Chinese sentenses without punctuations in between)
  * - half-width punctuation
  * - width-width punctuation
  * - punctuation pair as special marks: brackets
  * - punctuation pair as a group: quotes
+ * Besides them there are some special tokens
+ * - content-hyper from hyperMarks as input
+ * For spaces they would be included as one or multiple successive spaces in
+ * - afterSpace after a token or
+ * - innerSpaceBefore after the left quote of a group
  */
 export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
-  // init top-level tokens
-  const tokens = [] as unknown as GroupToken
-  Object.assign(tokens, {
-    type: GroupTokenType.GROUP,
-    index: 0,
-    length: -1, // TODO: placeholder
-    content: '', // TODO: placeholder
-    spaceAfter: '',
-    startIndex: 0,
-    endIndex: str.length - 1,
-    startContent: '',
-    endContent: '',
-    innerSpaceBefore: ''
-  })
-
-  // pre-process hyper marks
-  const hyperMarkMap: MarkMap = {}
-  hyperMarks.forEach((mark) => {
-    hyperMarkMap[mark.startIndex] = mark
-    if (mark.type !== MarkType.RAW) {
-      hyperMarkMap[mark.endIndex] = mark
-    }
-  })
-
-  // states
-  const status: ParseStatus = {
-    lastToken: undefined,
-    lastGroup: tokens,
-    lastMark: undefined,
-
-    tokens,
-    marks: [...hyperMarks],
-    groups: [],
-
-    markStack: [],
-    groupStack: []
-  }
+  // init status and hyper marks
+  const status: ParseStatus = initNewStatus(str, hyperMarks)
+  const hyperMarkMap: MarkMap = getHyperMarkMap(hyperMarks)
 
   // travel every character in the string
   for (let i = 0; i < str.length; i++) {
@@ -88,7 +60,7 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
     // - content: whether start a new one or append into the current one
     if (hyperMark) {
       // end the last unfinished token
-      finalizeCurrentToken(status, i)
+      finalizeLastToken(status, i)
       // for hyper mark without startContent
       delete hyperMarkMap[i]
       // check the next token
@@ -98,7 +70,7 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
       //   - start mark: append token
       //   - end mark: append token, append mark
       if (hyperMark.type === MarkType.RAW) {
-        appendHyperContent(
+        addHyperContent(
           status,
           i,
           str.substring(hyperMark.startIndex, hyperMark.endIndex)
@@ -106,7 +78,7 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
         i = hyperMark.endIndex - 1
       } else {
         if (i === hyperMark.startIndex) {
-          appendHyperMark(
+          addHyperToken(
             status,
             i,
             hyperMark,
@@ -115,7 +87,7 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
           )
           i += hyperMark.startContent.length - 1
         } else if (i === hyperMark.endIndex) {
-          appendHyperMark(
+          addHyperToken(
             status,
             i,
             hyperMark,
@@ -126,24 +98,24 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
         }
       }
     } else if (type === CharType.SPACE) {
-      if (!status.lastGroup) {
-        throw new Error(`Unmatched token group at ${i}`)
-      }
       // end the last unfinished token
       // jump to the next non-space char
       // record the last space
       // - space after a token
       // - inner space before a group
-      finalizeCurrentToken(status, i)
+      finalizeLastToken(status, i)
+      if (!status.lastGroup) {
+        throw new Error(`Unmatched token group at ${i}`)
+      }
       const spaceLength = getConnectingSpaceLength(str, i)
-      const space = str.substring(i, i + spaceLength)
+      const spaces = str.substring(i, i + spaceLength)
       if (status.lastGroup.length) {
         const lastToken = getPreviousToken(status)
         if (lastToken) {
-          lastToken.spaceAfter = space
+          lastToken.spaceAfter = spaces
         }
       } else {
-        status.lastGroup.innerSpaceBefore = space
+        status.lastGroup.innerSpaceBefore = spaces
       }
       if (spaceLength - 1 > 0) {
         i += spaceLength - 1
@@ -163,9 +135,9 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
       handleContent(i, char, type, status)
     }
   }
-  finalizeCurrentToken(status, str.length)
+  finalizeLastToken(status, str.length)
 
-  // throw error if `markStack` or `groupStack` not fully flushed
+  // throw an error if `markStack` or `groupStack` not fully flushed
   if (status.markStack.length > 0) {
     const mark = status.markStack[status.markStack.length - 1]
     throw new Error(

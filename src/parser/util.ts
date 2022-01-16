@@ -2,8 +2,10 @@ import { checkCharType } from './char'
 import {
   CharType,
   GroupToken,
+  GroupTokenType,
   GROUP_CHAR_SET,
   Mark,
+  MarkMap,
   MarkSideType,
   MarkType,
   MARK_CHAR_SET,
@@ -22,7 +24,7 @@ export const handlePunctuation = (
   status: ParseStatus
 ): void => {
   // end the last unfinished token
-  finalizeCurrentToken(status, i)
+  finalizeLastToken(status, i)
   // check the current token type
   // - start of a mark: start an unfinished mark
   // - end of a mark: end the current unfinished mark
@@ -32,16 +34,16 @@ export const handlePunctuation = (
   // - other punctuation: add and end the current token
   if (MARK_CHAR_SET.left.indexOf(char) >= 0) {
     // push (save) the current unfinished mark if have
-    createBracket(status, i, char)
+    initNewMark(status, i, char)
     // generate a new token and mark it as a mark punctuation by left
     // and finish the token
-    appendBracket(status, i, char, MarkSideType.LEFT)
+    addBracketToken(status, i, char, MarkSideType.LEFT)
   } else if (MARK_CHAR_SET.right.indexOf(char) >= 0) {
     if (!status.lastMark) {
       throw new Error(`Unmatched closed bracket ${char} at ${i}`)
     }
     // generate token as a punctuation
-    appendBracket(status, i, char, MarkSideType.RIGHT)
+    addBracketToken(status, i, char, MarkSideType.RIGHT)
     // end the last unfinished mark
     // and pop the previous one if exists
     finalizeCurrentMark(status, i, char)
@@ -51,17 +53,17 @@ export const handlePunctuation = (
     if (status.lastGroup && char === status.lastGroup.startContent) {
       finalizeCurrentGroup(status, i, char)
     } else {
-      createNewGroup(status, i, char)
+      initNewGroup(status, i, char)
     }
   } else if (GROUP_CHAR_SET.left.indexOf(char) >= 0) {
-    createNewGroup(status, i, char)
+    initNewGroup(status, i, char)
   } else if (GROUP_CHAR_SET.right.indexOf(char) >= 0) {
     if (!status.lastGroup) {
       throw new Error(`Unmatched closed quote ${char} at ${i}`)
     }
     finalizeCurrentGroup(status, i, char)
   } else {
-    addNormalPunctuation(status, i, char, type)
+    addNormalPunctuationToken(status, i, char, type)
   }
 }
 
@@ -76,69 +78,105 @@ export const handleContent = (
   // - append into current unfinished token
   if (status.lastToken) {
     if (type !== CharType.UNKNOWN && status.lastToken.type !== type) {
-      finalizeCurrentToken(status, i)
-      createContent(status, i, char, type)
+      finalizeLastToken(status, i)
+      initNewContent(status, i, char, type)
     } else {
       appendContent(status, char)
     }
   } else {
-    createContent(status, i, char, type)
+    initNewContent(status, i, char, type)
   }
 }
 
-// finalize token/mark/group
+// status
 
-/**
- * Finalize the token length and push it into the current group
- */
-export const finalizeCurrentToken = (
-  status: ParseStatus,
-  index: number
-): void => {
+export const initNewStatus = (str: string, hyperMarks: Mark[]): ParseStatus => {
+  const tokens = [] as unknown as GroupToken
+  Object.assign(tokens, {
+    type: GroupTokenType.GROUP,
+    index: 0,
+    length: -1, // TODO: placeholder
+    content: '', // TODO: placeholder
+    spaceAfter: '',
+    startIndex: 0,
+    endIndex: str.length - 1,
+    startContent: '',
+    endContent: '',
+    innerSpaceBefore: ''
+  })
+  const status: ParseStatus = {
+    lastToken: undefined,
+    lastGroup: tokens,
+    lastMark: undefined,
+
+    tokens,
+    marks: [...hyperMarks],
+    groups: [],
+
+    markStack: [],
+    groupStack: []
+  }
+  return status
+}
+
+// finalize token
+
+export const finalizeLastToken = (status: ParseStatus, index: number): void => {
   if (status.lastToken) {
+    // the lastToken.index is not the current index anymore
     status.lastToken.length = index - status.lastToken.index
     status.lastGroup && status.lastGroup.push(status.lastToken)
     status.lastToken = undefined
   }
 }
 
-export const finalizeCurrentMark = (
+export const finalizeCurrentToken = (
   status: ParseStatus,
-  index: number,
-  char: string
-) => {
-  if (!status.lastMark) {
-    return
-  }
-  status.lastMark.endIndex = index
-  status.lastMark.endContent = char
-  if (status.markStack.length > 0) {
-    status.lastMark = status.markStack.pop()
-  } else {
-    status.lastMark = undefined
-  }
+  token: SingleToken
+): void => {
+  status.lastGroup && status.lastGroup.push(token)
+  status.lastToken = undefined
 }
 
-export const finalizeCurrentGroup = (
+// hyper marks
+
+export const addHyperToken = (
   status: ParseStatus,
   index: number,
-  char: string
+  mark: Mark,
+  content: string,
+  markSide: MarkSideType
 ) => {
-  if (status.lastGroup) {
-    // index, length, content
-    status.lastGroup.endIndex = index
-    status.lastGroup.endContent = char
+  const token: SingleToken = {
+    type: `mark-${mark.type}` as SingleTokenType, // TODO enum
+    index,
+    length: content.length,
+    content: content,
+    spaceAfter: '', // to be finalized
+    mark: mark,
+    markSide
   }
-  if (status.groupStack.length > 0) {
-    status.lastGroup = status.groupStack.pop()
-  } else {
-    status.lastGroup = undefined
+  finalizeCurrentToken(status, token)
+}
+
+export const addHyperContent = (
+  status: ParseStatus,
+  index: number,
+  content: string
+) => {
+  const token: SingleToken = {
+    type: SingleTokenType.CONTENT_HYPER,
+    index,
+    length: content.length,
+    content: content,
+    spaceAfter: '' // to be finalized
   }
+  finalizeCurrentToken(status, token)
 }
 
 // bracket marks
 
-export const createBracket = (
+export const initNewMark = (
   status: ParseStatus,
   index: number,
   char: string,
@@ -159,7 +197,7 @@ export const createBracket = (
   status.lastMark = mark
 }
 
-export const appendBracket = (
+export const addBracketToken = (
   status: ParseStatus,
   index: number,
   char: string,
@@ -174,51 +212,47 @@ export const appendBracket = (
     mark: status.lastMark,
     markSide
   }
-  status.lastGroup && status.lastGroup.push(token)
-  status.lastToken = undefined
+  finalizeCurrentToken(status, token)
 }
 
-// hyper marks
-
-export const appendHyperMark = (
+export const finalizeCurrentMark = (
   status: ParseStatus,
   index: number,
-  mark: Mark,
-  content: string,
-  markSide: MarkSideType
+  char: string
+) => {
+  if (!status.lastMark) {
+    return
+  }
+  status.lastMark.endIndex = index
+  status.lastMark.endContent = char
+  if (status.markStack.length > 0) {
+    status.lastMark = status.markStack.pop()
+  } else {
+    status.lastMark = undefined
+  }
+}
+
+// normal punctuation
+
+const addNormalPunctuationToken = (
+  status: ParseStatus,
+  index: number,
+  char: string,
+  type: CharType
 ) => {
   const token: SingleToken = {
-    type: `mark-${mark.type}` as SingleTokenType, // TODO enum
+    type,
     index,
-    length: content.length,
-    content: content,
-    spaceAfter: '', // to be finalized
-    mark: mark,
-    markSide
-  }
-  status.lastGroup && status.lastGroup.push(token)
-  status.lastToken = undefined
-}
-
-export const appendHyperContent = (
-  status: ParseStatus,
-  index: number,
-  content: string
-) => {
-  status.lastToken = {
-    type: SingleTokenType.CONTENT_HYPER,
-    index,
-    length: content.length,
-    content: content,
+    length: 1,
+    content: char,
     spaceAfter: '' // to be finalized
   }
-  status.lastGroup && status.lastGroup.push(status.lastToken)
-  status.lastToken = undefined
+  finalizeCurrentToken(status, token)
 }
 
 // group
 
-export const createNewGroup = (
+export const initNewGroup = (
   status: ParseStatus,
   index: number,
   char: string
@@ -244,9 +278,26 @@ export const createNewGroup = (
   status.groups.push(lastGroup)
 }
 
+export const finalizeCurrentGroup = (
+  status: ParseStatus,
+  index: number,
+  char: string
+) => {
+  if (status.lastGroup) {
+    // index, length, content
+    status.lastGroup.endIndex = index
+    status.lastGroup.endContent = char
+  }
+  if (status.groupStack.length > 0) {
+    status.lastGroup = status.groupStack.pop()
+  } else {
+    status.lastGroup = undefined
+  }
+}
+
 // content
 
-export const createContent = (
+export const initNewContent = (
   status: ParseStatus,
   index: number,
   char: string,
@@ -295,27 +346,21 @@ export const getConnectingSpaceLength = (
   return str.length - start
 }
 
-const addNormalPunctuation = (
-  status: ParseStatus,
-  index: number,
-  char: string,
-  type: CharType
-) => {
-  status.lastToken = {
-    type,
-    index,
-    length: 1,
-    content: char,
-    spaceAfter: '' // to be finalized
-  }
-  status.lastGroup && status.lastGroup.push(status.lastToken)
-  status.lastToken = undefined
-}
-
 export const getPreviousToken = (status: ParseStatus): Token | undefined => {
   if (status.lastGroup) {
     return status.lastGroup[status.lastGroup.length - 1]
   }
+}
+
+export const getHyperMarkMap = (hyperMarks: Mark[]) => {
+  const hyperMarkMap: MarkMap = {}
+  hyperMarks.forEach((mark) => {
+    hyperMarkMap[mark.startIndex] = mark
+    if (mark.type !== MarkType.RAW) {
+      hyperMarkMap[mark.endIndex] = mark
+    }
+  })
+  return hyperMarkMap
 }
 
 export const isShorthand = (
