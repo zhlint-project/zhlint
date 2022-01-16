@@ -1,5 +1,7 @@
 // Char
 
+import { Validation } from '../logger'
+
 export enum CharType {
   EMPTY = 'empty',
   SPACE = 'space',
@@ -107,6 +109,7 @@ type CommonToken = {
 type ModifiedCommonToken = {
   modifiedContent?: string
   modifiedSpaceAfter?: string
+  validations: Validation[]
 }
 
 export type SingleToken = CommonToken & {
