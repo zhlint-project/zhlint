@@ -19,14 +19,11 @@ const handler: Handler = (token, _, group) => {
     if (
       nonMarkTokenBefore &&
       !nonMarkTokenBefore.spaceAfter &&
-
       tokenBefore &&
       !tokenBefore.spaceAfter &&
-
       nonMarkTokenAfter &&
       tokenBeforeNonMarkTokenAfter &&
       !tokenBeforeNonMarkTokenAfter.spaceAfter &&
-
       !token.spaceAfter
     ) {
       removeValidation(token, 'unify-punctuation', ValidationTarget.CONTENT)

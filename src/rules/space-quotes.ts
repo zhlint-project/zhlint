@@ -1,63 +1,78 @@
+import { ValidationTarget } from '../logger'
+import { GroupTokenType, Handler, ModifiedToken as Token } from '../parser'
 import {
   findTokenBefore,
-  findTokenAfter,
   findContentTokenBefore,
   findContentTokenAfter,
   findSpaceAfterHost,
-  getMarkSide,
   addValidation
 } from './util'
 
-const quoteIsFullWidth = (char) => '‘’“”《》〈〉『』「」【】'.indexOf(char) >= 0
+const quoteIsFullWidth = (char: string): boolean =>
+  '‘’“”《》〈〉『』「」【】'.indexOf(char) >= 0
 
-const messages = {
+const messages: Record<string, string> = {
   inside: 'There should be no space inside quotes',
   'outside-full': 'There should be no space outside full-width quotes',
   'outside-half': 'There should be one space outside half-width quotes'
 }
 
-const validate = (token, type, target, condition) => {
+const validate = (
+  token: Token,
+  type: string,
+  target: ValidationTarget,
+  condition: boolean
+): void => {
   if (condition) {
     addValidation(token, 'space-quotes', target, messages[type])
   }
 }
 
-const checkOutside = (spaceAfterHost, quoteContent, isRawQuoteContent) => {
+const checkOutside = (
+  spaceAfterHost: Token | undefined,
+  quoteContent: string,
+  isRawQuoteContent: boolean
+): void => {
   if (spaceAfterHost) {
     if (quoteIsFullWidth(quoteContent)) {
       validate(
         spaceAfterHost,
         'outside-full',
-        'spaceAfter',
-        isRawQuoteContent && spaceAfterHost.spaceAfter
+        ValidationTarget.SPACE_AFTER,
+        isRawQuoteContent && !!spaceAfterHost.modifiedSpaceAfter
       )
-      spaceAfterHost.spaceAfter = ''
+      spaceAfterHost.modifiedSpaceAfter = ''
     } else {
       validate(
         spaceAfterHost,
         'outside-half',
-        'spaceAfter',
-        isRawQuoteContent && spaceAfterHost.spaceAfter !== ' '
+        ValidationTarget.SPACE_AFTER,
+        isRawQuoteContent && spaceAfterHost.modifiedSpaceAfter !== ' '
       )
-      spaceAfterHost.spaceAfter = ' '
+      spaceAfterHost.modifiedSpaceAfter = ' '
     }
   }
 }
 
-export default (token, index, group, matched, marks) => {
-  if (token.type === 'group') {
+const handler: Handler = (token, _, group) => {
+  if (token.type === GroupTokenType.GROUP) {
     // no space inside
-    validate(token, 'inside', 'innerSpaceBefore', token.rawInnerSpaceBefore)
-    token.innerSpaceBefore = ''
+    validate(
+      token,
+      'inside',
+      ValidationTarget.INNER_SPACE_BEFORE,
+      !!token.innerSpaceBefore
+    )
+    token.modifiedInnerSpaceBefore = ''
     const lastInnerToken = token[token.length - 1]
     if (lastInnerToken) {
       validate(
         lastInnerToken,
         'inside',
-        'spaceAfter',
-        lastInnerToken.rawSpaceAfter
+        ValidationTarget.SPACE_AFTER,
+        !!lastInnerToken.spaceAfter
       )
-      lastInnerToken.spaceAfter = ''
+      lastInnerToken.modifiedSpaceAfter = ''
     }
 
     // content before:
@@ -73,8 +88,8 @@ export default (token, index, group, matched, marks) => {
       )
       checkOutside(
         spaceAfterHost,
-        token.startContent,
-        token.startContent === token.rawStartContent
+        token.modifiedStartContent,
+        token.modifiedStartContent === token.startContent
       )
     }
 
@@ -91,9 +106,11 @@ export default (token, index, group, matched, marks) => {
       )
       checkOutside(
         spaceAfterHost,
-        token.endContent,
-        token.endContent === token.rawEndContent
+        token.modifiedEndContent,
+        token.modifiedEndContent === token.endContent
       )
     }
   }
 }
+
+export default handler

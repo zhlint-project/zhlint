@@ -3,7 +3,10 @@ import { Handler, SingleTokenType } from '../parser'
 import { findTokenBefore, findTokenAfter, removeValidation } from './util'
 
 const handler: Handler = (token, _, group) => {
-  if (token.type.match(/^punctuation-/) && '/|'.indexOf(token.modifiedContent || token.content) >= 0) {
+  if (
+    token.type.match(/^punctuation-/) &&
+    '/|'.indexOf(token.modifiedContent || token.content) >= 0
+  ) {
     const tokenBefore = findTokenBefore(group, token)
     const tokenAfter = findTokenAfter(group, token)
     if (

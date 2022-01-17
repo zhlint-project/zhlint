@@ -1,5 +1,10 @@
 import { ValidationTarget } from '../logger'
-import { CharType, ModifiedToken as Token, ModifiedGroupToken as GroupToken, Handler } from '../parser'
+import {
+  CharType,
+  ModifiedToken as Token,
+  ModifiedGroupToken as GroupToken,
+  Handler
+} from '../parser'
 import { findTokenBefore, findTokenAfter, removeValidation } from './util'
 
 const abbrs = [
@@ -17,7 +22,11 @@ const abbrs = [
 
 const reversedAbbrs = abbrs.map((str) => str.split('.').reverse().slice(1))
 
-const hasAbbr = (token: Token, group: GroupToken, reversedAbbrs: string[][]): Token[] | undefined => {
+const hasAbbr = (
+  token: Token,
+  group: GroupToken,
+  reversedAbbrs: string[][]
+): Token[] | undefined => {
   const tokenBefore = findTokenBefore(group, token)
   if (tokenBefore && !tokenBefore.spaceAfter) {
     const matchedAbbrs = reversedAbbrs
@@ -48,11 +57,7 @@ const handler: Handler = (token, index, group) => {
   if (token.content === '.') {
     // end of the content or has space after or full-width content after
     const tokenAfter = findTokenAfter(group, token)
-    if (
-      tokenAfter &&
-      tokenAfter.type === 'content-half' &&
-      !token.spaceAfter
-    ) {
+    if (tokenAfter && tokenAfter.type === 'content-half' && !token.spaceAfter) {
       return
     }
 
@@ -64,7 +69,11 @@ const handler: Handler = (token, index, group) => {
       result.forEach((_, i) => {
         const periodToken = group[index - i * 2]
         if (periodToken.modifiedContent !== '.') {
-          removeValidation(periodToken, 'unify-punctuation', ValidationTarget.CONTENT)
+          removeValidation(
+            periodToken,
+            'unify-punctuation',
+            ValidationTarget.CONTENT
+          )
         }
         periodToken.modifiedContent = '.'
         periodToken.type = CharType.PUNCTUATION_HALF

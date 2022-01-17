@@ -19,7 +19,11 @@ const messages = {
     `The traditional punctuation "${origin}" should be converted into "${result}".`
 }
 
-const validate = (token: Token, type: ValidationTarget, args: MessageOption): void =>
+const validate = (
+  token: Token,
+  type: ValidationTarget,
+  args: MessageOption
+): void =>
   addValidation(token, 'case-traditional', type, messages.default(args))
 
 const handler: Handler = (token) => {

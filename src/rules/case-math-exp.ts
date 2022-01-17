@@ -1,3 +1,5 @@
+import { ValidationTarget } from '../logger'
+import { CharType, Handler, ModifiedToken as Token } from '../parser'
 import {
   findTokenBefore,
   findTokenAfter,
@@ -9,19 +11,29 @@ import {
   removeValidation
 } from './util'
 
-const messages = {
+const messages: Record<string, (char: string) => string> = {
   before: (char) => `There should be a space before the '${char}' character.`,
   after: (char) => `There should be a space after the '${char}' character.`
 }
 
-const validate = (token, type, char, condition) => {
-  removeValidation(token, 'space-punctuation', 'spaceAfter')
+const validate = (
+  token: Token,
+  type: string,
+  char: string,
+  condition: boolean
+): void => {
+  removeValidation(token, 'space-punctuation', ValidationTarget.SPACE_AFTER)
   if (condition) {
-    addValidation(token, 'case-math-exp', 'spaceAfter', messages[type](char))
+    addValidation(
+      token,
+      'case-math-exp',
+      ValidationTarget.SPACE_AFTER,
+      messages[type](char)
+    )
   }
 }
 
-export default (token, index, group, matched, marks) => {
+const handler: Handler = (token, _, group) => {
   // calculation: space in both sides
   // - 1 + 1 = 2
   // x 2020/01/01
@@ -31,16 +43,16 @@ export default (token, index, group, matched, marks) => {
   // x a/b
   // x Chrome 53+
   if (
-    token.type.match(/^punctuation\-/) &&
-    token.content &&
-    token.content.match(/^(\+|\-|\*|\/|\%|\<|\>|\=)\=?$/)
+    token.type.match(/^punctuation-/) &&
+    token.modifiedContent &&
+    token.modifiedContent.match(/^(\+|-|\*|\/|%|<|>|=)=?$/)
   ) {
     const contentTokenBefore = findContentTokenBefore(group, token)
     const contentTokenAfter = findContentTokenAfter(group, token)
     if (contentTokenBefore && contentTokenAfter) {
       if (
-        contentTokenBefore.content.match(/^[\d\.]+$/) &&
-        contentTokenAfter.content.match(/^[\d\.]+$/)
+        contentTokenBefore.modifiedContent.match(/^[\d.]+$/) &&
+        contentTokenAfter.modifiedContent.match(/^[\d.]+$/)
       ) {
         const nonMarkTokenBefore = findNonMarkTokenBefore(
           group,
@@ -51,95 +63,109 @@ export default (token, index, group, matched, marks) => {
           contentTokenAfter
         )
         if (
-          token.content === '/' &&
-          ((nonMarkTokenBefore && nonMarkTokenBefore.content === '/') ||
-            (nonMarkTokenAfter && nonMarkTokenAfter.content === '/'))
+          token.modifiedContent === '/' &&
+          ((nonMarkTokenBefore && nonMarkTokenBefore.modifiedContent === '/') ||
+            (nonMarkTokenAfter && nonMarkTokenAfter.modifiedContent === '/'))
         ) {
           return
         }
         if (
-          token.content === '-' &&
-          ((nonMarkTokenBefore && nonMarkTokenBefore.content === '-') ||
-            (nonMarkTokenAfter && nonMarkTokenAfter.content === '-'))
+          token.modifiedContent === '-' &&
+          ((nonMarkTokenBefore && nonMarkTokenBefore.modifiedContent === '-') ||
+            (nonMarkTokenAfter && nonMarkTokenAfter.modifiedContent === '-'))
         ) {
           return
         }
-      } else if (token.content === '-') {
+      } else if (token.modifiedContent === '-') {
         return
       }
-      if ('/%'.indexOf(token.content) >= 0) {
+      if ('/%'.indexOf(token.modifiedContent) >= 0) {
         return
       }
       if (
-        '+-'.indexOf(token.content) >= 0 &&
-        !contentTokenBefore.rawSpaceAfter &&
-        token.rawSpaceAfter
+        '+-'.indexOf(token.modifiedContent) >= 0 &&
+        !contentTokenBefore.spaceAfter &&
+        token.spaceAfter
       ) {
         return
       }
       validate(
         contentTokenBefore,
         'before',
-        token.content,
-        contentTokenBefore.rawSpaceAfter !== ' '
+        token.modifiedContent,
+        contentTokenBefore.spaceAfter !== ' '
       )
-      contentTokenBefore.spaceAfter = ' '
-      const tokenBefore = findTokenBefore(group, token)
+      contentTokenBefore.modifiedSpaceAfter = ' '
+      const tokenBefore = findTokenBefore(group, token) as Token
       if (tokenBefore !== contentTokenBefore) {
         validate(
           tokenBefore,
           'before',
-          token.content,
-          tokenBefore.rawSpaceAfter !== ' '
+          token.modifiedContent,
+          tokenBefore.spaceAfter !== ' '
         )
-        tokenBefore.spaceAfter = ' '
+        tokenBefore.modifiedSpaceAfter = ' '
       }
-      validate(token, 'after', token.content, token.rawSpaceAfter !== ' ')
-      token.spaceAfter = ' '
+      validate(token, 'after', token.modifiedContent, token.spaceAfter !== ' ')
+      token.modifiedSpaceAfter = ' '
       const tokenBeforeContentTokenAfter = findTokenBefore(
         group,
         contentTokenAfter
-      )
+      ) as Token
       if (tokenBeforeContentTokenAfter !== token) {
         validate(
           tokenBeforeContentTokenAfter,
           'after',
-          token.content,
-          tokenBeforeContentTokenAfter.rawSpaceAfter !== ' '
+          token.modifiedContent,
+          tokenBeforeContentTokenAfter.spaceAfter !== ' '
         )
-        tokenBeforeContentTokenAfter.spaceAfter = ' '
+        tokenBeforeContentTokenAfter.modifiedSpaceAfter = ' '
       }
     }
   }
+
   // vertical lines: space in neither sides (no space detected around)
   // or both sides (otherwise)
   // - a | b | c
   // - a || b || c
   // x a|b|c
-  if (token.type === 'punctuation-half' && token.content === '|') {
+  if (
+    token.type === CharType.PUNCTUATION_HALF &&
+    token.modifiedContent === '|'
+  ) {
     const tokenBefore = findTokenBefore(group, token)
-    if (tokenBefore && tokenBefore.content !== '|') {
-      const tokens = []
-      let nextToken = token
-      while (nextToken && nextToken.content === '|') {
+    if (tokenBefore && tokenBefore.modifiedContent !== '|') {
+      const tokens: Token[] = []
+      let nextToken: Token | undefined = token
+      while (nextToken && nextToken.modifiedContent === '|') {
         tokens.push(nextToken)
         nextToken = findTokenAfter(group, nextToken)
       }
       const lastToken = tokens[tokens.length - 1]
-      if (tokenBefore.rawSpaceAfter || lastToken.rawSpaceAfter) {
+      if (tokenBefore.spaceAfter || lastToken.spaceAfter) {
         validate(
           tokenBefore,
           'before',
-          tokenBefore.rawSpaceAfter !== ' ',
+          tokenBefore.modifiedContent, // TODO
           false
         )
-        validate(lastToken, 'after', lastToken.rawSpaceAfter !== ' ', false)
-        tokenBefore.spaceAfter = lastToken.spaceAfter = ' '
+        validate(lastToken, 'after', lastToken.modifiedContent, false) // TODO
+        tokenBefore.modifiedSpaceAfter = lastToken.modifiedSpaceAfter = ' '
       } else {
-        removeValidation(tokenBefore, 'space-punctuation', 'spaceAfter')
-        removeValidation(lastToken, 'space-punctuation', 'spaceAfter')
-        tokenBefore.spaceAfter = lastToken.spaceAfter = ''
+        removeValidation(
+          tokenBefore,
+          'space-punctuation',
+          ValidationTarget.SPACE_AFTER
+        )
+        removeValidation(
+          lastToken,
+          'space-punctuation',
+          ValidationTarget.SPACE_AFTER
+        )
+        tokenBefore.modifiedSpaceAfter = lastToken.modifiedSpaceAfter = ''
       }
     }
   }
 }
+
+export default handler

@@ -11,7 +11,11 @@ const handler: Handler = (token, _, group) => {
       !tokenBefore.spaceAfter
     ) {
       const tokenBeforeBefore = findTokenBefore(group, tokenBefore)
-      if (tokenBeforeBefore && tokenBeforeBefore.content === '&' && !tokenBeforeBefore.spaceAfter) {
+      if (
+        tokenBeforeBefore &&
+        tokenBeforeBefore.content === '&' &&
+        !tokenBeforeBefore.spaceAfter
+      ) {
         removeValidation(token, 'unify-punctuation', ValidationTarget.CONTENT)
         token.modifiedContent = ';'
         token.modifiedSpaceAfter = token.spaceAfter

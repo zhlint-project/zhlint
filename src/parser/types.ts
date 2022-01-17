@@ -42,7 +42,7 @@ type Pair = {
 
 type ModifiedPair = {
   modifiedStartContent: string
-  modifiedEndContent?: string
+  modifiedEndContent: string
 }
 
 // Mark
@@ -107,8 +107,8 @@ type CommonToken = {
 }
 
 type ModifiedCommonToken = {
-  modifiedContent?: string
-  modifiedSpaceAfter?: string
+  modifiedContent: string
+  modifiedSpaceAfter: string
   validations: Validation[]
 }
 
@@ -116,7 +116,11 @@ export type SingleToken = CommonToken & {
   type: CharType | SingleTokenType
 }
 
-export type ModifiedSingleToken = SingleToken & ModifiedCommonToken
+export type ModifiedSingleToken = CommonToken &
+  ModifiedCommonToken & {
+    type: CharType | SingleTokenType
+    modifiedType: CharType | SingleTokenType
+  }
 
 export type GroupToken = Array<Token> &
   CommonToken &
@@ -131,8 +135,9 @@ export type ModifiedGroupToken = Array<ModifiedToken> &
   Pair &
   ModifiedPair & {
     type: GroupTokenType
+    modifiedType: GroupTokenType
     innerSpaceBefore: string
-    modifiedInnerSpaceBefore?: string
+    modifiedInnerSpaceBefore: string
   }
 
 export type Token = SingleToken | GroupToken

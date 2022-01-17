@@ -1,3 +1,11 @@
+import { ValidationTarget } from '../logger'
+import {
+  CharType,
+  GroupTokenType,
+  Handler,
+  ModifiedToken as Token,
+  SingleTokenType
+} from '../parser'
 import {
   findTokenBefore,
   findContentTokenBefore,
@@ -5,12 +13,14 @@ import {
   addValidation
 } from './util'
 
-const halfWidthMap = {
+type AlterMap = Record<string, string>
+
+const halfWidthMap: AlterMap = {
   '（': `(`,
   '）': `)`
 }
 
-const fullWidthMap = {
+const fullWidthMap: AlterMap = {
   ',': `，`,
   '.': `。`,
   ';': `；`,
@@ -19,7 +29,11 @@ const fullWidthMap = {
   '!': `！`
 }
 
-const messages = {
+type MessageArgs = { origin: string; result: string }
+
+type MessageGenerator = (args: MessageArgs) => string
+
+const messages: Record<string, MessageGenerator> = {
   full: ({ origin, result }) =>
     `The punctuation \`${origin}\` should be full-width as \`${result}\`.`,
   half: ({ origin, result }) =>
@@ -30,14 +44,21 @@ const messages = {
     `The right bracket \`${origin}\` should be full-width as \`${result}\`.`
 }
 
-const targets = {
-  full: 'content',
-  half: 'content',
-  bracketStart: 'startContent',
-  bracketEnd: 'endContent'
+type TargetMap = Record<string, ValidationTarget>
+
+const targets: TargetMap = {
+  full: ValidationTarget.CONTENT,
+  half: ValidationTarget.CONTENT,
+  bracketStart: ValidationTarget.START_CONTENT,
+  bracketEnd: ValidationTarget.END_CONTENT
 }
 
-const validate = (token, type, args, condition) => {
+const validate = (
+  token: Token,
+  type: string,
+  args: MessageArgs,
+  condition: boolean
+): void => {
   if (condition) {
     addValidation(
       token,
@@ -48,11 +69,11 @@ const validate = (token, type, args, condition) => {
   }
 }
 
-export default (token, index, group, matched, marks) => {
+const handler: Handler = (token, _, group) => {
   // full-width: comma, full stop, colon, quotes
   // half-width: brackets
   // no change for half-width punctuation between half-width content without space
-  if (token.type === 'punctuation-half') {
+  if (token.type === CharType.PUNCTUATION_HALF) {
     const contentTokenBefore = findContentTokenBefore(group, token)
     const contentTokenAfter = findContentTokenAfter(group, token)
     const tokenBefore = findTokenBefore(group, token)
@@ -62,73 +83,82 @@ export default (token, index, group, matched, marks) => {
     )
     if (
       contentTokenBefore &&
-      contentTokenBefore.type === 'content-half' &&
+      contentTokenBefore.type === CharType.CONTENT_HALF &&
+      !contentTokenBefore.modifiedSpaceAfter &&
       contentTokenAfter &&
-      contentTokenAfter.type === 'content-half' &&
-      !contentTokenBefore.spaceAfter &&
-      !tokenBefore.spaceAfter &&
-      !token.spaceAfter &&
-      !tokenBeforeContentTokenAfter.spaceAfter
+      contentTokenAfter.type === CharType.CONTENT_HALF &&
+      tokenBefore &&
+      !tokenBefore.modifiedSpaceAfter &&
+      !token.modifiedSpaceAfter &&
+      tokenBeforeContentTokenAfter &&
+      !tokenBeforeContentTokenAfter.modifiedSpaceAfter
     ) {
       return
     }
-    if (fullWidthMap[token.content]) {
+    if (fullWidthMap[token.modifiedContent || '']) {
       validate(
         token,
         'full',
-        { origin: token.content, result: fullWidthMap[token.content] },
+        {
+          origin: token.modifiedContent || '',
+          result: fullWidthMap[token.modifiedContent || '']
+        },
         true
       )
-      token.rawType = token.type
-      token.type = 'punctuation-full'
-      token.content = fullWidthMap[token.content]
+      token.modifiedType = CharType.PUNCTUATION_FULL
+      token.modifiedContent = fullWidthMap[token.modifiedContent || '']
     }
-  } else if (token.type === 'mark-brackets') {
-    if (halfWidthMap[token.content]) {
+  } else if (token.type === SingleTokenType.MARK_BRACKETS) {
+    if (halfWidthMap[token.modifiedContent || '']) {
       validate(
         token,
         'half',
-        { origin: token.content, result: halfWidthMap[token.content] },
+        {
+          origin: token.modifiedContent || '',
+          result: halfWidthMap[token.modifiedContent || '']
+        },
         true
       )
-      token.content = halfWidthMap[token.content]
+      token.modifiedContent = halfWidthMap[token.modifiedContent || '']
     }
-  } else if (token.type === 'group') {
-    if (token.startContent === '"') {
+  } else if (token.type === GroupTokenType.GROUP) {
+    if (token.modifiedStartContent === '"') {
       validate(
         token,
         'bracketStart',
-        { origin: token.startContent, result: '“' },
+        { origin: token.modifiedStartContent, result: '“' },
         true
       )
-      token.startContent = '“'
+      token.modifiedStartContent = '“'
     }
-    if (token.startContent === "'") {
+    if (token.modifiedStartContent === "'") {
       validate(
         token,
         'bracketStart',
-        { origin: token.startContent, result: '‘' },
+        { origin: token.modifiedStartContent, result: '‘' },
         true
       )
-      token.startContent = '‘'
+      token.modifiedStartContent = '‘'
     }
-    if (token.endContent === '"') {
+    if (token.modifiedEndContent === '"') {
       validate(
         token,
         'bracketEnd',
-        { origin: token.startContent, result: '”' },
+        { origin: token.modifiedStartContent, result: '”' },
         true
       )
-      token.endContent = '”'
+      token.modifiedEndContent = '”'
     }
-    if (token.endContent === "'") {
+    if (token.modifiedEndContent === "'") {
       validate(
         token,
         'bracketEnd',
-        { origin: token.startContent, result: '’' },
+        { origin: token.modifiedStartContent, result: '’' },
         true
       )
-      token.endContent = '’'
+      token.modifiedEndContent = '’'
     }
   }
 }
+
+export default handler

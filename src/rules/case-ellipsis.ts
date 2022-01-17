@@ -15,7 +15,12 @@ const messages = {
 
 const validate = (token: Token, type: string, condition: boolean): void => {
   if (condition) {
-    addValidation(token, 'case-ellipsis', ValidationTarget.SPACE_AFTER, messages[type])
+    addValidation(
+      token,
+      'case-ellipsis',
+      ValidationTarget.SPACE_AFTER,
+      messages[type]
+    )
   }
 }
 

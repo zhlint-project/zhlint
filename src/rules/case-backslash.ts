@@ -17,7 +17,12 @@ const messages = {
 const validate = (token: Token, type: string, condition: boolean): void => {
   removeValidation(token, 'space-punctuation', ValidationTarget.SPACE_AFTER)
   if (condition) {
-    addValidation(token, 'case-backslash', ValidationTarget.SPACE_AFTER, messages[type])
+    addValidation(
+      token,
+      'case-backslash',
+      ValidationTarget.SPACE_AFTER,
+      messages[type]
+    )
   }
 }
 
@@ -29,7 +34,11 @@ const handler: Handler = (token, _, group) => {
     const contentTokenBefore = findContentTokenBefore(group, token)
     if (tokenAfter) {
       if (tokenAfter.type.match(/-half*/) && !token.spaceAfter) {
-        removeValidation(token, 'space-punctuation', ValidationTarget.SPACE_AFTER)
+        removeValidation(
+          token,
+          'space-punctuation',
+          ValidationTarget.SPACE_AFTER
+        )
         token.modifiedSpaceAfter = ''
         if (contentTokenBefore) {
           const tokenBefore = findTokenBefore(group, token)
@@ -39,7 +48,11 @@ const handler: Handler = (token, _, group) => {
             tokenBefore
           )
           if (spaceAfterHost) {
-            removeValidation(spaceAfterHost, 'space-punctuation', ValidationTarget.SPACE_AFTER)
+            removeValidation(
+              spaceAfterHost,
+              'space-punctuation',
+              ValidationTarget.SPACE_AFTER
+            )
             spaceAfterHost.modifiedSpaceAfter = spaceAfterHost.spaceAfter
           }
           if (contentTokenBefore && contentTokenBefore.type.match(/-full*/)) {
