@@ -40,7 +40,7 @@ type Pair = {
   endContent: string
 }
 
-type ModifiedPair = {
+type MutablePair = {
   modifiedStartContent: string
   modifiedEndContent: string
 }
@@ -68,9 +68,9 @@ export type RawMark = Mark & {
   rightPair?: RawMark
 }
 
-export type ModifiedMark = Mark & ModifiedPair
+export type MutableMark = Mark & MutablePair
 
-export type ModifiedRawMark = RawMark & ModifiedPair
+export type MutableRawMark = RawMark & MutablePair
 
 export type MarkMap = {
   [index: number]: Mark
@@ -106,7 +106,7 @@ type CommonToken = {
   markSide?: MarkSideType
 }
 
-type ModifiedCommonToken = {
+type MutableCommonToken = {
   modifiedContent: string
   modifiedSpaceAfter: string
   validations: Validation[]
@@ -116,8 +116,8 @@ export type SingleToken = CommonToken & {
   type: CharType | SingleTokenType
 }
 
-export type ModifiedSingleToken = CommonToken &
-  ModifiedCommonToken & {
+export type MutableSingleToken = CommonToken &
+  MutableCommonToken & {
     type: CharType | SingleTokenType
     modifiedType: CharType | SingleTokenType
   }
@@ -129,11 +129,11 @@ export type GroupToken = Array<Token> &
     innerSpaceBefore: string
   }
 
-export type ModifiedGroupToken = Array<ModifiedToken> &
+export type MutableGroupToken = Array<MutableToken> &
   CommonToken &
-  ModifiedCommonToken &
+  MutableCommonToken &
   Pair &
-  ModifiedPair & {
+  MutablePair & {
     type: GroupTokenType
     modifiedType: GroupTokenType
     innerSpaceBefore: string
@@ -142,7 +142,7 @@ export type ModifiedGroupToken = Array<ModifiedToken> &
 
 export type Token = SingleToken | GroupToken
 
-export type ModifiedToken = ModifiedSingleToken | ModifiedGroupToken
+export type MutableToken = MutableSingleToken | MutableGroupToken
 
 // Status
 
@@ -162,17 +162,17 @@ export type ParseStatus = {
 // Travel
 
 export type FilterFunction = (
-  token: ModifiedToken,
+  token: MutableToken,
   index: number,
-  group: ModifiedGroupToken
+  group: MutableGroupToken
 ) => boolean | RegExpMatchArray | null
 
 export type Filter = FilterFunction | string | RegExp | { type: TokenType }
 
 export type Handler = (
-  token: ModifiedToken,
+  token: MutableToken,
   index: number,
-  group: ModifiedGroupToken,
+  group: MutableGroupToken,
   matched: boolean | RegExpMatchArray | null,
-  marks: ModifiedMark[]
+  marks: MutableMark[]
 ) => void

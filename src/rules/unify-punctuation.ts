@@ -3,7 +3,7 @@ import {
   CharType,
   GroupTokenType,
   Handler,
-  ModifiedToken as Token,
+  MutableToken as Token,
   SingleTokenType
 } from '../parser'
 import {

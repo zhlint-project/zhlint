@@ -18,7 +18,7 @@ import { ValidationTarget } from '../logger'
 import {
   CharType,
   Handler,
-  ModifiedToken as Token,
+  MutableToken as Token,
   SingleTokenType
 } from '../parser'
 import {

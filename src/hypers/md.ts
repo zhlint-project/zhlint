@@ -9,7 +9,7 @@ import {
   MarkSideType,
   MarkType,
   RawMark
-} from '../parser/types'
+} from '../parser'
 import { Block, Data } from './types'
 
 type NormalizedPosition = {
@@ -226,14 +226,16 @@ const parser = (data: Data): Data => {
     const position = parsePosition(b.block.position)
     ignoredByParsers.forEach(({ index, length, originContent: raw, meta }) => {
       if (position.start <= index && position.end >= index + length) {
-        ;(b.hyperMarks || []).push({
-          type: MarkType.RAW,
-          meta,
-          startIndex: index - position.start,
-          startContent: raw,
-          endIndex: index - position.start + length,
-          endContent: ''
-        })
+        if (b.hyperMarks) {
+          b.hyperMarks.push({
+            type: MarkType.RAW,
+            meta,
+            startIndex: index - position.start,
+            startContent: raw,
+            endIndex: index - position.start + length,
+            endContent: ''
+          })
+        }
       }
     })
     return {

@@ -1,5 +1,5 @@
 import { ValidationTarget } from '../logger'
-import { CharType, Handler, ModifiedToken as Token } from '../parser'
+import { CharType, Handler, MutableToken as Token } from '../parser'
 import {
   findTokenBefore,
   findTokenAfter,

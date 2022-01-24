@@ -1,5 +1,5 @@
 import { IgnoredCase } from '../ignore'
-import { Mark } from '../parser/types'
+import { Mark } from '../parser'
 
 export type ParserIgnoredCase = {
   name: string

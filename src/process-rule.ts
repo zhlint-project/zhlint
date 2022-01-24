@@ -1,18 +1,11 @@
-import { GroupToken, Mark, Filter, Handler } from './parser/types'
-import { travel } from './parser/travel'
-
-type Data = {
-  tokens: GroupToken
-  groups: GroupToken[]
-  marks: Mark[]
-}
+import { Filter, Handler, travel, MutableParseResult } from './parser'
 
 type Rule = Handler | { filter: Filter; handler: Handler }
 
 /**
  * Process a single lint rule
  */
-const processRule = (data: Data, rule: Rule): void => {
+const processRule = (data: MutableParseResult, rule: Rule): void => {
   if (!rule) {
     return
   }

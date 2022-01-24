@@ -1,11 +1,16 @@
 import { checkCharType } from './char'
 import {
   CharType,
-  GroupToken,
   Mark,
+  MutableMark,
   MarkMap,
   MarkSideType,
   MarkType,
+  MutableSingleToken,
+  GroupToken,
+  MutableGroupToken,
+  MutableToken,
+  Token,
   ParseStatus
 } from './types'
 import {
@@ -156,4 +161,45 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
     groups: status.groups,
     marks: status.marks
   }
+}
+
+export type MutableParseResult = {
+    tokens: MutableGroupToken;
+    groups: MutableGroupToken[];
+    marks: MutableMark[];
+}
+
+const toMutableToken = (token: Token): MutableToken => {
+  if (Array.isArray(token)) {
+    const mutableToken: MutableGroupToken = token as MutableGroupToken
+    mutableToken.modifiedType = token.type
+    mutableToken.modifiedContent = token.content
+    mutableToken.modifiedSpaceAfter = token.spaceAfter
+    mutableToken.modifiedStartContent = token.startContent
+    mutableToken.modifiedEndContent = token.endContent
+    mutableToken.modifiedInnerSpaceBefore = token.innerSpaceBefore
+    mutableToken.validations = []
+    token.forEach(toMutableToken)
+    return mutableToken
+  } else {
+    const mutableToken: MutableSingleToken = token as MutableSingleToken
+    mutableToken.modifiedType = token.type
+    mutableToken.modifiedContent = token.content
+    mutableToken.modifiedSpaceAfter = token.spaceAfter
+    mutableToken.validations = []
+    return mutableToken
+  }
+}
+
+const toMutableMark = (mark: Mark): MutableMark => {
+  const mutableMark: MutableMark = mark as MutableMark
+  mutableMark.modifiedStartContent = mark.startContent
+  mutableMark.modifiedEndContent = mark.endContent
+  return mutableMark
+}
+
+export const toMutableResult = (result: ParseResult): MutableParseResult => {
+  result.tokens.forEach(toMutableToken)
+  result.marks.forEach(toMutableMark)
+  return result as MutableParseResult
 }

@@ -1,10 +1,9 @@
 import { Block, Data } from './hypers/types'
-import { Handler } from './parser/types'
 import { Validation } from './logger'
 import { IgnoredCase, IgnoredMark } from './ignore'
 
 import replaceBlocks from './replace-block'
-import { parse } from './parser/index'
+import { parse, toMutableResult, Handler } from './parser'
 import processRule from './process-rule'
 import join from './join'
 import findIgnoredMarks from './ignore'
@@ -195,7 +194,7 @@ const run = (str: string, options: Options = {}): Result => {
   const result = replaceBlocks(
     str,
     finalData.blocks.map(({ value, marks, start, end }) => {
-      const result = parse(value, marks)
+      const result = toMutableResult(parse(value, marks))
       const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules, logger)
       matchCallArray(rulesInput, ruleMap).forEach((rule) =>
         processRule(result, rule)

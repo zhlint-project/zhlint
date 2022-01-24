@@ -1,5 +1,5 @@
 export * from './types'
 
 export { checkCharType } from './char'
-export { parse } from './parse'
+export { parse, toMutableResult, ParseResult, MutableParseResult } from './parse'
 export { travel } from './travel'

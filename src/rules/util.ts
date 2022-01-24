@@ -1,9 +1,9 @@
 import { Validation, ValidationTarget } from '../logger'
 import {
-  ModifiedGroupToken as GroupToken,
   MarkSideType,
-  ModifiedToken as Token,
-  ModifiedSingleToken as SingleToken
+  MutableSingleToken as SingleToken,
+  MutableGroupToken as GroupToken,
+  MutableToken as Token
 } from '../parser'
 
 // find tokens

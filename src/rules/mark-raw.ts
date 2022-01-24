@@ -3,8 +3,8 @@
 import { ValidationTarget } from '../logger'
 import {
   Handler,
-  ModifiedGroupToken as GroupToken,
-  ModifiedToken as Token,
+  MutableGroupToken as GroupToken,
+  MutableToken as Token,
   SingleTokenType
 } from '../parser'
 import { isInlineCode, addValidation } from './util'

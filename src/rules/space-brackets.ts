@@ -16,7 +16,7 @@ import {
   CharType,
   Handler,
   MarkSideType,
-  ModifiedToken as Token,
+  MutableToken as Token,
   SingleTokenType
 } from '../parser'
 import {

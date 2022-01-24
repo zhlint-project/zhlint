@@ -1,20 +1,20 @@
 import { checkCharType } from './char'
 import {
   CharType,
-  GroupToken,
-  GroupTokenType,
+  SHORTHAND_CHARS,
+  SHORTHAND_PAIR_SET,
+  MARK_CHAR_SET,
   GROUP_CHAR_SET,
   Mark,
   MarkMap,
   MarkSideType,
   MarkType,
-  MARK_CHAR_SET,
-  ParseStatus,
-  SHORTHAND_CHARS,
-  SHORTHAND_PAIR_SET,
   SingleToken,
   SingleTokenType,
-  Token
+  GroupToken,
+  GroupTokenType,
+  Token,
+  ParseStatus
 } from './types'
 
 export const handlePunctuation = (

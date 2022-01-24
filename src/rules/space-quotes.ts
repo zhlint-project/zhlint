@@ -1,5 +1,5 @@
 import { ValidationTarget } from '../logger'
-import { GroupTokenType, Handler, ModifiedToken as Token } from '../parser'
+import { GroupTokenType, Handler, MutableToken as Token } from '../parser'
 import {
   findTokenBefore,
   findContentTokenBefore,

@@ -1,8 +1,8 @@
 import { ValidationTarget } from '../logger'
 import {
   CharType,
-  ModifiedToken as Token,
-  ModifiedGroupToken as GroupToken,
+  MutableToken as Token,
+  MutableGroupToken as GroupToken,
   Handler
 } from '../parser'
 import { findTokenBefore, findTokenAfter, removeValidation } from './util'
