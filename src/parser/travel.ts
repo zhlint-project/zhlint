@@ -7,7 +7,7 @@ export const travel = (
   group: MutableGroupToken,
   filter: Filter,
   handler: Handler,
-  marks: MutableMark[]
+  marks: MutableMark[] = []
 ): void => {
   let normalizedFilter: FilterFunction = () => null
   if (filter instanceof RegExp || typeof filter === 'string') {

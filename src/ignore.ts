@@ -21,9 +21,8 @@ export type IgnoredMark = {
 const findIgnoredMarks = (
   str: string,
   ignoredCases: IgnoredCase[] = [],
-  logger: Console
+  logger: Console = env.defaultLogger
 ): IgnoredMark[] => {
-  logger = logger || env.defaultLogger
   const marks: IgnoredMark[] = []
   ignoredCases.forEach(({ prefix, textStart, textEnd, suffix }): void => {
     const start = (prefix || '') + textStart

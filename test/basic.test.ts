@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest'
 
-import run from '../src/run'
-import { checkCharType, parse, travel } from '../src/parser/index'
+import run, { Options } from '../src/run'
+import { CharType, checkCharType, Mark, MarkType, parse, SingleTokenType, toMutableResult, travel } from '../src/parser'
 import join from '../src/join'
 import processRule from '../src/process-rule'
 import findIgnoredMarks from '../src/ignore'
@@ -15,14 +15,14 @@ import caseTraditional from '../src/rules/case-traditional'
 import caseDatetime from '../src/rules/case-datetime'
 import caseDatetimeZh from '../src/rules/case-datetime-zh'
 
-const lint = (...args) => run(...args).result
+const lint = (...args) => run(...args as [string, Options]).result
 
 const purify = (arr) =>
   arr.map((item) => (Array.isArray(item) ? purify(item) : item))
 
 const clone = (obj) => JSON.parse(JSON.stringify(obj))
 
-const restruct = (str) => join(parse(str).tokens)
+const restruct = (str) => join(toMutableResult(parse(str)).tokens)
 
 describe('check char type', () => {
   test('space', () => {
@@ -466,18 +466,18 @@ describe('parser', () => {
     expect(groups[0].endIndex).toBe(51 + 1)
     expect(groups[0].endContent).toBe('"')
     expect(groups[0].innerSpaceBefore).toBe(' ')
-    expect(groups[0].rawInnerSpaceBefore).toBe(' ')
+    // expect(groups[0].rawInnerSpaceBefore).toBe(' ')
   })
 })
 
 describe('parser with hyper marks', () => {
   test('X [xxx](xxx) X', () => {
-    const hyperMark = {
+    const hyperMark: Mark = {
       startIndex: 2,
       startContent: '[',
       endIndex: 6,
       endContent: '](xxx)',
-      type: 'md'
+      type: MarkType.HYPER
     }
     const { tokens, marks, groups } = parse('X [xxx](xxx) X', [hyperMark])
     expect(purify(tokens)).toEqual([
@@ -522,7 +522,7 @@ describe('parser with hyper marks', () => {
       startContent: '`v-bind:style`',
       endIndex: 14,
       endContent: '',
-      type: 'raw'
+      type: MarkType.RAW
     }
     const { tokens, marks, groups } = parse('`v-bind:style` 的对象语法', [
       hyperMark
@@ -629,7 +629,6 @@ describe('find ignored marks', () => {
 })
 
 describe('travel', () => {
-  const { tokens } = parse('遵守JavaScript编码规范非常重要')
   const expectedTokens = [
     {
       type: 'content-full',
@@ -654,7 +653,9 @@ describe('travel', () => {
     }
   ]
   test('general travel', () => {
-    const records = []
+    const { tokens } = toMutableResult(parse('遵守JavaScript编码规范非常重要'))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const records: any[] = []
     travel(
       tokens,
       () => true,
@@ -683,8 +684,10 @@ describe('travel', () => {
     ])
   })
   test('filter by type', () => {
-    const records = []
-    travel(tokens, { type: 'content-half' }, (token, index, tokens, result) =>
+    const { tokens } = toMutableResult(parse('遵守JavaScript编码规范非常重要'))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const records: any[] = []
+    travel(tokens, { type: CharType.CONTENT_HALF }, (token, index, tokens, result) =>
       records.push({ token, index, tokens, result })
     )
     expect(clone(records)).toEqual([
@@ -697,7 +700,9 @@ describe('travel', () => {
     ])
   })
   test('filter by string match', () => {
-    const records = []
+    const { tokens } = toMutableResult(parse('遵守JavaScript编码规范非常重要'))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const records: any[] = []
     travel(tokens, '规范', (token, index, tokens, result) =>
       records.push({ token, index, tokens, result })
     )
@@ -711,7 +716,9 @@ describe('travel', () => {
     ])
   })
   test('filter by regexp match', () => {
-    const records = []
+    const { tokens } = toMutableResult(parse('遵守JavaScript编码规范非常重要'))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const records: any[] = []
     travel(tokens, /[a-z]{3}/, (token, index, tokens, result) =>
       records.push({ token, index, tokens, result })
     )
@@ -725,10 +732,12 @@ describe('travel', () => {
     ])
   })
   test('filter by function', () => {
-    const records = []
+    const { tokens } = toMutableResult(parse('遵守JavaScript编码规范非常重要'))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const records: any[] = []
     travel(
       tokens,
-      (token, index, tokens) => index,
+      (_, index) => !!index,
       (token, index, tokens, result) =>
         records.push({ token, index, tokens, result })
     )
@@ -764,10 +773,10 @@ describe('join', () => {
 
 describe('process rules', () => {
   test('replace half-width brackets into full-width', () => {
-    const data = parse(`关注(watch)你关心的仓库。`)
+    const data = toMutableResult(parse(`关注(watch)你关心的仓库。`))
     processRule(data, {
-      filter: { type: 'mark-brackets' },
-      handler: (token, index, group, matched, marks) => {
+      filter: { type: SingleTokenType.MARK_BRACKETS },
+      handler: (token) => {
         token.content =
           {
             '(': '（',
