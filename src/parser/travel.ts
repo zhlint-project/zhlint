@@ -1,13 +1,13 @@
-import { MutableGroupToken, MutableMark, Filter, FilterFunction, Handler } from './types'
+import { GroupToken, MutableGroupToken, Mark, MutableMark, Filter, FilterFunction, Handler } from './types'
 
 /**
  * Travel through a group nestedly
  */
 export const travel = (
-  group: MutableGroupToken,
+  group: MutableGroupToken | GroupToken,
   filter: Filter,
   handler: Handler,
-  marks: MutableMark[] = []
+  marks: MutableMark[] | Mark[] = []
 ): void => {
   let normalizedFilter: FilterFunction = () => null
   if (filter instanceof RegExp || typeof filter === 'string') {

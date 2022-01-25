@@ -71,22 +71,22 @@ describe('parser', () => {
     expect(purify(tokens)).toEqual([
       {
         type: 'content-full',
-        raw: '遵守',
         content: '遵守',
+        spaceAfter: '',
         index: 0,
         length: 2
       },
       {
         type: 'content-half',
-        raw: 'JavaScript',
         content: 'JavaScript',
+        spaceAfter: '',
         index: 2,
         length: 10
       },
       {
         type: 'content-full',
-        raw: '编码规范非常重要',
         content: '编码规范非常重要',
+        spaceAfter: '',
         index: 12,
         length: 8
       }
@@ -99,25 +99,23 @@ describe('parser', () => {
     const mark = {
       type: 'brackets',
       startContent: `(`,
-      rawStartContent: `(`,
       startIndex: 2,
       endContent: `)`,
-      rawEndContent: `)`,
       endIndex: 8
     }
     expect(marks).toEqual([mark])
     expect(purify(tokens)).toEqual([
       {
         type: 'content-full',
-        raw: '关注',
         content: '关注',
+        spaceAfter: '',
         index: 0,
         length: 2
       },
       {
         type: 'mark-brackets',
-        raw: '(',
         content: '(',
+        spaceAfter: '',
         index: 2,
         length: 1,
         markSide: 'left',
@@ -125,15 +123,15 @@ describe('parser', () => {
       },
       {
         type: 'content-half',
-        raw: 'watch',
         content: 'watch',
+        spaceAfter: '',
         index: 3,
         length: 5
       },
       {
         type: 'mark-brackets',
-        raw: ')',
         content: ')',
+        spaceAfter: '',
         index: 8,
         length: 1,
         markSide: 'right',
@@ -141,15 +139,15 @@ describe('parser', () => {
       },
       {
         type: 'content-full',
-        raw: '你关心的仓库',
         content: '你关心的仓库',
+        spaceAfter: '',
         index: 9,
         length: 6
       },
       {
         type: 'punctuation-full',
-        raw: '。',
         content: '。',
+        spaceAfter: '',
         index: 15,
         length: 1
       }
@@ -160,36 +158,36 @@ describe('parser', () => {
     expect(purify(tokens)).toEqual([
       {
         type: 'content-full',
-        raw: '如果你有任何问题',
         content: '如果你有任何问题',
+        spaceAfter: '',
         index: 0,
         length: 8
       },
       {
         type: 'punctuation-full',
-        raw: '，',
         content: '，',
+        spaceAfter: '',
         index: 8,
         length: 1
       },
       {
         type: 'content-full',
-        raw: '请联系',
         content: '请联系',
+        spaceAfter: '',
         index: 9,
         length: 3
       },
       {
         type: 'content-half',
-        raw: '@Vuejs_Events',
         content: '@Vuejs_Events',
+        spaceAfter: '',
         index: 12,
         length: 13
       },
       {
         type: 'punctuation-full',
-        raw: '！',
         content: '！',
+        spaceAfter: '',
         index: 25,
         length: 1
       }
@@ -200,28 +198,24 @@ describe('parser', () => {
     expect(purify(tokens)).toEqual([
       {
         type: 'content-full',
-        raw: '每个版本的更新日志见',
         content: '每个版本的更新日志见',
         index: 0,
         length: 10,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       },
       {
         type: 'content-half',
-        raw: 'GitHub',
         content: 'GitHub',
         index: 11,
         length: 6,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       },
       {
         type: 'punctuation-full',
-        raw: '。',
         content: '。',
         index: 18,
-        length: 1
+        length: 1,
+        spaceAfter: ''
       }
     ])
   })
@@ -232,104 +226,84 @@ describe('parser', () => {
     const mark = {
       type: 'brackets',
       startContent: `(`,
-      rawStartContent: `(`,
       startIndex: 27,
       endContent: `)`,
-      rawEndContent: `)`,
       endIndex: 45
     }
     expect(marks).toEqual([mark])
     expect(purify(tokens)).toEqual([
       {
         type: 'content-half',
-        raw: 'Vue',
         content: 'Vue',
         index: 0,
         length: 2 - 0 + 1,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       },
       {
         type: 'content-full',
-        raw: '也可以在',
         content: '也可以在',
         index: 4,
         length: 7 - 4 + 1,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       },
       {
         type: 'content-half',
-        raw: 'unpkg',
         content: 'unpkg',
         index: 9,
         length: 13 - 9 + 1,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       },
       {
         type: 'content-full',
-        raw: '和',
         content: '和',
         index: 15,
         length: 15 - 15 + 1,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       },
       {
         type: 'content-half',
-        raw: 'cdnjs',
         content: 'cdnjs',
         index: 17,
         length: 21 - 17 + 1,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       },
       {
         type: 'content-full',
-        raw: '上获取',
         content: '上获取',
         index: 23,
         length: 25 - 23 + 1,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       },
       {
         type: 'mark-brackets',
-        raw: '(',
         content: '(',
         index: 27,
         length: 1,
         markSide: 'left',
         mark,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       },
       {
         type: 'content-half',
-        raw: 'cdnjs',
         content: 'cdnjs',
         index: 29,
         length: 33 - 29 + 1,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       },
       {
         type: 'content-full',
-        raw: '的版本更新可能略滞后',
         content: '的版本更新可能略滞后',
         index: 35,
-        length: 44 - 35 + 1
+        length: 44 - 35 + 1,
+        spaceAfter: ''
       },
       {
         type: 'mark-brackets',
-        raw: ')',
         content: ')',
         index: 45,
         length: 1,
         markSide: 'right',
         mark,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       }
     ])
@@ -339,31 +313,31 @@ describe('parser', () => {
     expect(purify(tokens)).toEqual([
       {
         type: 'content-full',
-        raw: '对于制作原型或学习',
         content: '对于制作原型或学习',
         index: 0,
-        length: 8 - 0 + 1
+        length: 8 - 0 + 1,
+        spaceAfter: ''
       },
       {
         type: 'punctuation-half',
-        raw: ',',
         content: ',',
         index: 9,
-        length: 9 - 9 + 1
+        length: 9 - 9 + 1,
+        spaceAfter: ''
       },
       {
         type: 'content-full',
-        raw: '你可以这样使用最新版本',
         content: '你可以这样使用最新版本',
         index: 10,
-        length: 20 - 10 + 1
+        length: 20 - 10 + 1,
+        spaceAfter: ''
       },
       {
         type: 'punctuation-half',
-        raw: ':',
         content: ':',
         index: 21,
-        length: 21 - 21 + 1
+        length: 21 - 21 + 1,
+        spaceAfter: ''
       }
     ])
   })
@@ -374,89 +348,75 @@ describe('parser', () => {
     expect(purify(tokens)).toEqual([
       {
         type: 'content-full',
-        raw: '该指令的意思是',
         content: '该指令的意思是',
         index: 0,
-        length: 6 - 0 + 1
+        length: 6 - 0 + 1,
+        spaceAfter: ''
       },
       {
         type: 'punctuation-half',
-        raw: ':',
         content: ':',
         index: 7,
         length: 8 - 8 + 1,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       },
       [
         {
           type: 'content-full',
-          raw: '将这个元素节点的',
           content: '将这个元素节点的',
           index: 10 + 1,
           length: 17 - 10 + 1,
-          rawSpaceAfter: ' ',
           spaceAfter: ' '
         },
         {
           type: 'content-half',
-          raw: 'title',
           content: 'title',
           index: 19 + 1,
           length: 23 - 19 + 1,
-          rawSpaceAfter: ' ',
           spaceAfter: ' '
         },
         {
           type: 'content-full',
-          raw: '特性和',
           content: '特性和',
           index: 25 + 1,
           length: 27 - 25 + 1,
-          rawSpaceAfter: ' ',
           spaceAfter: ' '
         },
         {
           type: 'content-half',
-          raw: 'Vue',
           content: 'Vue',
           index: 29 + 1,
           length: 31 - 29 + 1,
-          rawSpaceAfter: ' ',
           spaceAfter: ' '
         },
         {
           type: 'content-full',
-          raw: '实例的',
           content: '实例的',
           index: 33 + 1,
           length: 35 - 33 + 1,
-          rawSpaceAfter: ' ',
           spaceAfter: ' '
         },
         {
           type: 'content-half',
-          raw: 'message',
           content: 'message',
           index: 37 + 1,
           length: 43 - 37 + 1,
-          rawSpaceAfter: ' ',
           spaceAfter: ' '
         },
         {
           type: 'content-full',
-          raw: '属性保持一致',
           content: '属性保持一致',
           index: 45 + 1,
-          length: 50 - 45 + 1
+          length: 50 - 45 + 1,
+          spaceAfter: ''
         }
       ],
       {
         type: 'punctuation-half',
-        raw: '.',
         content: '.',
         index: 52 + 1,
-        length: 52 - 52 + 1
+        length: 52 - 52 + 1,
+        spaceAfter: ''
       }
     ])
     expect(marks.length).toBe(0)
@@ -483,35 +443,43 @@ describe('parser with hyper marks', () => {
     expect(purify(tokens)).toEqual([
       {
         type: 'content-half',
-        raw: 'X',
         content: 'X',
         index: 0,
         length: 1,
-        rawSpaceAfter: ' ',
         spaceAfter: ' '
       },
       {
-        type: 'mark-md',
-        raw: '[',
+        type: 'mark-hyper',
         content: '[',
         index: 2,
         length: 1,
+        spaceAfter: '',
         markSide: 'left',
         mark: hyperMark
       },
-      { type: 'content-half', raw: 'xxx', content: 'xxx', index: 3, length: 3 },
       {
-        type: 'mark-md',
-        raw: '](xxx)',
+        type: 'content-half',
+        content: 'xxx',
+        index: 3,
+        length: 3,
+        spaceAfter: ''
+      },
+      {
+        type: 'mark-hyper',
         content: '](xxx)',
         index: 6,
         length: 6,
+        spaceAfter: ' ',
         markSide: 'right',
-        mark: hyperMark,
-        rawSpaceAfter: ' ',
-        spaceAfter: ' '
+        mark: hyperMark
       },
-      { type: 'content-half', raw: 'X', content: 'X', index: 13, length: 1 }
+      {
+        type: 'content-half',
+        content: 'X',
+        index: 13,
+        length: 1,
+        spaceAfter: ''
+      }
     ])
     expect(marks).toEqual([hyperMark])
     expect(groups.length).toBe(0)
@@ -530,19 +498,17 @@ describe('parser with hyper marks', () => {
     expect(purify(tokens)).toEqual([
       {
         type: 'content-hyper',
-        raw: '`v-bind:style`',
         content: '`v-bind:style`',
         index: 0,
         length: 14,
-        spaceAfter: ' ',
-        rawSpaceAfter: ' '
+        spaceAfter: ' '
       },
       {
         type: 'content-full',
-        raw: '的对象语法',
         content: '的对象语法',
         index: 15,
-        length: 5
+        length: 5,
+        spaceAfter: ''
       }
     ])
     expect(marks).toEqual([hyperMark])
@@ -632,28 +598,28 @@ describe('travel', () => {
   const expectedTokens = [
     {
       type: 'content-full',
-      raw: '遵守',
       content: '遵守',
       index: 0,
-      length: 1 - 0 + 1
+      length: 1 - 0 + 1,
+      spaceAfter: ''
     },
     {
       type: 'content-half',
-      raw: 'JavaScript',
       content: 'JavaScript',
       index: 2,
-      length: 11 - 2 + 1
+      length: 11 - 2 + 1,
+      spaceAfter: ''
     },
     {
       type: 'content-full',
-      raw: '编码规范非常重要',
       content: '编码规范非常重要',
       index: 12,
-      length: 19 - 12 + 1
+      length: 19 - 12 + 1,
+      spaceAfter: ''
     }
   ]
   test('general travel', () => {
-    const { tokens } = toMutableResult(parse('遵守JavaScript编码规范非常重要'))
+    const { tokens } = parse('遵守JavaScript编码规范非常重要')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const records: any[] = []
     travel(
@@ -684,7 +650,7 @@ describe('travel', () => {
     ])
   })
   test('filter by type', () => {
-    const { tokens } = toMutableResult(parse('遵守JavaScript编码规范非常重要'))
+    const { tokens } = parse('遵守JavaScript编码规范非常重要')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const records: any[] = []
     travel(tokens, { type: CharType.CONTENT_HALF }, (token, index, tokens, result) =>
@@ -700,7 +666,7 @@ describe('travel', () => {
     ])
   })
   test('filter by string match', () => {
-    const { tokens } = toMutableResult(parse('遵守JavaScript编码规范非常重要'))
+    const { tokens } = parse('遵守JavaScript编码规范非常重要')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const records: any[] = []
     travel(tokens, '规范', (token, index, tokens, result) =>
@@ -716,7 +682,7 @@ describe('travel', () => {
     ])
   })
   test('filter by regexp match', () => {
-    const { tokens } = toMutableResult(parse('遵守JavaScript编码规范非常重要'))
+    const { tokens } = parse('遵守JavaScript编码规范非常重要')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const records: any[] = []
     travel(tokens, /[a-z]{3}/, (token, index, tokens, result) =>
@@ -732,7 +698,7 @@ describe('travel', () => {
     ])
   })
   test('filter by function', () => {
-    const { tokens } = toMutableResult(parse('遵守JavaScript编码规范非常重要'))
+    const { tokens } = parse('遵守JavaScript编码规范非常重要')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const records: any[] = []
     travel(
@@ -742,8 +708,8 @@ describe('travel', () => {
         records.push({ token, index, tokens, result })
     )
     expect(clone(records)).toEqual([
-      { token: expectedTokens[1], tokens: expectedTokens, index: 1, result: 1 },
-      { token: expectedTokens[2], tokens: expectedTokens, index: 2, result: 2 }
+      { token: expectedTokens[1], tokens: expectedTokens, index: 1, result: true },
+      { token: expectedTokens[2], tokens: expectedTokens, index: 2, result: true }
     ])
   })
 })

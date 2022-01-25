@@ -95,8 +95,6 @@ export const initNewStatus = (str: string, hyperMarks: Mark[]): ParseStatus => {
   Object.assign(tokens, {
     type: GroupTokenType.GROUP,
     index: 0,
-    length: -1, // TODO: placeholder
-    content: '', // TODO: placeholder
     spaceAfter: '',
     startIndex: 0,
     endIndex: str.length - 1,
@@ -262,8 +260,6 @@ export const initNewGroup = (
 
   Object.assign(lastGroup, {
     index,
-    length: -1, // TODO: placeholder
-    content: '', // TODO: placeholder
     spaceAfter: '', // to be finalized
     startIndex: index,
     startContent: char,

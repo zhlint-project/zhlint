@@ -162,17 +162,17 @@ export type ParseStatus = {
 // Travel
 
 export type FilterFunction = (
-  token: MutableToken,
+  token: MutableToken | Token,
   index: number,
-  group: MutableGroupToken
+  group: MutableGroupToken | GroupToken
 ) => boolean | RegExpMatchArray | null
 
 export type Filter = FilterFunction | string | RegExp | { type: TokenType }
 
 export type Handler = (
-  token: MutableToken,
+  token: MutableToken | Token,
   index: number,
-  group: MutableGroupToken,
+  group: MutableGroupToken | GroupToken,
   matched: boolean | RegExpMatchArray | null,
-  marks: MutableMark[]
+  marks: MutableMark[] | Mark[]
 ) => void
