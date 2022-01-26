@@ -88,8 +88,8 @@ const join = (
   const ignoredFlags = isIgnored(tokens, ignoredMarks)
   // innerSpaceBefore
   return [
-    ignoredFlags.START,
-    ignoredFlags.INNER_SPACE,
+    ignoredFlags.START ? tokens.startContent : tokens.modifiedStartContent,
+    ignoredFlags.INNER_SPACE ? tokens.innerSpaceBefore : tokens.modifiedInnerSpaceBefore,
     ...tokens.map((token) => {
       const ignoredPieces = isIgnored(token, ignoredMarks)
       // validate content, spaceAfter
@@ -101,14 +101,14 @@ const join = (
       return Array.isArray(token)
         ? join(token, ignoredMarks, validations, start)
         : [
-            ignoredPieces.CONTENT,
-            ignoredPieces.SPACE_AFTER
+            ignoredPieces.CONTENT ? token.content : token.modifiedContent,
+            ignoredPieces.SPACE_AFTER ? token.spaceAfter : token.modifiedSpaceAfter
           ]
             .filter(Boolean)
             .join('')
     }),
-    ignoredFlags.END,
-    ignoredFlags.SPACE_AFTER
+    ignoredFlags.END ? tokens.endContent : tokens.modifiedEndContent,
+    ignoredFlags.SPACE_AFTER ? tokens.spaceAfter : tokens.modifiedSpaceAfter
   ]
     .filter(Boolean)
     .join('')

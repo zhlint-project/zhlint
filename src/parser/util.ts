@@ -259,6 +259,7 @@ export const initNewGroup = (
   const lastGroup = [] as unknown as GroupToken
 
   Object.assign(lastGroup, {
+    type: GroupTokenType.GROUP,
     index,
     spaceAfter: '', // to be finalized
     startIndex: index,

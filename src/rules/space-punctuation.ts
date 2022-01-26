@@ -1,5 +1,5 @@
 import { ValidationTarget } from '../logger'
-import { CharType, Handler, MutableToken as Token } from '../parser'
+import { CharType, Handler, MutableGroupToken as GroupToken, MutableToken as Token } from '../parser'
 import {
   findTokenBefore,
   findTokenAfter,
@@ -28,20 +28,25 @@ const validate = (token: Token, type: string, condition: boolean): void => {
   }
 }
 
-const handler: Handler = (token, _, group) => {
-  // token is a punctuation between 2 contents
-  // (exception: between 2 half-width content)
-  // full-width -> no space
-  // half-width -> one space after
+/**
+ * token is a punctuation between 2 contents
+ * (exception: between 2 half-width content)
+ * full-width -> no space
+ * half-width -> one space after
+ */
+const handler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.type.match(/^punctuation-/)) {
+    // Skip special punctuation which doesn't fit this rule.
     if ('/[&%-'.indexOf(token.modifiedContent) >= 0) {
       return
     }
+
     const contentTokenBefore = findContentTokenBefore(group, token)
     const contentTokenAfter = findContentTokenAfter(group, token)
     const nonMarkTokenBefore = findNonMarkTokenBefore(group, token)
     const nonMarkTokenAfter = findNonMarkTokenAfter(group, token)
-    // no space before punctuation
+
+    // When content exists before this punctuation.
     if (contentTokenBefore) {
       removeValidation(
         contentTokenBefore,
@@ -49,44 +54,58 @@ const handler: Handler = (token, _, group) => {
         ValidationTarget.SPACE_AFTER
       )
       validate(contentTokenBefore, 'noBefore', !!contentTokenBefore.spaceAfter)
+
+      // No space after the content before.
       contentTokenBefore.modifiedSpaceAfter = ''
+
+      // When there are some hyper content in-between.
       const tokenBefore = findTokenBefore(group, token) as Token
       if (tokenBefore !== contentTokenBefore) {
         removeValidation(tokenBefore, 'mark-raw', ValidationTarget.SPACE_AFTER)
         validate(tokenBefore, 'noBefore', !!tokenBefore.spaceAfter)
+        // No space before the punctuation.
         tokenBefore.modifiedSpaceAfter = ''
       }
     }
-    // both sides non-empty
+
+    // When there are content in both sides of the punctuation.
     if (nonMarkTokenBefore && nonMarkTokenAfter) {
-      // no space when punctuation is full-width
+      // When the punctuation is full-width
       if (token.type === CharType.PUNCTUATION_FULL) {
         removeValidation(token, 'mark-raw', ValidationTarget.SPACE_AFTER)
         validate(token, 'noAfter', !!token.spaceAfter && !token.type)
+
+        // No space after the punctuation.
         token.modifiedSpaceAfter = ''
+
+        // When there are some hyper content in-between.
         if (contentTokenAfter) {
           const before = findTokenBefore(group, contentTokenAfter) as Token
           if (before !== token) {
             removeValidation(before, 'mark-raw', ValidationTarget.SPACE_AFTER)
             validate(before, 'noAfter', !!before.spaceAfter && !before.type)
+            // No space after the hyper content.
             before.modifiedSpaceAfter = ''
           }
         }
       } else {
+        // Here the punctuation is half-width.
+        // When either side of the content is full-width.
         if (
           contentTokenBefore &&
           contentTokenAfter &&
-          (contentTokenBefore.type === 'content-full' ||
-            contentTokenAfter.type === 'content-full')
+          (contentTokenBefore.type === CharType.CONTENT_FULL ||
+            contentTokenAfter.type === CharType.CONTENT_FULL)
         ) {
-          // one space when punctuation is half-width and
-          // either side of content is full-width content
+          // When there is no hyper content in-between.
           const tokenAfter = findTokenAfter(group, token)
           if (tokenAfter === contentTokenAfter) {
             removeValidation(token, 'mark-raw', ValidationTarget.SPACE_AFTER)
             validate(token, 'oneAfter', token.spaceAfter !== ' ' && !token.type)
-            token.spaceAfter = ' '
+            // One space after the punctuation.
+            token.modifiedSpaceAfter = ' '
           } else {
+            // Here there are some hyper content in-between.
             const before = findTokenBefore(group, contentTokenAfter) as Token
             removeValidation(before, 'mark-raw', ValidationTarget.SPACE_AFTER)
             validate(
@@ -94,6 +113,7 @@ const handler: Handler = (token, _, group) => {
               'oneAfter',
               before.spaceAfter !== ' ' && !before.type
             )
+            // One space before the after-content.
             before.modifiedSpaceAfter = ' '
           }
         }

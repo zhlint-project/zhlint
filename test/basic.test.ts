@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest'
 
 import run, { Options } from '../src/run'
-import { CharType, checkCharType, Mark, MarkType, parse, SingleTokenType, toMutableResult, travel } from '../src/parser'
+import { CharType, checkCharType, Mark, MarkType, MutableToken, parse, SingleTokenType, toMutableResult, travel } from '../src/parser'
 import join from '../src/join'
 import processRule from '../src/process-rule'
 import findIgnoredMarks from '../src/ignore'
@@ -742,8 +742,8 @@ describe('process rules', () => {
     const data = toMutableResult(parse(`关注(watch)你关心的仓库。`))
     processRule(data, {
       filter: { type: SingleTokenType.MARK_BRACKETS },
-      handler: (token) => {
-        token.content =
+      handler: (token: MutableToken) => {
+        token.modifiedContent =
           {
             '(': '（',
             ')': '）'
