@@ -1,3 +1,10 @@
+import { ValidationTarget } from '../logger'
+import {
+  CharType,
+  MutableToken as Token,
+  MutableGroupToken as GroupToken,
+  Handler
+} from '../parser'
 import { findTokenBefore, findTokenAfter, removeValidation } from './util'
 
 const abbrs = [
@@ -11,22 +18,28 @@ const abbrs = [
   'i.e.',
   'e.g.',
   'a.k.a.'
-].map((str) => str.split('.').reverse().slice(1))
+]
 
-const hasAbbr = (token, group, abbrs) => {
+const reversedAbbrs = abbrs.map((str) => str.split('.').reverse().slice(1))
+
+const hasAbbr = (
+  token: Token,
+  group: GroupToken,
+  reversedAbbrs: string[][]
+): Token[] | undefined => {
   const tokenBefore = findTokenBefore(group, token)
-  if (tokenBefore && !tokenBefore.rawSpaceAfter) {
-    const matchedAbbrs = abbrs
+  if (tokenBefore && !tokenBefore.spaceAfter) {
+    const matchedAbbrs = reversedAbbrs
       .filter((abbr) => abbr[0] === tokenBefore.content)
       .map((abbr) => abbr.slice(1))
-    if (matchedAbbrs && matchedAbbrs.length) {
+    if (matchedAbbrs.length) {
       const lastMatched = matchedAbbrs[matchedAbbrs.length - 1]
       if (lastMatched.length) {
         const tokenBeforeBefore = findTokenBefore(group, tokenBefore)
         if (
           tokenBeforeBefore &&
-          !tokenBeforeBefore.rawSpaceAfter &&
-          tokenBeforeBefore.raw === '.'
+          !tokenBeforeBefore.spaceAfter &&
+          tokenBeforeBefore.content === '.'
         ) {
           const result = hasAbbr(tokenBeforeBefore, group, matchedAbbrs)
           if (result) {
@@ -40,31 +53,33 @@ const hasAbbr = (token, group, abbrs) => {
   }
 }
 
-export default (token, index, group, matched, marks) => {
-  if (token.raw === '.') {
+const handler: Handler = (token: Token, index, group: GroupToken) => {
+  if (token.content === '.') {
     // end of the content or has space after or full-width content after
     const tokenAfter = findTokenAfter(group, token)
-    if (
-      tokenAfter &&
-      tokenAfter.type === 'content-half' &&
-      !token.rawSpaceAfter
-    ) {
+    if (tokenAfter && tokenAfter.type === 'content-half' && !token.spaceAfter) {
       return
     }
 
     // raw content back match abbrs and no raw space after
-    const result = hasAbbr(token, group, abbrs)
+    const result = hasAbbr(token, group, reversedAbbrs)
 
     // then keep all periods as they are
     if (result) {
-      result.forEach((content, i) => {
+      result.forEach((_, i) => {
         const periodToken = group[index - i * 2]
-        if (periodToken.content !== '.') {
-          removeValidation(periodToken, 'unify-punctuation', 'content')
+        if (periodToken.modifiedContent !== '.') {
+          removeValidation(
+            periodToken,
+            'unify-punctuation',
+            ValidationTarget.CONTENT
+          )
         }
-        periodToken.content = '.'
-        periodToken.type = 'punctuation-half'
+        periodToken.modifiedContent = '.'
+        periodToken.modifiedType = CharType.PUNCTUATION_HALF
       })
     }
   }
 }
+
+export default handler

@@ -1,29 +1,33 @@
+import { Data } from './types'
+
+// TODO: ::: tips 提示...
+//
 // ::: xxx\nyyy\nzzz\n:::\n
 // - `(?<=^|\n)` + `(\:\:\:.*)`
 // - `\n`
 // - `(.+)`
 // - `\n`
 // - `(\:\:\:)` + `(?=\n|$)`
-const matcher = /(?<=^|\n)(\:\:\:.*)\n(.+)\n(\:\:\:)(?=\n|$)/g
+const matcher = /(?<=^|\n)(:::.*)\n(.+)\n(:::)(?=\n|$)/g
 
-export default (data) => {
-  data.content = data.content.replace(
+const parser = (data: Data): Data => {
+  data.modifiedContent = data.modifiedContent.replace(
     matcher,
     (raw, start, content, end, index) => {
       const { length } = raw
-      const name = start.substr(3).trim()
+      const name = start.substring(3).trim()
       data.ignoredByParsers.push({
         name,
         index,
         length: start.length,
-        raw: start,
+        originContent: start,
         meta: `vuepress-${name}-start`
       })
       data.ignoredByParsers.push({
         name,
         index: index + length - 3,
         length: 3,
-        raw: end,
+        originContent: end,
         meta: `vuepress-${name}-end`
       })
       return '@'.repeat(start.length) + '\n' + content + '\n' + '@'.repeat(3)
@@ -31,3 +35,5 @@ export default (data) => {
   )
   return data
 }
+
+export default parser

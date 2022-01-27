@@ -3,93 +3,130 @@ import chalk from 'chalk'
 export const env: {
   stdout: NodeJS.WritableStream
   stderr: NodeJS.WritableStream
-  defaultLogger: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  defaultLogger: Console
 } = {
   stdout: process.stdout,
   stderr: process.stderr,
   defaultLogger: console
 }
 
-if (global.__DEV__) {
+if (global.__DEV__ != null) {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const fs = require('fs')
-  const { Console } = require('console')
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { Console: NativeConsole } = require('console')
   env.stdout = fs.createWriteStream('./stdout.log', { encoding: 'utf-8' })
   env.stderr = fs.createWriteStream('./stderr.log', { encoding: 'utf-8' })
-  env.defaultLogger = new Console(env.stdout, env.stderr)
+  env.defaultLogger = new NativeConsole(env.stdout, env.stderr)
 }
 
-const parsePosition = (str, index) => {
+type Position = {
+  offset: number
+  row: number
+  column: number
+  line: string
+}
+
+const getPositionByOffset = (str: string, offset: number): Position => {
   const rows = str.split('\n')
   const rowLengthList = rows.map((substr) => substr.length)
-  let row = 0
-  let column = 0
-  let line = ''
-  while (index >= 0 && rows.length) {
-    row++
-    column = index
-    line = rows.shift()
-    index -= rowLengthList.shift() + 1
+  const position = {
+    offset,
+    row: 0,
+    column: 0,
+    line: ''
   }
-  return {
-    offset: index,
-    row,
-    column,
-    line
+  while (position.offset >= 0 && rows.length) {
+    position.row++
+    position.column = position.offset
+    position.line = rows.shift() || ''
+    position.offset -= (rowLengthList.shift() || 0) + 1
   }
+  return position
 }
 
-export const reportSingleResult = (
-  file,
-  str,
-  validations,
+export enum ValidationTarget {
+  CONTENT = 'content',
+  START_CONTENT = 'startContent',
+  END_CONTENT = 'endContent',
+  SPACE_AFTER = 'spaceAfter',
+  INNER_SPACE_BEFORE = 'innerSpaceBefore'
+}
+
+export type Validation = {
+  name: string
+  target: ValidationTarget
+  index: number
+  length: number
+  message: string
+}
+
+export const reportItem = (
+  file: string | undefined = '',
+  str: string,
+  validations: Validation[],
   logger = env.defaultLogger
 ) => {
-  validations.forEach((v) => {
-    const { index, length, target } = v
+  validations.forEach(({ index, length, target, message }) => {
+    // 0. final index and position
     const finalIndex =
       target === 'spaceAfter' || target === 'endContent'
         ? index + length
         : index
-    const { row, column, line } = parsePosition(str, finalIndex)
-    const offset = 20
-    const start = column - offset < 0 ? 0 : column - offset
-    const end =
-      column + length + offset > line.length - 1
+    const { row, column, line } = getPositionByOffset(str, finalIndex)
+
+    // 1. headline
+    const fileDisplay = `${chalk.blue.bgWhite(file)}${file ? ':' : ''}`
+    const positionDisplay = `${chalk.yellow(row)}:${chalk.yellow(column)}`
+    const headline = `${fileDisplay}${positionDisplay} - ${message}`
+
+    // 2. display fragment
+    const displayRange = 20
+    const displayStart = column - displayRange < 0 ? 0 : column - displayRange
+    const displayEnd =
+      column + length + displayRange > line.length - 1
         ? line.length
-        : column + length + offset
-    const fragment = line.substring(start, end).replace(/\n/g, '\\n')
-    // TODO: any
-    const output: any = {
-      file: `${chalk.blue.bgWhite(file || '')}${file ? ':' : ''}`,
-      position: `${chalk.yellow(row)}:${chalk.yellow(column)}`,
-      marker: `${chalk.black.bgBlack(
-        fragment.substr(0, column - start)
-      )}${chalk.red('^')}`,
-      oldPosition: `${chalk.yellow(finalIndex)}`,
-      oldMarker: `${' '.repeat(column - start)}${chalk.red('^')}`
-    }
-    output.headline = `${output.file}${output.position} - ${v.message}`
-    logger.error(`${output.headline}\n\n${fragment}\n${output.marker}\n`)
+        : column + length + displayRange
+    const displayFragment = line
+      .substring(displayStart, displayEnd)
+      .replace(/\n/g, '\\n')
+
+    // 3. marker below
+    const markerBelow = `${chalk.black.bgBlack(
+      displayFragment.substring(0, column - displayStart)
+    )}${chalk.red('^')}`
+
+    logger.error(`${headline}\n\n${displayFragment}\n${markerBelow}\n`)
   })
 }
 
-export const report = (resultList, logger = env.defaultLogger) => {
+export type Result = {
+  file?: string
+  disabled: boolean
+  origin: string
+  validations: Validation[]
+}
+
+export const report = (resultList: Result[], logger = env.defaultLogger) => {
   let errorCount = 0
-  const invalidFiles = []
+  const invalidFiles: string[] = []
   resultList
     .filter(({ file, disabled }) => {
       if (disabled) {
-        logger.log(
-          `${chalk.blue.bgWhite(file || '')}${file ? ':' : ''} disabled`
-        )
+        if (file) {
+          logger.log(`${chalk.blue.bgWhite(file)}: disabled`)
+        } else {
+          logger.log(`disabled`)
+        }
         return false
       }
       return true
     })
-    .forEach(({ file, origin, validations }) => {
-      reportSingleResult(file, origin, validations, logger)
+    .forEach(({ file, origin, validations }: Result) => {
+      reportItem(file, origin, validations, logger)
       errorCount += validations.length
-      if (validations.length) {
+      if (file && validations.length) {
         invalidFiles.push(file)
       }
     })

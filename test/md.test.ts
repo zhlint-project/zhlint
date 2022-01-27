@@ -1,16 +1,17 @@
 import { describe, test, expect } from 'vitest'
 
-import run from '../src/run'
-import markdownParser from '../src/parsers/md'
+import run, { Options } from '../src/run'
+import markdownParser from '../src/hypers/md'
+import { Data } from '../src/hypers/types'
 
-const lint = (...args: [any]) => run(...args).result
+const lint = (...args) => run(...(args as [string, Options])).result
 
 describe('parser with markdown', () => {
   test('single paragraph', () => {
     const text = 'X [xxx](xxx) X *y* __x__ `ss` _0_ ~~asd~~ *asf**asf**adsf*'
-    const data = {
+    const data: Data = {
       content: text,
-      raw: text,
+      modifiedContent: text,
       ignoredByRules: [],
       ignoredByParsers: [],
       blocks: [

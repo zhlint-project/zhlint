@@ -11,37 +11,49 @@
 // - a( **a** )a   -> a( **a** )a -> a (**a**) a
 // - a(**a**)a     -> a( **a** )a -> a (**a**) a
 
+import { ValidationTarget } from '../logger'
+import {
+  CharType,
+  Handler,
+  MarkSideType,
+  MutableToken as Token,
+  MutableGroupToken as GroupToken,
+  SingleTokenType
+} from '../parser'
 import {
   findTokenBefore,
-  findTokenAfter,
   findContentTokenBefore,
   findContentTokenAfter,
   findSpaceAfterHost,
-  getMarkSide,
   removeValidation,
   addValidation
 } from './util'
 
-const messages = {
+const messages: Record<string, string> = {
   'outside-half': 'There should be one space outside half-width brackets',
   'outside-full': 'There should be on space outside full-width brackets',
   inside: 'There should be no space inside brackets'
 }
 
-const validate = (token, type, condition) => {
-  removeValidation(token, '', 'spaceAfter')
+const validate = (token: Token, type: string, condition: boolean): void => {
+  removeValidation(token, '', ValidationTarget.SPACE_AFTER)
   if (condition) {
-    addValidation(token, 'space-brackets', 'spaceAfter', messages[type])
+    addValidation(
+      token,
+      'space-brackets',
+      ValidationTarget.SPACE_AFTER,
+      messages[type]
+    )
   }
 }
 
 const checkSide = (
-  spaceAfterHost,
-  size,
-  isRawContent,
-  isOutside,
-  areBothHalfWidthContent
-) => {
+  spaceAfterHost: Token,
+  size: string,
+  isRawContent: boolean,
+  isOutside: boolean,
+  areBothHalfWidthContent: boolean
+): void => {
   if (isOutside) {
     if (size === 'half-width') {
       if (areBothHalfWidthContent) {
@@ -50,31 +62,33 @@ const checkSide = (
       validate(
         spaceAfterHost,
         'outside-half',
-        isRawContent && spaceAfterHost.rawSpaceAfter !== ' '
+        isRawContent && spaceAfterHost.spaceAfter !== ' '
       )
-      spaceAfterHost.spaceAfter = ' '
+      spaceAfterHost.modifiedSpaceAfter = ' '
     } else {
       validate(
         spaceAfterHost,
         'outside-full',
-        isRawContent && spaceAfterHost.rawSpaceAfter
+        isRawContent && !!spaceAfterHost.spaceAfter
       )
-      spaceAfterHost.spaceAfter = ''
+      spaceAfterHost.modifiedSpaceAfter = ''
     }
   } else {
     validate(
       spaceAfterHost,
       'inside',
-      isRawContent && spaceAfterHost.rawSpaceAfter
+      isRawContent && !!spaceAfterHost.spaceAfter
     )
-    spaceAfterHost.spaceAfter = ''
+    spaceAfterHost.modifiedSpaceAfter = ''
   }
 }
 
-export default (token, index, group, matched, marks) => {
-  if (token.type === 'mark-brackets') {
-    const isRawContent = token.content === token.raw
-    const size = token.content.match(/[\(\)]/) ? 'half-width' : 'full-width'
+const handler: Handler = (token: Token, _, group: GroupToken) => {
+  if (token.type === SingleTokenType.MARK_BRACKETS) {
+    const isRawContent = token.modifiedContent === token.content
+    const size = token.modifiedContent.match(/[()]/)
+      ? 'half-width'
+      : 'full-width'
     const contentTokenBefore = findContentTokenBefore(group, token)
     const contentTokenAfter = findContentTokenAfter(group, token)
     if (contentTokenBefore) {
@@ -83,16 +97,16 @@ export default (token, index, group, matched, marks) => {
         group,
         contentTokenBefore,
         tokenBefore
-      )
+      ) as Token
       checkSide(
         spaceAfterHost,
         size,
         isRawContent,
-        token.markSide === 'left',
-        contentTokenAfter &&
-          contentTokenBefore.type === 'content-half' &&
-          contentTokenAfter.type === 'content-half' &&
-          token.markSide === 'left'
+        token.markSide === MarkSideType.LEFT,
+        !!contentTokenAfter &&
+          contentTokenBefore.type === CharType.CONTENT_HALF &&
+          contentTokenAfter.type === CharType.CONTENT_HALF &&
+          token.markSide === MarkSideType.LEFT
       )
     }
     if (contentTokenAfter) {
@@ -101,17 +115,19 @@ export default (token, index, group, matched, marks) => {
         group,
         token,
         tokenBeforeContentAfter
-      )
+      ) as Token
       checkSide(
         spaceAfterHost,
         size,
         isRawContent,
-        token.markSide === 'right',
-        contentTokenBefore &&
-          contentTokenBefore.type === 'content-half' &&
-          contentTokenAfter.type === 'content-half' &&
-          token.markSide === 'right'
+        token.markSide === MarkSideType.RIGHT,
+        !!contentTokenBefore &&
+          contentTokenBefore.type === CharType.CONTENT_HALF &&
+          contentTokenAfter.type === CharType.CONTENT_HALF &&
+          token.markSide === MarkSideType.RIGHT
       )
     }
   }
 }
+
+export default handler

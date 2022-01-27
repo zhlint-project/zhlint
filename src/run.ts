@@ -1,14 +1,18 @@
+import { Block, Data } from './hypers/types'
+import { Validation } from './logger'
+import { IgnoredCase, IgnoredMark } from './ignore'
+
 import replaceBlocks from './replace-block'
-import parse from './parse'
+import { parse, toMutableResult, Handler } from './parser'
 import processRule from './process-rule'
 import join from './join'
-import findIgnoredMarks from './find-ignored-marks'
+import findIgnoredMarks from './ignore'
 import { env } from './logger'
 
-import ignore from './parsers/ignore'
-import hexo from './parsers/hexo'
-import vuepress from './parsers/vuepress'
-import md from './parsers/md'
+import ignore from './hypers/ignore'
+import hexo from './hypers/hexo'
+import vuepress from './hypers/vuepress'
+import md from './hypers/md'
 
 import markRaw from './rules/mark-raw'
 import markHyper from './rules/mark-hyper'
@@ -93,16 +97,18 @@ const rulesInfo = [
   { name: 'case-linebreak', value: caseLinebreak }
 ]
 
-const arrToMap = (arr) =>
+const arrToMap = <T>(
+  arr: { name: string; value: T }[]
+): { [name: string]: T } =>
   arr.reduce((current, { name, value }) => {
     current[name] = value
     return current
   }, {})
 
-const hyperParseMap = arrToMap(hyperParseInfo)
-const ruleMap = arrToMap(rulesInfo)
+const hyperParseMap = arrToMap<(data: Data) => Data>(hyperParseInfo)
+const ruleMap = arrToMap<Handler>(rulesInfo)
 
-const matchCallArray = (calls, map) =>
+const matchCallArray = <T>(calls: unknown[], map: { [name: string]: T }): T[] =>
   calls
     .map((call) => {
       switch (typeof call) {
@@ -114,33 +120,50 @@ const matchCallArray = (calls, map) =>
           return null
       }
     })
-    .filter(Boolean)
+    .filter(Boolean) as T[]
 
-// TODO: any
-const run = (str, options: any = {}) => {
-  const logger = options.logger || env.defaultLogger
+export type Options = {
+  logger?: Console
+  rules?: (string | Handler)[]
+  hyperParse?: (string | ((data: Data) => Data))[] | ((data: Data) => Data)
+  ignoredCases?: IgnoredCase[]
+}
 
-  const disabledMatcher = /<\!\-\-\s*zhlint\s*disabled\s*\-\-\>/g
+export type Result = {
+  file?: string
+  disabled?: boolean
+  origin: string
+  result: string
+  validations: Validation[]
+}
+
+const run = (str: string, options: Options = {}): Result => {
+  // return if the file is totally ignored
+  const disabledMatcher = /<!--\s*zhlint\s*disabled\s*-->/g
   if (str.match(disabledMatcher)) {
     return { origin: str, result: str, validations: [], disabled: true }
   }
 
-  const rules = options.rules || rulesInfo.map((item) => item.name)
-  let hyperParse = options.hyperParse || hyperParseInfo.map((item) => item.name)
+  // init logger
+  const logger = options.logger || env.defaultLogger
+
+  // init rules, hyper parsers, and ignored cases
   const ignoredCases = options.ignoredCases || []
-
-  if (typeof hyperParse === 'function') {
-    hyperParse = [hyperParse]
+  const rulesInput = options.rules || rulesInfo.map((item) => item.name)
+  let hyperParserList: (string | ((data: Data) => Data))[]
+  if (typeof options.hyperParse === 'function') {
+    hyperParserList = [options.hyperParse]
+  } else {
+    hyperParserList =
+      options.hyperParse || hyperParseInfo.map((item) => item.name)
   }
-  if (!Array.isArray) {
-    hyperParse = [(data) => data]
-  }
 
+  // init data
   // str -> ignoredByRules, ignoredByParsers
   // blocks -> marks, ignoredMarks
-  const data = {
+  const data: Data = {
     content: str,
-    raw: str,
+    modifiedContent: str,
     ignoredByRules: ignoredCases,
     ignoredByParsers: [],
     blocks: [
@@ -153,19 +176,27 @@ const run = (str, options: any = {}) => {
     ]
   }
 
-  const allValidations = []
-  const allIgnoredMarks = []
+  const allValidations: Validation[] = []
+  const allIgnoredMarks: IgnoredMark[] = []
 
-  const finalData = matchCallArray(hyperParse, hyperParseMap).reduce(
-    (current, parse) => parse(current),
-    data
-  )
+  // Run all the hyper parsers
+  const finalData = matchCallArray<(data: Data) => Data>(
+    hyperParserList,
+    hyperParseMap
+  ).reduce((current, parse) => parse(current), data)
+
+  // 1. Parse each block without ignoredByParsers
+  // 2. Parse all ignoredByRules into marks for each block
+  // 3. Run all rule processes for each block
+  // 4. Push all ignored marks into allIgnoredMarks for each block
+  // 5. Join all tokens with ignoredMarks and allValidations for each block
+  // 6. Replace each block back to the string
   const result = replaceBlocks(
     str,
     finalData.blocks.map(({ value, marks, start, end }) => {
-      const result = parse(value, marks)
+      const result = toMutableResult(parse(value, marks))
       const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules, logger)
-      matchCallArray(rules, ruleMap).forEach((rule) =>
+      matchCallArray(rulesInput, ruleMap).forEach((rule) =>
         processRule(result, rule)
       )
       ignoredMarks.forEach((mark) => allIgnoredMarks.push(mark))
@@ -173,10 +204,11 @@ const run = (str, options: any = {}) => {
         start,
         end,
         value: join(result.tokens, ignoredMarks, allValidations, start)
-      }
+      } as Block
     })
   )
 
+  // filter allValidations with allIgnoredMarks
   const validations = allValidations.filter(({ index }) =>
     allIgnoredMarks.length > 0
       ? allIgnoredMarks.some(({ start, end }) => index >= start && index <= end)

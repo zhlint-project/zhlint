@@ -1,64 +1,74 @@
-const isInRange = (start, end, mark) => {
+import { IgnoredMark } from './ignore'
+import { Validation } from './logger'
+import {
+  MutableGroupToken as GroupToken,
+  MutableToken as Token
+} from './parser'
+
+const isInRange = (start: number, end: number, mark: IgnoredMark) => {
   return start <= mark.end && end >= mark.start
 }
 
-const isIgnored = (token, marks = []) => {
-  // TODO: any
-  const result: any = {}
-  const {
-    index,
-    rawStartContent,
-    rawInnerSpaceBefore,
-    raw,
-    endIndex,
-    rawEndContent,
-    rawSpaceAfter
-  } = token
+type IgnoredFlags = {
+  START: boolean
+  INNER_SPACE: boolean
+  CONTENT: true
+  END: true
+  SPACE_AFTER: true
+}
+
+const isIgnored = (token: Token, marks: IgnoredMark[] = []): IgnoredFlags => {
+  const result = {} as IgnoredFlags
 
   // - group: startContent, innerSpaceBefore, endContent, spaceAfter
   // - single: raw, spaceAfter
   marks.forEach((mark) => {
     if (Array.isArray(token)) {
-      if (isInRange(index, index + (rawStartContent || '').length, mark)) {
-        result.startContent = true
+      const {
+        index,
+        startContent,
+        innerSpaceBefore,
+        endIndex = 0,
+        endContent,
+        spaceAfter
+      } = token
+      if (isInRange(index, index + (startContent || '').length, mark)) {
+        result.START = true
       }
       if (
         isInRange(
-          index + (rawStartContent || '').length,
-          index +
-            (rawStartContent || '').length +
-            (rawInnerSpaceBefore || '').length,
+          index + (startContent || '').length,
+          index + (startContent || '').length + (innerSpaceBefore || '').length,
           mark
         )
       ) {
-        result.innerSpaceBefore = true
+        result.INNER_SPACE = true
       }
-      if (isInRange(endIndex, endIndex + (rawEndContent || '').length, mark)) {
-        result.endContent = true
+      if (isInRange(endIndex, endIndex + (endContent || '').length, mark)) {
+        result.END = true
       }
       if (
         isInRange(
-          endIndex + (rawEndContent || '').length,
-          endIndex +
-            (rawEndContent || '').length +
-            (rawSpaceAfter || '').length,
+          endIndex + (endContent || '').length,
+          endIndex + (endContent || '').length + (spaceAfter || '').length,
           mark
         )
       ) {
-        result.spaceAfter = true
+        result.SPACE_AFTER = true
       }
     } else {
-      if (isInRange(index, index + (raw || '').length, mark)) {
-        result.content = true
+      const { index, content, spaceAfter } = token
+      if (isInRange(index, index + (content || '').length, mark)) {
+        result.CONTENT = true
       }
       if (
         isInRange(
-          index + (raw || '').length,
-          index + (raw || '').length + (rawSpaceAfter || '').length,
+          index + (content || '').length,
+          index + (content || '').length + (spaceAfter || '').length,
           mark
         )
       ) {
-        result.spaceAfter = true
+        result.SPACE_AFTER = true
       }
     }
   })
@@ -67,19 +77,20 @@ const isIgnored = (token, marks = []) => {
 
 /**
  * Join tokens back into string
- * @param  {Array<Token>} tokens
- * @param  {IngoredMark[]} ignoredMarks string which should be skipped
- * - IngoreMark: { start, end }
- * @return {string}
  */
-const join = (tokens, ignoredMarks = [], validations = [], start = 0) => {
-  const ignoredPieces = isIgnored(tokens, ignoredMarks)
+const join = (
+  tokens: GroupToken,
+  ignoredMarks: IgnoredMark[] = [],
+  validations: Validation[] = [],
+  start = 0
+): string => {
+  const ignoredFlags = isIgnored(tokens, ignoredMarks)
   // innerSpaceBefore
   return [
-    ignoredPieces.startContent ? tokens.rawStartContent : tokens.startContent,
-    ignoredPieces.innerSpaceBefore
-      ? tokens.rawInnerSpaceBefore
-      : tokens.innerSpaceBefore,
+    ignoredFlags.START ? tokens.startContent : tokens.modifiedStartContent,
+    ignoredFlags.INNER_SPACE
+      ? tokens.innerSpaceBefore
+      : tokens.modifiedInnerSpaceBefore,
     ...tokens.map((token) => {
       const ignoredPieces = isIgnored(token, ignoredMarks)
       // validate content, spaceAfter
@@ -91,14 +102,16 @@ const join = (tokens, ignoredMarks = [], validations = [], start = 0) => {
       return Array.isArray(token)
         ? join(token, ignoredMarks, validations, start)
         : [
-            ignoredPieces.content ? token.raw : token.content,
-            ignoredPieces.spaceAfter ? token.rawSpaceAfter : token.spaceAfter
+            ignoredPieces.CONTENT ? token.content : token.modifiedContent,
+            ignoredPieces.SPACE_AFTER
+              ? token.spaceAfter
+              : token.modifiedSpaceAfter
           ]
             .filter(Boolean)
             .join('')
     }),
-    ignoredPieces.endContent ? tokens.rawEndContent : tokens.endContent,
-    ignoredPieces.spaceAfter ? tokens.rawSpaceAfter : tokens.spaceAfter
+    ignoredFlags.END ? tokens.endContent : tokens.modifiedEndContent,
+    ignoredFlags.SPACE_AFTER ? tokens.spaceAfter : tokens.modifiedSpaceAfter
   ]
     .filter(Boolean)
     .join('')
