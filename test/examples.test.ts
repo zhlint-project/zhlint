@@ -42,7 +42,7 @@ const expectedValidationsInfo = {
 }
 
 describe('lint', () => {
-  test('units', () => {
+  test.todo('units', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-units.md'),
       { encoding: 'utf8' }

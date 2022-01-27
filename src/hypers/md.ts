@@ -12,6 +12,8 @@ import {
 } from '../parser'
 import { Block, Data } from './types'
 
+// Position related
+
 type NormalizedPosition = {
   start: number
   end: number
@@ -22,47 +24,33 @@ const parsePosition = (position?: Position): NormalizedPosition => ({
   end: position?.end?.offset || 0
 })
 
+// AST related
+
 const isParent = (node: Node): node is Ast.Parent => {
   return (node as Ast.Parent).children !== undefined
 }
 
-const blockTypes: string[] = ['paragraph', 'heading', 'table-cell']
-
-type BlockType = Ast.Paragraph | Ast.Heading | Ast.TableCell
-
-type BlockMark = {
-  block: BlockType
-  inlineMarks: InlineMark[]
-  hyperMarks?: Mark[]
-  value?: string
+type BlockType =
+  | Ast.Paragraph
+  | Ast.Heading
+  | Ast.TableCell
+const blockTypes: string[] = [
+  'paragraph',
+  'heading',
+  'table-cell'
+]
+const isBlock = (node: Node): node is BlockType => {
+  return blockTypes.indexOf(node.type) >= 0
 }
 
-type InlineMark = {
-  inline: Node
-  raw?: boolean
-}
-
-const travelBlocks = (node: Node, blocks: BlockMark[]) => {
-  if (isParent(node)) {
-    node.children.forEach((child) => {
-      if (child.type === 'yaml') {
-        return
-      }
-      if (blockTypes.indexOf(child.type) >= 0) {
-        const blockMark: BlockMark = {
-          block: child as BlockType,
-          inlineMarks: []
-        }
-        blocks.push(blockMark)
-        travelPhrasings(child as BlockType, blockMark)
-      } else {
-        travelBlocks(child, blocks)
-      }
-    })
-  }
-}
-
-const inlineMarkTypes: string[] = [
+type InlineContentType =
+  | Ast.Emphasis
+  | Ast.Strong
+  | Ast.Delete
+  | Ast.Footnote
+  | Ast.Link
+  | Ast.LinkReference
+const inlineContentTypes: string[] = [
   'emphasis',
   'strong',
   'delete',
@@ -70,15 +58,18 @@ const inlineMarkTypes: string[] = [
   'link',
   'linkReference'
 ]
-type InlineType =
-  | Ast.Emphasis
-  | Ast.Strong
-  | Ast.Delete
-  | Ast.Footnote
-  | Ast.Link
-  | Ast.LinkReference
+const isInlineContent = (node: Node): node is InlineContentType => {
+  return inlineContentTypes.indexOf(node.type) >= 0
+}
 
-const rawMarkTypes: string[] = [
+type InlineRawType =
+  | Ast.InlineCode
+  | Ast.Break
+  | Ast.Image
+  | Ast.ImageReference
+  | Ast.FootnoteDefinition
+  | Ast.HTML
+const inlineRawTypes: string[] = [
   'inlineCode',
   'break',
   'image',
@@ -86,86 +77,131 @@ const rawMarkTypes: string[] = [
   'footnoteReference',
   'html'
 ]
-type RawType =
-  | Ast.InlineCode
-  | Ast.Break
-  | Ast.Image
-  | Ast.ImageReference
-  | Ast.FootnoteDefinition
-  | Ast.HTML
+const isInlineRaw = (node: Node): node is InlineRawType => {
+  return inlineRawTypes.indexOf(node.type) >= 0
+}
 
-const travelPhrasings = (node: BlockType, blockMark: BlockMark) => {
-  if (node.children) {
+// Marks related
+
+type BlockMark = {
+  block: BlockType
+  inlineMarks: InlineMark[]
+  hyperMarks: Mark[]
+  value: string
+}
+
+type InlineMark = {
+  inline: InlineContentType | InlineRawType
+  raw: boolean
+}
+
+const travelBlocks = (node: Node, blocks: BlockMark[]): void => {
+  if (isParent(node)) {
     node.children.forEach((child) => {
-      if (inlineMarkTypes.indexOf(child.type) >= 0) {
-        // TODO
-        blockMark.inlineMarks.push({ inline: child as InlineType })
-        travelPhrasings(child as unknown as BlockType, blockMark) // TODO
+      if (child.type === 'yaml') {
+        return
       }
-      if (rawMarkTypes.indexOf(child.type) >= 0) {
-        // TODO
-        blockMark.inlineMarks.push({ inline: child as RawType, raw: true })
+      if (isBlock(child)) {
+        const blockMark: BlockMark = {
+          block: child,
+          inlineMarks: [],
+          hyperMarks: [],
+          value: '' // to be initialzed
+        }
+        blocks.push(blockMark)
+        travelInlines(child, blockMark)
+      } else {
+        travelBlocks(child, blocks)
       }
     })
   }
 }
 
-const processBlockMark = (blockMark: BlockMark, str) => {
+const travelInlines = (node: Node, blockMark: BlockMark): void => {
+  if (isParent(node)) {
+    node.children.forEach((child) => {
+      if (isInlineContent(child)) {
+        blockMark.inlineMarks.push({ inline: child, raw: false })
+        travelInlines(child, blockMark)
+      }
+      if (isInlineRaw(child)) {
+        blockMark.inlineMarks.push({ inline: child, raw: true })
+      }
+    })
+  }
+}
+
+const processBlockMark = (blockMark: BlockMark, str: string): void => {
   const { block, inlineMarks } = blockMark
-  const offset = block?.position?.start?.offset
+  if (!block.position) {
+    return
+  }
+  const offset = block.position.start.offset || 0
+
   const marks: Mark[] = []
   const unresolvedCodeMarks: RawMark[] = []
+
+  // Generate all the marks includes hyper (inline) and raw.
   inlineMarks.forEach((inlineMark) => {
     const { inline } = inlineMark
-    if (inlineMark.raw) {
-      const mark: RawMark = {
+    if (!inline.position) {
+      return
+    }
+    const startOffset = inline.position.start.offset || 0
+    const endOffset = inline.position.end.offset || 0
+
+    if (isInlineRaw(inline)) {
+      const mark: Mark = {
         type: MarkType.RAW,
+        // TODO: typeof RawMark.meta
         meta: inline.type,
-        startIndex: (inline?.position?.start?.offset || 0) - (offset || 0),
-        endIndex: (inline?.position?.end?.offset || 0) - (offset || 0),
-        startContent: str.substring(
-          inline?.position?.start?.offset,
-          inline?.position?.end?.offset
-        ),
-        endContent: '',
-        code: MarkSideType.LEFT
+        startIndex: startOffset - offset,
+        endIndex: endOffset - offset,
+        startContent: str.substring(startOffset, endOffset),
+        endContent: ''
       }
+      // TODO: Ast.InlineCode?
       if (mark.startContent.match(/<code.*>/)) {
-        unresolvedCodeMarks.push(mark)
+        const rawMark: RawMark = { ...mark, code: MarkSideType.LEFT }
+        unresolvedCodeMarks.push(rawMark)
+        marks.push(rawMark)
+        return
       } else if (mark.startContent.match(/<\/code.*>/)) {
-        mark.code = MarkSideType.RIGHT
+        const rawMark: RawMark = { ...mark, code: MarkSideType.RIGHT }
         const leftCode = unresolvedCodeMarks.pop()
         if (leftCode) {
-          leftCode.rightPair = mark
+          leftCode.rightPair = rawMark
         }
+        marks.push(rawMark)
+        return
       }
       marks.push(mark)
     } else {
-      const parentInline = inline as Ast.Parent
+      const firstChild = inline.children[0]
+      const lastChild = inline.children[inline.children.length - 1]
+      if (!firstChild.position || !lastChild.position) {
+        return
+      }
+      const innerStartOffset = firstChild.position.start.offset || 0
+      const innerEndOffset = lastChild.position.end.offset || 0
       const mark: Mark = {
         type: MarkType.HYPER,
+        // TODO: typeof RawMark.meta
         meta: inline.type,
-        startIndex: (inline?.position?.start?.offset || 0) - (offset || 0),
-        startContent: str.substring(
-          parentInline?.position?.start?.offset,
-          parentInline.children[0]?.position?.start?.offset
-        ),
-        endIndex:
-          (parentInline.children[parentInline.children.length - 1]?.position
-            ?.end?.offset || 0) - (offset || 0),
-        endContent: str.substring(
-          parentInline.children[parentInline.children.length - 1]?.position?.end
-            ?.offset,
-          parentInline?.position?.end?.offset
-        )
+        startIndex: startOffset - offset,
+        startContent: str.substring(startOffset, innerStartOffset),
+        endIndex: innerEndOffset - offset,
+        endContent: str.substring(innerEndOffset, endOffset)
       }
       marks.push(mark)
     }
   })
+
   blockMark.value = str.substring(
-    block?.position?.start?.offset,
-    block?.position?.end?.offset
+    block.position.start.offset || 0,
+    block.position.end.offset || 0
   )
+
   blockMark.hyperMarks = marks
     .map((mark) => {
       if (isRawMark(mark)) {
@@ -173,17 +209,17 @@ const processBlockMark = (blockMark: BlockMark, str) => {
           return
         }
         if (mark.code === MarkSideType.LEFT) {
-          const { rightPair: rightCode } = mark
+          const { rightPair } = mark
           mark.startContent = str.substring(
-            mark.startIndex + (offset || 0),
-            mark.endIndex + (offset || 0)
+            mark.startIndex + offset,
+            mark.endIndex + offset
           )
-          mark.endIndex = rightCode?.endIndex || 0
+          mark.endIndex = rightPair?.endIndex || 0
           mark.endContent = ''
           delete mark.rightPair
-          return mark
         }
       }
+      return mark
     })
     .filter(Boolean) as Mark[]
 }
@@ -197,8 +233,8 @@ const processBlockMark = (blockMark: BlockMark, str) => {
     - marks: emphasis/strong/delete/footnote/link/link ref
  */
 const parser = (data: Data): Data => {
-  const raw = data.content
-  const content = data.modifiedContent
+  const content = data.content
+  const modifiedContent = data.modifiedContent
   const ignoredByParsers = data.ignoredByParsers
 
   const blockMarks: BlockMark[] = []
@@ -206,7 +242,7 @@ const parser = (data: Data): Data => {
   const tree: Ast.Root = unified()
     .use(markdown)
     .use(frontmatter)
-    .parse(content) as Ast.Root
+    .parse(modifiedContent) as Ast.Root
 
   // - travel and record all paragraphs/headings/table-cells into blocks
   // - for each block, travel and record all
@@ -221,7 +257,7 @@ const parser = (data: Data): Data => {
   // - - startContent: [mark.start.offset - offset, mark.firstChild.start.offset - offset]
   // - - endIndex: mark.lastChild.end.offset - offset
   // - - endContent: [mark.lastChild.end.offset - offset, mark.end.offset]
-  blockMarks.forEach((blockMark) => processBlockMark(blockMark, raw))
+  blockMarks.forEach((blockMark) => processBlockMark(blockMark, content))
   data.blocks = blockMarks.map((b): Block => {
     const position = parsePosition(b.block.position)
     ignoredByParsers.forEach(({ index, length, originContent: raw, meta }) => {

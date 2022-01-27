@@ -1,16 +1,17 @@
 import { describe, test, expect } from 'vitest'
 
-import run from '../src/run'
+import run, { Options } from '../src/run'
 import markdownParser from '../src/hypers/md'
+import { Data } from '../src/hypers/types'
 
-const lint = (...args: [any]) => run(...args).result
+const lint = (...args) => run(...args as [string, Options]).result
 
 describe('parser with markdown', () => {
   test('single paragraph', () => {
     const text = 'X [xxx](xxx) X *y* __x__ `ss` _0_ ~~asd~~ *asf**asf**adsf*'
-    const data = {
+    const data: Data = {
       content: text,
-      raw: text,
+      modifiedContent: text,
       ignoredByRules: [],
       ignoredByParsers: [],
       blocks: [
@@ -180,7 +181,7 @@ describe('lint', () => {
       '你可以使用 [`try`...`catch`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch) 作为替代。'
     )
   })
-  test('space between punctuation and hyper content', () => {
+  test.only('space between punctuation and hyper content', () => {
     expect(
       lint(
         'store 实例不再暴露事件触发器 (event emitter) 接口 (`on`, `off`, `emit`)。'
