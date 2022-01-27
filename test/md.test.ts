@@ -181,7 +181,7 @@ describe('lint', () => {
       '你可以使用 [`try`...`catch`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch) 作为替代。'
     )
   })
-  test.only('space between punctuation and hyper content', () => {
+  test('space between punctuation and hyper content', () => {
     expect(
       lint(
         'store 实例不再暴露事件触发器 (event emitter) 接口 (`on`, `off`, `emit`)。'

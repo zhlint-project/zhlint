@@ -53,7 +53,7 @@ const hasAbbr = (
   }
 }
 
-const handler: Handler = (token, index, group) => {
+const handler: Handler = (token: Token, index, group: GroupToken) => {
   if (token.content === '.') {
     // end of the content or has space after or full-width content after
     const tokenAfter = findTokenAfter(group, token)
@@ -76,7 +76,7 @@ const handler: Handler = (token, index, group) => {
           )
         }
         periodToken.modifiedContent = '.'
-        periodToken.type = CharType.PUNCTUATION_HALF
+        periodToken.modifiedType = CharType.PUNCTUATION_HALF
       })
     }
   }

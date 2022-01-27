@@ -71,9 +71,9 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
     // When there are content in both sides of the punctuation.
     if (nonMarkTokenBefore && nonMarkTokenAfter) {
       // When the punctuation is full-width
-      if (token.type === CharType.PUNCTUATION_FULL) {
+      if (token.modifiedType === CharType.PUNCTUATION_FULL) {
         removeValidation(token, 'mark-raw', ValidationTarget.SPACE_AFTER)
-        validate(token, 'noAfter', !!token.spaceAfter && !token.type)
+        validate(token, 'noAfter', !!token.spaceAfter && !token.modifiedType)
 
         // No space after the punctuation.
         token.modifiedSpaceAfter = ''
@@ -101,7 +101,7 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
           const tokenAfter = findTokenAfter(group, token)
           if (tokenAfter === contentTokenAfter) {
             removeValidation(token, 'mark-raw', ValidationTarget.SPACE_AFTER)
-            validate(token, 'oneAfter', token.spaceAfter !== ' ' && !token.type)
+            validate(token, 'oneAfter', token.spaceAfter !== ' ' && !token.modifiedType)
             // One space after the punctuation.
             token.modifiedSpaceAfter = ' '
           } else {

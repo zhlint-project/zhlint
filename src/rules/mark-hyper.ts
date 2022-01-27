@@ -45,7 +45,7 @@ const checkSpace = (group: GroupToken, markSeq: Token[]): boolean => {
   return false
 }
 
-const handler: Handler = (token, _, group) => {
+const handler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.type === SingleTokenType.MARK_HYPER) {
     const markSeq = findMarkSeq(group, token)
     const tokenBeforeMarkSeq = findTokenBefore(group, markSeq[0])

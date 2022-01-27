@@ -1,6 +1,7 @@
 import { ValidationTarget } from '../logger'
 import {
   CharType,
+  MutableGroupToken as GroupToken,
   GroupTokenType,
   Handler,
   MutableToken as Token,
@@ -69,7 +70,7 @@ const validate = (
   }
 }
 
-const handler: Handler = (token, _, group) => {
+const handler: Handler = (token: Token, _, group: GroupToken) => {
   // full-width: comma, full stop, colon, quotes
   // half-width: brackets
   // no change for half-width punctuation between half-width content without space
