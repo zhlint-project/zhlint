@@ -32,7 +32,7 @@ const hasAbbr = (
     const matchedAbbrs = reversedAbbrs
       .filter((abbr) => abbr[0] === tokenBefore.content)
       .map((abbr) => abbr.slice(1))
-    if (matchedAbbrs && matchedAbbrs.length) {
+    if (matchedAbbrs.length) {
       const lastMatched = matchedAbbrs[matchedAbbrs.length - 1]
       if (lastMatched.length) {
         const tokenBeforeBefore = findTokenBefore(group, tokenBefore)
