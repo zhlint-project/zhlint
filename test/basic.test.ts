@@ -920,6 +920,12 @@ describe('lint special/edge cases', () => {
       'Chrome 顶部导航 > 窗口 > 任务管理'
     )
   })
+  // https://github.com/Jinjiang/zhlint/issues/23
+  test('two dots only', () => {
+    expect(lint('..')).toBe(
+      '..'
+    )
+  })
 })
 
 describe('lint with different arguments', () => {
