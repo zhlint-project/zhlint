@@ -1,7 +1,17 @@
 import { describe, test, expect } from 'vitest'
 
 import run, { Options } from '../src/run'
-import { CharType, checkCharType, Mark, MarkType, MutableToken, parse, SingleTokenType, toMutableResult, travel } from '../src/parser'
+import {
+  CharType,
+  checkCharType,
+  Mark,
+  MarkType,
+  MutableToken,
+  parse,
+  SingleTokenType,
+  toMutableResult,
+  travel
+} from '../src/parser'
 import join from '../src/join'
 import processRule from '../src/process-rule'
 import findIgnoredMarks from '../src/ignore'
@@ -15,7 +25,7 @@ import caseTraditional from '../src/rules/case-traditional'
 import caseDatetime from '../src/rules/case-datetime'
 import caseDatetimeZh from '../src/rules/case-datetime-zh'
 
-const lint = (...args) => run(...args as [string, Options]).result
+const lint = (...args) => run(...(args as [string, Options])).result
 
 const purify = (arr) =>
   arr.map((item) => (Array.isArray(item) ? purify(item) : item))
@@ -653,8 +663,11 @@ describe('travel', () => {
     const { tokens } = parse('遵守JavaScript编码规范非常重要')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const records: any[] = []
-    travel(tokens, { type: CharType.CONTENT_HALF }, (token, index, tokens, result) =>
-      records.push({ token, index, tokens, result })
+    travel(
+      tokens,
+      { type: CharType.CONTENT_HALF },
+      (token, index, tokens, result) =>
+        records.push({ token, index, tokens, result })
     )
     expect(clone(records)).toEqual([
       {
@@ -708,8 +721,18 @@ describe('travel', () => {
         records.push({ token, index, tokens, result })
     )
     expect(clone(records)).toEqual([
-      { token: expectedTokens[1], tokens: expectedTokens, index: 1, result: true },
-      { token: expectedTokens[2], tokens: expectedTokens, index: 2, result: true }
+      {
+        token: expectedTokens[1],
+        tokens: expectedTokens,
+        index: 1,
+        result: true
+      },
+      {
+        token: expectedTokens[2],
+        tokens: expectedTokens,
+        index: 2,
+        result: true
+      }
     ])
   })
 })

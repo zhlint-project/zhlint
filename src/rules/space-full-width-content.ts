@@ -18,6 +18,7 @@ import { ValidationTarget } from '../logger'
 import {
   CharType,
   Handler,
+  MutableGroupToken as GroupToken,
   MutableToken as Token,
   SingleTokenType
 } from '../parser'
@@ -46,7 +47,7 @@ const validate = (token: Token, type: string, condition: boolean): void => {
   }
 }
 
-const handler: Handler = (token, _, group) => {
+const handler: Handler = (token: Token, _, group: GroupToken) => {
   // - if next content width different
   //   - if there is a mark
   //     - add a space outside mark

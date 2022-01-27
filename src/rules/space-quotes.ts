@@ -1,5 +1,10 @@
 import { ValidationTarget } from '../logger'
-import { GroupTokenType, Handler, MutableToken as Token } from '../parser'
+import {
+  GroupTokenType,
+  Handler,
+  MutableGroupToken as GroupToken,
+  MutableToken as Token
+} from '../parser'
 import {
   findTokenBefore,
   findContentTokenBefore,
@@ -54,7 +59,7 @@ const checkOutside = (
   }
 }
 
-const handler: Handler = (token, _, group) => {
+const handler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.type === GroupTokenType.GROUP) {
     // no space inside
     validate(

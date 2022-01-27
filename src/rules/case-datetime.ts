@@ -1,5 +1,9 @@
 import { ValidationTarget } from '../logger'
-import { Handler } from '../parser'
+import {
+  Handler,
+  MutableGroupToken as GroupToken,
+  MutableToken as Token
+} from '../parser'
 import {
   findTokenBefore,
   findNonMarkTokenBefore,
@@ -7,7 +11,7 @@ import {
   removeValidation
 } from './util'
 
-const handler: Handler = (token, _, group) => {
+const handler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.type.match(/^punctuation-/) && token.content === ':') {
     const tokenBefore = findTokenBefore(group, token)
     const nonMarkTokenBefore = findNonMarkTokenBefore(group, token)

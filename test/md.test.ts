@@ -4,7 +4,7 @@ import run, { Options } from '../src/run'
 import markdownParser from '../src/hypers/md'
 import { Data } from '../src/hypers/types'
 
-const lint = (...args) => run(...args as [string, Options]).result
+const lint = (...args) => run(...(args as [string, Options])).result
 
 describe('parser with markdown', () => {
   test('single paragraph', () => {

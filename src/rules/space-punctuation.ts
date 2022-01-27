@@ -1,5 +1,10 @@
 import { ValidationTarget } from '../logger'
-import { CharType, Handler, MutableGroupToken as GroupToken, MutableToken as Token } from '../parser'
+import {
+  CharType,
+  Handler,
+  MutableGroupToken as GroupToken,
+  MutableToken as Token
+} from '../parser'
 import {
   findTokenBefore,
   findTokenAfter,
@@ -101,7 +106,11 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
           const tokenAfter = findTokenAfter(group, token)
           if (tokenAfter === contentTokenAfter) {
             removeValidation(token, 'mark-raw', ValidationTarget.SPACE_AFTER)
-            validate(token, 'oneAfter', token.spaceAfter !== ' ' && !token.modifiedType)
+            validate(
+              token,
+              'oneAfter',
+              token.spaceAfter !== ' ' && !token.modifiedType
+            )
             // One space after the punctuation.
             token.modifiedSpaceAfter = ' '
           } else {

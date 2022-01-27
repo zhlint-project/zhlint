@@ -164,9 +164,9 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
 }
 
 export type MutableParseResult = {
-    tokens: MutableGroupToken;
-    groups: MutableGroupToken[];
-    marks: MutableMark[];
+  tokens: MutableGroupToken
+  groups: MutableGroupToken[]
+  marks: MutableMark[]
 }
 
 const toMutableToken = (token: Token): MutableToken => {

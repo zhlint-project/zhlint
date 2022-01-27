@@ -3,13 +3,7 @@ import markdown from 'remark-parse'
 import frontmatter from 'remark-frontmatter'
 import * as Ast from 'mdast'
 import { Node, Position } from 'unist'
-import {
-  isRawMark,
-  Mark,
-  MarkSideType,
-  MarkType,
-  RawMark
-} from '../parser'
+import { isRawMark, Mark, MarkSideType, MarkType, RawMark } from '../parser'
 import { Block, Data } from './types'
 
 // Position related
@@ -30,15 +24,8 @@ const isParent = (node: Node): node is Ast.Parent => {
   return (node as Ast.Parent).children !== undefined
 }
 
-type BlockType =
-  | Ast.Paragraph
-  | Ast.Heading
-  | Ast.TableCell
-const blockTypes: string[] = [
-  'paragraph',
-  'heading',
-  'table-cell'
-]
+type BlockType = Ast.Paragraph | Ast.Heading | Ast.TableCell
+const blockTypes: string[] = ['paragraph', 'heading', 'table-cell']
 const isBlock = (node: Node): node is BlockType => {
   return blockTypes.indexOf(node.type) >= 0
 }

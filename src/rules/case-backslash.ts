@@ -1,5 +1,9 @@
 import { ValidationTarget } from '../logger'
-import { Handler, MutableToken as Token } from '../parser'
+import {
+  Handler,
+  MutableGroupToken as GroupToken,
+  MutableToken as Token
+} from '../parser'
 import {
   findTokenBefore,
   findTokenAfter,
@@ -26,7 +30,7 @@ const validate = (token: Token, type: string, condition: boolean): void => {
   }
 }
 
-const handler: Handler = (token, _, group) => {
+const handler: Handler = (token: Token, _, group: GroupToken) => {
   // half width and no raw space after -> no space after
   // full width before -> one space before
   if (token.type.match(/^punctuation-/) && token.content === '\\') {

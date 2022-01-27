@@ -17,6 +17,7 @@ import {
   Handler,
   MarkSideType,
   MutableToken as Token,
+  MutableGroupToken as GroupToken,
   SingleTokenType
 } from '../parser'
 import {
@@ -82,7 +83,7 @@ const checkSide = (
   }
 }
 
-const handler: Handler = (token, _, group) => {
+const handler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.type === SingleTokenType.MARK_BRACKETS) {
     const isRawContent = token.modifiedContent === token.content
     const size = token.modifiedContent.match(/[()]/)

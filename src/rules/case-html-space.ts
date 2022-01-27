@@ -1,7 +1,11 @@
-import { Handler } from '../parser'
+import {
+  Handler,
+  MutableGroupToken as GroupToken,
+  MutableToken as Token
+} from '../parser'
 import { findTokenBefore } from './util'
 
-const handler: Handler = (token, _, group) => {
+const handler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.type === 'content-hyper') {
     if (
       token.content.match(/^<(b|i|u|s|strong|em|strike|del|sub|sup)(\s.*)?>$/)

@@ -1,4 +1,12 @@
-import { GroupToken, MutableGroupToken, Mark, MutableMark, Filter, FilterFunction, Handler } from './types'
+import {
+  GroupToken,
+  MutableGroupToken,
+  Mark,
+  MutableMark,
+  Filter,
+  FilterFunction,
+  Handler
+} from './types'
 
 /**
  * Travel through a group nestedly

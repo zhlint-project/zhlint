@@ -1,5 +1,10 @@
 import { ValidationTarget } from '../logger'
-import { CharType, Handler, MutableToken as Token } from '../parser'
+import {
+  CharType,
+  Handler,
+  MutableGroupToken as GroupToken,
+  MutableToken as Token
+} from '../parser'
 import {
   findTokenBefore,
   findTokenAfter,
@@ -33,7 +38,7 @@ const validate = (
   }
 }
 
-const handler: Handler = (token, _, group) => {
+const handler: Handler = (token: Token, _, group: GroupToken) => {
   // calculation: space in both sides
   // - 1 + 1 = 2
   // x 2020/01/01
