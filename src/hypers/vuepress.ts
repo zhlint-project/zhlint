@@ -3,19 +3,19 @@ import { Data } from './types'
 // TODO: ::: tips 提示...
 //
 // ::: xxx\nyyy\nzzz\n:::\n
-// - `(?<=^|\n)` + `(\:\:\:.*)`
+// - `(?<=^|\n)` + `(:::.*)`
 // - `\n`
 // - `(.+)`
 // - `\n`
-// - `(\:\:\:)` + `(?=\n|$)`
+// - `(:::)` + `(?=\n|$)`
 const matcher = /(?<=^|\n)(:::.*)\n(.+)\n(:::)(?=\n|$)/g
 
 const parser = (data: Data): Data => {
   data.modifiedContent = data.modifiedContent.replace(
     matcher,
-    (raw, start, content, end, index) => {
+    (raw: string, start: string, content: string, end: string, index: number) => {
       const { length } = raw
-      const name = start.substring(3).trim()
+      const name = start.substring(3).trim().split(' ')[0] || 'default'
       data.ignoredByParsers.push({
         name,
         index,

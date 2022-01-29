@@ -35,12 +35,12 @@ const validate = (token: Token, type: string, condition: boolean): void => {
 }
 
 const checkSpace = (group: GroupToken, markSeq: Token[]): boolean => {
-  if (markSeq.some((markToken) => markToken.spaceAfter)) {
+  if (markSeq.some((markToken) => markToken.modifiedSpaceAfter)) {
     return true
   }
   const tokenBefore = findTokenBefore(group, markSeq[0])
   if (tokenBefore) {
-    return !!tokenBefore.spaceAfter
+    return !!tokenBefore.modifiedSpaceAfter
   }
   return false
 }
