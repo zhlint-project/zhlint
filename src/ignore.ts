@@ -1,4 +1,4 @@
-import { env } from './logger'
+import { env } from './report'
 
 // Ref: https://github.com/WICG/ScrollToTextFragment
 export type IgnoredCase = {

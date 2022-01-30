@@ -1,6 +1,6 @@
 // Char
 
-import { Validation } from '../logger'
+import { Validation } from '../report'
 
 export enum CharType {
   EMPTY = 'empty',

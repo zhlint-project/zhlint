@@ -1,4 +1,4 @@
-import { Validation, ValidationTarget } from '../logger'
+import { Validation, ValidationTarget } from '../report'
 import {
   MarkSideType,
   MutableSingleToken as SingleToken,

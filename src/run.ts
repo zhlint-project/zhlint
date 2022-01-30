@@ -1,5 +1,5 @@
 import { Block, Data } from './hypers/types'
-import { Validation } from './logger'
+import { Validation } from './report'
 import { IgnoredCase, IgnoredMark } from './ignore'
 
 import replaceBlocks from './replace-block'
@@ -7,7 +7,7 @@ import { parse, toMutableResult, Handler } from './parser'
 import processRule from './process-rule'
 import join from './join'
 import findIgnoredMarks from './ignore'
-import { env } from './logger'
+import { env } from './report'
 
 import ignore from './hypers/ignore'
 import hexo from './hypers/hexo'

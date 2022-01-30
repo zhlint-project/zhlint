@@ -11,7 +11,7 @@
 // - a( **a** )a   -> a( **a** )a -> a (**a**) a
 // - a(**a**)a     -> a( **a** )a -> a (**a**) a
 
-import { ValidationTarget } from '../logger'
+import { ValidationTarget } from '../report'
 import {
   CharType,
   Handler,

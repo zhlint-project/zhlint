@@ -1,7 +1,7 @@
 // space besides hyper mark:
 // add 1 space outside the most outside mark if there is any space besides mark or mark group
 
-import { ValidationTarget } from '../logger'
+import { ValidationTarget } from '../report'
 import {
   Handler,
   MutableGroupToken as GroupToken,

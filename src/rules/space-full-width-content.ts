@@ -14,7 +14,7 @@
 
 // TODO: revamp
 
-import { ValidationTarget } from '../logger'
+import { ValidationTarget } from '../report'
 import {
   CharType,
   Handler,

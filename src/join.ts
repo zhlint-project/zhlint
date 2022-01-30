@@ -1,5 +1,5 @@
 import { IgnoredMark } from './ignore'
-import { Validation } from './logger'
+import { Validation } from './report'
 import {
   MutableGroupToken as GroupToken,
   MutableToken as Token

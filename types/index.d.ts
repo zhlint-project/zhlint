@@ -1,5 +1,5 @@
 import { Options, Result } from '../src/run'
-import { Validation, ValidationTarget } from '../src/logger'
+import { Validation, ValidationTarget } from '../src/report'
 import { IgnoredCase } from '../src/ignore'
 import { Data, Block, ParserIgnoredCase } from '../src/hypers/types'
 import {
