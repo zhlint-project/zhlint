@@ -1,4 +1,5 @@
 import chalk from 'chalk'
+import { CharType, checkCharType } from './parser'
 
 export const env: {
   stdout: NodeJS.WritableStream
@@ -62,6 +63,21 @@ export type Validation = {
   message: string
 }
 
+const generateMarker = (str: string, index: number): string => {
+  const prefix = str.substring(0, index)
+  let fullWidthCount = 0
+  let halfWidthCount = 0
+  for (let i = 0; i < prefix.length; i++) {
+    const charType = checkCharType(prefix[i])
+    if (charType === CharType.CONTENT_FULL || charType === CharType.PUNCTUATION_FULL) {
+      fullWidthCount++
+    } else if (charType === CharType.CONTENT_HALF || charType === CharType.PUNCTUATION_HALF || charType === CharType.SPACE) {
+      halfWidthCount++
+    }
+  }
+  return ' '.repeat(halfWidthCount) + '　'.repeat(fullWidthCount) + `${chalk.red('^')}`
+}
+
 export const reportItem = (
   file: string | undefined = '',
   str: string,
@@ -93,9 +109,7 @@ export const reportItem = (
       .replace(/\n/g, '\\n')
 
     // 3. marker below
-    const markerBelow = `${chalk.black.bgBlack(
-      displayFragment.substring(0, column - displayStart)
-    )}${chalk.red('^')}`
+    const markerBelow = generateMarker(displayFragment, column - displayStart)
 
     logger.error(`${headline}\n\n${displayFragment}\n${markerBelow}\n`)
   })

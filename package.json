@@ -15,8 +15,6 @@
   "jsdelivr": "./dist/zhlint.umd.js",
   "types": "./dist/zhlint.d.ts",
   "files": [
-    "src/*",
-    "types/*",
     "tsconfig.json",
     "dist/*",
     "bin/*",
