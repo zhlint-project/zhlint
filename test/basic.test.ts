@@ -920,10 +920,15 @@ describe('lint special/edge cases', () => {
       'Chrome 顶部导航 > 窗口 > 任务管理'
     )
   })
-  // https://github.com/Jinjiang/zhlint/issues/23
-  test('two dots only', () => {
-    expect(lint('..')).toBe(
-      '..'
+  test('curly brackets', () => {
+    expect(lint('# 简介 {#introduction}')).toBe(
+      '# 简介 {#introduction}'
+    )
+    expect(lint('# 简介{#introduction}')).toBe(
+      '# 简介 {#introduction}'
+    )
+    expect(lint('### 托管模式 {#takeover-mode}')).toBe(
+      '### 托管模式 {#takeover-mode}'
     )
   })
 })
