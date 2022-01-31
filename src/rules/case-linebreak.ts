@@ -1,4 +1,4 @@
-import { ValidationTarget } from '../logger'
+import { ValidationTarget } from '../report'
 import { Handler, MutableToken as Token } from '../parser'
 import { removeValidation } from './util'
 

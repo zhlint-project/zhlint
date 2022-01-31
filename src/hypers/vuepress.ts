@@ -8,7 +8,7 @@ import { Data } from './types'
 // - `(.+)`
 // - `\n`
 // - `(:::)` + `(?=\n|$)`
-const matcher = /(?<=^|\n)(:::.*)\n(.+)\n(:::)(?=\n|$)/g
+const matcher = /(?<=^|\n)(:::.*)\n([\s\S]+?)\n(:::)(?=\n|$)/g
 
 const parser = (data: Data): Data => {
   data.modifiedContent = data.modifiedContent.replace(

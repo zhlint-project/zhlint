@@ -1,6 +1,6 @@
 // Char
 
-import { Validation } from '../logger'
+import { Validation } from '../report'
 
 export enum CharType {
   EMPTY = 'empty',
@@ -21,8 +21,8 @@ export const MARK_CHAR_SET: CharSet = {
   right: ')）'
 }
 export const GROUP_CHAR_SET: CharSet = {
-  left: `“‘《〈『「【`,
-  right: `”’》〉』」】`,
+  left: `“‘《〈『「【{`,
+  right: `”’》〉』」】}`,
   neutral: `'"`
 }
 export const SHORTHAND_CHARS = `'’`
