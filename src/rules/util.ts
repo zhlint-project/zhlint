@@ -3,7 +3,8 @@ import {
   MarkSideType,
   MutableSingleToken as SingleToken,
   MutableGroupToken as GroupToken,
-  MutableToken as Token
+  MutableToken as Token,
+  SingleTokenType
 } from '../parser'
 
 // find tokens
@@ -165,13 +166,13 @@ export const spreadMarkSeq = (
 ): void => {
   if (isBackward) {
     const tokenBefore = findTokenBefore(group, token)
-    if (tokenBefore && tokenBefore.type === 'mark-hyper') {
+    if (tokenBefore && tokenBefore.type === SingleTokenType.MARK_HYPER) {
       seq.unshift(tokenBefore)
       spreadMarkSeq(group, tokenBefore, seq, isBackward)
     }
   } else {
     const tokenAfter = findTokenAfter(group, token)
-    if (tokenAfter && tokenAfter.type === 'mark-hyper') {
+    if (tokenAfter && tokenAfter.type === SingleTokenType.MARK_HYPER) {
       seq.push(tokenAfter)
       spreadMarkSeq(group, tokenAfter, seq, isBackward)
     }
@@ -192,10 +193,18 @@ export const findSpaceAfterHost = (
   firstPossibleHost: Token | undefined,
   lastPossibleHost: Token | undefined
 ): Token | undefined => {
+  // If either first or last possible host then directly return another.
+  // If neither first nor last possible host then return nothing.
+  // If first equals to last then return it directly.
   if (!firstPossibleHost && !lastPossibleHost) {
     return
   }
   if (!firstPossibleHost) {
+    // If first token doesn't exist (no left extra content)
+    // and last token is left side mark, then no after space
+    if (getMarkSide(lastPossibleHost) === MarkSideType.LEFT) {
+      return
+    }
     return lastPossibleHost
   }
   if (!lastPossibleHost) {
@@ -205,41 +214,80 @@ export const findSpaceAfterHost = (
     return firstPossibleHost
   }
 
+  // If first and last both exists but different.
+  // Detech whether this mark seq is on the left side or right.
   const secondPossibleHost = findTokenAfter(group, firstPossibleHost)
   const sideSecond = getMarkSide(secondPossibleHost)
   const sideLast = getMarkSide(lastPossibleHost)
+
+  // If first and last mark have the same side, then return
   if (sideSecond === sideLast) {
+    // - first mark if it's the left side
+    // - last mark if it's the right side
     return sideSecond === MarkSideType.LEFT
       ? firstPossibleHost
       : lastPossibleHost
-  } else {
-    if (sideSecond === MarkSideType.LEFT) {
-      return
-    }
-    let tempToken: Token = lastPossibleHost
-    while (tempToken !== firstPossibleHost) {
-      if (tempToken.markSide === MarkSideType.RIGHT) {
-        return tempToken
-      }
-      tempToken = findTokenBefore(group, tempToken) as Token
-    }
-    return firstPossibleHost
   }
+
+  // If first mark is the left side and last mark is the right side,
+  // that usually means multiple marks partially overlapped.
+  // This situation is abnormal but technically exists.
+  // We'd better do nothing and leave this issue to human.
+  if (sideSecond === MarkSideType.LEFT) {
+    return
+  }
+
+  // If first mark is the right side and last mark is the left side,
+  // that usually means multiple marks closely near eath other.
+  // We'd better find the gap outside the both sides of marks.
+  let tempToken: Token = lastPossibleHost
+  while (tempToken !== firstPossibleHost) {
+    if (tempToken.markSide === MarkSideType.RIGHT) {
+      return tempToken
+    }
+    tempToken = findTokenBefore(group, tempToken) as Token
+  }
+  return firstPossibleHost
 }
 
 export const isInlineCode = (token: Token): boolean => {
   // html tags, raw content
   if (token.type === 'content-hyper') {
     if (token.content.match(/\n/)) {
+      // Usually it's hexo custom containers.
       return false
     }
     if (token.content.match(/^<code.*>.*<\/code.*>$/)) {
+      // Usually it's <code>...</code>.
       return true
     }
     if (token.content.match(/^<.+>$/)) {
+      // Usually it's other HTML tags.
       return false
     }
+    // Usually it's `...`.
     return true
+  }
+  return false
+}
+
+export const isUnexpectedHtmlTag = (token: Token): boolean => {
+  // html tags, raw content
+  if (token.type === 'content-hyper') {
+    if (token.content.match(/\n/)) {
+      // Usually it's hexo custom containers.
+      return false
+    }
+    if (token.content.match(/^<code.*>.*<\/code.*>$/)) {
+      // Usually it's <code>...</code>.
+      return false
+    }
+    if (token.content.match(/^<.+>$/)) {
+      // Usually it's other HTML tags.
+      return true
+    }
+    // Usually it's `...`.
+    return false
   }
   return false
 }
