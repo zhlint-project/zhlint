@@ -28,7 +28,7 @@ const validate = (token: Token, type: string, condition: boolean): void => {
   }
 }
 
-const handler: Handler = (token: Token, _, group: GroupToken) => {
+const caseEllipsisHandler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.content === '.') {
     const tokenBefore = findTokenBefore(group, token)
 
@@ -84,4 +84,4 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
   }
 }
 
-export default handler
+export default caseEllipsisHandler

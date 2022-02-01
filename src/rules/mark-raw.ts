@@ -58,10 +58,10 @@ const addSpaceOutside = (group: GroupToken, token: Token): void => {
   }
 }
 
-const handler: Handler = (token: Token, _, group: GroupToken) => {
+const markRawHandler: Handler = (token: Token, _, group: GroupToken) => {
   if (isInlineCode(token)) {
     addSpaceOutside(group, token)
   }
 }
 
-export default handler
+export default markRawHandler

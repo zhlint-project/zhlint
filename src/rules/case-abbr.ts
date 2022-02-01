@@ -53,7 +53,7 @@ const hasAbbr = (
   }
 }
 
-const handler: Handler = (token: Token, index, group: GroupToken) => {
+const caseAbbrHandler: Handler = (token: Token, index, group: GroupToken) => {
   if (token.content === '.') {
     // end of the content or has space after or full-width content after
     const tokenAfter = findTokenAfter(group, token)
@@ -82,4 +82,4 @@ const handler: Handler = (token: Token, index, group: GroupToken) => {
   }
 }
 
-export default handler
+export default caseAbbrHandler

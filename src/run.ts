@@ -16,6 +16,7 @@ import md from './hypers/md'
 
 import markRaw from './rules/mark-raw'
 import markHyper from './rules/mark-hyper'
+import markHtml from './rules/mark-html'
 import unifyPunctuation from './rules/unify-punctuation'
 import caseAbbr from './rules/case-abbr'
 import spaceFullWidthContent from './rules/space-full-width-content'
@@ -80,6 +81,7 @@ const hyperParseInfo = [
 const rulesInfo = [
   { name: 'mark-raw', value: markRaw },
   { name: 'mark-hyper', value: markHyper },
+  { name: 'mark-html', value: markHtml },
   { name: 'unify-punctuation', value: unifyPunctuation },
   { name: 'case-abbr', value: caseAbbr },
   { name: 'space-full-width-content', value: spaceFullWidthContent },
@@ -194,16 +196,34 @@ const run = (str: string, options: Options = {}): Result => {
   const result = replaceBlocks(
     str,
     finalData.blocks.map(({ value, marks, start, end }) => {
+      let lastValue = value
+      if (global.__DEV__) {
+        logger.log('[Original block value]')
+        logger.log(lastValue)
+      }
       const result = toMutableResult(parse(value, marks))
       const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules, logger)
-      matchCallArray(rulesInput, ruleMap).forEach((rule) =>
+      matchCallArray(rulesInput, ruleMap).forEach((rule) => {
         processRule(result, rule)
-      )
+        if (global.__DEV__) {
+          const currentValue = join(result.tokens, ignoredMarks, [], start)
+          if (lastValue !== currentValue) {
+            logger.log(`[After process by ${rule.name}]`)
+            logger.log(currentValue)
+          }
+          lastValue = currentValue
+        }
+      })
       ignoredMarks.forEach((mark) => allIgnoredMarks.push(mark))
+      lastValue = join(result.tokens, ignoredMarks, allValidations, start)
+      if (global.__DEV__) {
+        logger.log('[Eventual block value]')
+        logger.log(lastValue + '\n')
+      }
       return {
         start,
         end,
-        value: join(result.tokens, ignoredMarks, allValidations, start)
+        value: lastValue
       } as Block
     })
   )

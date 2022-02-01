@@ -83,7 +83,7 @@ const checkSide = (
   }
 }
 
-const handler: Handler = (token: Token, _, group: GroupToken) => {
+const spaceBracketsHandler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.type === SingleTokenType.MARK_BRACKETS) {
     const isRawContent = token.modifiedContent === token.content
     const size = token.modifiedContent.match(/[()]/)
@@ -130,4 +130,4 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
   }
 }
 
-export default handler
+export default spaceBracketsHandler

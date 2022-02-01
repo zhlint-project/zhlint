@@ -45,12 +45,15 @@ const checkSpace = (group: GroupToken, markSeq: Token[]): boolean => {
   return false
 }
 
-const handler: Handler = (token: Token, _, group: GroupToken) => {
+const markHyperHandler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.type === SingleTokenType.MARK_HYPER) {
+    // Usually, it's `[`, `](...)`, etc.
     const markSeq = findMarkSeq(group, token)
     const tokenBeforeMarkSeq = findTokenBefore(group, markSeq[0])
     const hasSpace = checkSpace(group, markSeq)
 
+    // Only handle the case when the current token is the first in the seq to
+    // dedupe the logic.
     if (token === markSeq[0]) {
       const spaceAfterHost = findSpaceAfterHost(
         group,
@@ -77,4 +80,4 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
   }
 }
 
-export default handler
+export default markHyperHandler

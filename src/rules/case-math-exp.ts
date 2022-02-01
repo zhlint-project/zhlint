@@ -38,7 +38,7 @@ const validate = (
   }
 }
 
-const handler: Handler = (token: Token, _, group: GroupToken) => {
+const caseMathExpHandler: Handler = (token: Token, _, group: GroupToken) => {
   // calculation: space in both sides
   // - 1 + 1 = 2
   // x 2020/01/01
@@ -173,4 +173,4 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
   }
 }
 
-export default handler
+export default caseMathExpHandler

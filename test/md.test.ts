@@ -291,4 +291,9 @@ describe('lint', () => {
       '详见[自定义指令指南](custom-directive.html)。'
     )
   })
+  test('space for md marker in the front', () => {
+    expect(lint('- [`<KeepAlive>` API 参考](/api/built-in-components.html#keepalive)')).toBe(
+      '- [`<KeepAlive>` API 参考](/api/built-in-components.html#keepalive)'
+    )
+  })
 })

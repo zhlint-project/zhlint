@@ -11,7 +11,7 @@ import {
   removeValidation
 } from './util'
 
-const handler: Handler = (token: Token, _, group: GroupToken) => {
+const caseDateTimeHandler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.type.match(/^punctuation-/) && token.content === ':') {
     const tokenBefore = findTokenBefore(group, token)
     const nonMarkTokenBefore = findNonMarkTokenBefore(group, token)
@@ -36,4 +36,4 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
   }
 }
 
-export default handler
+export default caseDateTimeHandler
