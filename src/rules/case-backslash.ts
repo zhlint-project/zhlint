@@ -30,7 +30,7 @@ const validate = (token: Token, type: string, condition: boolean): void => {
   }
 }
 
-const handler: Handler = (token: Token, _, group: GroupToken) => {
+const caseBackSlashHandler: Handler = (token: Token, _, group: GroupToken) => {
   // half width and no raw space after -> no space after
   // full width before -> one space before
   if (token.type.match(/^punctuation-/) && token.content === '\\') {
@@ -75,4 +75,4 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
   }
 }
 
-export default handler
+export default caseBackSlashHandler

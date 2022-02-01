@@ -7,7 +7,7 @@ import {
 } from '../parser'
 import { findTokenBefore, removeValidation } from './util'
 
-const handler: Handler = (token: Token, _, group: GroupToken) => {
+const caseHtmlEntityHandler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.content === ';') {
     const tokenBefore = findTokenBefore(group, token)
     if (
@@ -29,4 +29,4 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
   }
 }
 
-export default handler
+export default caseHtmlEntityHandler
