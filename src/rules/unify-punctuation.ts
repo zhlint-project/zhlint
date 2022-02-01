@@ -70,7 +70,7 @@ const validate = (
   }
 }
 
-const handler: Handler = (token: Token, _, group: GroupToken) => {
+const unifyPunctuationHandler: Handler = (token: Token, _, group: GroupToken) => {
   // full-width: comma, full stop, colon, quotes
   // half-width: brackets
   // no change for half-width punctuation between half-width content without space
@@ -162,4 +162,4 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
   }
 }
 
-export default handler
+export default unifyPunctuationHandler

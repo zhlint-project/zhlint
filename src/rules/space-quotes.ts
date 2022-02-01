@@ -59,7 +59,7 @@ const checkOutside = (
   }
 }
 
-const handler: Handler = (token: Token, _, group: GroupToken) => {
+const spaceQuotesHandler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.type === GroupTokenType.GROUP) {
     // no space inside
     validate(
@@ -118,4 +118,4 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
   }
 }
 
-export default handler
+export default spaceQuotesHandler

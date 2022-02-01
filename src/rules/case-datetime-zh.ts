@@ -29,7 +29,7 @@ const validate = (token: Token, type: string, condition: boolean): void => {
   }
 }
 
-const handler: Handler = (token: Token, _, group: GroupToken) => {
+const caseDateTimeZhHandler: Handler = (token: Token, _, group: GroupToken) => {
   if (token.type === 'content-half') {
     if (!token.modifiedContent?.match(/^[\d.]+$/)) {
       return
@@ -62,4 +62,4 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
   }
 }
 
-export default handler
+export default caseDateTimeZhHandler

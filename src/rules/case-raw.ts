@@ -7,7 +7,7 @@ import {
 } from '../parser'
 import { findTokenBefore, findTokenAfter, removeValidation } from './util'
 
-const handler: Handler = (token: Token, _, group: GroupToken) => {
+const caseRawHandler: Handler = (token: Token, _, group: GroupToken) => {
   if (
     token.type.match(/^punctuation-/) &&
     '/|'.indexOf(token.modifiedContent || token.content) >= 0
@@ -28,4 +28,4 @@ const handler: Handler = (token: Token, _, group: GroupToken) => {
   }
 }
 
-export default handler
+export default caseRawHandler

@@ -26,7 +26,7 @@ const validate = (
 ): void =>
   addValidation(token, 'case-traditional', type, messages.default(args))
 
-const handler: Handler = (token: Token) => {
+const caseTraditionalHandler: Handler = (token: Token) => {
   if (token.type === GroupTokenType.GROUP) {
     if (token.modifiedStartContent && replaceMap[token.modifiedStartContent]) {
       validate(token, ValidationTarget.START_CONTENT, {
@@ -45,4 +45,4 @@ const handler: Handler = (token: Token) => {
   }
 }
 
-export default handler
+export default caseTraditionalHandler
