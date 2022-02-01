@@ -16,6 +16,7 @@ import md from './hypers/md'
 
 import markRaw from './rules/mark-raw'
 import markHyper from './rules/mark-hyper'
+import markHtml from './rules/mark-html'
 import unifyPunctuation from './rules/unify-punctuation'
 import caseAbbr from './rules/case-abbr'
 import spaceFullWidthContent from './rules/space-full-width-content'
@@ -80,6 +81,7 @@ const hyperParseInfo = [
 const rulesInfo = [
   { name: 'mark-raw', value: markRaw },
   { name: 'mark-hyper', value: markHyper },
+  { name: 'mark-html', value: markHtml },
   { name: 'unify-punctuation', value: unifyPunctuation },
   { name: 'case-abbr', value: caseAbbr },
   { name: 'space-full-width-content', value: spaceFullWidthContent },
