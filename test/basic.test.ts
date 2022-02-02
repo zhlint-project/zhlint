@@ -16,14 +16,14 @@ import join from '../src/join'
 import processRule from '../src/process-rule'
 import findIgnoredMarks from '../src/ignore'
 
-import spacePunctuation from '../src/rules/space-punctuation'
-import spaceBrackets from '../src/rules/space-brackets'
-import spaceQuotes from '../src/rules/space-quotes'
-import spaceFullWidthContent from '../src/rules/space-full-width-content'
-import unifyPunctuation from '../src/rules/unify-punctuation'
-import caseTraditional from '../src/rules/case-traditional'
-import caseDatetime from '../src/rules/case-datetime'
-import caseDatetimeZh from '../src/rules/case-datetime-zh'
+import spacePunctuation from '../src/legacy-rules/space-punctuation'
+import spaceBrackets from '../src/legacy-rules/space-brackets'
+import spaceQuotes from '../src/legacy-rules/space-quotes'
+import spaceFullWidthContent from '../src/legacy-rules/space-full-width-content'
+import unifyPunctuation from '../src/legacy-rules/unify-punctuation'
+import caseTraditional from '../src/legacy-rules/case-traditional'
+import caseDatetime from '../src/legacy-rules/case-datetime'
+import caseDatetimeZh from '../src/legacy-rules/case-datetime-zh'
 
 const lint = (...args) => run(...(args as [string, Options])).result
 
