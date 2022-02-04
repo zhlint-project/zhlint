@@ -18,9 +18,10 @@ import { ValidationTarget } from '../report'
 import {
   CharType,
   Handler,
+  isContentType,
+  isHyperContentType,
   MutableGroupToken as GroupToken,
-  MutableToken as Token,
-  SingleTokenType
+  MutableToken as Token
 } from '../parser'
 import {
   findTokenBefore,
@@ -57,7 +58,7 @@ const spaceFullWidthContentHandler: Handler = (
   //     - add a space outside mark
   //   - else
   //     - add a space between
-  if (!token.type.match(/^content-/)) {
+  if (!isContentType(token.type) && !isHyperContentType(token.type)) {
     return
   }
 
@@ -84,13 +85,10 @@ const spaceFullWidthContentHandler: Handler = (
   }
   // special case: content-hyper
   // converge before&after cases into one
-  if (
-    contentTokenAfter &&
-    contentTokenAfter.type === SingleTokenType.CONTENT_HYPER
-  ) {
+  if (contentTokenAfter && isHyperContentType(contentTokenAfter.type)) {
     return
   }
-  if (token.type === SingleTokenType.CONTENT_HYPER) {
+  if (isHyperContentType(token.type)) {
     const contentTokenBefore = findContentTokenBefore(group, token)
     if (
       token.modifiedContent.match(/^<[^/].+\/\s*>$/) ||

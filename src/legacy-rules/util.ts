@@ -4,7 +4,11 @@ import {
   MutableSingleToken as SingleToken,
   MutableGroupToken as GroupToken,
   MutableToken as Token,
-  SingleTokenType
+  SingleTokenType,
+  isHyperContentType,
+  TokenType,
+  isContentType,
+  isPunctuationType
 } from '../parser'
 
 // find tokens
@@ -58,14 +62,18 @@ export const findContentTokenBefore = (
   // TODO: type enum
   if (
     tokenBefore.type === 'mark-hyper' ||
-    (tokenBefore.type === 'content-hyper' && !isInlineCode(tokenBefore))
+    (isHyperContentType(tokenBefore.type) && !isInlineCode(tokenBefore))
   ) {
     return findContentTokenBefore(group, group[index - 1])
   }
 
-  if (tokenBefore.type.match(/^content-/)) {
+  if (isContentTypeOrHyperContentType(tokenBefore.type)) {
     return tokenBefore as SingleToken
   }
+}
+
+const isContentTypeOrHyperContentType = (type: TokenType): boolean => {
+  return isContentType(type) || isHyperContentType(type)
 }
 
 export const findContentTokenAfter = (
@@ -88,12 +96,12 @@ export const findContentTokenAfter = (
 
   if (
     tokenAfter.type === 'mark-hyper' ||
-    (tokenAfter.type === 'content-hyper' && !isInlineCode(tokenAfter))
+    (isHyperContentType(tokenAfter.type) && !isInlineCode(tokenAfter))
   ) {
     return findContentTokenAfter(group, group[index + 1])
   }
 
-  if (tokenAfter.type.match(/^content-/)) {
+  if (isContentTypeOrHyperContentType(tokenAfter.type)) {
     return tokenAfter as SingleToken
   }
 }
@@ -117,12 +125,12 @@ export const findNonMarkTokenBefore = (
   }
 
   if (
-    tokenBefore.type.match(/^content-/) ||
-    tokenBefore.type.match(/^punctuation-/) ||
-    tokenBefore.type === 'mark-brackets'
+    isContentTypeOrHyperContentType(tokenBefore.type) ||
+    isPunctuationType(tokenBefore.type) ||
+    tokenBefore.type === SingleTokenType.MARK_BRACKETS
   ) {
     return tokenBefore
-  } else if (tokenBefore.type === 'mark-hyper') {
+  } else if (tokenBefore.type === SingleTokenType.MARK_HYPER) {
     return findContentTokenBefore(group, group[index - 1])
   }
 }
@@ -146,12 +154,12 @@ export const findNonMarkTokenAfter = (
   }
 
   if (
-    tokenAfter.type.match(/^content-/) ||
-    tokenAfter.type.match(/^punctuation-/) ||
-    tokenAfter.type === 'mark-brackets'
+    isContentTypeOrHyperContentType(tokenAfter.type) ||
+    isPunctuationType(tokenAfter.type) ||
+    tokenAfter.type === SingleTokenType.MARK_BRACKETS
   ) {
     return tokenAfter
-  } else if (tokenAfter.type === 'mark-hyper') {
+  } else if (tokenAfter.type === SingleTokenType.MARK_HYPER) {
     return findNonMarkTokenAfter(group, group[index + 1])
   }
 }
@@ -252,7 +260,7 @@ export const findSpaceAfterHost = (
 
 export const isInlineCode = (token: Token): boolean => {
   // html tags, raw content
-  if (token.type === 'content-hyper') {
+  if (isHyperContentType(token.type)) {
     if (token.content.match(/\n/)) {
       // Usually it's hexo custom containers.
       return false
@@ -273,7 +281,7 @@ export const isInlineCode = (token: Token): boolean => {
 
 export const isUnexpectedHtmlTag = (token: Token): boolean => {
   // html tags, raw content
-  if (token.type === 'content-hyper') {
+  if (isHyperContentType(token.type)) {
     if (token.content.match(/\n/)) {
       // Usually it's hexo custom containers.
       return false
@@ -294,7 +302,7 @@ export const isUnexpectedHtmlTag = (token: Token): boolean => {
 
 export const isHyperTag = (token: Token): boolean => {
   // markdown tags
-  if (token.type === 'content-hyper') {
+  if (isHyperContentType(token.type)) {
     return !isInlineCode(token)
   }
   if (token.type === 'mark-hyper') {
@@ -312,7 +320,7 @@ export const getMarkSide = (
   if (token.markSide) {
     return token.markSide
   }
-  if (token.type === 'content-hyper' && !isInlineCode(token)) {
+  if (isHyperContentType(token.type) && !isInlineCode(token)) {
     // non-inline-code html
     if (token.content.match(/^<[^/].+>$/)) {
       // <...>

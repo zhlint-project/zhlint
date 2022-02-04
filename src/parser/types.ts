@@ -88,13 +88,15 @@ export type PunctuationType =
   | CharType.PUNCTUATION_FULL
   | CharType.PUNCTUATION_HALF
 
-export type CharTokenType = ContentType | PunctuationType | CharType.UNKNOWN
+export type CharTokenType = ContentType | PunctuationType
 
 export enum SingleTokenType {
   MARK_BRACKETS = 'mark-brackets',
   MARK_HYPER = 'mark-hyper',
-  MARK_RAW = 'mark-raw',
-  CONTENT_HYPER = 'content-hyper'
+  CONTENT_HYPER = 'content-hyper', // TEMP
+  HYPER_CONTAINER = 'hyper-container',
+  HYPER_INVISIBLE = 'hyper-invisible',
+  HYPER_CODE = 'hyper-code'
 }
 
 export enum GroupTokenType {
@@ -111,25 +113,39 @@ export type NonHyperVisibleTokenType =
 
 export type VisibleTokenType =
   | NonHyperVisibleTokenType
-  | SingleTokenType.MARK_RAW
+  | SingleTokenType.HYPER_CODE
 
-export type invisibleTokenType = SingleTokenType.MARK_HYPER
+export type invisibleTokenType =
+  | SingleTokenType.MARK_HYPER
+  | SingleTokenType.HYPER_INVISIBLE
 
 export type hyperTokenType =
   | SingleTokenType.MARK_HYPER
-  | SingleTokenType.MARK_RAW
+  | SingleTokenType.HYPER_INVISIBLE
+  | SingleTokenType.HYPER_CODE
 
-export const isContentType = (type: TokenType): type is ContentType => {
+export type hyperContentTokenType =
+  | SingleTokenType.HYPER_CONTAINER
+  | SingleTokenType.HYPER_INVISIBLE
+  | SingleTokenType.HYPER_CODE
+
+export const isContentType = (
+  type: TokenType | CharType
+): type is ContentType => {
   return type === CharType.CONTENT_FULL || type === CharType.CONTENT_HALF
 }
 
-export const isPunctuationType = (type: TokenType): type is ContentType => {
+export const isPunctuationType = (
+  type: TokenType | CharType
+): type is PunctuationType => {
   return (
     type === CharType.PUNCTUATION_FULL || type === CharType.PUNCTUATION_HALF
   )
 }
 
-export const isNonHyperVisibleType = (type: TokenType): type is ContentType => {
+export const isNonHyperVisibleType = (
+  type: TokenType | CharType
+): type is ContentType => {
   return (
     isContentType(type) ||
     isPunctuationType(type) ||
@@ -138,17 +154,38 @@ export const isNonHyperVisibleType = (type: TokenType): type is ContentType => {
   )
 }
 
-export const isVisibleType = (type: TokenType): type is VisibleTokenType => {
-  return isNonHyperVisibleType(type) || type === SingleTokenType.MARK_RAW
+export const isVisibleType = (
+  type: TokenType | CharType
+): type is VisibleTokenType => {
+  return isNonHyperVisibleType(type) || type === SingleTokenType.HYPER_CODE
 }
 
-export const isInvisibleType = (type: TokenType): type is VisibleTokenType => {
-  return type === SingleTokenType.MARK_HYPER
-}
-
-export const isHyperType = (type: TokenType): type is VisibleTokenType => {
+export const isInvisibleType = (
+  type: TokenType | CharType
+): type is VisibleTokenType => {
   return (
-    type === SingleTokenType.MARK_HYPER || type === SingleTokenType.MARK_RAW
+    type === SingleTokenType.MARK_HYPER ||
+    type === SingleTokenType.HYPER_INVISIBLE
+  )
+}
+
+export const isHyperType = (
+  type: TokenType | CharType
+): type is VisibleTokenType => {
+  return (
+    type === SingleTokenType.MARK_HYPER ||
+    type === SingleTokenType.HYPER_INVISIBLE ||
+    type === SingleTokenType.HYPER_CODE
+  )
+}
+
+export const isHyperContentType = (
+  type: TokenType | CharType
+): type is hyperContentTokenType => {
+  return (
+    type === SingleTokenType.HYPER_CONTAINER ||
+    type === SingleTokenType.HYPER_INVISIBLE ||
+    type === SingleTokenType.HYPER_CODE
   )
 }
 

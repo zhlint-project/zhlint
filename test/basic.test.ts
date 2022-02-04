@@ -495,7 +495,7 @@ describe('parser with hyper marks', () => {
     ])
     expect(purify(tokens)).toEqual([
       {
-        type: 'content-hyper',
+        type: 'hyper-code',
         content: '`v-bind:style`',
         index: 0,
         length: 14,

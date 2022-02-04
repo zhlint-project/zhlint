@@ -1,3 +1,4 @@
+import { isContentType, isPunctuationType } from '.'
 import { checkCharType } from './char'
 import {
   CharType,
@@ -127,17 +128,14 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
       }
     } else if (isShorthand(str, status, i, char)) {
       appendContent(status, char)
-    } else if (
-      type === CharType.PUNCTUATION_FULL ||
-      type === CharType.PUNCTUATION_HALF
-    ) {
+    } else if (isPunctuationType(type)) {
       handlePunctuation(i, char, type, status)
-    } else if (
-      type === CharType.CONTENT_FULL ||
-      type === CharType.CONTENT_HALF ||
-      type === CharType.UNKNOWN
-    ) {
+    } else if (isContentType(type)) {
       handleContent(i, char, type, status)
+    } else if (type === CharType.EMPTY) {
+      // Nothing
+    } else {
+      handleContent(i, char, CharType.CONTENT_HALF, status)
     }
   }
   finalizeLastToken(status, str.length)

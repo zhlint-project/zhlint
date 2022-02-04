@@ -1,3 +1,4 @@
+import { ContentType } from '.'
 import { checkCharType } from './char'
 import {
   CharType,
@@ -14,13 +15,14 @@ import {
   GroupToken,
   GroupTokenType,
   Token,
-  ParseStatus
+  ParseStatus,
+  PunctuationType
 } from './types'
 
 export const handlePunctuation = (
   i: number,
   char: string,
-  type: CharType,
+  type: PunctuationType,
   status: ParseStatus
 ): void => {
   // end the last unfinished token
@@ -70,14 +72,14 @@ export const handlePunctuation = (
 export const handleContent = (
   i: number,
   char: string,
-  type: CharType,
+  type: ContentType,
   status: ParseStatus
 ): void => {
   // check if type changed and last token unfinished
   // - create new token in the current group
   // - append into current unfinished token
   if (status.lastToken) {
-    if (type !== CharType.UNKNOWN && status.lastToken.type !== type) {
+    if (status.lastToken.type !== type) {
       finalizeLastToken(status, i)
       initNewContent(status, i, char, type)
     } else {
@@ -163,7 +165,7 @@ export const addHyperContent = (
   content: string
 ) => {
   const token: SingleToken = {
-    type: SingleTokenType.CONTENT_HYPER,
+    type: getHyperContentType(content),
     index,
     length: content.length,
     content: content,
@@ -236,7 +238,7 @@ const addNormalPunctuationToken = (
   status: ParseStatus,
   index: number,
   char: string,
-  type: CharType
+  type: PunctuationType
 ) => {
   const token: SingleToken = {
     type,
@@ -298,7 +300,7 @@ export const initNewContent = (
   status: ParseStatus,
   index: number,
   char: string,
-  type: CharType
+  type: ContentType
 ) => {
   status.lastToken = {
     type,
@@ -386,4 +388,21 @@ export const isShorthand = (
     }
   }
   return false
+}
+
+export const getHyperContentType = (content: string): SingleTokenType => {
+  if (content.match(/\n/)) {
+    // Usually it's hexo custom containers.
+    return SingleTokenType.HYPER_CONTAINER
+  }
+  if (content.match(/^<code.*>.*<\/code.*>$/)) {
+    // Usually it's <code>...</code>.
+    return SingleTokenType.HYPER_CODE
+  }
+  if (content.match(/^<.+>$/)) {
+    // Usually it's other HTML tags.
+    return SingleTokenType.HYPER_CONTAINER
+  }
+  // Usually it's `...`.
+  return SingleTokenType.HYPER_CODE
 }

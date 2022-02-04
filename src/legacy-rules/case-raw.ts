@@ -1,9 +1,9 @@
 import { ValidationTarget } from '../report'
 import {
   Handler,
-  SingleTokenType,
   MutableGroupToken as GroupToken,
-  MutableToken as Token
+  MutableToken as Token,
+  isHyperContentType
 } from '../parser'
 import { findTokenBefore, findTokenAfter, removeValidation } from './util'
 
@@ -16,9 +16,9 @@ const caseRawHandler: Handler = (token: Token, _, group: GroupToken) => {
     const tokenAfter = findTokenAfter(group, token)
     if (
       tokenBefore &&
-      tokenBefore.type === SingleTokenType.CONTENT_HYPER &&
+      isHyperContentType(tokenBefore.type) &&
       tokenAfter &&
-      tokenAfter.type === SingleTokenType.CONTENT_HYPER
+      isHyperContentType(tokenAfter.type)
     ) {
       removeValidation(tokenBefore, '', ValidationTarget.SPACE_AFTER)
       removeValidation(token, '', ValidationTarget.SPACE_AFTER)
