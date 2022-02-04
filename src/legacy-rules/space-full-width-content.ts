@@ -19,7 +19,7 @@ import {
   CharType,
   Handler,
   isContentType,
-  isHyperContentType,
+  isLegacyHyperContentType,
   MutableGroupToken as GroupToken,
   MutableToken as Token
 } from '../parser'
@@ -58,7 +58,7 @@ const spaceFullWidthContentHandler: Handler = (
   //     - add a space outside mark
   //   - else
   //     - add a space between
-  if (!isContentType(token.type) && !isHyperContentType(token.type)) {
+  if (!isContentType(token.type) && !isLegacyHyperContentType(token.type)) {
     return
   }
 
@@ -85,10 +85,10 @@ const spaceFullWidthContentHandler: Handler = (
   }
   // special case: content-hyper
   // converge before&after cases into one
-  if (contentTokenAfter && isHyperContentType(contentTokenAfter.type)) {
+  if (contentTokenAfter && isLegacyHyperContentType(contentTokenAfter.type)) {
     return
   }
-  if (isHyperContentType(token.type)) {
+  if (isLegacyHyperContentType(token.type)) {
     const contentTokenBefore = findContentTokenBefore(group, token)
     if (
       token.modifiedContent.match(/^<[^/].+\/\s*>$/) ||

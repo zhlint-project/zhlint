@@ -93,9 +93,7 @@ export type CharTokenType = ContentType | PunctuationType
 export enum SingleTokenType {
   MARK_BRACKETS = 'mark-brackets',
   MARK_HYPER = 'mark-hyper',
-  CONTENT_HYPER = 'content-hyper', // TEMP
-  HYPER_CONTAINER = 'hyper-container',
-  HYPER_INVISIBLE = 'hyper-invisible',
+  HYPER_UNEXPECTED = 'hyper-container',
   HYPER_CODE = 'hyper-code'
 }
 
@@ -115,18 +113,14 @@ export type VisibleTokenType =
   | NonHyperVisibleTokenType
   | SingleTokenType.HYPER_CODE
 
-export type invisibleTokenType =
-  | SingleTokenType.MARK_HYPER
-  | SingleTokenType.HYPER_INVISIBLE
+export type InvisibleTokenType = SingleTokenType.MARK_HYPER
 
-export type hyperTokenType =
+export type HyperTokenType =
   | SingleTokenType.MARK_HYPER
-  | SingleTokenType.HYPER_INVISIBLE
   | SingleTokenType.HYPER_CODE
 
-export type hyperContentTokenType =
-  | SingleTokenType.HYPER_CONTAINER
-  | SingleTokenType.HYPER_INVISIBLE
+export type LegacyHyperContentTokenType =
+  | SingleTokenType.HYPER_UNEXPECTED
   | SingleTokenType.HYPER_CODE
 
 export const isContentType = (
@@ -162,29 +156,23 @@ export const isVisibleType = (
 
 export const isInvisibleType = (
   type: TokenType | CharType
-): type is VisibleTokenType => {
-  return (
-    type === SingleTokenType.MARK_HYPER ||
-    type === SingleTokenType.HYPER_INVISIBLE
-  )
+): type is InvisibleTokenType => {
+  return type === SingleTokenType.MARK_HYPER
 }
 
 export const isHyperType = (
   type: TokenType | CharType
-): type is VisibleTokenType => {
+): type is HyperTokenType => {
   return (
-    type === SingleTokenType.MARK_HYPER ||
-    type === SingleTokenType.HYPER_INVISIBLE ||
-    type === SingleTokenType.HYPER_CODE
+    type === SingleTokenType.MARK_HYPER || type === SingleTokenType.HYPER_CODE
   )
 }
 
-export const isHyperContentType = (
+export const isLegacyHyperContentType = (
   type: TokenType | CharType
-): type is hyperContentTokenType => {
+): type is LegacyHyperContentTokenType => {
   return (
-    type === SingleTokenType.HYPER_CONTAINER ||
-    type === SingleTokenType.HYPER_INVISIBLE ||
+    type === SingleTokenType.HYPER_UNEXPECTED ||
     type === SingleTokenType.HYPER_CODE
   )
 }

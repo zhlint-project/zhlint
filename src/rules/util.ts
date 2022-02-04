@@ -7,7 +7,7 @@ import {
   isNonHyperVisibleType,
   isInvisibleType,
   isVisibleType,
-  isHyperContentType
+  isLegacyHyperContentType
 } from '../parser'
 
 // find tokens
@@ -286,7 +286,7 @@ export const isInlineCode = (token: Token): boolean => {
 
 export const _isUnexpectedHtmlTag = (token: Token): boolean => {
   // html tags, raw content
-  if (isHyperContentType(token.type)) {
+  if (isLegacyHyperContentType(token.type)) {
     if (token.content.match(/\n/)) {
       // Usually it's hexo custom containers.
       return false
@@ -307,7 +307,7 @@ export const _isUnexpectedHtmlTag = (token: Token): boolean => {
 
 export const _isHyperTag = (token: Token): boolean => {
   // markdown tags
-  if (isHyperContentType(token.type)) {
+  if (isLegacyHyperContentType(token.type)) {
     return !isInlineCode(token)
   }
   if (token.type === 'mark-hyper') {
@@ -325,7 +325,7 @@ export const _getMarkSide = (
   if (token.markSide) {
     return token.markSide
   }
-  if (isHyperContentType(token.type) && !isInlineCode(token)) {
+  if (isLegacyHyperContentType(token.type) && !isInlineCode(token)) {
     // non-inline-code html
     if (token.content.match(/^<[^/].+>$/)) {
       // <...>

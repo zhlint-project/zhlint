@@ -1,13 +1,13 @@
 import {
   Handler,
-  isHyperContentType,
+  isLegacyHyperContentType,
   MutableGroupToken as GroupToken,
   MutableToken as Token
 } from '../parser'
 import { findTokenBefore } from './util'
 
 const caseHtmlSpaceHandler: Handler = (token: Token, _, group: GroupToken) => {
-  if (isHyperContentType(token.type)) {
+  if (isLegacyHyperContentType(token.type)) {
     if (
       token.content.match(/^<(b|i|u|s|strong|em|strike|del|sub|sup)(\s.*)?>$/)
     ) {

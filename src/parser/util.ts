@@ -393,7 +393,7 @@ export const isShorthand = (
 export const getHyperContentType = (content: string): SingleTokenType => {
   if (content.match(/\n/)) {
     // Usually it's hexo custom containers.
-    return SingleTokenType.HYPER_CONTAINER
+    return SingleTokenType.HYPER_UNEXPECTED
   }
   if (content.match(/^<code.*>.*<\/code.*>$/)) {
     // Usually it's <code>...</code>.
@@ -401,7 +401,7 @@ export const getHyperContentType = (content: string): SingleTokenType => {
   }
   if (content.match(/^<.+>$/)) {
     // Usually it's other HTML tags.
-    return SingleTokenType.HYPER_CONTAINER
+    return SingleTokenType.HYPER_UNEXPECTED
   }
   // Usually it's `...`.
   return SingleTokenType.HYPER_CODE
