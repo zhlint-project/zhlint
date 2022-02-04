@@ -292,7 +292,11 @@ describe('lint', () => {
     )
   })
   test('space for md marker in the front', () => {
-    expect(lint('- [`<KeepAlive>` API 参考](/api/built-in-components.html#keepalive)')).toBe(
+    expect(
+      lint(
+        '- [`<KeepAlive>` API 参考](/api/built-in-components.html#keepalive)'
+      )
+    ).toBe(
       '- [`<KeepAlive>` API 参考](/api/built-in-components.html#keepalive)'
     )
   })

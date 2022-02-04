@@ -1,53 +1,191 @@
 /**
- * This rule will decide whether to keep a space outside inline code like:
+ * @fileoverview
+ *
+ * This rule will decide whether to keep a space outside inline code with
+ * content like:
  * - xxx `foo` xxx
  * - xxx <code>foo</code> xxx
- * in markdown/html content.
- * 
+ * in markdown/html.
+ *
  * Options:
  * - `true`: keep one space outside
  * - `false`: no space outside
  * - `undefined`: do nothing, just keep the original format
+ *
+ * Note:
+ * This rule just simply add one more space outside the inline code. However,
+ * the space might not be the proper position since there might be some quotes,
+ * brackets, marks between the inline code and the content, which should
+ * involve another following rule called `hyper-space-position` to handle.
  */
 
-import { addValidation, findContentTokenAfter, findContentTokenBefore, findTokenBefore, isInlineCode } from "./util";
-import { Handler, MutableGroupToken, MutableToken } from "../parser";
-import { ValidationTarget } from "../report";
-import { hyperSpace as messages, MessageType } from "./messages";
+import {
+  addValidation,
+  hasSpaceInHyperMarkSeq,
+  findHyperMarkSeq,
+  findNonHyperVisibleTokenAfter,
+  findNonHyperVisibleTokenBefore,
+  findSpaceHostInHyperMarkSeq,
+  findTokenBefore,
+  isInlineCode,
+  findTokenAfter
+} from './util'
+import {
+  Handler,
+  isContentType,
+  MutableGroupToken,
+  MutableToken,
+  SingleTokenType
+} from '../parser'
+import { ValidationTarget } from '../report'
+import { hyperSpace as messages, MessageType } from './messages'
 
-const checkSpace = (token: MutableToken, side: 'before' | 'after', needSpace: boolean): void => {
-  token.modifiedSpaceAfter = needSpace ? ' ' : ''
+const checkSpace = (
+  token: MutableToken,
+  side: 'before' | 'after',
+  isContentBeside: boolean,
+  needSpaceOption: boolean
+): void => {
+  const actuallyNeedSpace = isContentBeside && needSpaceOption
+  token.modifiedSpaceAfter = actuallyNeedSpace ? ' ' : ''
   if (token.modifiedSpaceAfter !== token.spaceAfter) {
     addValidation(
       token,
       MessageType.HYPER_SPACE,
       ValidationTarget.SPACE_AFTER,
-      messages[`${side}-${needSpace}`]
+      messages[`${side}-${isContentBeside}-${actuallyNeedSpace}`]
     )
   }
 }
 
+const checkOutsideSpace = (
+  token: MutableToken,
+  isContentBeside: boolean,
+  needSpaceOption: boolean
+): void => {
+  if (isContentBeside && needSpaceOption) {
+    token.modifiedSpaceAfter = ' '
+    addValidation(
+      token,
+      MessageType.HYPER_SPACE,
+      ValidationTarget.SPACE_AFTER,
+      messages.outside
+    )
+  }
+}
+
+const checkInsideSpace = (token: MutableToken): void => {
+  token.modifiedSpaceAfter = ''
+  addValidation(
+    token,
+    MessageType.HYPER_SPACE,
+    ValidationTarget.SPACE_AFTER,
+    messages.inside
+  )
+}
+
+const checkSpaceInHyperMarkSeq = (
+  side: 'before' | 'after',
+  group: MutableGroupToken,
+  hyperMark: MutableToken,
+  isContentBeside: boolean,
+  needSpaceOption: boolean
+) => {
+  const hyperMarkSeq = findHyperMarkSeq(group, hyperMark)
+  const spaceHost = findSpaceHostInHyperMarkSeq(group, hyperMarkSeq)
+  if (spaceHost) {
+    hyperMarkSeq.forEach((hyperMark) => {
+      // hasSpace x spaceHost -> check space | check outside
+      // hasSpace x !spaceHost -> check inside | correct
+      // !hasSpace x spaceHost -> check space
+      // !hasSpace x !spaceHost -> correct
+      const hasSpace = hasSpaceInHyperMarkSeq(group, hyperMarkSeq)
+      if (!hasSpace) {
+        if (hyperMark === spaceHost) {
+          checkSpace(hyperMark, side, isContentBeside, needSpaceOption)
+        }
+      } else {
+        if (hyperMark === spaceHost) {
+          if (hyperMark.modifiedSpaceAfter) {
+            checkSpace(hyperMark, side, isContentBeside, needSpaceOption)
+          } else {
+            checkOutsideSpace(hyperMark, isContentBeside, needSpaceOption)
+          }
+        } else {
+          if (spaceHost.modifiedSpaceAfter) {
+            checkInsideSpace(hyperMark)
+          }
+        }
+      }
+    })
+  }
+}
+
 export const generateHandler = (options: unknown): Handler => {
-  const needSpace = !!options
-  return (token: MutableToken, _, group: MutableGroupToken) => {
+  const needSpaceOption = !!options
+  const handleHyperSpaceOption: Handler = (
+    token: MutableToken,
+    _,
+    group: MutableGroupToken
+  ) => {
     // Do nothing if there is no options.
     if (typeof options === 'undefined') {
       return
     }
+
     // Do nothing if the current token is not inline code.
     if (!isInlineCode(token)) {
       return
     }
-    // For inline code, make sure whether each side has content beside.
-    // If it has, then ensure there is one or there is no space outside.
-    if (findContentTokenBefore(group, token)) {
+
+    // For inline code, make sure whether each side has besides:
+    // - content
+    // - punctuation
+    // - brackets
+    // - quotes
+    // If it has, then ensure there is one or there is no space outside
+    // when it's a content token.
+    const nonHyperVisibleTokenBefore = findNonHyperVisibleTokenBefore(
+      group,
+      token
+    )
+    if (nonHyperVisibleTokenBefore) {
+      const isContentBefore = isContentType(nonHyperVisibleTokenBefore.type)
       const tokenBefore = findTokenBefore(group, token) as MutableToken
-      checkSpace(tokenBefore, 'before', needSpace)
+      if (tokenBefore.type === SingleTokenType.MARK_HYPER) {
+        checkSpaceInHyperMarkSeq(
+          'before',
+          group,
+          tokenBefore,
+          isContentBefore,
+          needSpaceOption
+        )
+      } else {
+        checkSpace(tokenBefore, 'before', isContentBefore, needSpaceOption)
+      }
     }
-    if (findContentTokenAfter(group, token)) {
-      checkSpace(token, 'before', needSpace)
+
+    const nonHyperVisibleTokenAfter = findNonHyperVisibleTokenAfter(
+      group,
+      token
+    )
+    if (nonHyperVisibleTokenAfter) {
+      const isContentAfter = isContentType(nonHyperVisibleTokenAfter.type)
+      const tokenAfter = findTokenAfter(group, token) as MutableToken
+      if (tokenAfter.type === SingleTokenType.MARK_HYPER) {
+        checkSpaceInHyperMarkSeq(
+          'after',
+          group,
+          tokenAfter,
+          isContentAfter,
+          needSpaceOption
+        )
+      } else {
+        checkSpace(tokenAfter, 'after', isContentAfter, needSpaceOption)
+      }
     }
   }
+  return handleHyperSpaceOption
 }
 
 const handleHyperSpaceOption = generateHandler(true)

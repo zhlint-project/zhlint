@@ -50,12 +50,8 @@ describe('lint special/edge cases', () => {
     )
   })
   test('curly brackets', () => {
-    expect(lint('# 简介 {#introduction}')).toBe(
-      '# 简介 {#introduction}'
-    )
-    expect(lint('# 简介{#introduction}')).toBe(
-      '# 简介 {#introduction}'
-    )
+    expect(lint('# 简介 {#introduction}')).toBe('# 简介 {#introduction}')
+    expect(lint('# 简介{#introduction}')).toBe('# 简介 {#introduction}')
     expect(lint('### 托管模式 {#takeover-mode}')).toBe(
       '### 托管模式 {#takeover-mode}'
     )

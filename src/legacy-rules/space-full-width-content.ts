@@ -47,7 +47,11 @@ const validate = (token: Token, type: string, condition: boolean): void => {
   }
 }
 
-const spaceFullWidthContentHandler: Handler = (token: Token, _, group: GroupToken) => {
+const spaceFullWidthContentHandler: Handler = (
+  token: Token,
+  _,
+  group: GroupToken
+) => {
   // - if next content width different
   //   - if there is a mark
   //     - add a space outside mark

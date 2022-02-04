@@ -80,7 +80,15 @@ export const isRawMark = (mark: Mark): mark is RawMark => {
   return (mark as RawMark).code !== undefined
 }
 
-// Token
+// Token type
+
+export type ContentType = CharType.CONTENT_FULL | CharType.CONTENT_HALF
+
+export type PunctuationType =
+  | CharType.PUNCTUATION_FULL
+  | CharType.PUNCTUATION_HALF
+
+export type CharTokenType = ContentType | PunctuationType | CharType.UNKNOWN
 
 export enum SingleTokenType {
   MARK_BRACKETS = 'mark-brackets',
@@ -93,7 +101,58 @@ export enum GroupTokenType {
   GROUP = 'group'
 }
 
-export type TokenType = CharType | SingleTokenType | GroupTokenType
+export type TokenType = CharTokenType | SingleTokenType | GroupTokenType
+
+export type NonHyperVisibleTokenType =
+  | ContentType
+  | PunctuationType
+  | SingleTokenType.MARK_BRACKETS
+  | GroupTokenType.GROUP
+
+export type VisibleTokenType =
+  | NonHyperVisibleTokenType
+  | SingleTokenType.MARK_RAW
+
+export type invisibleTokenType = SingleTokenType.MARK_HYPER
+
+export type hyperTokenType =
+  | SingleTokenType.MARK_HYPER
+  | SingleTokenType.MARK_RAW
+
+export const isContentType = (type: TokenType): type is ContentType => {
+  return type === CharType.CONTENT_FULL || type === CharType.CONTENT_HALF
+}
+
+export const isPunctuationType = (type: TokenType): type is ContentType => {
+  return (
+    type === CharType.PUNCTUATION_FULL || type === CharType.PUNCTUATION_HALF
+  )
+}
+
+export const isNonHyperVisibleType = (type: TokenType): type is ContentType => {
+  return (
+    isContentType(type) ||
+    isPunctuationType(type) ||
+    type === SingleTokenType.MARK_BRACKETS ||
+    type === GroupTokenType.GROUP
+  )
+}
+
+export const isVisibleType = (type: TokenType): type is VisibleTokenType => {
+  return isNonHyperVisibleType(type) || type === SingleTokenType.MARK_RAW
+}
+
+export const isInvisibleType = (type: TokenType): type is VisibleTokenType => {
+  return type === SingleTokenType.MARK_HYPER
+}
+
+export const isHyperType = (type: TokenType): type is VisibleTokenType => {
+  return (
+    type === SingleTokenType.MARK_HYPER || type === SingleTokenType.MARK_RAW
+  )
+}
+
+// Token
 
 type CommonToken = {
   index: number
@@ -113,13 +172,13 @@ type MutableCommonToken = {
 }
 
 export type SingleToken = CommonToken & {
-  type: CharType | SingleTokenType
+  type: CharTokenType | SingleTokenType
 }
 
 export type MutableSingleToken = CommonToken &
   MutableCommonToken & {
-    type: CharType | SingleTokenType
-    modifiedType: CharType | SingleTokenType
+    type: CharTokenType | SingleTokenType
+    modifiedType: CharTokenType | SingleTokenType
   }
 
 export type GroupToken = Array<Token> &

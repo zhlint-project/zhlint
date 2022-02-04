@@ -69,13 +69,24 @@ const generateMarker = (str: string, index: number): string => {
   let halfWidthCount = 0
   for (let i = 0; i < prefix.length; i++) {
     const charType = checkCharType(prefix[i])
-    if (charType === CharType.CONTENT_FULL || charType === CharType.PUNCTUATION_FULL) {
+    if (
+      charType === CharType.CONTENT_FULL ||
+      charType === CharType.PUNCTUATION_FULL
+    ) {
       fullWidthCount++
-    } else if (charType === CharType.CONTENT_HALF || charType === CharType.PUNCTUATION_HALF || charType === CharType.SPACE) {
+    } else if (
+      charType === CharType.CONTENT_HALF ||
+      charType === CharType.PUNCTUATION_HALF ||
+      charType === CharType.SPACE
+    ) {
       halfWidthCount++
     }
   }
-  return ' '.repeat(halfWidthCount) + '　'.repeat(fullWidthCount) + `${chalk.red('^')}`
+  return (
+    ' '.repeat(halfWidthCount) +
+    '　'.repeat(fullWidthCount) +
+    `${chalk.red('^')}`
+  )
 }
 
 export const reportItem = (

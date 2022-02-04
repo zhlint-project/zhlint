@@ -13,7 +13,13 @@ const matcher = /(?<=^|\n)(:::.*)\n([\s\S]+?)\n(:::)(?=\n|$)/g
 const parser = (data: Data): Data => {
   data.modifiedContent = data.modifiedContent.replace(
     matcher,
-    (raw: string, start: string, content: string, end: string, index: number) => {
+    (
+      raw: string,
+      start: string,
+      content: string,
+      end: string,
+      index: number
+    ) => {
       const { length } = raw
       const name = start.substring(3).trim().split(' ')[0] || 'default'
       data.ignoredByParsers.push({

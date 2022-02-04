@@ -39,7 +39,11 @@ const validate = (token: Token, type: string, condition: boolean): void => {
  * full-width -> no space
  * half-width -> one space after
  */
-const spacePunctuationHandler: Handler = (token: Token, _, group: GroupToken) => {
+const spacePunctuationHandler: Handler = (
+  token: Token,
+  _,
+  group: GroupToken
+) => {
   if (token.type.match(/^punctuation-/)) {
     // Skip special punctuation which doesn't fit this rule.
     if ('/[&%-'.indexOf(token.modifiedContent) >= 0) {

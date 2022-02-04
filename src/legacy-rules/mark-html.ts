@@ -8,11 +8,7 @@ import {
   MutableGroupToken as GroupToken,
   MutableToken as Token
 } from '../parser'
-import {
-  findTokenBefore,
-  isUnexpectedHtmlTag,
-  removeValidation
-} from './util'
+import { findTokenBefore, isUnexpectedHtmlTag, removeValidation } from './util'
 
 const markHyperHandler: Handler = (token: Token, _, group: GroupToken) => {
   if (isUnexpectedHtmlTag(token)) {

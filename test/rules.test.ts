@@ -110,4 +110,3 @@ describe('lint by rule', () => {
     )
   })
 })
-
