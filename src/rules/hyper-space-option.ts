@@ -27,7 +27,6 @@ import {
   findNonHyperVisibleTokenBefore,
   findSpaceHostInHyperMarkSeq,
   findTokenBefore,
-  isInlineCode,
   findTokenAfter
 } from './util'
 import {
@@ -134,7 +133,7 @@ export const generateHandler = (options: unknown): Handler => {
     }
 
     // Do nothing if the current token is not inline code.
-    if (!isInlineCode(token)) {
+    if (token.type !== SingleTokenType.HYPER_CODE) {
       return
     }
 

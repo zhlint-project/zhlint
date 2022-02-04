@@ -6,8 +6,7 @@ import {
   SingleTokenType,
   isNonHyperVisibleType,
   isInvisibleType,
-  isVisibleType,
-  isLegacyHyperContentType
+  isVisibleType
 } from '../parser'
 
 // find tokens
@@ -208,133 +207,53 @@ export const hasSpaceInHyperMarkSeq = (
 
 export const findSpaceHostInHyperMarkSeq = (
   group: GroupToken,
-  markSeq: Token[]
+  hyperMarkSeq: Token[]
 ): Token | undefined => {
-  // TODO
-  group
-  markSeq
-  return
-}
-
-// others
-
-export const _findSpaceAfterHost = (
-  group: GroupToken,
-  firstPossibleHost: Token | undefined,
-  lastPossibleHost: Token | undefined
-): Token | undefined => {
-  // If either first or last possible host then directly return another.
-  // If neither first nor last possible host then return nothing.
-  // If first equals to last then return it directly.
-  if (!firstPossibleHost && !lastPossibleHost) {
+  // Return nothing if the seq is empty
+  if (!hyperMarkSeq.length) {
     return
   }
-  if (!firstPossibleHost) {
-    // If first token doesn't exist (no left extra content)
-    // and last token is left side mark, then no after space
-    if (_getMarkSide(lastPossibleHost) === MarkSideType.LEFT) {
-      return
+
+  const tokenBefore = findTokenBefore(group, hyperMarkSeq[0])
+  const firstMark = hyperMarkSeq[0]
+  const lastMark = hyperMarkSeq[hyperMarkSeq.length - 1]
+  const firstMarkSide = firstMark.markSide
+  const lastMarkSide = lastMark.markSide
+
+  // Return nothing if any token is not a mark.
+  if (!firstMarkSide || !lastMarkSide) {
+    return
+  }
+
+  // If first and last mark have the same side, then return:
+  // - token before first mark if they are the left side
+  // - last mark if they are the right side
+  if (firstMarkSide === lastMarkSide) {
+    if (firstMarkSide === MarkSideType.LEFT) {
+      return tokenBefore
     }
-    return lastPossibleHost
-  }
-  if (!lastPossibleHost) {
-    return firstPossibleHost
-  }
-  if (firstPossibleHost === lastPossibleHost) {
-    return firstPossibleHost
-  }
-
-  // If first and last both exists but different.
-  // Detech whether this mark seq is on the left side or right.
-  const secondPossibleHost = findTokenAfter(group, firstPossibleHost)
-  const sideSecond = _getMarkSide(secondPossibleHost)
-  const sideLast = _getMarkSide(lastPossibleHost)
-
-  // If first and last mark have the same side, then return
-  if (sideSecond === sideLast) {
-    // - first mark if it's the left side
-    // - last mark if it's the right side
-    return sideSecond === MarkSideType.LEFT
-      ? firstPossibleHost
-      : lastPossibleHost
+    return lastMark
   }
 
   // If first mark is the left side and last mark is the right side,
   // that usually means multiple marks partially overlapped.
   // This situation is abnormal but technically exists.
   // We'd better do nothing and leave this issue to human.
-  if (sideSecond === MarkSideType.LEFT) {
+  if (firstMarkSide === MarkSideType.LEFT) {
     return
   }
 
   // If first mark is the right side and last mark is the left side,
   // that usually means multiple marks closely near eath other.
   // We'd better find the gap outside the both sides of marks.
-  let tempToken: Token = lastPossibleHost
-  while (tempToken !== firstPossibleHost) {
+  let tempToken: Token = lastMark
+  while (tempToken !== lastMark) {
     if (tempToken.markSide === MarkSideType.RIGHT) {
       return tempToken
     }
     tempToken = findTokenBefore(group, tempToken) as Token
   }
-  return firstPossibleHost
-}
-
-export const isInlineCode = (token: Token): boolean => {
-  return token.type === SingleTokenType.HYPER_CODE
-}
-
-export const _isUnexpectedHtmlTag = (token: Token): boolean => {
-  // html tags, raw content
-  if (isLegacyHyperContentType(token.type)) {
-    if (token.content.match(/\n/)) {
-      // Usually it's hexo custom containers.
-      return false
-    }
-    if (token.content.match(/^<code.*>.*<\/code.*>$/)) {
-      // Usually it's <code>...</code>.
-      return false
-    }
-    if (token.content.match(/^<.+>$/)) {
-      // Usually it's other HTML tags.
-      return true
-    }
-    // Usually it's `...`.
-    return false
-  }
-  return false
-}
-
-export const _isHyperTag = (token: Token): boolean => {
-  // markdown tags
-  if (isLegacyHyperContentType(token.type)) {
-    return !isInlineCode(token)
-  }
-  if (token.type === 'mark-hyper') {
-    return true
-  }
-  return false
-}
-
-export const _getMarkSide = (
-  token: Token | undefined
-): MarkSideType | undefined => {
-  if (!token) {
-    return
-  }
-  if (token.markSide) {
-    return token.markSide
-  }
-  if (isLegacyHyperContentType(token.type) && !isInlineCode(token)) {
-    // non-inline-code html
-    if (token.content.match(/^<[^/].+>$/)) {
-      // <...>
-      return MarkSideType.LEFT
-    } else if (token.content.match(/^<\/.+>$/)) {
-      // </...>
-      return MarkSideType.RIGHT
-    }
-  }
+  return tokenBefore
 }
 
 // validations
