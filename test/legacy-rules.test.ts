@@ -13,7 +13,7 @@ import caseDatetimeZh from '../src/legacy-rules/case-datetime-zh'
 
 const lint = (...args) => run(...(args as [string, Options])).result
 
-describe('lint by rule', () => {
+describe.todo('lint by rule', () => {
   test('space between half-width content and full-width content', () => {
     expect(
       lint('汉字和English之间需要有空格比如 half width content。', {
