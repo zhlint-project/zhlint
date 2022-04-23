@@ -9,6 +9,18 @@ import {
   isVisibleType
 } from '../parser'
 
+// options
+
+export type Options = {
+  hyper?: {
+    codeSpace?: boolean
+  }
+  punctuation?: {
+    halfWidth?: string
+    fullWidth?: string
+  }
+}
+
 // find tokens
 
 /**

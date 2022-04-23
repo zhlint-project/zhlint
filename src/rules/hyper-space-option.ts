@@ -8,9 +8,10 @@
  * in markdown/html.
  *
  * Options:
- * - `true`: keep one space outside
- * - `false`: no space outside
- * - `undefined`: do nothing, just keep the original format
+ * - hyper.codeSpace: boolean | undefined
+ *   - `true`: keep one space outside (default)
+ *   - `false`: no space outside
+ *   - `undefined`: do nothing, just keep the original format
  *
  * Note:
  * This rule just simply add one more space outside the inline code. However,
@@ -27,7 +28,8 @@ import {
   findNonHyperVisibleTokenBefore,
   findSpaceHostInHyperMarkSeq,
   findTokenBefore,
-  findTokenAfter
+  findTokenAfter,
+  Options
 } from './util'
 import {
   Handler,
@@ -120,15 +122,15 @@ const checkSpaceInHyperMarkSeq = (
   }
 }
 
-export const generateHandler = (options: unknown): Handler => {
-  const needSpaceOption = !!options
+export const generateHandler = (options: Options): Handler => {
+  const needSpaceOption = options?.hyper?.codeSpace
   const handleHyperSpaceOption: Handler = (
     token: MutableToken,
     _,
     group: MutableGroupToken
   ) => {
     // Do nothing if there is no options.
-    if (typeof options === 'undefined') {
+    if (typeof needSpaceOption === 'undefined') {
       return
     }
 
@@ -187,6 +189,10 @@ export const generateHandler = (options: unknown): Handler => {
   return handleHyperSpaceOption
 }
 
-const handleHyperSpaceOption = generateHandler(true)
+const handleHyperSpaceOption = generateHandler({
+  hyper: {
+    codeSpace: true
+  }
+})
 
 export default handleHyperSpaceOption
