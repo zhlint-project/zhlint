@@ -41,7 +41,7 @@ const expectedValidationsInfo = {
   27: []
 }
 
-describe('lint', () => {
+describe.todo('lint', () => {
   test.todo('units', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-units.md'),

@@ -11,7 +11,7 @@ import caseTraditional from '../src/legacy-rules/case-traditional'
 import caseDatetime from '../src/legacy-rules/case-datetime'
 import caseDatetimeZh from '../src/legacy-rules/case-datetime-zh'
 
-const lint = (...args) => run(...(args as [string, Options])).result
+const lint = (...args: [string, Options?]) => run(...args).result
 
 describe.todo('lint by rule', () => {
   test('space between half-width content and full-width content', () => {

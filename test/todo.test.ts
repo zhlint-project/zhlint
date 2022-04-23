@@ -4,7 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import run from '../src/run'
 
-describe('lint', () => {
+describe.todo('lint', () => {
   test('ignore HTML comment', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-todo.md'),
