@@ -15,8 +15,7 @@ import hexo from './hypers/hexo'
 import vuepress from './hypers/vuepress'
 import md from './hypers/md'
 
-// TODO: import rules
-// TODO: processRules: options => str => rules.reduce(genRule => genRule(options)(str), str)
+import { generateHandlers } from './rules'
 
 const hyperParseInfo = [
   { name: 'ignore', value: ignore },
@@ -75,6 +74,7 @@ const run = (str: string, options: Options = {}): Result => {
 
   // init rules, hyper parsers, rule options, and ignored cases
   const ignoredCases = options.ignoredCases || []
+  const rules = generateHandlers(options.rules || {})
   let hyperParserList: (string | ((data: Data) => Data))[]
   if (typeof options.hyperParse === 'function') {
     hyperParserList = [options.hyperParse]
@@ -82,7 +82,6 @@ const run = (str: string, options: Options = {}): Result => {
     hyperParserList =
       options.hyperParse || hyperParseInfo.map((item) => item.name)
   }
-  // TODO: rule options
 
   // init data
   // str -> ignoredByRules, ignoredByParsers
@@ -128,20 +127,17 @@ const run = (str: string, options: Options = {}): Result => {
       const result = toMutableResult(parse(value, marks))
       const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules, logger)
 
-      // TODO: import new rule generators
-      // TODO: compatible: allRules.forEach(rule => processRule(result, defaultRule))
-      // TODO: new: allRules.forEach(rule => processRule(result, genRule(ruleOptions)))
-      // matchCallArray(rulesInput, ruleMap).forEach((rule) => {
-      //   processRule(result, rule)
-      //   if (global.__DEV__) {
-      //     const currentValue = join(result.tokens, ignoredMarks, [], start)
-      //     if (lastValue !== currentValue) {
-      //       logger.log(`[After process by ${rule.name}]`)
-      //       logger.log(currentValue)
-      //     }
-      //     lastValue = currentValue
-      //   }
-      // })
+      rules.forEach((rule) => {
+        processRule(result, rule)
+        if (global.__DEV__) {
+          const currentValue = join(result.tokens, ignoredMarks, [], start)
+          if (lastValue !== currentValue) {
+            logger.log(`[After process by ${rule.name}]`)
+            logger.log(currentValue)
+          }
+          lastValue = currentValue
+        }
+      })
       processRule
 
       ignoredMarks.forEach((mark) => allIgnoredMarks.push(mark))

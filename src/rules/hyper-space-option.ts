@@ -182,7 +182,7 @@ export const generateHandler = (options: Options): Handler => {
           needSpaceOption
         )
       } else {
-        checkSpace(tokenAfter, 'after', isContentAfter, needSpaceOption)
+        checkSpace(token, 'after', isContentAfter, needSpaceOption)
       }
     }
   }
