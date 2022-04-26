@@ -27,8 +27,8 @@ const widthPairList: WidthPairList = [
   [`!`, `！`]
 ]
 const widthSidePairList: WidthSidePairList = [
-  [`'`, `“`, `”`],
-  [`"`, `‘`, `’`]
+  [`"`, `“`, `”`],
+  [`'`, `‘`, `’`]
 ]
 
 const defaultHalfWidthOption = `()`

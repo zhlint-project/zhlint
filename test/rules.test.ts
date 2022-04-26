@@ -49,5 +49,21 @@ describe('lint by rule', () => {
   test('[hyper-space-position] the position of spaces around hyper marks (if any)', () => {
     const options = { rules: { hyper: { codeSpace: true }}}
     expect(lint('x ** yyy ** z', options)).toBe('x **yyy** z')
+    expect(lint('x _** yyy ** _ z', options)).toBe('x _**yyy**_ z')
+    expect(lint('x _ ** yyy **_ z', options)).toBe('x _**yyy**_ z')
+  })
+  test('[punctuation-width-option] format each punctuation into the right width options', () => {
+    const options = { rules: { punctuation: {
+      halfWidth: `()`,
+      fullWidth: `，。：；？！“”‘’`
+    }}}
+    expect(lint('你好,再见.', options)).toBe('你好，再见。')
+    expect(lint('你（好）,再见.', options)).toBe('你(好)，再见。')
+    expect(lint('你\'好\',再见.', options)).toBe('你‘好’，再见。')
+    expect(lint('你"好",再见.', options)).toBe('你“好”，再见。')
+    expect(lint('"你\'好\'",再见.', options)).toBe('“你‘好’”，再见。')
+
+    // keep the single quote between half-width content without spaces
+    expect(lint('what\'s up', options)).toBe('what\'s up')
   })
 })
