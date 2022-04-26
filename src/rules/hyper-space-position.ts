@@ -20,7 +20,8 @@ import {
   addValidation,
   hasSpaceInHyperMarkSeq,
   findHyperMarkSeq,
-  findSpaceHostInHyperMarkSeq
+  findSpaceHostInHyperMarkSeq,
+  findTokenBefore
 } from './util'
 import {
   Handler,
@@ -73,15 +74,21 @@ const handleHyperSpacePosition: Handler = (
     return
   }
 
+  const tokenBefore = findTokenBefore(group, markSeq[0])
+
+  if (spaceHost.modifiedSpaceAfter !== ' ') {
+    checkOutsideSpace(spaceHost)
+  }
+
+  if (tokenBefore && tokenBefore !== spaceHost) {
+    if (tokenBefore.modifiedSpaceAfter) {
+      checkInsideSpace(tokenBefore)
+    }
+  }
+
   markSeq.forEach((token) => {
-    if (token === spaceHost) {
-      if (token.modifiedSpaceAfter !== ' ') {
-        checkOutsideSpace(token)
-      }
-    } else {
-      if (!token.modifiedSpaceAfter) {
-        checkInsideSpace(token)
-      }
+    if (token !== spaceHost && token.modifiedSpaceAfter) {
+      checkInsideSpace(token)
     }
   })
 }

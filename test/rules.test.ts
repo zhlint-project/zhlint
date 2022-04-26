@@ -47,12 +47,7 @@ describe('lint by rule', () => {
     })
   })
   test('[hyper-space-position] the position of spaces around hyper marks (if any)', () => {
-    expect(lint('1', {
-      rules: {
-        hyper: {
-          codeSpace: true
-        }
-      }
-    })).toBe('1')
+    const options = { rules: { hyper: { codeSpace: true }}}
+    expect(lint('x ** yyy ** z', options)).toBe('x **yyy** z')
   })
 })
