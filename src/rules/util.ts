@@ -18,6 +18,7 @@ export type Options = {
   punctuation?: {
     halfWidth?: string
     fullWidth?: string
+    unified?: "traditional" | "simplified"
   }
 }
 

@@ -66,4 +66,27 @@ describe('lint by rule', () => {
     // keep the single quote between half-width content without spaces
     expect(lint('what\'s up', options)).toBe('what\'s up')
   })
+  describe('[punctuation-unify-option] unify the punctuation choices', () => {
+    test('simplified', () => {
+      const options: Options = { rules: { punctuation: { unified: 'simplified' }}}
+      expect(lint(
+        '老師說：「你們要記住國父說的『青年要立志做大事，不要做大官』這句話。」',
+        options
+      )).toBe(
+        '老師說：“你們要記住國父說的‘青年要立志做大事，不要做大官’這句話。”'
+      )
+    })
+    test('traditional', () => {
+      const options: Options = { rules: { punctuation: { unified: 'traditional' }}}
+      expect(lint(
+        '老師說：“你們要記住國父說的‘青年要立志做大事，不要做大官’這句話。”',
+        options
+      )).toBe(
+        '老師說：「你們要記住國父說的『青年要立志做大事，不要做大官』這句話。」'
+      )
+    })
+  })
+  test('[punctuation-keep-option] keep some punctuations in particular sequences', () => {
+    // TODO:
+  })
 })
