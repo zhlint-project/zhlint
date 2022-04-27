@@ -144,9 +144,11 @@ export const generateHandler = (options: Options): Handler => {
       const content = token.modifiedContent
       if (fullWidthMap[content]) {
         token.modifiedContent = fullWidthMap[content]
+        token.modifiedType = CharType.PUNCTUATION_FULL
       }
       else if (halfWidthMap[content]) {
         token.modifiedContent = halfWidthMap[content]
+        token.modifiedType = CharType.PUNCTUATION_HALF
       }
       return
     }
@@ -156,9 +158,11 @@ export const generateHandler = (options: Options): Handler => {
       const content = token.modifiedContent
       if (fullWidthMap[content]) {
         token.modifiedContent = fullWidthMap[content]
+        token.modifiedType = CharType.PUNCTUATION_FULL
       }
       else if (halfWidthMap[content]) {
         token.modifiedContent = halfWidthMap[content]
+        token.modifiedType = CharType.PUNCTUATION_HALF
       }
       return
     }

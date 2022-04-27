@@ -20,6 +20,10 @@ export type Options = {
     fullWidth?: string
     unified?: "traditional" | "simplified"
   }
+  skip?: {
+    abbrs?: string[]
+    ellipsis?: boolean
+  }
 }
 
 // find tokens
