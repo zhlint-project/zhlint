@@ -86,7 +86,4 @@ describe('lint by rule', () => {
       )
     })
   })
-  test('[punctuation-keep-option] keep some punctuations in particular sequences', () => {
-    // TODO:
-  })
 })

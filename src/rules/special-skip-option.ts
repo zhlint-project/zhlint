@@ -1,3 +1,6 @@
+// TODO: parse abbrs into tokens, then check to match them out and revert any changes
+// TODO: remove the spaces around
+
 /**
  * @fileoverview
  * 
@@ -90,7 +93,6 @@ const checkAbbr = (token: MutableToken, index: number, group: MutableGroupToken,
 }
 
 // Ellipsis
-// TODO: spaces
 
 const checkEllipsis = (token: MutableToken, _: number, group: MutableGroupToken): void => {
   if (token.content !== '.') {
