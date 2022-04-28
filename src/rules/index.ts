@@ -5,6 +5,7 @@ import defaultHyperSpaceOption, { generateHandler as genHyperSpaceOption } from 
 import defaultHyperSpacePosition, { generateHandler as genHyperSpacePosition } from './hyper-space-position'
 import defaultPunctuationWidthOption, { generateHandler as genPunctuationWidthOption } from './punctuation-width-option'
 import defaultPunctuationUnifiedOption, { generateHandler as genPunctuationUnifiedOption } from './punctuation-unified-option'
+import defaultSpaceBetweenContentOption, { generateHandler as genSpaceBetweenContentOption } from './space-content-option'
 
 export const generateHandlers = (options: Options): Handler[] => {
   return [
@@ -12,14 +13,16 @@ export const generateHandlers = (options: Options): Handler[] => {
     genHyperSpacePosition(),
     genPunctuationWidthOption(options),
     genPunctuationUnifiedOption(options),
+    genSpaceBetweenContentOption(options)
   ]
 }
 
-const defaultHandlers: Handler[] =  [
+const defaultHandlers: Handler[] = [
   defaultHyperSpaceOption,
   defaultHyperSpacePosition,
   defaultPunctuationWidthOption,
   defaultPunctuationUnifiedOption,
+  defaultSpaceBetweenContentOption
 ]
 
 export default defaultHandlers

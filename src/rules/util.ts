@@ -18,11 +18,11 @@ export type Options = {
   punctuation?: {
     halfWidth?: string
     fullWidth?: string
-    unified?: "traditional" | "simplified"
+    unified?: 'traditional' | 'simplified'
   }
-  skip?: {
-    abbrs?: string[]
-    ellipsis?: boolean
+  space?: {
+    noBetweenFullWidthContent?: boolean
+    betweenWidthMixedContent?: boolean
   }
 }
 

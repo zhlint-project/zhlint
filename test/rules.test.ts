@@ -86,4 +86,7 @@ describe('lint by rule', () => {
       )
     })
   })
+  describe('[space-content-option] the space between content and punctuation', () => {
+    // TODO:
+  })
 })
