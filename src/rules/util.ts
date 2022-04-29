@@ -27,6 +27,8 @@ export type Options = {
     noBeforePunctuation?: boolean
     oneAfterHalfWidthPunctuation?: boolean
     noAfterFullWidthPunctuation?: boolean
+    oneOutsideQuote?: boolean
+    noInsideQuote?: boolean
   }
 }
 
@@ -275,6 +277,46 @@ export const findSpaceHostInHyperMarkSeq = (
     tempToken = findTokenBefore(group, tempToken) as Token
   }
   return tokenBefore
+}
+
+export const findMarkSeqBetween = (group: GroupToken, before: Token, after: Token): {
+  spaceHost?: Token
+  markSeq: Token[]
+  tokenSeq: Token[]
+} => {
+  if (!before || !after) {
+    return {
+      spaceHost: undefined,
+      markSeq: [],
+      tokenSeq: []
+    }
+  }
+
+  const firstMark = findTokenAfter(group, before)
+  const firstVisible = findExpectedVisibleTokenAfter(group, before)
+  if (!firstMark || firstVisible !== after) {
+    return {
+      spaceHost: undefined,
+      markSeq: [],
+      tokenSeq: []
+    }
+  }
+  if (firstMark === after) {
+    return {
+      spaceHost: before,
+      markSeq: [],
+      tokenSeq: [before]
+    }
+  }
+
+  const markSeq = findHyperMarkSeq(group, firstMark)
+  const spaceHost = findSpaceHostInHyperMarkSeq(group, markSeq)
+
+  return {
+    spaceHost,
+    markSeq,
+    tokenSeq: [before, ...markSeq]
+  }
 }
 
 // validations

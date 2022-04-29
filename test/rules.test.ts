@@ -178,4 +178,39 @@ describe('lint by rule', () => {
       )
     })
   })
+  describe('[space-quote-option] the space around quotes', () => {
+    test('no space inside', () => {
+      const options: Options = {
+        rules: { space: { noInsideQuote: true } }
+      }
+      expect(lint('foo " bar " baz', options)).toBe('foo "bar" baz')
+      expect(lint('foo “ bar ” baz', options)).toBe('foo “bar” baz')
+    })
+    test('one space outside', () => {
+      const options: Options = {
+        rules: { space: { oneOutsideQuote: true } }
+      }
+      expect(lint('foo " bar " baz', options)).toBe('foo " bar " baz')
+      expect(lint('foo “ bar ” baz', options)).toBe('foo “ bar ” baz')
+      expect(lint('foo, " bar " , baz', options)).toBe('foo, " bar ", baz')
+      expect(lint('foo. “ bar ” . baz', options)).toBe('foo. “ bar ”. baz')
+      expect(lint('一 " 二 " 三', options)).toBe('一" 二 "三')
+      expect(lint('一 “ 二 ” 三', options)).toBe('一“ 二 ”三')
+      expect(lint('一， " 二 " ， 三', options)).toBe('一，" 二 "， 三')
+      expect(lint('一。 “ 二 ” 。 三', options)).toBe('一。“ 二 ”。 三')
+    })
+    test('no space outside', () => {
+      const options: Options = {
+        rules: { space: { oneOutsideQuote: false } }
+      }
+      expect(lint('foo " bar " baz', options)).toBe('foo" bar "baz')
+      expect(lint('foo “ bar ” baz', options)).toBe('foo“ bar ”baz')
+      expect(lint('foo, " bar " , baz', options)).toBe('foo," bar ", baz')
+      expect(lint('foo. “ bar ” . baz', options)).toBe('foo.“ bar ”. baz')
+      expect(lint('一 " 二 " 三', options)).toBe('一" 二 "三')
+      expect(lint('一 “ 二 ” 三', options)).toBe('一“ 二 ”三')
+      expect(lint('一， " 二 " ， 三', options)).toBe('一，" 二 "， 三')
+      expect(lint('一。 “ 二 ” 。 三', options)).toBe('一。“ 二 ”。 三')
+    })
+  })
 })
