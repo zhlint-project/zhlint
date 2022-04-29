@@ -24,6 +24,9 @@ export type Options = {
     onlyOneBetweenHalfWidthContent?: boolean
     noBetweenFullWidthContent?: boolean
     betweenMixedWidthContent?: boolean
+    noBeforePunctuation?: boolean
+    oneAfterHalfWidthPunctuation?: boolean
+    noAfterFullWidthPunctuation?: boolean
   }
 }
 

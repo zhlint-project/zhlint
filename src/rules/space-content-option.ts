@@ -88,8 +88,12 @@ export const generateHandler = (options: Options): Handler => {
 
       // set the space between
       tokenSeq.forEach((target) => {
+        if (target === contentTokenAfter) {
+          return
+        }
         if (target === spaceHost) {
-          target.modifiedSpaceAfter = (token.type === CharType.CONTENT_HALF) ? ' ' : ''
+          target.modifiedSpaceAfter =
+            token.type === CharType.CONTENT_HALF ? ' ' : ''
         } else {
           target.modifiedSpaceAfter = ''
         }
