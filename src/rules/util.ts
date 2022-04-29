@@ -21,8 +21,9 @@ export type Options = {
     unified?: 'traditional' | 'simplified'
   }
   space?: {
+    onlyOneBetweenHalfWidthContent?: boolean
     noBetweenFullWidthContent?: boolean
-    betweenWidthMixedContent?: boolean
+    betweenMixedWidthContent?: boolean
   }
 }
 

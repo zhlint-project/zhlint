@@ -5,7 +5,10 @@
  * content.
  * 
  * Options:
- * - space.betweenWidthMixedContent: boolean | undefined
+ * - space.onlyOneBetweenHalfWidthContentOption: boolean | undefined
+ *   - `true`: ensure one space between half-width content (default)
+ *   - `false` or `undefined`: do nothing, just keep the original format
+ * - space.betweenMixedWidthContent: boolean | undefined
  *   - `true`: keep one space between width-mixed content (default)
  *   - `false`: no space between width-mixed content
  *   - `undefined`: do nothing, just keep the original format
@@ -17,13 +20,13 @@
  * The challenging part is to skip hyper marks and put the space (if any) into
  * the right places.
  * 
- * Examples (betweenWidthMixedContent = true):
+ * Examples (betweenMixedWidthContent = true):
  * - *a*啊 -> *a* 啊
  * - *a *啊 -> *a* 啊
  * - *啊*a -> *啊* a
  * - *啊 *a -> *啊* a
  * 
- * Examples (betweenWidthMixedContent = false):
+ * Examples (betweenMixedWidthContent = false):
  * - *a* 啊 -> *a*啊
  * - *a *啊 -> *a*啊
  * - *啊* a -> *啊*a
@@ -34,7 +37,8 @@ import { CharType, Handler, isContentType, MutableGroupToken, MutableToken } fro
 import { findExpectedVisibleTokenAfter, findSpaceHostInHyperMarkSeq, Options } from "./util"
 
 export const generateHandler = (options: Options): Handler => {
-  const betweenWidthMixedContentOption = options?.space?.betweenWidthMixedContent
+  const onlyOneBetweenHalfWidthContentOption = options?.space?.onlyOneBetweenHalfWidthContent
+  const betweenMixedWidthContentOption = options?.space?.betweenMixedWidthContent
   const noBetweenFullWidthContentOption = options?.space?.noBetweenFullWidthContent
 
   return (token: MutableToken, index: number, group: MutableGroupToken) => {
@@ -50,9 +54,14 @@ export const generateHandler = (options: Options): Handler => {
     }
 
     // get the space host
+    // the `tokenSeq` include the token itself and exclude the next content token
+    // so the `markSeq` should be one off from the beginning of tokenSeq
+    // if the `markSeq` is empty, the spaceHost should be the token itself
+    // the `tokenSeq` and `spaceHost` are also to be travelled later
     const contentTokenAfterIndex = group.indexOf(contentTokenAfter)
     const tokenSeq = group.slice(index, contentTokenAfterIndex)
-    const spaceHost = findSpaceHostInHyperMarkSeq(group, tokenSeq.slice(1))
+    const markSeq = tokenSeq.slice(1)
+    const spaceHost = tokenSeq.length > 1 ? findSpaceHostInHyperMarkSeq(group, markSeq) : token
 
     // skip if the space host is not found
     if (!spaceHost) {
@@ -67,24 +76,34 @@ export const generateHandler = (options: Options): Handler => {
     // - no space in other places
     if (contentTokenAfter.type === token.type) {
       // skip without custom option
-      if (!noBetweenFullWidthContentOption) {
-        return
+      if (token.type === CharType.CONTENT_HALF) {
+        if (!onlyOneBetweenHalfWidthContentOption) {
+          return
+        }
+      } else {
+        if (!noBetweenFullWidthContentOption) {
+          return
+        }
       }
+
+      // set the space between
       tokenSeq.forEach((target) => {
-        if ((token.type === CharType.CONTENT_HALF && target) === spaceHost) {
-          target.modifiedSpaceAfter = ' '
+        if (target === spaceHost) {
+          target.modifiedSpaceAfter = (token.type === CharType.CONTENT_HALF) ? ' ' : ''
         } else {
           target.modifiedSpaceAfter = ''
         }
       })
     } else {
       // skip without custom option
-      if (typeof betweenWidthMixedContentOption === 'undefined') {
+      if (typeof betweenMixedWidthContentOption === 'undefined') {
         return
       }
+
+      // set the space between
       tokenSeq.forEach((target) => {
         if (target === spaceHost) {
-          target.modifiedSpaceAfter = betweenWidthMixedContentOption ? ' ' : ''
+          target.modifiedSpaceAfter = betweenMixedWidthContentOption ? ' ' : ''
         } else {
           target.modifiedSpaceAfter = ''
         }
@@ -95,7 +114,8 @@ export const generateHandler = (options: Options): Handler => {
 
 export default generateHandler({
   space: {
-    betweenWidthMixedContent: true,
+    onlyOneBetweenHalfWidthContent: true,
+    betweenMixedWidthContent: true,
     noBetweenFullWidthContent: true
   }
 })
