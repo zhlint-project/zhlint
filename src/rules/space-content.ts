@@ -1,9 +1,9 @@
 /**
  * @fileoverview
- * 
+ *
  * This rule is used to check whether there should be a space between
  * content.
- * 
+ *
  * Options:
  * - spaceBetweenHalfWidthContent: boolean | undefined
  *   - `true`: ensure one space between half-width content (default)
@@ -19,13 +19,13 @@
  * Note:
  * The challenging part is to skip hyper marks and put the space (if any) into
  * the right places.
- * 
+ *
  * Examples (betweenMixedWidthContent = true):
  * - *a*啊 -> *a* 啊
  * - *a *啊 -> *a* 啊
  * - *啊*a -> *啊* a
  * - *啊 *a -> *啊* a
- * 
+ *
  * Examples (betweenMixedWidthContent = false):
  * - *a* 啊 -> *a*啊
  * - *a *啊 -> *a*啊
@@ -33,16 +33,25 @@
  * - *啊 *a -> *啊*a
  */
 
-import { CharType, Handler, isContentType, MutableGroupToken, MutableToken } from "../parser"
-import { findExpectedVisibleTokenAfter, findSpaceHostInHyperMarkSeq, Options } from "./util"
+import {
+  CharType,
+  Handler,
+  isContentType,
+  MutableGroupToken,
+  MutableToken
+} from '../parser'
+import {
+  findExpectedVisibleTokenAfter,
+  findMarkSeqBetween,
+  Options
+} from './util'
 
 export const generateHandler = (options: Options): Handler => {
   const onlyOneBetweenHalfWidthContentOption =
     options?.spaceBetweenHalfWidthContent
   const noBetweenFullWidthContentOption =
     options?.noSpaceBetweenFullWidthContent
-  const betweenMixedWidthContentOption =
-    options?.spaceBetweenMixedWidthContent
+  const betweenMixedWidthContentOption = options?.spaceBetweenMixedWidthContent
 
   return (token: MutableToken, index: number, group: MutableGroupToken) => {
     // skip non-content tokens
@@ -56,15 +65,7 @@ export const generateHandler = (options: Options): Handler => {
       return
     }
 
-    // get the space host
-    // the `tokenSeq` include the token itself and exclude the next content token
-    // so the `markSeq` should be one off from the beginning of tokenSeq
-    // if the `markSeq` is empty, the spaceHost should be the token itself
-    // the `tokenSeq` and `spaceHost` are also to be travelled later
-    const contentTokenAfterIndex = group.indexOf(contentTokenAfter)
-    const tokenSeq = group.slice(index, contentTokenAfterIndex)
-    const markSeq = tokenSeq.slice(1)
-    const spaceHost = tokenSeq.length > 1 ? findSpaceHostInHyperMarkSeq(group, markSeq) : token
+    const { spaceHost, tokenSeq } = findMarkSeqBetween(group, token, contentTokenAfter)
 
     // skip if the space host is not found
     if (!spaceHost) {

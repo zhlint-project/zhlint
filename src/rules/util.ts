@@ -221,28 +221,14 @@ const spreadHyperMarkSeq = (
   }
 }
 
-export const findHyperMarkSeq = (group: GroupToken, token: Token): Token[] => {
+const findHyperMarkSeq = (group: GroupToken, token: Token): Token[] => {
   const seq: Token[] = [token]
   spreadHyperMarkSeq(group, token, seq, false)
   spreadHyperMarkSeq(group, token, seq, true)
   return seq
 }
 
-export const hasSpaceInHyperMarkSeq = (
-  group: GroupToken,
-  markSeq: Token[]
-): boolean => {
-  if (markSeq.some((markToken) => markToken.modifiedSpaceAfter)) {
-    return true
-  }
-  const tokenBefore = findTokenBefore(group, markSeq[0])
-  if (tokenBefore) {
-    return !!tokenBefore.modifiedSpaceAfter
-  }
-  return false
-}
-
-export const findSpaceHostInHyperMarkSeq = (
+const findSpaceHostInHyperMarkSeq = (
   group: GroupToken,
   hyperMarkSeq: Token[]
 ): Token | undefined => {
@@ -293,9 +279,11 @@ export const findSpaceHostInHyperMarkSeq = (
   return tokenBefore
 }
 
-// TODO: apply this to more places
-
-export const findMarkSeqBetween = (group: GroupToken, before: Token, after: Token): {
+export const findMarkSeqBetween = (
+  group: GroupToken,
+  before: Token,
+  after: Token
+): {
   spaceHost?: Token
   markSeq: Token[]
   tokenSeq: Token[]

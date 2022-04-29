@@ -28,7 +28,7 @@ import {
 import {
   findExpectedVisibleTokenAfter,
   findExpectedVisibleTokenBefore,
-  findSpaceHostInHyperMarkSeq,
+  findMarkSeqBetween,
   Options
 } from './util'
 
@@ -37,8 +37,7 @@ const isNormalPunctuation = (char: string): boolean =>
   normalPunctuationList.indexOf(char) >= 0
 
 export const generateHandler = (options: Options): Handler => {
-  const noBeforePunctuationOption =
-    options?.noSpaceBeforePunctuation
+  const noBeforePunctuationOption = options?.noSpaceBeforePunctuation
   const oneAfterHalfWidthPunctuationOption =
     options?.spaceAfterHalfWidthPunctuation
   const noAfterFullWidthPunctuationOption =
@@ -57,14 +56,11 @@ export const generateHandler = (options: Options): Handler => {
     if (noBeforePunctuationOption) {
       const contentTokenBefore = findExpectedVisibleTokenBefore(group, token)
       if (contentTokenBefore && isContentType(contentTokenBefore.type)) {
-        // get token seq and space host
-        const contentTokenBeforeIndex = group.indexOf(contentTokenBefore)
-        const tokenSeq = group.slice(contentTokenBeforeIndex + 1, index + 1)
-        const markSeq = tokenSeq.slice(1)
-        const spaceHost =
-          tokenSeq.length > 1
-            ? findSpaceHostInHyperMarkSeq(group, markSeq)
-            : contentTokenBefore
+        const { spaceHost, tokenSeq } = findMarkSeqBetween(
+          group,
+          contentTokenBefore,
+          token
+        )
 
         // no space
         if (spaceHost) {
@@ -87,14 +83,12 @@ export const generateHandler = (options: Options): Handler => {
     ) {
       const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
       if (contentTokenAfter && isContentType(contentTokenAfter.type)) {
-        // get token seq and space host
-        const contentTokenAfterIndex = group.indexOf(contentTokenAfter)
-        const tokenSeq = group.slice(index, contentTokenAfterIndex)
-        const markSeq = tokenSeq.slice(1)
-        const spaceHost =
-          tokenSeq.length > 1
-            ? findSpaceHostInHyperMarkSeq(group, markSeq)
-            : token
+        const { spaceHost, tokenSeq } = findMarkSeqBetween(
+          group,
+          token,
+          contentTokenAfter
+        )
+
         // check the space after
         if (spaceHost) {
           spaceHost.modifiedSpaceAfter =

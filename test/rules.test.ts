@@ -72,7 +72,7 @@ describe('lint by rule', () => {
   })
   test('[hyper-mark] the position of spaces around hyper marks (if any)', () => {
     const options: Options = {
-      rules: { spaceOutsideCode: true, noSpaceInsideMark: true }
+      rules: { noSpaceInsideMark: true }
     }
     expect(lint('x ** yyy ** z', options)).toBe('x **yyy** z')
     expect(lint('x _** yyy ** _ z', options)).toBe('x _**yyy**_ z')

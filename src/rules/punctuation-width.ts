@@ -1,18 +1,33 @@
 /**
  * @fileoverview
- * 
+ *
  * This rule will format each punctuation into the right width options.
- * 
+ *
  * Options:
  * - halfWidthPunctuation: string
  * - fullWidthPunctuation: string
  */
 
-import { CharType, GroupTokenType, Handler, isPunctuationType, MutableGroupToken, MutableToken, SingleTokenType } from "../parser"
-import { findHyperMarkSeq, findNonHyperVisibleTokenAfter, findNonHyperVisibleTokenBefore, findTokenAfter, findTokenBefore, hasSpaceInHyperMarkSeq, Options } from "./util"
+import {
+  CharType,
+  GroupTokenType,
+  Handler,
+  isPunctuationType,
+  MutableGroupToken,
+  MutableToken,
+  SingleTokenType
+} from '../parser'
+import {
+  findMarkSeqBetween,
+  findNonHyperVisibleTokenAfter,
+  findNonHyperVisibleTokenBefore,
+  Options
+} from './util'
 
 type WidthPairList = Array<[halfWidth: string, fullWidth: string]>
-type WidthSidePairList = Array<[halfWidth: string, fullWidthLeftSide: string, fullWidthRightSide: string]>
+type WidthSidePairList = Array<
+  [halfWidth: string, fullWidthLeftSide: string, fullWidthRightSide: string]
+>
 type AlterMap = Record<string, string>
 type AlterPairMap = Record<string, [leftSide: string, rightSide: string]>
 
@@ -34,7 +49,9 @@ const widthSidePairList: WidthSidePairList = [
 const defaultHalfWidthOption = `()`
 const defaultFullWidthOption = `，。：；？！“”‘’`
 
-const parseOptions = (options: Options): {
+const parseOptions = (
+  options: Options
+): {
   halfWidthMap: AlterMap
   fullWidthMap: AlterMap
   fullWidthPairMap: AlterPairMap
@@ -59,7 +76,10 @@ const parseOptions = (options: Options): {
       halfWidthMap[left] = half
       halfWidthMap[right] = half
     }
-    if (fullWidthOption.indexOf(left) >= 0 || fullWidthOption.indexOf(right) >= 0) {
+    if (
+      fullWidthOption.indexOf(left) >= 0 ||
+      fullWidthOption.indexOf(right) >= 0
+    ) {
       fullWidthPairMap[half] = [left, right]
     }
   })
@@ -75,12 +95,7 @@ const needKeep = (group: MutableGroupToken, token: MutableToken): boolean => {
     group,
     token
   )
-  const nonHyperVisibleTokenAfter = findNonHyperVisibleTokenAfter(
-    group,
-    token
-  )
-  const tokenBefore = findTokenBefore(group, token)
-  const tokenAfter = findTokenAfter(group, token)
+  const nonHyperVisibleTokenAfter = findNonHyperVisibleTokenAfter(group, token)
 
   if (
     token.type === CharType.PUNCTUATION_HALF &&
@@ -89,36 +104,30 @@ const needKeep = (group: MutableGroupToken, token: MutableToken): boolean => {
     nonHyperVisibleTokenBefore.type === CharType.CONTENT_HALF &&
     nonHyperVisibleTokenAfter.type === CharType.CONTENT_HALF
   ) {
-    let hasSpaceBefore = !!nonHyperVisibleTokenBefore.modifiedSpaceAfter
-    let hasSpaceAfter = !!token.modifiedSpaceAfter
-    
-    if (nonHyperVisibleTokenBefore !== tokenBefore) {
-      const hyperMarkSeqBefore = findHyperMarkSeq(group, tokenBefore as MutableToken)
-      if (hasSpaceInHyperMarkSeq(group, hyperMarkSeqBefore)) {
-        hasSpaceBefore = true
-      }
-    }
+    const resultBefore = findMarkSeqBetween(
+      group,
+      nonHyperVisibleTokenBefore,
+      token
+    )
+    const hasSpaceBefore = resultBefore.tokenSeq.some(
+      (target) => target.modifiedSpaceAfter
+    )
 
-    if (nonHyperVisibleTokenAfter !== tokenAfter) {
-      const hyperMarkSeqAfter = findHyperMarkSeq(group, tokenAfter as MutableToken)
-      if (hasSpaceInHyperMarkSeq(group, hyperMarkSeqAfter)) {
-        hasSpaceAfter = true
-      }
-    }
-
-    if (!hasSpaceBefore && !hasSpaceAfter) {
-      return true
-    }
+    const resultAfter = findMarkSeqBetween(
+      group,
+      token,
+      nonHyperVisibleTokenAfter
+    )
+    const hasSpaceAfter = resultAfter.tokenSeq.some(
+      (target) => target.modifiedSpaceAfter
+    )
+    return !hasSpaceBefore && !hasSpaceAfter
   }
   return false
 }
 
 export const generateHandler = (options: Options): Handler => {
-  const {
-    halfWidthMap,
-    fullWidthMap,
-    fullWidthPairMap
-  } = parseOptions(options)
+  const { halfWidthMap, fullWidthMap, fullWidthPairMap } = parseOptions(options)
 
   const handleHyperSpaceOption: Handler = (
     token: MutableToken,
@@ -145,8 +154,7 @@ export const generateHandler = (options: Options): Handler => {
       if (fullWidthMap[content]) {
         token.modifiedContent = fullWidthMap[content]
         token.modifiedType = CharType.PUNCTUATION_FULL
-      }
-      else if (halfWidthMap[content]) {
+      } else if (halfWidthMap[content]) {
         token.modifiedContent = halfWidthMap[content]
         token.modifiedType = CharType.PUNCTUATION_HALF
       }
@@ -159,8 +167,7 @@ export const generateHandler = (options: Options): Handler => {
       if (fullWidthMap[content]) {
         token.modifiedContent = fullWidthMap[content]
         token.modifiedType = CharType.PUNCTUATION_FULL
-      }
-      else if (halfWidthMap[content]) {
+      } else if (halfWidthMap[content]) {
         token.modifiedContent = halfWidthMap[content]
         token.modifiedType = CharType.PUNCTUATION_HALF
       }
@@ -171,16 +178,18 @@ export const generateHandler = (options: Options): Handler => {
     const startContent = (token as MutableGroupToken).modifiedStartContent
     const endContent = (token as MutableGroupToken).modifiedEndContent
     if (fullWidthPairMap[startContent]) {
-      (token as MutableGroupToken).modifiedStartContent = fullWidthPairMap[startContent][0]
-    }
-    else if (halfWidthMap[startContent]) {
-      (token as MutableGroupToken).modifiedStartContent = halfWidthMap[startContent][0]
+      (token as MutableGroupToken).modifiedStartContent =
+        fullWidthPairMap[startContent][0]
+    } else if (halfWidthMap[startContent]) {
+      (token as MutableGroupToken).modifiedStartContent =
+        halfWidthMap[startContent][0]
     }
     if (fullWidthPairMap[endContent]) {
-      (token as MutableGroupToken).modifiedEndContent = fullWidthPairMap[endContent][1]
-    }
-    else if (halfWidthMap[endContent]) {
-      (token as MutableGroupToken).modifiedEndContent = halfWidthMap[endContent][1]
+      (token as MutableGroupToken).modifiedEndContent =
+        fullWidthPairMap[endContent][1]
+    } else if (halfWidthMap[endContent]) {
+      (token as MutableGroupToken).modifiedEndContent =
+        halfWidthMap[endContent][1]
     }
   }
   return handleHyperSpaceOption
