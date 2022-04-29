@@ -22,6 +22,9 @@ import defaultSpaceBesidesPunctuationOption, {
 import defaultSpaceBesidesQuoteOption, {
   generateHandler as genSpaceBesidesQuoteOption
 } from './space-quote-option'
+import defaultSpaceBesidesBracketOption, {
+  generateHandler as genSpaceBesidesBracketOption
+} from './space-bracket-option'
 
 export const generateHandlers = (options: Options): Handler[] => {
   return [
@@ -31,7 +34,8 @@ export const generateHandlers = (options: Options): Handler[] => {
     genPunctuationUnifiedOption(options),
     genSpaceBetweenContentOption(options),
     genSpaceBesidesPunctuationOption(options),
-    genSpaceBesidesQuoteOption(options)
+    genSpaceBesidesQuoteOption(options),
+    genSpaceBesidesBracketOption(options)
   ]
 }
 
@@ -42,7 +46,8 @@ const defaultHandlers: Handler[] = [
   defaultPunctuationUnifiedOption,
   defaultSpaceBetweenContentOption,
   defaultSpaceBesidesPunctuationOption,
-  defaultSpaceBesidesQuoteOption
+  defaultSpaceBesidesQuoteOption,
+  defaultSpaceBesidesBracketOption
 ]
 
 export default defaultHandlers

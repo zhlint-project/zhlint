@@ -213,4 +213,15 @@ describe('lint by rule', () => {
       expect(lint('一。 “ 二 ” 。 三', options)).toBe('一。“ 二 ”。 三')
     })
   })
+  describe('[space-bracket-option] the space around brackets', () => {
+    test('no space inside', () => {
+      // TODO:
+    })
+    test('one space outside', () => {
+      // TODO:
+    })
+    test('no space outside', () => {
+      // TODO:
+    })
+  })
 })

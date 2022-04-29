@@ -8,13 +8,6 @@
  * - space.noInsideQuote: boolean | undefined
  */
 
-// TODO:
-// - find quotes as groups
-// - get token outside the quote
-//   - full-width -> no space
-//   - half-width -> one space
-// - no space inside the quote
-
 import {
   CharType,
   GroupTokenType,

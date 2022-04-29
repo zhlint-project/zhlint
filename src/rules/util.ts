@@ -29,6 +29,8 @@ export type Options = {
     noAfterFullWidthPunctuation?: boolean
     oneOutsideQuote?: boolean
     noInsideQuote?: boolean
+    oneOutsideBracket?: boolean
+    noInsideBracket?: boolean
   }
 }
 
