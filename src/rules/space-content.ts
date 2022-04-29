@@ -5,16 +5,16 @@
  * content.
  * 
  * Options:
- * - space.onlyOneBetweenHalfWidthContentOption: boolean | undefined
+ * - spaceBetweenHalfWidthContent: boolean | undefined
  *   - `true`: ensure one space between half-width content (default)
  *   - `false` or `undefined`: do nothing, just keep the original format
- * - space.betweenMixedWidthContent: boolean | undefined
+ * - noSpaceBetweenFullWidthContent: boolean | undefined
+ *   - `true`: remove the space between full-width content (default)
+ *   - `false` or `undefined`: do nothing, just keep the original format
+ * - spaceBetweenMixedWidthContent: boolean | undefined
  *   - `true`: keep one space between width-mixed content (default)
  *   - `false`: no space between width-mixed content
  *   - `undefined`: do nothing, just keep the original format
- * - space.noBetweenFullWidthContent: boolean | undefined
- *   - `true`: remove the space between full-width content (default)
- *   - `false` or `undefined`: do nothing, just keep the original format
  *
  * Note:
  * The challenging part is to skip hyper marks and put the space (if any) into
@@ -37,9 +37,12 @@ import { CharType, Handler, isContentType, MutableGroupToken, MutableToken } fro
 import { findExpectedVisibleTokenAfter, findSpaceHostInHyperMarkSeq, Options } from "./util"
 
 export const generateHandler = (options: Options): Handler => {
-  const onlyOneBetweenHalfWidthContentOption = options?.space?.onlyOneBetweenHalfWidthContent
-  const betweenMixedWidthContentOption = options?.space?.betweenMixedWidthContent
-  const noBetweenFullWidthContentOption = options?.space?.noBetweenFullWidthContent
+  const onlyOneBetweenHalfWidthContentOption =
+    options?.spaceBetweenHalfWidthContent
+  const noBetweenFullWidthContentOption =
+    options?.noSpaceBetweenFullWidthContent
+  const betweenMixedWidthContentOption =
+    options?.spaceBetweenMixedWidthContent
 
   return (token: MutableToken, index: number, group: MutableGroupToken) => {
     // skip non-content tokens
@@ -117,9 +120,7 @@ export const generateHandler = (options: Options): Handler => {
 }
 
 export default generateHandler({
-  space: {
-    onlyOneBetweenHalfWidthContent: true,
-    betweenMixedWidthContent: true,
-    noBetweenFullWidthContent: true
-  }
+  spaceBetweenHalfWidthContent: true,
+  noSpaceBetweenFullWidthContent: true,
+  spaceBetweenMixedWidthContent: true
 })

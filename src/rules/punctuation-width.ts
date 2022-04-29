@@ -4,8 +4,8 @@
  * This rule will format each punctuation into the right width options.
  * 
  * Options:
- * - punctuation.halfWidth: string
- * - punctuation.fullWidth: string
+ * - halfWidthPunctuation: string
+ * - fullWidthPunctuation: string
  */
 
 import { CharType, GroupTokenType, Handler, isPunctuationType, MutableGroupToken, MutableToken, SingleTokenType } from "../parser"
@@ -39,8 +39,8 @@ const parseOptions = (options: Options): {
   fullWidthMap: AlterMap
   fullWidthPairMap: AlterPairMap
 } => {
-  const halfWidthOption = options?.punctuation?.halfWidth || ''
-  const fullWidthOption = options?.punctuation?.fullWidth || ''
+  const halfWidthOption = options?.halfWidthPunctuation || ''
+  const fullWidthOption = options?.fullWidthPunctuation || ''
 
   const halfWidthMap: AlterMap = {}
   const fullWidthMap: AlterMap = {}
@@ -187,8 +187,6 @@ export const generateHandler = (options: Options): Handler => {
 }
 
 export default generateHandler({
-  punctuation: {
-    halfWidth: defaultHalfWidthOption,
-    fullWidth: defaultFullWidthOption
-  }
+  halfWidthPunctuation: defaultHalfWidthOption,
+  fullWidthPunctuation: defaultFullWidthOption
 })

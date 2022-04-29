@@ -3,6 +3,9 @@
  *
  * This rule is to ensure all the existing spaces should be outside hyper
  * marks like *, _, [, ], etc.
+ * 
+ * Options:
+ * - noSpaceInsideMark: boolean | undefined
  *
  * For example:
  * - `x ** yyy ** z` should be `x **yyy** z`
@@ -21,7 +24,8 @@ import {
   hasSpaceInHyperMarkSeq,
   findHyperMarkSeq,
   findSpaceHostInHyperMarkSeq,
-  findTokenBefore
+  findTokenBefore,
+  Options
 } from './util'
 import {
   Handler,
@@ -93,6 +97,15 @@ const handleHyperSpacePosition: Handler = (
   })
 }
 
-export const generateHandler = (): Handler => handleHyperSpacePosition
+export const generateHandler = (options: Options): Handler => {
+  if (!options.noSpaceInsideMark) {
+    return () => {
+      // Do nothing.
+    }
+  }
+  return handleHyperSpacePosition
+}
 
-export default handleHyperSpacePosition
+export default generateHandler({
+  noSpaceInsideMark: true
+})

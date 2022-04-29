@@ -11,47 +11,38 @@ import {
 
 // options
 
-// TODO:
-// - halfWidthPunctuation?: string
-// - fullWidthPunctuation?: string
-// - unifiyPunctuation?: 'traditional' | 'simplified'
-
-// - spaceBetweenHalfWidthContent?: boolean
-// - noSpaceBetweenFullWidthContent?: boolean
-// - spaceBetweenMixedWidthContent?: boolean
-
-// - noSpaceBeforePunctuation?: boolean
-// - spaceAfterHalfWidthPunctuation?: boolean
-// - noSpaceAfterFullWidthPunctuation?: boolean
-
-// - spaceOutsideQuote?: boolean
-// - noSpaceInsideQuote?: boolean
-
-// - spaceOutsideBracket?: boolean
-// - noSpaceInsideBracket?: boolean
-
-// - spaceOutsideCode?: boolean
-
 export type Options = {
-  hyper?: {
-    codeSpace?: boolean
-  }
-  punctuation?: {
-    halfWidth?: string
-    fullWidth?: string
-    unified?: 'traditional' | 'simplified'
-  }
-  space?: {
-    onlyOneBetweenHalfWidthContent?: boolean
-    noBetweenFullWidthContent?: boolean
-    betweenMixedWidthContent?: boolean
-    noBeforePunctuation?: boolean
-    oneAfterHalfWidthPunctuation?: boolean
-    noAfterFullWidthPunctuation?: boolean
-    oneOutsideQuote?: boolean
-    noInsideQuote?: boolean
-    oneOutsideBracket?: boolean
-    noInsideBracket?: boolean
+  // punctuation
+  halfWidthPunctuation?: string
+  fullWidthPunctuation?: string
+  unifiedPunctuation?: 'traditional' | 'simplified'
+
+  // space around content
+  spaceBetweenHalfWidthContent?: boolean
+  noSpaceBetweenFullWidthContent?: boolean
+  spaceBetweenMixedWidthContent?: boolean
+
+  // space around punctuation
+  noSpaceBeforePunctuation?: boolean
+  spaceAfterHalfWidthPunctuation?: boolean
+  noSpaceAfterFullWidthPunctuation?: boolean
+
+  // space around quote and bracket
+  spaceOutsideQuote?: boolean
+  noSpaceInsideQuote?: boolean
+  spaceOutsideBracket?: boolean
+  noSpaceInsideBracket?: boolean
+
+  // space around code
+  spaceOutsideCode?: boolean
+
+  // space around mark
+  noSpaceInsideMark?: boolean
+
+  // test
+  skip?: {
+    abbrs?: string[]
+    ellipsis?: boolean
   }
 }
 

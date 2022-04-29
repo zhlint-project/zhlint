@@ -4,8 +4,8 @@
  * This rule is checking spaces besides brackets.
  * 
  * Options
- * - space.oneOutsideBracket: boolean | undefined
- * - space.noInsideBracket: boolean | undefined
+ * - spaceOutsideBracket: boolean | undefined
+ * - noSpaceInsideBracket: boolean | undefined
  */
 
 import {
@@ -27,8 +27,8 @@ import {
 } from './util'
 
 export const generateHandler = (options: Options): Handler => {
-  const oneOutsideBracketOption = options?.space?.oneOutsideBracket
-  const noInsideBracketOption = options?.space?.noInsideBracket
+  const oneOutsideBracketOption = options?.spaceOutsideBracket
+  const noInsideBracketOption = options?.noSpaceInsideBracket
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-bracket tokens
@@ -127,8 +127,6 @@ export const generateHandler = (options: Options): Handler => {
 }
 
 export default generateHandler({
-  space: {
-    oneOutsideBracket: true,
-    noInsideBracket: true
-  }
+  spaceOutsideBracket: true,
+  noSpaceInsideBracket: true
 })

@@ -5,7 +5,7 @@
  * Usually, it's just about Chinese quotes.
  * 
  * Options:
- * - punctuation.unified: "traditional" | "simplified" | undefined
+ * - unifiedPunctuation: "traditional" | "simplified" | undefined
  */
 
 import { GroupTokenType, Handler, MutableToken } from "../parser"
@@ -53,7 +53,7 @@ const checkChar = (content: string, objectMap: Record<string, QuoteType>, unifie
 }
 
 export const generateHandler = (options: Options): Handler => {
-  const unifiedOption = options?.punctuation?.unified
+  const unifiedOption = options?.unifiedPunctuation
 
   if (!unifiedOption) {
     return () => {
@@ -79,7 +79,5 @@ export const generateHandler = (options: Options): Handler => {
 }
 
 export default generateHandler({
-  punctuation: {
-    unified: 'simplified',
-  }
+  unifiedPunctuation: 'simplified'
 })

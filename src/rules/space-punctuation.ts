@@ -6,13 +6,13 @@
  * For half-width punctuations, we need a space after that.
  *
  * Options
- * - space.noBeforePunctuation: boolean | undefined
+ * - noSpaceBeforePunctuation: boolean | undefined
  *   - `true`: remove spaces before a half-width punctuation (default)
  *   - `false` or `undefined`: do nothing, just keep the original format
- * - space.oneAfterHalfWidthPunctuation: boolean | undefined
+ * - spaceAfterHalfWidthPunctuation: boolean | undefined
  *   - `true`: ensure one space after a half-width punctuation (default)
  *   - `false` or `undefined`: do nothing, just keep the original format
- * - space.noAfterFullWidthPunctuation: boolean | undefined
+ * - noSpaceAfterFullWidthPunctuation: boolean | undefined
  *   - `true`: remove spaces around a full-width punctuation (default)
  *   - `false` or `undefined`: do nothing, just keep the original format
  */
@@ -37,11 +37,12 @@ const isNormalPunctuation = (char: string): boolean =>
   normalPunctuationList.indexOf(char) >= 0
 
 export const generateHandler = (options: Options): Handler => {
-  const noBeforePunctuationOption = options?.space?.noBeforePunctuation
+  const noBeforePunctuationOption =
+    options?.noSpaceBeforePunctuation
   const oneAfterHalfWidthPunctuationOption =
-    options?.space?.oneAfterHalfWidthPunctuation
+    options?.spaceAfterHalfWidthPunctuation
   const noAfterFullWidthPunctuationOption =
-    options?.space?.noAfterFullWidthPunctuation
+    options?.noSpaceAfterFullWidthPunctuation
 
   return (token: MutableToken, index: number, group: MutableGroupToken) => {
     // skip non-punctuation tokens and find normal punctuations
@@ -110,9 +111,7 @@ export const generateHandler = (options: Options): Handler => {
 }
 
 export default generateHandler({
-  space: {
-    noBeforePunctuation: true,
-    oneAfterHalfWidthPunctuation: true,
-    noAfterFullWidthPunctuation: true
-  }
+  noSpaceBeforePunctuation: true,
+  spaceAfterHalfWidthPunctuation: true,
+  noSpaceAfterFullWidthPunctuation: true
 })

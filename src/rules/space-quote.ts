@@ -4,8 +4,8 @@
  * This rule is checking spaces besides quotes.
  * 
  * Options
- * - space.oneOutsideQuote: boolean | undefined
- * - space.noInsideQuote: boolean | undefined
+ * - spaceOutsideQuote: boolean | undefined
+ * - noSpaceInsideQuote: boolean | undefined
  */
 
 import {
@@ -24,8 +24,8 @@ import {
 } from './util'
 
 export const generateHandler = (options: Options): Handler => {
-  const noInsideQuoteOption = options?.space?.noInsideQuote
-  const oneOutsideQuoteOption = options?.space?.oneOutsideQuote
+  const oneOutsideQuoteOption = options?.spaceOutsideQuote
+  const noInsideQuoteOption = options?.noSpaceInsideQuote
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     if (token.type !== GroupTokenType.GROUP) {
@@ -139,8 +139,6 @@ export const generateHandler = (options: Options): Handler => {
 }
 
 export default generateHandler({
-  space: {
-    oneOutsideQuote: true,
-    noInsideQuote: true
-  }
+  spaceOutsideQuote: true,
+  noSpaceInsideQuote: true
 })

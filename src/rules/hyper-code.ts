@@ -8,7 +8,7 @@
  * in markdown/html.
  *
  * Options:
- * - hyper.codeSpace: boolean | undefined
+ * - spaceOutsideCode: boolean | undefined
  *   - `true`: keep one space outside (default)
  *   - `false`: no space outside
  *   - `undefined`: do nothing, just keep the original format
@@ -123,7 +123,7 @@ const checkSpaceInHyperMarkSeq = (
 }
 
 export const generateHandler = (options: Options): Handler => {
-  const needSpaceOption = options?.hyper?.codeSpace
+  const needSpaceOption = options?.spaceOutsideCode
   const handleHyperSpaceOption: Handler = (
     token: MutableToken,
     _,
@@ -189,10 +189,6 @@ export const generateHandler = (options: Options): Handler => {
   return handleHyperSpaceOption
 }
 
-const handleHyperSpaceOption = generateHandler({
-  hyper: {
-    codeSpace: true
-  }
+export default generateHandler({
+  spaceOutsideCode: true
 })
-
-export default handleHyperSpaceOption
