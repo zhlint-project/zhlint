@@ -215,13 +215,31 @@ describe('lint by rule', () => {
   })
   describe('[space-bracket-option] the space around brackets', () => {
     test('no space inside', () => {
-      // TODO:
+      const options: Options = {
+        rules: { space: { noInsideBracket: true } }
+      }
+      expect(lint('foo (bar) baz', options)).toBe('foo (bar) baz')
+      expect(lint('foo ( bar ) baz', options)).toBe('foo (bar) baz')
+      expect(lint('foo （bar） baz', options)).toBe('foo （bar） baz')
+      expect(lint('foo （ bar ） baz', options)).toBe('foo （bar） baz')
     })
     test('one space outside', () => {
-      // TODO:
+      const options: Options = {
+        rules: { space: { oneOutsideBracket: true } }
+      }
+      expect(lint('foo(bar)baz', options)).toBe('foo (bar) baz')
+      expect(lint('foo ( bar ) baz', options)).toBe('foo ( bar ) baz')
+      expect(lint('foo（bar）baz', options)).toBe('foo（bar）baz')
+      expect(lint('foo （ bar ） baz', options)).toBe('foo（ bar ）baz')
     })
     test('no space outside', () => {
-      // TODO:
+      const options: Options = {
+        rules: { space: { oneOutsideBracket: false } }
+      }
+      expect(lint('foo(bar)baz', options)).toBe('foo(bar)baz')
+      expect(lint('foo ( bar ) baz', options)).toBe('foo( bar )baz')
+      expect(lint('foo（bar）baz', options)).toBe('foo（bar）baz')
+      expect(lint('foo （ bar ） baz', options)).toBe('foo（ bar ）baz')
     })
   })
 })

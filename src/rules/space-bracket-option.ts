@@ -54,7 +54,7 @@ export const generateHandler = (options: Options): Handler => {
     }
 
     // spaces outside
-    if (oneOutsideBracketOption) {
+    if (typeof oneOutsideBracketOption !== 'undefined') {
       if (token.markSide === MarkSideType.LEFT) {
         const contentTokenBefore = findNonHyperVisibleTokenBefore(group, token)
         if (contentTokenBefore) {
