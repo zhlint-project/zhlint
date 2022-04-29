@@ -11,6 +11,27 @@ import {
 
 // options
 
+// TODO:
+// - halfWidthPunctuation?: string
+// - fullWidthPunctuation?: string
+// - unifiyPunctuation?: 'traditional' | 'simplified'
+
+// - spaceBetweenHalfWidthContent?: boolean
+// - noSpaceBetweenFullWidthContent?: boolean
+// - spaceBetweenMixedWidthContent?: boolean
+
+// - noSpaceBeforePunctuation?: boolean
+// - spaceAfterHalfWidthPunctuation?: boolean
+// - noSpaceAfterFullWidthPunctuation?: boolean
+
+// - spaceOutsideQuote?: boolean
+// - noSpaceInsideQuote?: boolean
+
+// - spaceOutsideBracket?: boolean
+// - noSpaceInsideBracket?: boolean
+
+// - spaceOutsideCode?: boolean
+
 export type Options = {
   hyper?: {
     codeSpace?: boolean
@@ -280,6 +301,8 @@ export const findSpaceHostInHyperMarkSeq = (
   }
   return tokenBefore
 }
+
+// TODO: apply this to more places
 
 export const findMarkSeqBetween = (group: GroupToken, before: Token, after: Token): {
   spaceHost?: Token

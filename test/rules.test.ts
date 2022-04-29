@@ -242,4 +242,11 @@ describe('lint by rule', () => {
       expect(lint('foo （ bar ） baz', options)).toBe('foo（ bar ）baz')
     })
   })
+  describe.todo('combo cases', () => {
+    // TODO:
+  })
 })
+
+// TODO: validation and messages
+
+// TODO: error handling
