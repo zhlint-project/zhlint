@@ -41,6 +41,7 @@ import {
   MutableToken
 } from '../parser'
 import {
+  checkSpaceAfter,
   findExpectedVisibleTokenAfter,
   findMarkSeqBetween,
   Options
@@ -96,10 +97,13 @@ export const generateHandler = (options: Options): Handler => {
           return
         }
         if (target === spaceHost) {
-          target.modifiedSpaceAfter =
-            token.type === CharType.CONTENT_HALF ? ' ' : ''
+          checkSpaceAfter(
+            target,
+            token.type === CharType.CONTENT_HALF ? ' ' : '',
+            '...'
+          )
         } else {
-          target.modifiedSpaceAfter = ''
+          checkSpaceAfter(target, '', '....')
         }
       })
     } else {
@@ -111,9 +115,13 @@ export const generateHandler = (options: Options): Handler => {
       // set the space between
       tokenSeq.forEach((target) => {
         if (target === spaceHost) {
-          target.modifiedSpaceAfter = betweenMixedWidthContentOption ? ' ' : ''
+          checkSpaceAfter(
+            target,
+            betweenMixedWidthContentOption ? ' ' : '',
+            '...'
+          )
         } else {
-          target.modifiedSpaceAfter = ''
+          checkSpaceAfter(target, '', '....')
         }
       })
     }

@@ -23,7 +23,8 @@ import {
   Options,
   findExpectedVisibleTokenBefore,
   findExpectedVisibleTokenAfter,
-  findMarkSeqBetween
+  findMarkSeqBetween,
+  checkSpaceAfter
 } from './util'
 import {
   Handler,
@@ -56,9 +57,9 @@ export const generateHandler = (options: Options): Handler => {
         tokenSeq.forEach((target) => {
           if (target !== spaceHost) {
             if (target.modifiedSpaceAfter) {
-              spaceHost.modifiedSpaceAfter = ' '
+              checkSpaceAfter(spaceHost, ' ', '...')
             }
-            target.modifiedSpaceAfter = ''
+            checkSpaceAfter(target, '', '....')
           }
         })
       }

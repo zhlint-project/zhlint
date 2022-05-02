@@ -17,6 +17,8 @@ import {
   MutableToken
 } from '../parser'
 import {
+  checkInnerSpaceBefore,
+  checkSpaceAfter,
   findMarkSeqBetween,
   findNonHyperVisibleTokenAfter,
   findNonHyperVisibleTokenBefore,
@@ -36,10 +38,10 @@ export const generateHandler = (options: Options): Handler => {
       const firstInsdieToken = token[0]
       const lastInsideToken = token[token.length - 1]
       if (firstInsdieToken) {
-        token.modifiedInnerSpaceBefore = ''
+        checkInnerSpaceBefore(token, '', '..')
       }
       if (lastInsideToken) {
-        lastInsideToken.modifiedSpaceAfter = ''
+        checkSpaceAfter(lastInsideToken, '', '..')
       }
     }
 
@@ -71,7 +73,7 @@ export const generateHandler = (options: Options): Handler => {
             token
           )
           tokenSeq.forEach((target) => {
-            target.modifiedSpaceAfter = ''
+            checkSpaceAfter(target, '', '..')
           })
         }
         if (
@@ -86,9 +88,9 @@ export const generateHandler = (options: Options): Handler => {
           )
           tokenSeq.forEach((target) => {
             if (target === spaceHost) {
-              target.modifiedSpaceAfter = oneOutsideQuoteOption ? ' ' : ''
+              checkSpaceAfter(target, oneOutsideQuoteOption ? ' ' : '', '..')
             } else {
-              target.modifiedSpaceAfter = ''
+              checkSpaceAfter(target, '', '..')
             }
           })
         }
@@ -113,7 +115,7 @@ export const generateHandler = (options: Options): Handler => {
             contentTokenAfter
           )
           tokenSeq.forEach((target) => {
-            target.modifiedSpaceAfter = ''
+            checkSpaceAfter(target, '', '..')
           })
         }
         if (
@@ -127,9 +129,9 @@ export const generateHandler = (options: Options): Handler => {
           )
           tokenSeq.forEach((target) => {
             if (target === spaceHost) {
-              target.modifiedSpaceAfter = oneOutsideQuoteOption ? ' ' : ''
+              checkSpaceAfter(target, oneOutsideQuoteOption ? ' ' : '', '..')
             } else {
-              target.modifiedSpaceAfter = ''
+              checkSpaceAfter(target, '', '..')
             }
           })
         }

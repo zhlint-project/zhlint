@@ -9,7 +9,7 @@
  */
 
 import { GroupTokenType, Handler, MutableToken } from "../parser"
-import { Options } from "./util"
+import { checkEndContent, checkStartContent, Options } from "./util"
 
 type UnifiedOptions = "traditional" | "simplified"
 
@@ -70,8 +70,8 @@ export const generateHandler = (options: Options): Handler => {
     const modifiedStartContent = checkChar(token.modifiedStartContent, objectMap, unifiedMap)
     const modifiedEndContent = checkChar(token.modifiedEndContent, objectMap, unifiedMap)
     if (modifiedStartContent !== token.modifiedStartContent || modifiedEndContent !== token.modifiedEndContent) {
-      token.modifiedStartContent = modifiedStartContent
-      token.modifiedEndContent = modifiedEndContent
+      checkStartContent(token, modifiedStartContent, '.....')
+      checkEndContent(token, modifiedEndContent, '......')
     }
   }
 

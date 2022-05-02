@@ -24,7 +24,8 @@ import {
   findNonHyperVisibleTokenAfter,
   findNonHyperVisibleTokenBefore,
   Options,
-  findMarkSeqBetween
+  findMarkSeqBetween,
+  checkSpaceAfter
 } from './util'
 import {
   Handler,
@@ -66,9 +67,10 @@ export const generateHandler = (options: Options): Handler => {
       if (spaceHost) {
         tokenSeq.forEach(target => {
           if (target === spaceHost) {
-            target.modifiedSpaceAfter = needSpaceOption ? ' ' : ''
+            checkSpaceAfter(target, needSpaceOption ? ' ' : '', '.')
           } else {
             target.modifiedSpaceAfter = ''
+            checkSpaceAfter(target, '', '..')
           }
         })
       }

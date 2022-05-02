@@ -26,6 +26,7 @@ import {
   MutableToken
 } from '../parser'
 import {
+  checkSpaceAfter,
   findExpectedVisibleTokenAfter,
   findExpectedVisibleTokenBefore,
   findMarkSeqBetween,
@@ -64,11 +65,12 @@ export const generateHandler = (options: Options): Handler => {
 
         // no space
         if (spaceHost) {
-          spaceHost.modifiedSpaceAfter = ''
+          // TODO: dedupe
+          checkSpaceAfter(spaceHost, '', '..')
         }
         tokenSeq.forEach((target) => {
           if (target !== token) {
-            target.modifiedSpaceAfter = ''
+            checkSpaceAfter(target, '', '..')
           }
         })
       }
@@ -91,12 +93,15 @@ export const generateHandler = (options: Options): Handler => {
 
         // check the space after
         if (spaceHost) {
-          spaceHost.modifiedSpaceAfter =
-            token.type === CharType.PUNCTUATION_HALF ? ' ' : ''
+          checkSpaceAfter(
+            spaceHost,
+            token.type === CharType.PUNCTUATION_HALF ? ' ' : '',
+            '..'
+          )
         }
         tokenSeq.forEach((target) => {
           if (target !== spaceHost && target !== contentTokenAfter) {
-            target.modifiedSpaceAfter = ''
+            checkSpaceAfter(target, '', '..')
           }
         })
       }

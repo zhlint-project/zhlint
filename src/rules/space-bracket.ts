@@ -18,6 +18,7 @@ import {
   SingleTokenType
 } from '../parser'
 import {
+  checkSpaceAfter,
   findMarkSeqBetween,
   findNonHyperVisibleTokenAfter,
   findNonHyperVisibleTokenBefore,
@@ -42,13 +43,13 @@ export const generateHandler = (options: Options): Handler => {
         // no space after
         const tokenAfter = findTokenAfter(group, token)
         if (tokenAfter) {
-          token.modifiedSpaceAfter = ''
+          checkSpaceAfter(token, '', '..')
         }
       } else {
         // no space before
         const tokenBefore = findTokenBefore(group, token)
         if (tokenBefore) {
-          tokenBefore.modifiedSpaceAfter = ''
+          checkSpaceAfter(tokenBefore, '', '..')
         }
       }
     }
@@ -65,7 +66,7 @@ export const generateHandler = (options: Options): Handler => {
           )
           if (token.modifiedContent === '（') {
             tokenSeq.forEach(target => {
-              target.modifiedSpaceAfter = ''
+              checkSpaceAfter(target, '', '..')
             })
           }
           if (token.modifiedContent === '(') {
@@ -73,16 +74,18 @@ export const generateHandler = (options: Options): Handler => {
             if (isContentType(contentTokenBefore.modifiedType) || contentTokenBefore.type === CharType.PUNCTUATION_HALF) {
               tokenSeq.forEach(target => {
                 if (target === spaceHost) {
-                  spaceHost.modifiedSpaceAfter = oneOutsideBracketOption
-                    ? ' '
-                    : ''
+                  checkSpaceAfter(
+                    spaceHost,
+                    oneOutsideBracketOption ? ' ' : '',
+                    '..'
+                  )
                 } else {
-                  target.modifiedSpaceAfter = ''
+                  checkSpaceAfter(target, '', '..')
                 }
               })
             } else {
               tokenSeq.forEach(target => {
-                target.modifiedSpaceAfter = ''
+                checkSpaceAfter(target, '', '..')
               })
             }
           }
@@ -97,7 +100,7 @@ export const generateHandler = (options: Options): Handler => {
           )
           if (token.modifiedContent === '）') {
             tokenSeq.forEach((target) => {
-              target.modifiedSpaceAfter = ''
+              checkSpaceAfter(target, '', '..')
             })
           }
           if (token.modifiedContent === ')') {
@@ -107,16 +110,18 @@ export const generateHandler = (options: Options): Handler => {
             ) {
               tokenSeq.forEach((target) => {
                 if (target === spaceHost) {
-                  spaceHost.modifiedSpaceAfter = oneOutsideBracketOption
-                    ? ' '
-                    : ''
+                  checkSpaceAfter(
+                    spaceHost,
+                    oneOutsideBracketOption ? ' ' : '',
+                    '..'
+                  )
                 } else {
-                  target.modifiedSpaceAfter = ''
+                  checkSpaceAfter(target, '', '..')
                 }
               })
             } else {
               tokenSeq.forEach((target) => {
-                target.modifiedSpaceAfter = ''
+                checkSpaceAfter(target, '', '..')
               })
             }
           }

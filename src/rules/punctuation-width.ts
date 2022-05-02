@@ -18,6 +18,9 @@ import {
   SingleTokenType
 } from '../parser'
 import {
+  checkContent,
+  checkEndContent,
+  checkStartContent,
   findMarkSeqBetween,
   findNonHyperVisibleTokenAfter,
   findNonHyperVisibleTokenBefore,
@@ -152,11 +155,19 @@ export const generateHandler = (options: Options): Handler => {
     if (isPunctuationType(token.type)) {
       const content = token.modifiedContent
       if (fullWidthMap[content]) {
-        token.modifiedContent = fullWidthMap[content]
-        token.modifiedType = CharType.PUNCTUATION_FULL
+        checkContent(
+          token,
+          fullWidthMap[content],
+          CharType.PUNCTUATION_FULL,
+          '.......'
+        )
       } else if (halfWidthMap[content]) {
-        token.modifiedContent = halfWidthMap[content]
-        token.modifiedType = CharType.PUNCTUATION_HALF
+        checkContent(
+          token,
+          halfWidthMap[content],
+          CharType.PUNCTUATION_HALF,
+          '........'
+        )
       }
       return
     }
@@ -165,11 +176,19 @@ export const generateHandler = (options: Options): Handler => {
     if (token.type === SingleTokenType.MARK_BRACKETS) {
       const content = token.modifiedContent
       if (fullWidthMap[content]) {
-        token.modifiedContent = fullWidthMap[content]
-        token.modifiedType = CharType.PUNCTUATION_FULL
+        checkContent(
+          token,
+          fullWidthMap[content],
+          CharType.PUNCTUATION_FULL,
+          '.........'
+        )
       } else if (halfWidthMap[content]) {
-        token.modifiedContent = halfWidthMap[content]
-        token.modifiedType = CharType.PUNCTUATION_HALF
+        checkContent(
+          token,
+          halfWidthMap[content],
+          CharType.PUNCTUATION_HALF,
+          '..........'
+        )
       }
       return
     }
@@ -178,18 +197,22 @@ export const generateHandler = (options: Options): Handler => {
     const startContent = (token as MutableGroupToken).modifiedStartContent
     const endContent = (token as MutableGroupToken).modifiedEndContent
     if (fullWidthPairMap[startContent]) {
-      (token as MutableGroupToken).modifiedStartContent =
-        fullWidthPairMap[startContent][0]
+      checkStartContent(
+        token,
+        fullWidthPairMap[startContent][0],
+        '............'
+      )
     } else if (halfWidthMap[startContent]) {
-      (token as MutableGroupToken).modifiedStartContent =
-        halfWidthMap[startContent][0]
+      checkStartContent(
+        token,
+        halfWidthMap[startContent][0],
+        '.............'
+      )
     }
     if (fullWidthPairMap[endContent]) {
-      (token as MutableGroupToken).modifiedEndContent =
-        fullWidthPairMap[endContent][1]
+      checkEndContent(token, fullWidthPairMap[endContent][1], '............')
     } else if (halfWidthMap[endContent]) {
-      (token as MutableGroupToken).modifiedEndContent =
-        halfWidthMap[endContent][1]
+      checkEndContent(token, halfWidthMap[endContent][1], '............')
     }
   }
   return handleHyperSpaceOption

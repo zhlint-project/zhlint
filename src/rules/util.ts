@@ -6,7 +6,9 @@ import {
   SingleTokenType,
   isNonHyperVisibleType,
   isInvisibleType,
-  isVisibleType
+  isVisibleType,
+  GroupTokenType,
+  TokenType
 } from '../parser'
 
 // options
@@ -323,17 +325,14 @@ export const findMarkSeqBetween = (
   }
 }
 
-// validations
+// validations helpers
 
-export const addValidation = (
+const createValidation = (
   token: Token,
-  name: string,
   target: ValidationTarget,
-  message: string
-): void => {
-  if (!token.validations) {
-    token.validations = []
-  }
+  message: string,
+  name: string
+): Validation => {
   const validation: Validation = {
     index: token.index,
     length: token.length,
@@ -350,6 +349,96 @@ export const addValidation = (
   } else if (target === ValidationTarget.INNER_SPACE_BEFORE) {
     validation.index = (token as GroupToken).startIndex
   }
+  return validation
+}
+
+export const setValidationOnTarget = (
+  token: Token,
+  target: ValidationTarget,
+  message: string,
+  name: string,
+): void => {
+  const validation = createValidation(token, target, message, name)
+  removeValidationOnTarget(token, target)
+  token.validations.push(validation)
+}
+
+export const hasValidationOnTarget = (
+  token: Token,
+  target: ValidationTarget
+): boolean => {
+  return token.validations.some((validation) => validation.target === target)
+}
+
+export const removeValidationOnTarget = (
+  token: Token,
+  target: ValidationTarget
+): void => {
+  token.validations = token.validations.filter(
+    (validation) => validation.target !== target
+  )
+}
+
+// validation checkers
+
+type Checker = (
+  token: Token,
+  value: string,
+  message: string
+) => void
+
+const genChecker = (key: keyof Token | keyof GroupToken, target: ValidationTarget): Checker => {
+  return (token: Token, value: string, message: string) => {
+    if (token[key] !== value) {
+      token[key] = value
+      setValidationOnTarget(token, target, message, '')
+    }
+  }
+}
+
+export const checkSpaceAfter: Checker = genChecker(
+  'modifiedSpaceAfter',
+  ValidationTarget.SPACE_AFTER
+)
+
+export const checkStartContent: Checker = genChecker(
+  'modifiedStartContent',
+  ValidationTarget.START_CONTENT
+)
+
+export const checkEndContent: Checker = genChecker(
+  'modifiedEndContent',
+  ValidationTarget.END_CONTENT
+)
+
+export const checkInnerSpaceBefore: Checker = genChecker(
+  'modifiedInnerSpaceBefore',
+  ValidationTarget.INNER_SPACE_BEFORE
+)
+
+export const checkContent = (
+  token: Token,
+  value: string,
+  type: TokenType,
+  message: string
+): void => {
+  if (token.modifiedContent === value) {
+    return
+  }
+  token.modifiedContent = value
+  token.modifiedType = type
+  setValidationOnTarget(token, ValidationTarget.CONTENT, message, '')
+}
+
+// legacy validation helpers
+
+export const addValidation = (
+  token: Token,
+  name: string,
+  target: ValidationTarget,
+  message: string
+): void => {
+  const validation = createValidation(token, target, message, name)
   token.validations.push(validation)
 }
 
