@@ -7,7 +7,6 @@ import {
   isNonHyperVisibleType,
   isInvisibleType,
   isVisibleType,
-  GroupTokenType,
   TokenType
 } from '../parser'
 

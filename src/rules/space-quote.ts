@@ -2,7 +2,7 @@
  * @fileoverview
  *
  * This rule is checking spaces besides quotes.
- * 
+ *
  * Options
  * - spaceOutsideQuote: boolean | undefined
  * - noSpaceInsideQuote: boolean | undefined
@@ -16,6 +16,12 @@ import {
   MutableGroupToken,
   MutableToken
 } from '../parser'
+import {
+  MARKDOWN_NOSPACE_INSIDE,
+  QUOTE_NOSPACE_INSIDE,
+  QUOTE_NOSPACE_OUTSIDE,
+  QUOTE_SPACE_OUTSIDE
+} from './messages'
 import {
   checkInnerSpaceBefore,
   checkSpaceAfter,
@@ -38,10 +44,10 @@ export const generateHandler = (options: Options): Handler => {
       const firstInsdieToken = token[0]
       const lastInsideToken = token[token.length - 1]
       if (firstInsdieToken) {
-        checkInnerSpaceBefore(token, '', '..')
+        checkInnerSpaceBefore(token, '', QUOTE_NOSPACE_INSIDE)
       }
       if (lastInsideToken) {
-        checkSpaceAfter(lastInsideToken, '', '..')
+        checkSpaceAfter(lastInsideToken, '', QUOTE_NOSPACE_INSIDE)
       }
     }
 
@@ -73,7 +79,7 @@ export const generateHandler = (options: Options): Handler => {
             token
           )
           tokenSeq.forEach((target) => {
-            checkSpaceAfter(target, '', '..')
+            checkSpaceAfter(target, '', QUOTE_NOSPACE_OUTSIDE)
           })
         }
         if (
@@ -88,9 +94,15 @@ export const generateHandler = (options: Options): Handler => {
           )
           tokenSeq.forEach((target) => {
             if (target === spaceHost) {
-              checkSpaceAfter(target, oneOutsideQuoteOption ? ' ' : '', '..')
+              checkSpaceAfter(
+                target,
+                oneOutsideQuoteOption ? ' ' : '',
+                oneOutsideQuoteOption
+                  ? QUOTE_SPACE_OUTSIDE
+                  : QUOTE_NOSPACE_OUTSIDE
+              )
             } else {
-              checkSpaceAfter(target, '', '..')
+              checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
             }
           })
         }
@@ -115,12 +127,10 @@ export const generateHandler = (options: Options): Handler => {
             contentTokenAfter
           )
           tokenSeq.forEach((target) => {
-            checkSpaceAfter(target, '', '..')
+            checkSpaceAfter(target, '', QUOTE_NOSPACE_OUTSIDE)
           })
         }
-        if (
-          contentTokenAfter.modifiedType === CharType.CONTENT_HALF
-        ) {
+        if (contentTokenAfter.modifiedType === CharType.CONTENT_HALF) {
           // oneOutsideQuoteOption
           const { tokenSeq, spaceHost } = findMarkSeqBetween(
             group,
@@ -129,9 +139,15 @@ export const generateHandler = (options: Options): Handler => {
           )
           tokenSeq.forEach((target) => {
             if (target === spaceHost) {
-              checkSpaceAfter(target, oneOutsideQuoteOption ? ' ' : '', '..')
+              checkSpaceAfter(
+                target,
+                oneOutsideQuoteOption ? ' ' : '',
+                oneOutsideQuoteOption
+                  ? QUOTE_SPACE_OUTSIDE
+                  : QUOTE_NOSPACE_OUTSIDE
+              )
             } else {
-              checkSpaceAfter(target, '', '..')
+              checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
             }
           })
         }

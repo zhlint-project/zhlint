@@ -17,6 +17,7 @@ import {
   MutableToken,
   SingleTokenType
 } from '../parser'
+import { PUNCTUATION_FULL_WIDTH, PUNCTUATION_HALF_WIDTH } from './messages'
 import {
   checkContent,
   checkEndContent,
@@ -159,14 +160,14 @@ export const generateHandler = (options: Options): Handler => {
           token,
           fullWidthMap[content],
           CharType.PUNCTUATION_FULL,
-          '.......'
+          PUNCTUATION_FULL_WIDTH
         )
       } else if (halfWidthMap[content]) {
         checkContent(
           token,
           halfWidthMap[content],
           CharType.PUNCTUATION_HALF,
-          '........'
+          PUNCTUATION_HALF_WIDTH
         )
       }
       return
@@ -180,14 +181,14 @@ export const generateHandler = (options: Options): Handler => {
           token,
           fullWidthMap[content],
           CharType.PUNCTUATION_FULL,
-          '.........'
+          PUNCTUATION_FULL_WIDTH
         )
       } else if (halfWidthMap[content]) {
         checkContent(
           token,
           halfWidthMap[content],
           CharType.PUNCTUATION_HALF,
-          '..........'
+          PUNCTUATION_HALF_WIDTH
         )
       }
       return
@@ -200,19 +201,27 @@ export const generateHandler = (options: Options): Handler => {
       checkStartContent(
         token,
         fullWidthPairMap[startContent][0],
-        '............'
+        PUNCTUATION_FULL_WIDTH
       )
     } else if (halfWidthMap[startContent]) {
       checkStartContent(
         token,
         halfWidthMap[startContent][0],
-        '.............'
+        PUNCTUATION_HALF_WIDTH
       )
     }
     if (fullWidthPairMap[endContent]) {
-      checkEndContent(token, fullWidthPairMap[endContent][1], '............')
+      checkEndContent(
+        token,
+        fullWidthPairMap[endContent][1],
+        PUNCTUATION_FULL_WIDTH
+      )
     } else if (halfWidthMap[endContent]) {
-      checkEndContent(token, halfWidthMap[endContent][1], '............')
+      checkEndContent(
+        token,
+        halfWidthMap[endContent][1],
+        PUNCTUATION_HALF_WIDTH
+      )
     }
   }
   return handleHyperSpaceOption

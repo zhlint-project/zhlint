@@ -25,6 +25,7 @@ import {
   MutableGroupToken,
   MutableToken
 } from '../parser'
+import { MARKDOWN_NOSPACE_INSIDE, PUNCTUATION_NOSPACE_AFTER, PUNCTUATION_NOSPACE_BEFORE, PUNCTUATION_SPACE_AFTER } from './messages'
 import {
   checkSpaceAfter,
   findExpectedVisibleTokenAfter,
@@ -44,7 +45,7 @@ export const generateHandler = (options: Options): Handler => {
   const noAfterFullWidthPunctuationOption =
     options?.noSpaceAfterFullWidthPunctuation
 
-  return (token: MutableToken, index: number, group: MutableGroupToken) => {
+  return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-punctuation tokens and find normal punctuations
     if (!isPunctuationType(token.type)) {
       return
@@ -65,12 +66,11 @@ export const generateHandler = (options: Options): Handler => {
 
         // no space
         if (spaceHost) {
-          // TODO: dedupe
-          checkSpaceAfter(spaceHost, '', '..')
+          checkSpaceAfter(spaceHost, '', PUNCTUATION_NOSPACE_BEFORE)
         }
         tokenSeq.forEach((target) => {
-          if (target !== token) {
-            checkSpaceAfter(target, '', '..')
+          if (target !== token && token !== spaceHost) {
+            checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
           }
         })
       }
@@ -96,12 +96,12 @@ export const generateHandler = (options: Options): Handler => {
           checkSpaceAfter(
             spaceHost,
             token.type === CharType.PUNCTUATION_HALF ? ' ' : '',
-            '..'
+            token.type === CharType.PUNCTUATION_HALF ? PUNCTUATION_SPACE_AFTER : PUNCTUATION_NOSPACE_AFTER
           )
         }
         tokenSeq.forEach((target) => {
           if (target !== spaceHost && target !== contentTokenAfter) {
-            checkSpaceAfter(target, '', '..')
+            checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
           }
         })
       }

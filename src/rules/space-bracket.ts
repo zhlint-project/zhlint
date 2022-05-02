@@ -1,8 +1,8 @@
 /**
  * @fileoverview
- * 
+ *
  * This rule is checking spaces besides brackets.
- * 
+ *
  * Options
  * - spaceOutsideBracket: boolean | undefined
  * - noSpaceInsideBracket: boolean | undefined
@@ -17,6 +17,12 @@ import {
   MutableToken,
   SingleTokenType
 } from '../parser'
+import {
+  BRACKET_NOSPACE_INSIDE,
+  BRACKET_NOSPACE_OUTSIDE,
+  BRACKET_SPACE_OUTSIDE,
+  MARKDOWN_NOSPACE_INSIDE
+} from './messages'
 import {
   checkSpaceAfter,
   findMarkSeqBetween,
@@ -43,13 +49,13 @@ export const generateHandler = (options: Options): Handler => {
         // no space after
         const tokenAfter = findTokenAfter(group, token)
         if (tokenAfter) {
-          checkSpaceAfter(token, '', '..')
+          checkSpaceAfter(token, '', BRACKET_NOSPACE_INSIDE)
         }
       } else {
         // no space before
         const tokenBefore = findTokenBefore(group, token)
         if (tokenBefore) {
-          checkSpaceAfter(tokenBefore, '', '..')
+          checkSpaceAfter(tokenBefore, '', BRACKET_NOSPACE_INSIDE)
         }
       }
     }
@@ -65,27 +71,32 @@ export const generateHandler = (options: Options): Handler => {
             token
           )
           if (token.modifiedContent === '（') {
-            tokenSeq.forEach(target => {
-              checkSpaceAfter(target, '', '..')
+            tokenSeq.forEach((target) => {
+              checkSpaceAfter(target, '', BRACKET_NOSPACE_OUTSIDE)
             })
           }
           if (token.modifiedContent === '(') {
             // content or left half punctuation: oneOutsideBracket
-            if (isContentType(contentTokenBefore.modifiedType) || contentTokenBefore.type === CharType.PUNCTUATION_HALF) {
-              tokenSeq.forEach(target => {
+            if (
+              isContentType(contentTokenBefore.modifiedType) ||
+              contentTokenBefore.type === CharType.PUNCTUATION_HALF
+            ) {
+              tokenSeq.forEach((target) => {
                 if (target === spaceHost) {
                   checkSpaceAfter(
                     spaceHost,
                     oneOutsideBracketOption ? ' ' : '',
-                    '..'
+                    oneOutsideBracketOption
+                      ? BRACKET_SPACE_OUTSIDE
+                      : BRACKET_NOSPACE_OUTSIDE
                   )
                 } else {
-                  checkSpaceAfter(target, '', '..')
+                  checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
                 }
               })
             } else {
-              tokenSeq.forEach(target => {
-                checkSpaceAfter(target, '', '..')
+              tokenSeq.forEach((target) => {
+                checkSpaceAfter(target, '', BRACKET_NOSPACE_OUTSIDE)
               })
             }
           }
@@ -100,28 +111,28 @@ export const generateHandler = (options: Options): Handler => {
           )
           if (token.modifiedContent === '）') {
             tokenSeq.forEach((target) => {
-              checkSpaceAfter(target, '', '..')
+              checkSpaceAfter(target, '', BRACKET_NOSPACE_OUTSIDE)
             })
           }
           if (token.modifiedContent === ')') {
             // content: oneOutsideBracket
-            if (
-              isContentType(contentTokenAfter.modifiedType)
-            ) {
+            if (isContentType(contentTokenAfter.modifiedType)) {
               tokenSeq.forEach((target) => {
                 if (target === spaceHost) {
                   checkSpaceAfter(
                     spaceHost,
                     oneOutsideBracketOption ? ' ' : '',
-                    '..'
+                    oneOutsideBracketOption
+                      ? BRACKET_SPACE_OUTSIDE
+                      : BRACKET_NOSPACE_OUTSIDE
                   )
                 } else {
-                  checkSpaceAfter(target, '', '..')
+                  checkSpaceAfter(target, '', BRACKET_NOSPACE_OUTSIDE)
                 }
               })
             } else {
               tokenSeq.forEach((target) => {
-                checkSpaceAfter(target, '', '..')
+                checkSpaceAfter(target, '', BRACKET_NOSPACE_OUTSIDE)
               })
             }
           }

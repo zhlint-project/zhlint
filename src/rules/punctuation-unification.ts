@@ -9,6 +9,7 @@
  */
 
 import { GroupTokenType, Handler, MutableToken } from "../parser"
+import { PUNCTUATION_UNIFICATION_SIMPLIFIED, PUNCTUATION_UNIFICATION_TRADITIONAL } from "./messages"
 import { checkEndContent, checkStartContent, Options } from "./util"
 
 type UnifiedOptions = "traditional" | "simplified"
@@ -60,6 +61,10 @@ export const generateHandler = (options: Options): Handler => {
       // do nothing
     }
   }
+  const message =
+    unifiedOption === 'simplified'
+      ? PUNCTUATION_UNIFICATION_SIMPLIFIED
+      : PUNCTUATION_UNIFICATION_TRADITIONAL
   const unifiedMap = replaceMap[unifiedOption]
   const objectMap = valueToKey(unifiedOption === 'simplified' ? replaceMap.traditional : replaceMap.simplified)
 
@@ -69,10 +74,8 @@ export const generateHandler = (options: Options): Handler => {
     }
     const modifiedStartContent = checkChar(token.modifiedStartContent, objectMap, unifiedMap)
     const modifiedEndContent = checkChar(token.modifiedEndContent, objectMap, unifiedMap)
-    if (modifiedStartContent !== token.modifiedStartContent || modifiedEndContent !== token.modifiedEndContent) {
-      checkStartContent(token, modifiedStartContent, '.....')
-      checkEndContent(token, modifiedEndContent, '......')
-    }
+    checkStartContent(token, modifiedStartContent, message)
+    checkEndContent(token, modifiedEndContent, message)
   }
 
   return handlerPunctuationUnified

@@ -33,6 +33,11 @@ import {
   MutableToken,
   SingleTokenType
 } from '../parser'
+import {
+  MARKDOWN_NOSPACE_INSIDE,
+  CODE_NOSPACE_OUTSIDE,
+  CODE_SPACE_OUTSIDE
+} from './messages'
 
 export const generateHandler = (options: Options): Handler => {
   const needSpaceOption = options?.spaceOutsideCode
@@ -63,14 +68,21 @@ export const generateHandler = (options: Options): Handler => {
       token
     )
     if (nonHyperVisibleTokenBefore) {
-      const { spaceHost, tokenSeq } = findMarkSeqBetween(group, nonHyperVisibleTokenBefore, token)
+      const { spaceHost, tokenSeq } = findMarkSeqBetween(
+        group,
+        nonHyperVisibleTokenBefore,
+        token
+      )
       if (spaceHost) {
-        tokenSeq.forEach(target => {
+        tokenSeq.forEach((target) => {
           if (target === spaceHost) {
-            checkSpaceAfter(target, needSpaceOption ? ' ' : '', '.')
+            checkSpaceAfter(
+              target,
+              needSpaceOption ? ' ' : '',
+              needSpaceOption ? CODE_SPACE_OUTSIDE : CODE_NOSPACE_OUTSIDE
+            )
           } else {
-            target.modifiedSpaceAfter = ''
-            checkSpaceAfter(target, '', '..')
+            checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
           }
         })
       }
@@ -89,9 +101,13 @@ export const generateHandler = (options: Options): Handler => {
       if (spaceHost) {
         tokenSeq.forEach((target) => {
           if (target === spaceHost) {
-            target.modifiedSpaceAfter = needSpaceOption ? ' ' : ''
+            checkSpaceAfter(
+              target,
+              needSpaceOption ? ' ' : '',
+              needSpaceOption ? CODE_SPACE_OUTSIDE : CODE_NOSPACE_OUTSIDE
+            )
           } else {
-            target.modifiedSpaceAfter = ''
+            checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
           }
         })
       }

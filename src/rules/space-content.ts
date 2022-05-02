@@ -41,6 +41,13 @@ import {
   MutableToken
 } from '../parser'
 import {
+  CONTENT_NOSPACE_FULL_WIDTH,
+  CONTENT_NOSPACE_MIXED_WIDTH,
+  CONTENT_SPACE_HALF_WIDTH,
+  CONTENT_SPACE_MIXED_WIDTH,
+  MARKDOWN_NOSPACE_INSIDE
+} from './messages'
+import {
   checkSpaceAfter,
   findExpectedVisibleTokenAfter,
   findMarkSeqBetween,
@@ -66,7 +73,11 @@ export const generateHandler = (options: Options): Handler => {
       return
     }
 
-    const { spaceHost, tokenSeq } = findMarkSeqBetween(group, token, contentTokenAfter)
+    const { spaceHost, tokenSeq } = findMarkSeqBetween(
+      group,
+      token,
+      contentTokenAfter
+    )
 
     // skip if the space host is not found
     if (!spaceHost) {
@@ -100,10 +111,12 @@ export const generateHandler = (options: Options): Handler => {
           checkSpaceAfter(
             target,
             token.type === CharType.CONTENT_HALF ? ' ' : '',
-            '...'
+            token.type === CharType.CONTENT_HALF
+              ? CONTENT_SPACE_HALF_WIDTH
+              : CONTENT_NOSPACE_FULL_WIDTH
           )
         } else {
-          checkSpaceAfter(target, '', '....')
+          checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
         }
       })
     } else {
@@ -118,10 +131,12 @@ export const generateHandler = (options: Options): Handler => {
           checkSpaceAfter(
             target,
             betweenMixedWidthContentOption ? ' ' : '',
-            '...'
+            betweenMixedWidthContentOption
+              ? CONTENT_SPACE_MIXED_WIDTH
+              : CONTENT_NOSPACE_MIXED_WIDTH
           )
         } else {
-          checkSpaceAfter(target, '', '....')
+          checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
         }
       })
     }

@@ -32,6 +32,7 @@ import {
   MutableToken,
   SingleTokenType
 } from '../parser'
+import { MARKDOWN_NOSPACE_INSIDE, MARKDOWN_SPACE_OUTSIDE } from './messages'
 
 export const generateHandler = (options: Options): Handler => {
   const noSpaceInsideMarkOption = options?.noSpaceInsideMark
@@ -57,9 +58,9 @@ export const generateHandler = (options: Options): Handler => {
         tokenSeq.forEach((target) => {
           if (target !== spaceHost) {
             if (target.modifiedSpaceAfter) {
-              checkSpaceAfter(spaceHost, ' ', '...')
+              checkSpaceAfter(spaceHost, ' ', MARKDOWN_SPACE_OUTSIDE)
             }
-            checkSpaceAfter(target, '', '....')
+            checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
           }
         })
       }
