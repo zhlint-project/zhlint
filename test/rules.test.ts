@@ -1,10 +1,23 @@
 import { describe, test, expect } from 'vitest'
 
 import run, { Options } from '../src/run'
+import { ValidationTarget } from '../src/report'
 
 const lint = (...args: [string, Options?]) => run(...args).result
 
-describe('lint by rule', () => {
+type FormattedValidation = {
+  index: number
+  target: ValidationTarget
+  message: string
+}
+
+const validate = (...args: [string, Options?]): FormattedValidation[] =>
+  run(...args).validations.map((validation) => {
+    const { index, length, target, message } = validation
+    return { index: index + length, target, message }
+  })
+
+describe('lint by rules', () => {
   describe('[hyper-code] the existence of spaces around hyper code marks', () => {
     test('forcing spaces', () => {
       const options: Options = { rules: { spaceOutsideCode: true } }
@@ -247,6 +260,25 @@ describe('lint by rule', () => {
   })
 })
 
-// TODO: validation and messages
+describe('validate by rules', () => {
+  describe('[hyper-code] the existence of spaces around hyper code marks', () => {
+    test('forcing spaces', () => {
+      const options: Options = { rules: { spaceOutsideCode: true } }
+      expect(validate('xxx`foo`xxx', options)).toEqual([
+        {
+          index: 3,
+          target: ValidationTarget.SPACE_AFTER,
+          message: '此处内联代码的外部需要一个空格'
+        },
+        {
+          index: 8,
+          target: ValidationTarget.SPACE_AFTER,
+          message: '此处内联代码的外部需要一个空格'
+        }
+      ])
+    })
+  })
+  // TODO:
+})
 
 // TODO: error handling
