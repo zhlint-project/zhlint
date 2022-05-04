@@ -87,6 +87,9 @@ describe('lint by rules', () => {
       expect(getOutput('xxx <code>foo</code> xxx', options)).toBe(
         'xxx <code>foo</code> xxx'
       )
+
+      // at the beginning or at the end
+      expect(getOutput(' `foo` ', options)).toBe('`foo`')
     })
     test('forcing no spaces', () => {
       const options: Options = { rules: { spaceOutsideCode: false } }
@@ -150,6 +153,9 @@ describe('lint by rules', () => {
     })
     expect(getOutput('x _** yyy ** _ z', options)).toBe('x _**yyy**_ z')
     expect(getOutput('x _ ** yyy **_ z', options)).toBe('x _**yyy**_ z')
+
+    // at the beginning or at the end
+    expect(getOutput(' _ ** yyy **_ ', options)).toBe('_**yyy**_')
   })
   test('[punctuation-width] format each punctuation into the right width options', () => {
     const options = {
@@ -248,6 +254,9 @@ describe('lint by rules', () => {
           }
         ]
       })
+
+      // at the beginning or at the end
+      expect(getOutput(' foo bar   ', options)).toBe('foo bar')
     })
     test('no space between full-width content', () => {
       const options: Options = {
@@ -293,12 +302,17 @@ describe('lint by rules', () => {
         ]
       })
     })
-    test('no space after half-width punctuation', () => {
+    test('one space after half-width punctuation', () => {
       const options: Options = {
         rules: { spaceAfterHalfWidthPunctuation: true }
       }
       expect(getOutput('中文, 中文.中； 文。中文', options)).toBe(
         '中文, 中文. 中； 文。中文'
+      )
+
+      // at the beginning or at the end
+      expect(getOutput('中文, 中文. ', options)).toBe(
+        '中文, 中文.'
       )
     })
     test('no space after full-width punctuation', () => {
@@ -307,6 +321,11 @@ describe('lint by rules', () => {
       }
       expect(getOutput('中文, 中文.中； 文。中文', options)).toBe(
         '中文, 中文.中；文。中文'
+      )
+
+      // at the beginning or at the end
+      expect(getOutput('中文, 中文.中； 文。 ', options)).toBe(
+        '中文, 中文.中；文。'
       )
     })
   })
@@ -344,6 +363,9 @@ describe('lint by rules', () => {
       expect(getOutput('一 “ 二 ” 三', options)).toBe('一“ 二 ”三')
       expect(getOutput('一， " 二 " ， 三', options)).toBe('一，" 二 "， 三')
       expect(getOutput('一。 “ 二 ” 。 三', options)).toBe('一。“ 二 ”。 三')
+
+      // at the beginning or at the end
+      expect(getOutput(' " bar " ', options)).toBe('" bar "')
     })
     test('no space outside', () => {
       const options: Options = {
@@ -385,6 +407,9 @@ describe('lint by rules', () => {
       })
       expect(getOutput('foo （bar） baz', options)).toBe('foo （bar） baz')
       expect(getOutput('foo （ bar ） baz', options)).toBe('foo （bar） baz')
+
+      // at the beginning or at the end
+      expect(getOutput(' (bar) ', options)).toBe('(bar)')
     })
     test('one space outside', () => {
       const options: Options = {
