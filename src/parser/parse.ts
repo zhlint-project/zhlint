@@ -1,3 +1,5 @@
+// TODO: error hanlding utils
+
 import { isContentType, isPunctuationType } from '.'
 import { checkCharType } from './char'
 import {
@@ -32,6 +34,11 @@ export type ParseResult = {
   tokens: GroupToken
   groups: GroupToken[]
   marks: Mark[]
+}
+
+export interface ParseError extends Error {
+  index: number
+  status: ParseResult
 }
 
 /**
@@ -140,18 +147,56 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
   }
   finalizeLastToken(status, str.length)
 
-  // throw an error if `markStack` or `groupStack` not fully flushed
-  if (status.markStack.length > 0) {
-    const mark = status.markStack[status.markStack.length - 1]
-    throw new Error(
-      `Unmatched closed bracket ${mark.startContent} at ${mark.startIndex}`
-    )
+  // throw an error if the last mark not fully resolved
+  const lastMark = status.marks[status.marks.length - 1]
+  if (lastMark && lastMark.type === MarkType.BRACKETS && !lastMark.endContent) {
+    const error = new Error(`括号 ${lastMark.startContent} 未闭合`)
+    ;(error as ParseError).index = lastMark.startIndex
+    ;(error as ParseError).status = {
+      tokens: status.tokens,
+      groups: status.groups,
+      marks: status.marks
+    }
+    throw error
   }
+
+  // throw an error if `markStack` not fully resolved
+  if (status.markStack.length > 0) {
+    const lastMark = status.markStack[status.markStack.length - 1]
+    const error = new Error(`括号 ${lastMark.startContent} 未闭合`)
+    ;(error as ParseError).index = lastMark.startIndex
+    ;(error as ParseError).status = {
+      tokens: status.tokens,
+      groups: status.groups,
+      marks: status.marks
+    }
+    throw error
+  }
+
+  // throw an error if the last group not fully resolved
+  const lastGroup = status.groups[status.groups.length - 1]
+  if (lastGroup && !lastGroup.endContent) {
+    const error = new Error(`引号 ${lastGroup.startContent} 未闭合`)
+    ;(error as ParseError).index = lastGroup.startIndex
+    ;(error as ParseError).status = {
+      tokens: status.tokens,
+      groups: status.groups,
+      marks: status.marks
+    }
+    throw error
+  }
+
+  // throw an error if `groupStack` not fully resolved
   if (status.groupStack.length > 0) {
-    const group = status.groupStack[status.groupStack.length - 1]
-    throw new Error(
-      `Unmatched closed quote ${group.startContent} at ${group.startIndex}`
-    )
+    const lastGroup = status.groupStack[status.groupStack.length - 1]
+    const error = new Error(`引号 ${lastGroup.startContent} 未闭合`)
+    ;(error as ParseError).index = lastGroup.startIndex
+    ;(error as ParseError).status = {
+      tokens: status.tokens,
+      groups: status.groups,
+      marks: status.marks
+    }
+    throw error
   }
 
   return {
