@@ -1,5 +1,5 @@
 import { Block, Data } from './hypers/types'
-import { Validation, ValidationTarget } from './report'
+import { Validation } from './report'
 import { IgnoredCase, IgnoredMark } from './ignore'
 import { Options as RuleOptions } from './rules/util'
 
@@ -16,7 +16,6 @@ import vuepress from './hypers/vuepress'
 import md from './hypers/md'
 
 import { generateHandlers } from './rules'
-import { MutableParseResult, ParseError } from './parser/parse'
 
 const hyperParseInfo = [
   { name: 'ignore', value: ignore },
@@ -117,7 +116,7 @@ const run = (str: string, options: Options = {}): Result => {
   // 4. Push all ignored marks into allIgnoredMarks for each block
   // 5. Join all tokens with ignoredMarks and allValidations for each block
   // 6. Replace each block back to the string
-  const parseErrors: Validation[] = []
+  const parsingErrors: Validation[] = []
   const result = replaceBlocks(
     str,
     finalData.blocks.map(({ value, marks, start, end }) => {
@@ -126,19 +125,8 @@ const run = (str: string, options: Options = {}): Result => {
         logger.log('[Original block value]')
         logger.log(lastValue)
       }
-      let result: MutableParseResult
-      try {
-        result = toMutableResult(parse(value, marks))
-      } catch (error) {
-        result = toMutableResult((error as ParseError).status)
-        parseErrors.push({
-          name: '',
-          target: ValidationTarget.CONTENT,
-          index: (error as ParseError).index,
-          length: 0,
-          message: error.message
-        })
-      }
+      const result = toMutableResult(parse(value, marks))
+      parsingErrors.push(...result.errors)
       const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules, logger)
 
       rules.forEach((rule) => {
@@ -168,10 +156,13 @@ const run = (str: string, options: Options = {}): Result => {
   )
 
   // filter allValidations with allIgnoredMarks
-  const validations = [...parseErrors, ...allValidations].filter(({ index }) =>
-    allIgnoredMarks.length > 0
-      ? allIgnoredMarks.some(({ start, end }) => index >= start && index <= end)
-      : true
+  const validations = [...parsingErrors, ...allValidations].filter(
+    ({ index }) =>
+      allIgnoredMarks.length > 0
+        ? allIgnoredMarks.some(
+            ({ start, end }) => index >= start && index <= end
+          )
+        : true
   )
 
   return { origin: str, result, validations }

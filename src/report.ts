@@ -47,6 +47,8 @@ const getPositionByOffset = (str: string, offset: number): Position => {
   return position
 }
 
+// TODO: move validation types to a more general place
+
 export enum ValidationTarget {
   CONTENT = 'content',
   START_CONTENT = 'startContent',

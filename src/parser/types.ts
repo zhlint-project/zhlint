@@ -9,6 +9,7 @@ export enum CharType {
   CONTENT_FULL = 'content-full',
   PUNCTUATION_HALF = 'punctuation-half',
   PUNCTUATION_FULL = 'punctuation-full',
+  // TODO: newly added type
   UNKNOWN = 'unknown'
 }
 
@@ -94,7 +95,8 @@ export enum SingleTokenType {
   MARK_BRACKETS = 'mark-brackets',
   MARK_HYPER = 'mark-hyper',
   HYPER_UNEXPECTED = 'hyper-container',
-  HYPER_CODE = 'hyper-code'
+  HYPER_CODE = 'hyper-code',
+  UNMATCHED = 'unmatched'
 }
 
 export enum GroupTokenType {
@@ -241,6 +243,15 @@ export type ParseStatus = {
 
   markStack: Mark[]
   groupStack: GroupToken[]
+
+  errors: Validation[]
+}
+
+export type ParseResult = {
+  tokens: GroupToken
+  groups: GroupToken[]
+  marks: Mark[]
+  errors: Validation[]
 }
 
 // Travel

@@ -409,5 +409,3 @@ describe('lint by rules', () => {
     // TODO:
   })
 })
-
-// TODO: error handling

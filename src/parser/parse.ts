@@ -1,6 +1,5 @@
-// TODO: error hanlding utils
-
 import { isContentType, isPunctuationType } from '.'
+import { Validation } from '../report'
 import { checkCharType } from './char'
 import {
   CharType,
@@ -10,11 +9,11 @@ import {
   MarkSideType,
   MarkType,
   MutableSingleToken,
-  GroupToken,
   MutableGroupToken,
   MutableToken,
   Token,
-  ParseStatus
+  ParseStatus,
+  ParseResult
 } from './types'
 import {
   appendContent,
@@ -27,19 +26,9 @@ import {
   handleContent,
   handlePunctuation,
   initNewStatus,
-  isShorthand
+  isShorthand,
+  handleErrors
 } from './util'
-
-export type ParseResult = {
-  tokens: GroupToken
-  groups: GroupToken[]
-  marks: Mark[]
-}
-
-export interface ParseError extends Error {
-  index: number
-  status: ParseResult
-}
 
 /**
  * Parse a string into several tokens.
@@ -117,21 +106,20 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
       // - space after a token
       // - inner space before a group
       finalizeLastToken(status, i)
-      if (!status.lastGroup) {
-        throw new Error(`Unmatched token group at ${i}`)
-      }
-      const spaceLength = getConnectingSpaceLength(str, i)
-      const spaces = str.substring(i, i + spaceLength)
-      if (status.lastGroup.length) {
-        const lastToken = getPreviousToken(status)
-        if (lastToken) {
-          lastToken.spaceAfter = spaces
+      if (status.lastGroup) {
+        const spaceLength = getConnectingSpaceLength(str, i)
+        const spaces = str.substring(i, i + spaceLength)
+        if (status.lastGroup.length) {
+          const lastToken = getPreviousToken(status)
+          if (lastToken) {
+            lastToken.spaceAfter = spaces
+          }
+        } else {
+          status.lastGroup.innerSpaceBefore = spaces
         }
-      } else {
-        status.lastGroup.innerSpaceBefore = spaces
-      }
-      if (spaceLength - 1 > 0) {
-        i += spaceLength - 1
+        if (spaceLength - 1 > 0) {
+          i += spaceLength - 1
+        }
       }
     } else if (isShorthand(str, status, i, char)) {
       appendContent(status, char)
@@ -147,62 +135,14 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
   }
   finalizeLastToken(status, str.length)
 
-  // throw an error if the last mark not fully resolved
-  const lastMark = status.marks[status.marks.length - 1]
-  if (lastMark && lastMark.type === MarkType.BRACKETS && !lastMark.endContent) {
-    const error = new Error(`括号 ${lastMark.startContent} 未闭合`)
-    ;(error as ParseError).index = lastMark.startIndex
-    ;(error as ParseError).status = {
-      tokens: status.tokens,
-      groups: status.groups,
-      marks: status.marks
-    }
-    throw error
-  }
-
-  // throw an error if `markStack` not fully resolved
-  if (status.markStack.length > 0) {
-    const lastMark = status.markStack[status.markStack.length - 1]
-    const error = new Error(`括号 ${lastMark.startContent} 未闭合`)
-    ;(error as ParseError).index = lastMark.startIndex
-    ;(error as ParseError).status = {
-      tokens: status.tokens,
-      groups: status.groups,
-      marks: status.marks
-    }
-    throw error
-  }
-
-  // throw an error if the last group not fully resolved
-  const lastGroup = status.groups[status.groups.length - 1]
-  if (lastGroup && !lastGroup.endContent) {
-    const error = new Error(`引号 ${lastGroup.startContent} 未闭合`)
-    ;(error as ParseError).index = lastGroup.startIndex
-    ;(error as ParseError).status = {
-      tokens: status.tokens,
-      groups: status.groups,
-      marks: status.marks
-    }
-    throw error
-  }
-
-  // throw an error if `groupStack` not fully resolved
-  if (status.groupStack.length > 0) {
-    const lastGroup = status.groupStack[status.groupStack.length - 1]
-    const error = new Error(`引号 ${lastGroup.startContent} 未闭合`)
-    ;(error as ParseError).index = lastGroup.startIndex
-    ;(error as ParseError).status = {
-      tokens: status.tokens,
-      groups: status.groups,
-      marks: status.marks
-    }
-    throw error
-  }
+  // handle all the unmatched parsing tokens
+  handleErrors(status)
 
   return {
     tokens: status.tokens,
     groups: status.groups,
-    marks: status.marks
+    marks: status.marks,
+    errors: status.errors
   }
 }
 
@@ -210,6 +150,7 @@ export type MutableParseResult = {
   tokens: MutableGroupToken
   groups: MutableGroupToken[]
   marks: MutableMark[]
+  errors: Validation[]
 }
 
 const toMutableToken = (token: Token): MutableToken => {

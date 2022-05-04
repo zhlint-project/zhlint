@@ -1,5 +1,7 @@
 import { ContentType } from '.'
+import { ValidationTarget } from '../report'
 import { checkCharType } from './char'
+import { BRACKET_NOT_CLOSED, BRACKET_NOT_OPEN, QUOTE_NOT_CLOSED, QUOTE_NOT_OPEN } from './messages'
 import {
   CharType,
   SHORTHAND_CHARS,
@@ -41,14 +43,16 @@ export const handlePunctuation = (
     // and finish the token
     addBracketToken(status, i, char, MarkSideType.LEFT)
   } else if (MARK_CHAR_SET.right.indexOf(char) >= 0) {
-    if (!status.lastMark) {
-      throw new Error(`Unmatched closed bracket ${char} at ${i}`)
+    if (!status.lastMark || !status.lastMark.startContent) {
+      addUnmatchedToken(status, i, char)
+      addError(status, i, BRACKET_NOT_OPEN)
+    } else {
+      // generate token as a punctuation
+      addBracketToken(status, i, char, MarkSideType.RIGHT)
+      // end the last unfinished mark
+      // and pop the previous one if exists
+      finalizeCurrentMark(status, i, char)
     }
-    // generate token as a punctuation
-    addBracketToken(status, i, char, MarkSideType.RIGHT)
-    // end the last unfinished mark
-    // and pop the previous one if exists
-    finalizeCurrentMark(status, i, char)
   } else if (GROUP_CHAR_SET.neutral.indexOf(char) >= 0) {
     // - end the last unfinished group
     // - start a new group
@@ -60,10 +64,12 @@ export const handlePunctuation = (
   } else if (GROUP_CHAR_SET.left.indexOf(char) >= 0) {
     initNewGroup(status, i, char)
   } else if (GROUP_CHAR_SET.right.indexOf(char) >= 0) {
-    if (!status.lastGroup) {
-      throw new Error(`Unmatched closed quote ${char} at ${i}`)
+    if (!status.lastGroup || !status.lastGroup.startContent) {
+      addUnmatchedToken(status, i, char)
+      addError(status, i, QUOTE_NOT_OPEN)
+    } else {
+      finalizeCurrentGroup(status, i, char)
     }
-    finalizeCurrentGroup(status, i, char)
   } else {
     addNormalPunctuationToken(status, i, char, type)
   }
@@ -114,7 +120,9 @@ export const initNewStatus = (str: string, hyperMarks: Mark[]): ParseStatus => {
     groups: [],
 
     markStack: [],
-    groupStack: []
+    groupStack: [],
+
+    errors: []
   }
   return status
 }
@@ -246,6 +254,21 @@ const addNormalPunctuationToken = (
     length: 1,
     content: char,
     spaceAfter: '' // to be finalized
+  }
+  finalizeCurrentToken(status, token)
+}
+
+const addUnmatchedToken = (
+  status: ParseStatus,
+  i: number,
+  char: string
+): void => {
+  const token: SingleToken = {
+    type: SingleTokenType.UNMATCHED,
+    index: i,
+    length: 1,
+    content: char,
+    spaceAfter: ''
   }
   finalizeCurrentToken(status, token)
 }
@@ -405,4 +428,52 @@ export const getHyperContentType = (content: string): SingleTokenType => {
   }
   // Usually it's `...`.
   return SingleTokenType.HYPER_CODE
+}
+
+// error handling
+
+const addError = (
+  status: ParseStatus,
+  index: number,
+  message: string
+): void => {
+  status.errors.push({
+    name: '',
+    index,
+    length: 0,
+    message,
+    target: ValidationTarget.CONTENT
+  })
+}
+
+export const handleErrors = (status: ParseStatus): void => {
+  // record an error if the last mark not fully resolved
+  const lastMark = status.lastMark
+  if (lastMark && lastMark.type === MarkType.BRACKETS && !lastMark.endContent) {
+    addError(status, lastMark.startIndex, BRACKET_NOT_CLOSED)
+  }
+
+  // record an error if `markStack` not fully resolved
+  if (status.markStack.length > 0) {
+    status.markStack.forEach((mark) => {
+      if (mark !== lastMark) {
+        addError(status, mark.startIndex, BRACKET_NOT_CLOSED)
+      }
+    })
+  }
+
+  // record an error if the last group not fully resolved
+  const lastGroup = status.lastGroup
+  if (lastGroup && lastGroup.startContent && !lastGroup.endContent) {
+    addError(status, lastGroup.startIndex, QUOTE_NOT_CLOSED)
+  }
+
+  // record an error if `groupStack` not fully resolved
+  if (status.groupStack.length > 0) {
+    status.groupStack.forEach((group) => {
+      if (group !== lastGroup && group.startContent && !group.endContent) {
+        addError(status, group.startIndex, QUOTE_NOT_CLOSED)
+      }
+    })
+  }
 }
