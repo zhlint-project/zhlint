@@ -3,19 +3,23 @@ import { describe, test, expect } from 'vitest'
 import run, { Options } from '../src/run'
 import { ValidationTarget } from '../src/report'
 import {
+  BRACKET_NOSPACE_INSIDE,
   CODE_SPACE_OUTSIDE,
+  CONTENT_SPACE_HALF_WIDTH,
   MARKDOWN_NOSPACE_INSIDE,
   PUNCTUATION_FULL_WIDTH,
-  PUNCTUATION_UNIFICATION_SIMPLIFIED
+  PUNCTUATION_NOSPACE_BEFORE,
+  PUNCTUATION_UNIFICATION_SIMPLIFIED,
+  QUOTE_NOSPACE_INSIDE
 } from '../src/rules/messages'
-
-const getOutput = (...args: [string, Options?]) => run(...args).result
 
 type Warning = {
   index: number
   target: ValidationTarget
   message: string
 }
+
+const getOutput = (...args: [string, Options?]) => run(...args).result
 
 const lint = (
   ...args: [string, Options?]
@@ -234,7 +238,16 @@ describe('lint by rules', () => {
       const options: Options = {
         rules: { spaceBetweenHalfWidthContent: true }
       }
-      expect(getOutput('foo bar   baz', options)).toBe('foo bar baz')
+      expect(lint('foo bar   baz', options)).toEqual({
+        output: 'foo bar baz',
+        warnings: [
+          {
+            index: 7,
+            target: ValidationTarget.SPACE_AFTER,
+            message: CONTENT_SPACE_HALF_WIDTH
+          }
+        ]
+      })
     })
     test('no space between full-width content', () => {
       const options: Options = {
@@ -264,9 +277,21 @@ describe('lint by rules', () => {
       const options: Options = {
         rules: { noSpaceBeforePunctuation: true }
       }
-      expect(getOutput('中文 , 一. 二 ；三。四', options)).toBe(
-        '中文, 一. 二；三。四'
-      )
+      expect(lint('中文 , 一. 二 ；三。四', options)).toEqual({
+        output: '中文, 一. 二；三。四',
+        warnings: [
+          {
+            index: 2,
+            target: ValidationTarget.SPACE_AFTER,
+            message: PUNCTUATION_NOSPACE_BEFORE
+          },
+          {
+            index: 9,
+            target: ValidationTarget.SPACE_AFTER,
+            message: PUNCTUATION_NOSPACE_BEFORE
+          }
+        ]
+      })
     })
     test('no space after half-width punctuation', () => {
       const options: Options = {
@@ -290,7 +315,21 @@ describe('lint by rules', () => {
       const options: Options = {
         rules: { noSpaceInsideQuote: true }
       }
-      expect(getOutput('foo " bar " baz', options)).toBe('foo "bar" baz')
+      expect(lint('foo " bar " baz', options)).toEqual({
+        output: 'foo "bar" baz',
+        warnings: [
+          {
+            index: 5,
+            target: ValidationTarget.INNER_SPACE_BEFORE,
+            message: QUOTE_NOSPACE_INSIDE
+          },
+          {
+            index: 9,
+            target: ValidationTarget.SPACE_AFTER,
+            message: QUOTE_NOSPACE_INSIDE
+          }
+        ]
+      })
       expect(getOutput('foo “ bar ” baz', options)).toBe('foo “bar” baz')
     })
     test('one space outside', () => {
@@ -325,8 +364,25 @@ describe('lint by rules', () => {
       const options: Options = {
         rules: { noSpaceInsideBracket: true }
       }
-      expect(getOutput('foo (bar) baz', options)).toBe('foo (bar) baz')
-      expect(getOutput('foo ( bar ) baz', options)).toBe('foo (bar) baz')
+      expect(lint('foo (bar) baz', options)).toEqual({
+        output: 'foo (bar) baz',
+        warnings: []
+      })
+      expect(lint('foo ( bar ) baz', options)).toEqual({
+        output: 'foo (bar) baz',
+        warnings: [
+          {
+            index: 5,
+            target: ValidationTarget.SPACE_AFTER,
+            message: BRACKET_NOSPACE_INSIDE
+          },
+          {
+            index: 9,
+            target: ValidationTarget.SPACE_AFTER,
+            message: BRACKET_NOSPACE_INSIDE
+          }
+        ]
+      })
       expect(getOutput('foo （bar） baz', options)).toBe('foo （bar） baz')
       expect(getOutput('foo （ bar ） baz', options)).toBe('foo （bar） baz')
     })
