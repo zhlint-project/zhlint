@@ -2,83 +2,125 @@ import { describe, test, expect } from 'vitest'
 
 import run, { Options } from '../src/run'
 import { ValidationTarget } from '../src/report'
+import {
+  CODE_SPACE_OUTSIDE,
+  MARKDOWN_NOSPACE_INSIDE,
+  PUNCTUATION_FULL_WIDTH,
+  PUNCTUATION_UNIFICATION_SIMPLIFIED
+} from '../src/rules/messages'
 
-const lint = (...args: [string, Options?]) => run(...args).result
+const getOutput = (...args: [string, Options?]) => run(...args).result
 
-type FormattedValidation = {
+type Warning = {
   index: number
   target: ValidationTarget
   message: string
 }
 
-const validate = (...args: [string, Options?]): FormattedValidation[] =>
-  run(...args).validations.map((validation) => {
-    const { index, length, target, message } = validation
-    return { index: index + length, target, message }
-  })
+const lint = (
+  ...args: [string, Options?]
+): {
+  output: string
+  warnings: Warning[]
+} => {
+  const output = run(...args)
+  return {
+    output: output.result,
+    warnings: output.validations.map((validation) => {
+      const { index, length, target, message } = validation
+      return { index: index + length, target, message }
+    })
+  }
+}
 
 describe('lint by rules', () => {
   describe('[hyper-code] the existence of spaces around hyper code marks', () => {
     test('forcing spaces', () => {
       const options: Options = { rules: { spaceOutsideCode: true } }
-      expect(lint('xxx`foo`xxx', options)).toBe('xxx `foo` xxx')
-      expect(lint('xxx`foo` xxx', options)).toBe('xxx `foo` xxx')
-      expect(lint('xxx `foo`xxx', options)).toBe('xxx `foo` xxx')
-      expect(lint('xxx `foo` xxx', options)).toBe('xxx `foo` xxx')
+      expect(lint('xxx`foo`xxx', options)).toEqual({
+        output: 'xxx `foo` xxx',
+        warnings: [
+          {
+            index: 3,
+            target: ValidationTarget.SPACE_AFTER,
+            message: CODE_SPACE_OUTSIDE
+          },
+          {
+            index: 8,
+            target: ValidationTarget.SPACE_AFTER,
+            message: CODE_SPACE_OUTSIDE
+          }
+        ]
+      })
+      expect(getOutput('xxx`foo` xxx', options)).toBe('xxx `foo` xxx')
+      expect(getOutput('xxx `foo`xxx', options)).toBe('xxx `foo` xxx')
+      expect(getOutput('xxx `foo` xxx', options)).toBe('xxx `foo` xxx')
 
       // internal spaces would be kept
-      expect(lint('xxx ` foo`xxx', options)).toBe('xxx ` foo` xxx')
+      expect(getOutput('xxx ` foo`xxx', options)).toBe('xxx ` foo` xxx')
 
-      expect(lint('xxx<code>foo</code>xxx', options)).toBe(
+      expect(lint('xxx<code>foo</code>xxx', options)).toEqual({
+        output: 'xxx <code>foo</code> xxx',
+        warnings: [
+          {
+            index: 3,
+            target: ValidationTarget.SPACE_AFTER,
+            message: CODE_SPACE_OUTSIDE
+          },
+          {
+            index: 19,
+            target: ValidationTarget.SPACE_AFTER,
+            message: CODE_SPACE_OUTSIDE
+          }
+        ]
+      })
+      expect(getOutput('xxx<code>foo</code> xxx', options)).toBe(
         'xxx <code>foo</code> xxx'
       )
-      expect(lint('xxx<code>foo</code> xxx', options)).toBe(
+      expect(getOutput('xxx <code>foo</code>xxx', options)).toBe(
         'xxx <code>foo</code> xxx'
       )
-      expect(lint('xxx <code>foo</code>xxx', options)).toBe(
-        'xxx <code>foo</code> xxx'
-      )
-      expect(lint('xxx <code>foo</code> xxx', options)).toBe(
+      expect(getOutput('xxx <code>foo</code> xxx', options)).toBe(
         'xxx <code>foo</code> xxx'
       )
     })
     test('forcing no spaces', () => {
       const options: Options = { rules: { spaceOutsideCode: false } }
-      expect(lint('xxx`foo`xxx', options)).toBe('xxx`foo`xxx')
-      expect(lint('xxx`foo` xxx', options)).toBe('xxx`foo`xxx')
-      expect(lint('xxx `foo`xxx', options)).toBe('xxx`foo`xxx')
-      expect(lint('xxx `foo` xxx', options)).toBe('xxx`foo`xxx')
+      expect(getOutput('xxx`foo`xxx', options)).toBe('xxx`foo`xxx')
+      expect(getOutput('xxx`foo` xxx', options)).toBe('xxx`foo`xxx')
+      expect(getOutput('xxx `foo`xxx', options)).toBe('xxx`foo`xxx')
+      expect(getOutput('xxx `foo` xxx', options)).toBe('xxx`foo`xxx')
 
-      expect(lint('xxx<code>foo</code>xxx', options)).toBe(
+      expect(getOutput('xxx<code>foo</code>xxx', options)).toBe(
         'xxx<code>foo</code>xxx'
       )
-      expect(lint('xxx<code>foo</code> xxx', options)).toBe(
+      expect(getOutput('xxx<code>foo</code> xxx', options)).toBe(
         'xxx<code>foo</code>xxx'
       )
-      expect(lint('xxx <code>foo</code>xxx', options)).toBe(
+      expect(getOutput('xxx <code>foo</code>xxx', options)).toBe(
         'xxx<code>foo</code>xxx'
       )
-      expect(lint('xxx <code>foo</code> xxx', options)).toBe(
+      expect(getOutput('xxx <code>foo</code> xxx', options)).toBe(
         'xxx<code>foo</code>xxx'
       )
     })
     test('keep the original spaces', () => {
       const options = undefined
-      expect(lint('xxx`foo`xxx', options)).toBe('xxx`foo`xxx')
-      expect(lint('xxx`foo` xxx', options)).toBe('xxx`foo` xxx')
-      expect(lint('xxx `foo`xxx', options)).toBe('xxx `foo`xxx')
-      expect(lint('xxx `foo` xxx', options)).toBe('xxx `foo` xxx')
+      expect(getOutput('xxx`foo`xxx', options)).toBe('xxx`foo`xxx')
+      expect(getOutput('xxx`foo` xxx', options)).toBe('xxx`foo` xxx')
+      expect(getOutput('xxx `foo`xxx', options)).toBe('xxx `foo`xxx')
+      expect(getOutput('xxx `foo` xxx', options)).toBe('xxx `foo` xxx')
 
-      expect(lint('xxx<code>foo</code>xxx', options)).toBe(
+      expect(getOutput('xxx<code>foo</code>xxx', options)).toBe(
         'xxx<code>foo</code>xxx'
       )
-      expect(lint('xxx<code>foo</code> xxx', options)).toBe(
+      expect(getOutput('xxx<code>foo</code> xxx', options)).toBe(
         'xxx<code>foo</code> xxx'
       )
-      expect(lint('xxx <code>foo</code>xxx', options)).toBe(
+      expect(getOutput('xxx <code>foo</code>xxx', options)).toBe(
         'xxx <code>foo</code>xxx'
       )
-      expect(lint('xxx <code>foo</code> xxx', options)).toBe(
+      expect(getOutput('xxx <code>foo</code> xxx', options)).toBe(
         'xxx <code>foo</code> xxx'
       )
     })
@@ -87,9 +129,23 @@ describe('lint by rules', () => {
     const options: Options = {
       rules: { noSpaceInsideMark: true }
     }
-    expect(lint('x ** yyy ** z', options)).toBe('x **yyy** z')
-    expect(lint('x _** yyy ** _ z', options)).toBe('x _**yyy**_ z')
-    expect(lint('x _ ** yyy **_ z', options)).toBe('x _**yyy**_ z')
+    expect(lint('x ** yyy ** z', options)).toEqual({
+      output: 'x **yyy** z',
+      warnings: [
+        {
+          index: 4,
+          target: ValidationTarget.SPACE_AFTER,
+          message: MARKDOWN_NOSPACE_INSIDE
+        },
+        {
+          index: 8,
+          target: ValidationTarget.SPACE_AFTER,
+          message: MARKDOWN_NOSPACE_INSIDE
+        }
+      ]
+    })
+    expect(getOutput('x _** yyy ** _ z', options)).toBe('x _**yyy**_ z')
+    expect(getOutput('x _ ** yyy **_ z', options)).toBe('x _**yyy**_ z')
   })
   test('[punctuation-width] format each punctuation into the right width options', () => {
     const options = {
@@ -98,14 +154,28 @@ describe('lint by rules', () => {
         fullWidthPunctuation: `，。：；？！“”‘’`
       }
     }
-    expect(lint('你好,再见.', options)).toBe('你好，再见。')
-    expect(lint('你（好）,再见.', options)).toBe('你(好)，再见。')
-    expect(lint("你'好',再见.", options)).toBe('你‘好’，再见。')
-    expect(lint('你"好",再见.', options)).toBe('你“好”，再见。')
-    expect(lint('"你\'好\'",再见.', options)).toBe('“你‘好’”，再见。')
+    expect(lint('你好,再见.', options)).toEqual({
+      output: '你好，再见。',
+      warnings: [
+        {
+          index: 3,
+          target: ValidationTarget.CONTENT,
+          message: PUNCTUATION_FULL_WIDTH
+        },
+        {
+          index: 6,
+          target: ValidationTarget.CONTENT,
+          message: PUNCTUATION_FULL_WIDTH
+        }
+      ]
+    })
+    expect(getOutput('你（好）,再见.', options)).toBe('你(好)，再见。')
+    expect(getOutput("你'好',再见.", options)).toBe('你‘好’，再见。')
+    expect(getOutput('你"好",再见.', options)).toBe('你“好”，再见。')
+    expect(getOutput('"你\'好\'",再见.', options)).toBe('“你‘好’”，再见。')
 
     // keep the single quote between half-width content without spaces
-    expect(lint("what's up", options)).toBe("what's up")
+    expect(getOutput("what's up", options)).toBe("what's up")
   })
   describe('[punctuation-unification] unify the punctuation choices', () => {
     test('simplified', () => {
@@ -114,19 +184,43 @@ describe('lint by rules', () => {
       }
       expect(
         lint(
+          // Any better example?
           '老師說：「你們要記住國父說的『青年要立志做大事，不要做大官』這句話。」',
           options
         )
-      ).toBe(
-        '老師說：“你們要記住國父說的‘青年要立志做大事，不要做大官’這句話。”'
-      )
+      ).toEqual({
+        output:
+          '老師說：“你們要記住國父說的‘青年要立志做大事，不要做大官’這句話。”',
+        warnings: [
+          {
+            index: 4,
+            target: ValidationTarget.START_CONTENT,
+            message: PUNCTUATION_UNIFICATION_SIMPLIFIED
+          },
+          {
+            index: 34,
+            target: ValidationTarget.END_CONTENT,
+            message: PUNCTUATION_UNIFICATION_SIMPLIFIED
+          },
+          {
+            index: 14,
+            target: ValidationTarget.START_CONTENT,
+            message: PUNCTUATION_UNIFICATION_SIMPLIFIED
+          },
+          {
+            index: 29,
+            target: ValidationTarget.END_CONTENT,
+            message: PUNCTUATION_UNIFICATION_SIMPLIFIED
+          }
+        ]
+      })
     })
     test('traditional', () => {
       const options: Options = {
         rules: { unifiedPunctuation: 'traditional' }
       }
       expect(
-        lint(
+        getOutput(
           '老師說：“你們要記住國父說的‘青年要立志做大事，不要做大官’這句話。”',
           options
         )
@@ -140,19 +234,19 @@ describe('lint by rules', () => {
       const options: Options = {
         rules: { spaceBetweenHalfWidthContent: true }
       }
-      expect(lint('foo bar   baz', options)).toBe('foo bar baz')
+      expect(getOutput('foo bar   baz', options)).toBe('foo bar baz')
     })
     test('no space between full-width content', () => {
       const options: Options = {
         rules: { noSpaceBetweenFullWidthContent: true }
       }
-      expect(lint('中文 中文 中 文', options)).toBe('中文中文中文')
+      expect(getOutput('中文 中文 中 文', options)).toBe('中文中文中文')
     })
     test('one space between mixed-width content', () => {
       const options: Options = {
         rules: { spaceBetweenMixedWidthContent: true }
       }
-      expect(lint('中文foo 中文 foo中foo文', options)).toBe(
+      expect(getOutput('中文foo 中文 foo中foo文', options)).toBe(
         '中文 foo 中文 foo 中 foo 文'
       )
     })
@@ -160,7 +254,7 @@ describe('lint by rules', () => {
       const options: Options = {
         rules: { spaceBetweenMixedWidthContent: false }
       }
-      expect(lint('中文foo 中文 foo中foo文', options)).toBe(
+      expect(getOutput('中文foo 中文 foo中foo文', options)).toBe(
         '中文foo中文foo中foo文'
       )
     })
@@ -170,7 +264,7 @@ describe('lint by rules', () => {
       const options: Options = {
         rules: { noSpaceBeforePunctuation: true }
       }
-      expect(lint('中文 , 一. 二 ；三。四', options)).toBe(
+      expect(getOutput('中文 , 一. 二 ；三。四', options)).toBe(
         '中文, 一. 二；三。四'
       )
     })
@@ -178,7 +272,7 @@ describe('lint by rules', () => {
       const options: Options = {
         rules: { spaceAfterHalfWidthPunctuation: true }
       }
-      expect(lint('中文, 中文.中； 文。中文', options)).toBe(
+      expect(getOutput('中文, 中文.中； 文。中文', options)).toBe(
         '中文, 中文. 中； 文。中文'
       )
     })
@@ -186,7 +280,7 @@ describe('lint by rules', () => {
       const options: Options = {
         rules: { noSpaceAfterFullWidthPunctuation: true }
       }
-      expect(lint('中文, 中文.中； 文。中文', options)).toBe(
+      expect(getOutput('中文, 中文.中； 文。中文', options)).toBe(
         '中文, 中文.中；文。中文'
       )
     })
@@ -196,34 +290,34 @@ describe('lint by rules', () => {
       const options: Options = {
         rules: { noSpaceInsideQuote: true }
       }
-      expect(lint('foo " bar " baz', options)).toBe('foo "bar" baz')
-      expect(lint('foo “ bar ” baz', options)).toBe('foo “bar” baz')
+      expect(getOutput('foo " bar " baz', options)).toBe('foo "bar" baz')
+      expect(getOutput('foo “ bar ” baz', options)).toBe('foo “bar” baz')
     })
     test('one space outside', () => {
       const options: Options = {
         rules: { spaceOutsideQuote: true }
       }
-      expect(lint('foo " bar " baz', options)).toBe('foo " bar " baz')
-      expect(lint('foo “ bar ” baz', options)).toBe('foo “ bar ” baz')
-      expect(lint('foo, " bar " , baz', options)).toBe('foo, " bar ", baz')
-      expect(lint('foo. “ bar ” . baz', options)).toBe('foo. “ bar ”. baz')
-      expect(lint('一 " 二 " 三', options)).toBe('一" 二 "三')
-      expect(lint('一 “ 二 ” 三', options)).toBe('一“ 二 ”三')
-      expect(lint('一， " 二 " ， 三', options)).toBe('一，" 二 "， 三')
-      expect(lint('一。 “ 二 ” 。 三', options)).toBe('一。“ 二 ”。 三')
+      expect(getOutput('foo " bar " baz', options)).toBe('foo " bar " baz')
+      expect(getOutput('foo “ bar ” baz', options)).toBe('foo “ bar ” baz')
+      expect(getOutput('foo, " bar " , baz', options)).toBe('foo, " bar ", baz')
+      expect(getOutput('foo. “ bar ” . baz', options)).toBe('foo. “ bar ”. baz')
+      expect(getOutput('一 " 二 " 三', options)).toBe('一" 二 "三')
+      expect(getOutput('一 “ 二 ” 三', options)).toBe('一“ 二 ”三')
+      expect(getOutput('一， " 二 " ， 三', options)).toBe('一，" 二 "， 三')
+      expect(getOutput('一。 “ 二 ” 。 三', options)).toBe('一。“ 二 ”。 三')
     })
     test('no space outside', () => {
       const options: Options = {
         rules: { spaceOutsideQuote: false }
       }
-      expect(lint('foo " bar " baz', options)).toBe('foo" bar "baz')
-      expect(lint('foo “ bar ” baz', options)).toBe('foo“ bar ”baz')
-      expect(lint('foo, " bar " , baz', options)).toBe('foo," bar ", baz')
-      expect(lint('foo. “ bar ” . baz', options)).toBe('foo.“ bar ”. baz')
-      expect(lint('一 " 二 " 三', options)).toBe('一" 二 "三')
-      expect(lint('一 “ 二 ” 三', options)).toBe('一“ 二 ”三')
-      expect(lint('一， " 二 " ， 三', options)).toBe('一，" 二 "， 三')
-      expect(lint('一。 “ 二 ” 。 三', options)).toBe('一。“ 二 ”。 三')
+      expect(getOutput('foo " bar " baz', options)).toBe('foo" bar "baz')
+      expect(getOutput('foo “ bar ” baz', options)).toBe('foo“ bar ”baz')
+      expect(getOutput('foo, " bar " , baz', options)).toBe('foo," bar ", baz')
+      expect(getOutput('foo. “ bar ” . baz', options)).toBe('foo.“ bar ”. baz')
+      expect(getOutput('一 " 二 " 三', options)).toBe('一" 二 "三')
+      expect(getOutput('一 “ 二 ” 三', options)).toBe('一“ 二 ”三')
+      expect(getOutput('一， " 二 " ， 三', options)).toBe('一，" 二 "， 三')
+      expect(getOutput('一。 “ 二 ” 。 三', options)).toBe('一。“ 二 ”。 三')
     })
   })
   describe('[space-bracket] the space around brackets', () => {
@@ -231,54 +325,33 @@ describe('lint by rules', () => {
       const options: Options = {
         rules: { noSpaceInsideBracket: true }
       }
-      expect(lint('foo (bar) baz', options)).toBe('foo (bar) baz')
-      expect(lint('foo ( bar ) baz', options)).toBe('foo (bar) baz')
-      expect(lint('foo （bar） baz', options)).toBe('foo （bar） baz')
-      expect(lint('foo （ bar ） baz', options)).toBe('foo （bar） baz')
+      expect(getOutput('foo (bar) baz', options)).toBe('foo (bar) baz')
+      expect(getOutput('foo ( bar ) baz', options)).toBe('foo (bar) baz')
+      expect(getOutput('foo （bar） baz', options)).toBe('foo （bar） baz')
+      expect(getOutput('foo （ bar ） baz', options)).toBe('foo （bar） baz')
     })
     test('one space outside', () => {
       const options: Options = {
         rules: { spaceOutsideBracket: true }
       }
-      expect(lint('foo(bar)baz', options)).toBe('foo (bar) baz')
-      expect(lint('foo ( bar ) baz', options)).toBe('foo ( bar ) baz')
-      expect(lint('foo（bar）baz', options)).toBe('foo（bar）baz')
-      expect(lint('foo （ bar ） baz', options)).toBe('foo（ bar ）baz')
+      expect(getOutput('foo(bar)baz', options)).toBe('foo (bar) baz')
+      expect(getOutput('foo ( bar ) baz', options)).toBe('foo ( bar ) baz')
+      expect(getOutput('foo（bar）baz', options)).toBe('foo（bar）baz')
+      expect(getOutput('foo （ bar ） baz', options)).toBe('foo（ bar ）baz')
     })
     test('no space outside', () => {
       const options: Options = {
         rules: { spaceOutsideBracket: false }
       }
-      expect(lint('foo(bar)baz', options)).toBe('foo(bar)baz')
-      expect(lint('foo ( bar ) baz', options)).toBe('foo( bar )baz')
-      expect(lint('foo（bar）baz', options)).toBe('foo（bar）baz')
-      expect(lint('foo （ bar ） baz', options)).toBe('foo（ bar ）baz')
+      expect(getOutput('foo(bar)baz', options)).toBe('foo(bar)baz')
+      expect(getOutput('foo ( bar ) baz', options)).toBe('foo( bar )baz')
+      expect(getOutput('foo（bar）baz', options)).toBe('foo（bar）baz')
+      expect(getOutput('foo （ bar ） baz', options)).toBe('foo（ bar ）baz')
     })
   })
   describe.todo('combo cases', () => {
     // TODO:
   })
-})
-
-describe('validate by rules', () => {
-  describe('[hyper-code] the existence of spaces around hyper code marks', () => {
-    test('forcing spaces', () => {
-      const options: Options = { rules: { spaceOutsideCode: true } }
-      expect(validate('xxx`foo`xxx', options)).toEqual([
-        {
-          index: 3,
-          target: ValidationTarget.SPACE_AFTER,
-          message: '此处内联代码的外部需要一个空格'
-        },
-        {
-          index: 8,
-          target: ValidationTarget.SPACE_AFTER,
-          message: '此处内联代码的外部需要一个空格'
-        }
-      ])
-    })
-  })
-  // TODO:
 })
 
 // TODO: error handling

@@ -341,12 +341,13 @@ const createValidation = (
   }
   if (target === ValidationTarget.START_CONTENT) {
     validation.index = (token as GroupToken).startIndex
+    validation.length = 0
   } else if (target === ValidationTarget.END_CONTENT) {
-    validation.index = (token as GroupToken).startIndex
-    validation.length =
-      (token as GroupToken).endIndex - (token as GroupToken).startIndex + 1
+    validation.index = (token as GroupToken).endIndex
+    validation.length = 0
   } else if (target === ValidationTarget.INNER_SPACE_BEFORE) {
     validation.index = (token as GroupToken).startIndex
+    validation.length = (token as GroupToken).startContent.length
   }
   return validation
 }
