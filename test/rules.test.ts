@@ -485,6 +485,11 @@ describe('lint by cases', () => {
     `.trim()
     )
   })
+  test.todo('datetime', () => {
+    expect(getOutput('2019年06月26号 2019-06-26 12:00', defaultConfig)).toBe(
+      '2019年06月26号 2019-06-26 12:00'
+    )
+  })
   test.todo('abbr', () => {
     expect(getOutput('运行时 + 编译器 vs. 只包含运行时', defaultConfig)).toBe(
       '运行时 + 编译器 vs. 只包含运行时'
