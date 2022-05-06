@@ -47,22 +47,22 @@ const parsePosition = (str, index) => {
   }
 }
 
-const expectedValidationsInfo = {
-  1: [20, 21, 26, 29],
-  3: [22, 25, 27, 34],
-  5: [20, 24, 27, 31, 35, 37, 41, 44, 47, 48, 51, 55, 58],
-  7: [],
-  9: [],
-  11: [20, 22, 25, 29, 34, 35, 39, 42, 45],
-  13: [15, 16, 17, 18, 35, 36],
-  15: [24, 53, 55, 57],
-  17: [26, 30, 37, 39, 43, 45, 48, 50, 57, 59, 66, 72],
-  19: [15, 30, 28],
-  21: [18, 25, 20, 23],
-  23: [36, 41],
-  25: [32, 35, 39, 42, 46, 48, 52, 54],
-  27: []
-}
+// const expectedValidationsInfo = {
+//   1: [20, 21, 26, 29],
+//   3: [22, 25, 27, 34],
+//   5: [20, 24, 27, 31, 35, 37, 41, 44, 47, 48, 51, 55, 58],
+//   7: [],
+//   9: [],
+//   11: [20, 22, 25, 29, 34, 35, 39, 42, 45],
+//   13: [15, 16, 17, 18, 35, 36],
+//   15: [24, 53, 55, 57],
+//   17: [26, 30, 37, 39, 43, 45, 48, 50, 57, 59, 66, 72],
+//   19: [15, 30, 28],
+//   21: [18, 25, 20, 23],
+//   23: [36, 41],
+//   25: [32, 35, 39, 42, 46, 48, 52, 54],
+//   27: []
+// }
 
 describe('lint', () => {
   test.todo('units', () => {
@@ -88,12 +88,12 @@ describe('lint', () => {
       validationsByLine[row] = validationsByLine[row] || {}
       validationsByLine[row][column] = v
     })
-    Object.keys(expectedValidationsInfo).forEach((row) => {
-      const info = expectedValidationsInfo[row]
-      const lineValidations = validationsByLine[row] || {}
-      expect(Object.keys(lineValidations).length).toBe(info.length)
-      info.forEach((column) => expect(lineValidations[column]).toBeTruthy())
-    })
+    // Object.keys(expectedValidationsInfo).forEach((row) => {
+    //   const info = expectedValidationsInfo[row]
+    //   const lineValidations = validationsByLine[row] || {}
+    //   expect(Object.keys(lineValidations).length).toBe(info.length)
+    //   info.forEach((column) => expect(lineValidations[column]).toBeTruthy())
+    // })
   })
   test('ignore HTML comment', () => {
     const input = fs.readFileSync(

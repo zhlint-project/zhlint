@@ -204,7 +204,7 @@ describe('lint', () => {
       '你可以使用 [`try`...`catch`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch) 作为替代。'
     )
   })
-  test.todo('space between punctuation and hyper content', () => {
+  test('space between punctuation and hyper content', () => {
     expect(
       getOutput(
         'store 实例不再暴露事件触发器 (event emitter) 接口 (`on`, `off`, `emit`)。'
@@ -251,7 +251,7 @@ describe('lint', () => {
       '切换到 *Archive* 标签，然后再切换回 *Posts*'
     )
   })
-  test.todo('colon (not datetime)', () => {
+  test('colon (not datetime)', () => {
     expect(
       getOutput(
         '1. 添加全局方法或者属性。如: [vue-custom-element](https://github.com/karol-f/vue-custom-element)'

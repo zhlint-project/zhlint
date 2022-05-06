@@ -118,9 +118,9 @@ const generateHandler = (options: Options): Handler => {
       (token.modifiedType === CharType.PUNCTUATION_HALF &&
         oneAfterHalfWidthPunctuationOption)
     ) {
-      const spaceAfter = token.type === CharType.PUNCTUATION_HALF ? ' ' : ''
+      const spaceAfter = token.modifiedType === CharType.PUNCTUATION_HALF ? ' ' : ''
       const message =
-        token.type === CharType.PUNCTUATION_HALF
+        token.modifiedType === CharType.PUNCTUATION_HALF
           ? PUNCTUATION_SPACE_AFTER
           : PUNCTUATION_NOSPACE_AFTER
 

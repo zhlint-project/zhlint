@@ -98,8 +98,8 @@ const generateHandler = (options: Options): Handler => {
         )
         if (spaceHost) {
           const isFullWidth =
-            isFullWidthPair(token.content) ||
-            isFullWidthPair(contentTokenAfter.content)
+            isFullWidthPair(token.modifiedContent) ||
+            isFullWidthPair(contentTokenAfter.modifiedContent)
           
             // 2.1.1 any-full-bracket
             // 2.1.2 right-half-bracket x left-half-bracket
@@ -137,7 +137,7 @@ const generateHandler = (options: Options): Handler => {
             token
           )
           if (spaceHost) {
-            const isFullWidth = isFullWidthPair(token.content)
+            const isFullWidth = isFullWidthPair(token.modifiedContent)
 
             // 2.2.1 content/right-quote/code x left-full-bracket
             // 2.2.2 content/right-quote/code x left-half-bracket
@@ -170,7 +170,7 @@ const generateHandler = (options: Options): Handler => {
             contentTokenAfter
           )
           if (spaceHost) {
-            const isFullWidth = isFullWidthPair(token.content)
+            const isFullWidth = isFullWidthPair(token.modifiedContent)
 
             // 2.3.1 right-full-bracket x content/left-quote/code
             // 2.4.2 right-half-bracket x content/left-quote/code

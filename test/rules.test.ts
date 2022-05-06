@@ -44,7 +44,9 @@ describe('lint by rules', () => {
     expect(getOutput(' `foo` "foo" ', options)).toBe('`foo` "foo"')
     expect(getOutput(' foo bar   ', options)).toBe('foo bar')
     expect(getOutput('中文, 中文. ', options)).toBe('中文, 中文.')
-    expect(getOutput('中文, 中文.中； 文。 ', options)).toBe('中文, 中文.中； 文。')
+    expect(getOutput('中文, 中文.中； 文。 ', options)).toBe(
+      '中文, 中文.中； 文。'
+    )
     expect(getOutput(' " bar " ', options)).toBe('" bar "')
     expect(getOutput(' (bar) ', options)).toBe('(bar)')
   })
@@ -304,9 +306,7 @@ describe('lint by rules', () => {
           }
         ]
       })
-      expect(getOutput('foo, " bar " , baz', options)).toBe(
-        'foo, " bar ", baz'
-      )
+      expect(getOutput('foo, " bar " , baz', options)).toBe('foo, " bar ", baz')
       expect(getOutput('foo. “ bar ” . baz', options)).toBe('foo. “ bar ”. baz')
       expect(getOutput('一， " 二 " ， 三', options)).toBe('一， " 二 "， 三')
       expect(getOutput('一。 “ 二 ” 。 三', options)).toBe('一。 “ 二 ”。 三')
@@ -498,7 +498,9 @@ describe('lint by cases', () => {
   test('URL', () => {
     expect(getOutput('Vue.js 是什么', defaultConfig)).toBe('Vue.js 是什么')
     expect(getOutput('www.vuejs.org', defaultConfig)).toBe('www.vuejs.org')
-    expect(getOutput('https://vuejs.org', defaultConfig)).toBe('https://vuejs.org')
+    expect(getOutput('https://vuejs.org', defaultConfig)).toBe(
+      'https://vuejs.org'
+    )
   })
   test('slash character', () => {
     expect(getOutput('想知道 Vue 与其它库/框架有哪些区别', defaultConfig)).toBe(
@@ -511,7 +513,9 @@ describe('lint by cases', () => {
     )
   })
   test.todo('plural brackets', () => {
-    expect(getOutput('3 minite(s) left', defaultConfig)).toBe('3 minite(s) left')
+    expect(getOutput('3 minite(s) left', defaultConfig)).toBe(
+      '3 minite(s) left'
+    )
   })
   test('single quote for shorthand', () => {
     expect(getOutput(`how many user's here`, defaultConfig)).toBe(
