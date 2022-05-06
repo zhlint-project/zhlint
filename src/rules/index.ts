@@ -1,33 +1,16 @@
 import { Handler } from '../parser'
 import { Options } from './util'
 
-import defaultSpaceTrimHandler, {
-  generateHandler as genSpaceTrimGenerateHandler
-} from './space-trim'
-import defaultHyperCodeHandler, {
-  generateHandler as genHyperCodeHandler
-} from './hyper-code'
-import defaultHyperMarkHandler, {
-  generateHandler as genHyperMarkHandler
-} from './hyper-mark'
-import defaultPunctuationWidthHandler, {
-  generateHandler as genPunctuationWidthHandler
-} from './punctuation-width'
-import defaultPunctuationUnificationHandler, {
-  generateHandler as genPunctuationUnificationHandler
-} from './punctuation-unification'
-import defaultSpaceOfContentHandler, {
-  generateHandler as genSpaceOfContentHandler
-} from './space-content'
-import defaultSpaceOfPunctuationHandler, {
-  generateHandler as genSpaceOfPunctuationHandler
-} from './space-punctuation'
-import defaultSpaceOfQuoteHandler, {
-  generateHandler as genSpaceOfQuoteHandler
-} from './space-quote'
-import defaultSpaceOfBracketHandler, {
-  generateHandler as genSpaceOfBracketHandler
-} from './space-bracket'
+import genSpaceTrimGenerateHandler from './space-trim'
+import genHyperCodeHandler from './hyper-code'
+import genHyperMarkHandler from './hyper-mark'
+import genPunctuationWidthHandler from './punctuation-width'
+import genPunctuationUnificationHandler from './punctuation-unification'
+import genSpaceOfContentHandler from './space-content'
+import genSpaceOfPunctuationHandler from './space-punctuation'
+import genSpaceOfQuoteHandler from './space-quote'
+import genSpaceOfBracketHandler from './space-bracket'
+import genSpaceOfLinebreakHandler from './space-linebreak'
 
 export const generateHandlers = (options: Options): Handler[] => {
   return [
@@ -39,20 +22,7 @@ export const generateHandlers = (options: Options): Handler[] => {
     genSpaceOfContentHandler(options),
     genSpaceOfPunctuationHandler(options),
     genSpaceOfQuoteHandler(options),
-    genSpaceOfBracketHandler(options)
+    genSpaceOfBracketHandler(options),
+    genSpaceOfLinebreakHandler(options)
   ]
 }
-
-const defaultHandlers: Handler[] = [
-  defaultSpaceTrimHandler,
-  defaultHyperMarkHandler,
-  defaultHyperCodeHandler,
-  defaultPunctuationWidthHandler,
-  defaultPunctuationUnificationHandler,
-  defaultSpaceOfContentHandler,
-  defaultSpaceOfPunctuationHandler,
-  defaultSpaceOfQuoteHandler,
-  defaultSpaceOfBracketHandler
-]
-
-export default defaultHandlers

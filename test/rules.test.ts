@@ -443,3 +443,101 @@ describe('lint by rules', () => {
     })
   })
 })
+
+describe('lint by cases', () => {
+  const defaultConfig: Options = {
+    rules: {
+      halfWidthPunctuation: `()`,
+      fullWidthPunctuation: `，。：；？！“”‘’`,
+      unifiedPunctuation: 'simplified',
+      spaceBetweenHalfWidthContent: true,
+      noSpaceBetweenFullWidthContent: true,
+      spaceBetweenMixedWidthContent: true,
+      noSpaceBeforePunctuation: true,
+      spaceAfterHalfWidthPunctuation: true,
+      noSpaceAfterFullWidthPunctuation: true,
+      spaceOutsideHalfQuote: true,
+      noSpaceOutsideFullQuote: true,
+      noSpaceInsideQuote: true,
+      spaceOutsideHalfBracket: true,
+      noSpaceOutsideFullBracket: true,
+      noSpaceInsideBracket: true,
+      spaceOutsideCode: true,
+      noSpaceInsideMark: true,
+      trimSpace: true
+    }
+  }
+  test('[case-linebreak] keep the linebreaks', () => {
+    expect(
+      getOutput(
+        `
+  > foo  
+  > bar 
+  > baz
+    `.trim(),
+        defaultConfig
+      )
+    ).toBe(
+      `
+  > foo  
+  > bar 
+  > baz
+    `.trim()
+    )
+  })
+  test.todo('abbr', () => {
+    expect(getOutput('运行时 + 编译器 vs. 只包含运行时', defaultConfig)).toBe(
+      '运行时 + 编译器 vs. 只包含运行时'
+    )
+  })
+  test('URL', () => {
+    expect(getOutput('Vue.js 是什么', defaultConfig)).toBe('Vue.js 是什么')
+    expect(getOutput('www.vuejs.org', defaultConfig)).toBe('www.vuejs.org')
+    expect(getOutput('https://vuejs.org', defaultConfig)).toBe('https://vuejs.org')
+  })
+  test('slash character', () => {
+    expect(getOutput('想知道 Vue 与其它库/框架有哪些区别', defaultConfig)).toBe(
+      '想知道 Vue 与其它库/框架有哪些区别'
+    )
+  })
+  test('special characters', () => {
+    expect(getOutput('Vue (读音 /vjuː/，类似于)', defaultConfig)).toBe(
+      'Vue (读音 /vjuː/，类似于)'
+    )
+  })
+  test.todo('plural brackets', () => {
+    expect(getOutput('3 minite(s) left', defaultConfig)).toBe('3 minite(s) left')
+  })
+  test('single quote for shorthand', () => {
+    expect(getOutput(`how many user's here`, defaultConfig)).toBe(
+      `how many user's here`
+    )
+    expect(getOutput(`how many users' items here`, defaultConfig)).toBe(
+      `how many users' items here`
+    )
+    expect(getOutput(`what's going on`, defaultConfig)).toBe(`what's going on`)
+  })
+  test('math exp', () => {
+    expect(getOutput('1+1=2', defaultConfig)).toBe('1+1=2')
+    expect(getOutput('a|b', defaultConfig)).toBe('a|b')
+    expect(getOutput('a | b', defaultConfig)).toBe('a | b')
+    expect(getOutput('a||b', defaultConfig)).toBe('a||b')
+    expect(getOutput('a || b', defaultConfig)).toBe('a || b')
+  })
+  test('arrow chars', () => {
+    expect(getOutput('Chrome 顶部导航 > 窗口 > 任务管理', defaultConfig)).toBe(
+      'Chrome 顶部导航 > 窗口 > 任务管理'
+    )
+  })
+  test('curly brackets', () => {
+    expect(getOutput('# 简介 {#introduction}', defaultConfig)).toBe(
+      '# 简介 {#introduction}'
+    )
+    expect(getOutput('# 简介{#introduction}', defaultConfig)).toBe(
+      '# 简介 {#introduction}'
+    )
+    expect(getOutput('### 托管模式 {#takeover-mode}', defaultConfig)).toBe(
+      '### 托管模式 {#takeover-mode}'
+    )
+  })
+})

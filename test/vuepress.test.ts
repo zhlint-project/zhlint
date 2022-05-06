@@ -2,7 +2,30 @@ import { describe, test, expect } from 'vitest'
 
 import run, { Options } from '../src/run'
 
-const lint = (...args: [string, Options?]) => run(...args).result
+const defaultConfig: Options = {
+  rules: {
+    halfWidthPunctuation: `()`,
+    fullWidthPunctuation: `，。：；？！“”‘’`,
+    unifiedPunctuation: 'simplified',
+    spaceBetweenHalfWidthContent: true,
+    noSpaceBetweenFullWidthContent: true,
+    spaceBetweenMixedWidthContent: true,
+    noSpaceBeforePunctuation: true,
+    spaceAfterHalfWidthPunctuation: true,
+    noSpaceAfterFullWidthPunctuation: true,
+    spaceOutsideHalfQuote: true,
+    noSpaceOutsideFullQuote: true,
+    noSpaceInsideQuote: true,
+    spaceOutsideHalfBracket: true,
+    noSpaceOutsideFullBracket: true,
+    noSpaceInsideBracket: true,
+    spaceOutsideCode: true,
+    noSpaceInsideMark: true,
+    trimSpace: true
+  }
+}
+
+const getOutput = (str: string) => run(str, defaultConfig).result
 
 const simpleInput = `:::
 自动在中文和English之间加入空格
@@ -23,16 +46,16 @@ const customTitleOutput = `:::
 自动在中文和 English 之间加入空格
 :::`
 
-describe.todo('lint', () => {
+describe('lint', () => {
   test('simple custom container', () => {
-    expect(lint(simpleInput)).toBe(simpleOutput)
+    expect(getOutput(simpleInput)).toBe(simpleOutput)
   })
 
   test('custom container with default title', () => {
-    expect(lint(defaultTitleInput)).toBe(defaultTitleOutput)
+    expect(getOutput(defaultTitleInput)).toBe(defaultTitleOutput)
   })
 
   test('custom container with custom title', () => {
-    expect(lint(customTitleInput)).toBe(customTitleOutput)
+    expect(getOutput(customTitleInput)).toBe(customTitleOutput)
   })
 })

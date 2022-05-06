@@ -6,6 +6,10 @@
  * Options:
  * - halfWidthPunctuation: string = `()`
  * - fullWidthPunctuation: string = `，。：；？！“”‘’`
+ * 
+ * Details:
+ * - skip half-width punctuations between half-width content without space
+ * - skip successive multiple half-width punctuations
  */
 
 import {
@@ -22,9 +26,8 @@ import {
   checkContent,
   checkEndContent,
   checkStartContent,
-  findMarkSeqBetween,
-  findNonHyperVisibleTokenAfter,
-  findNonHyperVisibleTokenBefore,
+  isHalfWidthPunctuationWithoutSpaceAround,
+  isSuccessiveHalfWidthPunctuation,
   Options
 } from './util'
 
@@ -94,43 +97,7 @@ const parseOptions = (
   }
 }
 
-const needKeep = (group: MutableGroupToken, token: MutableToken): boolean => {
-  const nonHyperVisibleTokenBefore = findNonHyperVisibleTokenBefore(
-    group,
-    token
-  )
-  const nonHyperVisibleTokenAfter = findNonHyperVisibleTokenAfter(group, token)
-
-  if (
-    token.type === CharType.PUNCTUATION_HALF &&
-    nonHyperVisibleTokenBefore &&
-    nonHyperVisibleTokenAfter &&
-    nonHyperVisibleTokenBefore.type === CharType.CONTENT_HALF &&
-    nonHyperVisibleTokenAfter.type === CharType.CONTENT_HALF
-  ) {
-    const resultBefore = findMarkSeqBetween(
-      group,
-      nonHyperVisibleTokenBefore,
-      token
-    )
-    const hasSpaceBefore = resultBefore.tokenSeq.some(
-      (target) => target.modifiedSpaceAfter
-    )
-
-    const resultAfter = findMarkSeqBetween(
-      group,
-      token,
-      nonHyperVisibleTokenAfter
-    )
-    const hasSpaceAfter = resultAfter.tokenSeq.some(
-      (target) => target.modifiedSpaceAfter
-    )
-    return !hasSpaceBefore && !hasSpaceAfter
-  }
-  return false
-}
-
-export const generateHandler = (options: Options): Handler => {
+const generateHandler = (options: Options): Handler => {
   const { halfWidthMap, fullWidthMap, fullWidthPairMap } = parseOptions(options)
 
   const handleHyperSpaceOption: Handler = (
@@ -148,7 +115,12 @@ export const generateHandler = (options: Options): Handler => {
     }
 
     // skip half-width punctuations between half-width content without space
-    if (needKeep(group, token)) {
+    if (isHalfWidthPunctuationWithoutSpaceAround(group, token)) {
+      return
+    }
+
+    // skip successive multiple half-width punctuations
+    if (isSuccessiveHalfWidthPunctuation(group, token)) {
       return
     }
 
@@ -227,7 +199,9 @@ export const generateHandler = (options: Options): Handler => {
   return handleHyperSpaceOption
 }
 
-export default generateHandler({
+export const defaultConfig: Options = {
   halfWidthPunctuation: defaultHalfWidthOption,
   fullWidthPunctuation: defaultFullWidthOption
-})
+}
+
+export default generateHandler

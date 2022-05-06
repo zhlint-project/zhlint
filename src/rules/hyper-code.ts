@@ -29,7 +29,7 @@ import {
 } from '../parser'
 import { CODE_NOSPACE_OUTSIDE, CODE_SPACE_OUTSIDE } from './messages'
 
-export const generateHandler = (options: Options): Handler => {
+const generateHandler = (options: Options): Handler => {
   const needSpaceOption = options?.spaceOutsideCode
   const spaceAfter = needSpaceOption ? ' ' : ''
   const message = needSpaceOption ? CODE_SPACE_OUTSIDE : CODE_NOSPACE_OUTSIDE
@@ -68,6 +68,8 @@ export const generateHandler = (options: Options): Handler => {
   return handleHyperSpaceOption
 }
 
-export default generateHandler({
+export const defaultConfig: Options = {
   spaceOutsideCode: true
-})
+}
+
+export default generateHandler

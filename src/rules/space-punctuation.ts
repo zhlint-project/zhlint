@@ -23,6 +23,9 @@
  *   half x content/left-quote/left-bracket/code
  * - noSpaceAfterFullWidthPunctuation:
  *   full x content/left-quote/left-bracket/code
+ * 
+ * - skip half-width punctuations between half-width content without space
+ * - skip successive multiple half-width punctuations
  */
 
 import {
@@ -41,6 +44,8 @@ import {
   findExpectedVisibleTokenAfter,
   findExpectedVisibleTokenBefore,
   findMarkSeqBetween,
+  isHalfWidthPunctuationWithoutSpaceAround,
+  isSuccessiveHalfWidthPunctuation,
   Options
 } from './util'
 import {
@@ -53,7 +58,7 @@ const normalPunctuationList = `,.;:?!，。；：？！`.split('')
 const isNormalPunctuation = (char: string): boolean =>
   normalPunctuationList.indexOf(char) >= 0
 
-export const generateHandler = (options: Options): Handler => {
+const generateHandler = (options: Options): Handler => {
   const noBeforePunctuationOption = options?.noSpaceBeforePunctuation
   const oneAfterHalfWidthPunctuationOption =
     options?.spaceAfterHalfWidthPunctuation
@@ -69,20 +74,31 @@ export const generateHandler = (options: Options): Handler => {
       return
     }
 
+    // skip half-width punctuations between half-width content without space
+    if (isHalfWidthPunctuationWithoutSpaceAround(group, token)) {
+      return
+    }
+
+    // skip successive multiple half-width punctuations
+    if (isSuccessiveHalfWidthPunctuation(group, token)) {
+      return
+    }
+
     // 1. content/right-quote/right-bracket/code x punctuation
     if (noBeforePunctuationOption) {
       const contentTokenBefore = findExpectedVisibleTokenBefore(group, token)
-      if (contentTokenBefore && (
+      if (
+        contentTokenBefore &&
         // content
-        isContentType(contentTokenBefore.type) ||
-        // right-quote
-        contentTokenBefore.type === GroupTokenType.GROUP ||
-        // right-bracket
-        (contentTokenBefore.type === SingleTokenType.MARK_BRACKETS &&
-          contentTokenBefore.markSide === MarkSideType.RIGHT) ||
-        // code
-        contentTokenBefore.type === SingleTokenType.HYPER_CODE
-      )) {
+        (isContentType(contentTokenBefore.type) ||
+          // right-quote
+          contentTokenBefore.type === GroupTokenType.GROUP ||
+          // right-bracket
+          (contentTokenBefore.type === SingleTokenType.MARK_BRACKETS &&
+            contentTokenBefore.markSide === MarkSideType.RIGHT) ||
+          // code
+          contentTokenBefore.type === SingleTokenType.HYPER_CODE)
+      ) {
         const { spaceHost } = findMarkSeqBetween(
           group,
           contentTokenBefore,
@@ -109,17 +125,18 @@ export const generateHandler = (options: Options): Handler => {
           : PUNCTUATION_NOSPACE_AFTER
 
       const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
-      if (contentTokenAfter && (
+      if (
+        contentTokenAfter &&
         // content
-        isContentType(contentTokenAfter.type) ||
-        // left-quote
-        contentTokenAfter.type === GroupTokenType.GROUP ||
-        // left-bracket
-        (contentTokenAfter.type === SingleTokenType.MARK_BRACKETS &&
-          contentTokenAfter.markSide === MarkSideType.LEFT) ||
-        // code
-        contentTokenAfter.type === SingleTokenType.HYPER_CODE
-      )) {
+        (isContentType(contentTokenAfter.type) ||
+          // left-quote
+          contentTokenAfter.type === GroupTokenType.GROUP ||
+          // left-bracket
+          (contentTokenAfter.type === SingleTokenType.MARK_BRACKETS &&
+            contentTokenAfter.markSide === MarkSideType.LEFT) ||
+          // code
+          contentTokenAfter.type === SingleTokenType.HYPER_CODE)
+      ) {
         const { spaceHost } = findMarkSeqBetween(
           group,
           token,
@@ -134,8 +151,10 @@ export const generateHandler = (options: Options): Handler => {
   }
 }
 
-export default generateHandler({
+export const defaultConfig: Options = {
   noSpaceBeforePunctuation: true,
   spaceAfterHalfWidthPunctuation: true,
   noSpaceAfterFullWidthPunctuation: true
-})
+}
+
+export default generateHandler

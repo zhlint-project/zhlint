@@ -53,7 +53,7 @@ const checkChar = (content: string, objectMap: Record<string, QuoteType>, unifie
   return content
 }
 
-export const generateHandler = (options: Options): Handler => {
+const generateHandler = (options: Options): Handler => {
   const unifiedOption = options?.unifiedPunctuation
 
   if (!unifiedOption) {
@@ -82,6 +82,8 @@ export const generateHandler = (options: Options): Handler => {
   return handlerPunctuationUnified
 }
 
-export default generateHandler({
+export const defaultConfig: Options = {
   unifiedPunctuation: 'simplified'
-})
+}
+
+export default generateHandler

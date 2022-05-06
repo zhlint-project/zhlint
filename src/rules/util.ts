@@ -7,7 +7,8 @@ import {
   isNonHyperVisibleType,
   isInvisibleType,
   isVisibleType,
-  TokenType
+  TokenType,
+  CharType
 } from '../parser'
 
 // options
@@ -329,6 +330,43 @@ export const findMarkSeqBetween = (
     markSeq,
     tokenSeq: [before, ...markSeq]
   }
+}
+
+// special cases
+
+export const isHalfWidthPunctuationWithoutSpaceAround = (group: GroupToken, token: Token): boolean => {
+  const tokenBefore = findTokenBefore(group, token)
+  const tokenAfter = findTokenAfter(group, token)
+
+  if (
+    token.type === CharType.PUNCTUATION_HALF &&
+    tokenBefore &&
+    tokenBefore.type === CharType.CONTENT_HALF &&
+    tokenAfter &&
+    tokenAfter.type === CharType.CONTENT_HALF
+  ) {
+    return !tokenBefore.spaceAfter && !token.spaceAfter
+  }
+
+  return false
+}
+
+export const isSuccessiveHalfWidthPunctuation = (group: GroupToken, token: Token): boolean => {
+  if (token.type === CharType.PUNCTUATION_HALF) {
+    const tokenBefore = findTokenBefore(group, token)
+    const tokenAfter = findTokenAfter(group, token)
+    if (
+      (tokenBefore &&
+        tokenBefore.type === CharType.PUNCTUATION_HALF &&
+        !tokenBefore.spaceAfter) ||
+      (tokenAfter &&
+        tokenAfter.type === CharType.PUNCTUATION_HALF &&
+        !token.spaceAfter)
+    ) {
+      return true
+    }
+  }
+  return false
 }
 
 // validations helpers

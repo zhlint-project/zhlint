@@ -47,7 +47,7 @@ import {
   BRACKET_SPACE_OUTSIDE
 } from './messages'
 
-export const generateHandler = (options: Options): Handler => {
+const generateHandler = (options: Options): Handler => {
   const noInsideBracketOption = options?.noSpaceInsideBracket
   const spaceOutsideHalfBracketOption = options?.spaceOutsideHalfBracket
   const noSpaceOutsideFullBracketOption = options.noSpaceOutsideFullBracket
@@ -194,7 +194,9 @@ export const generateHandler = (options: Options): Handler => {
   }
 }
 
-export default generateHandler({
+export const defaultConfig: Options = {
   spaceOutsideHalfBracket: true,
   noSpaceInsideBracket: true
-})
+}
+
+export default generateHandler

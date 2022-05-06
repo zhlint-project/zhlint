@@ -2,7 +2,30 @@ import { describe, test, expect } from 'vitest'
 
 import fs from 'fs'
 import path from 'path'
-import run from '../src/run'
+import run, { Options } from '../src/run'
+
+const defaultConfig: Options = {
+  rules: {
+    halfWidthPunctuation: `()`,
+    fullWidthPunctuation: `，。：；？！“”‘’`,
+    unifiedPunctuation: 'simplified',
+    spaceBetweenHalfWidthContent: true,
+    noSpaceBetweenFullWidthContent: true,
+    spaceBetweenMixedWidthContent: true,
+    noSpaceBeforePunctuation: true,
+    spaceAfterHalfWidthPunctuation: true,
+    noSpaceAfterFullWidthPunctuation: true,
+    spaceOutsideHalfQuote: true,
+    noSpaceOutsideFullQuote: true,
+    noSpaceInsideQuote: true,
+    spaceOutsideHalfBracket: true,
+    noSpaceOutsideFullBracket: true,
+    noSpaceInsideBracket: true,
+    spaceOutsideCode: true,
+    noSpaceInsideMark: true,
+    trimSpace: true
+  }
+}
 
 const parsePosition = (str, index) => {
   const rows = str.split('\n')
@@ -41,7 +64,7 @@ const expectedValidationsInfo = {
   27: []
 }
 
-describe.todo('lint', () => {
+describe('lint', () => {
   test.todo('units', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-units.md'),
@@ -51,7 +74,7 @@ describe.todo('lint', () => {
       path.resolve(__dirname, './example-units-fixed.md'),
       { encoding: 'utf8' }
     )
-    const { result, validations, disabled } = run(input)
+    const { result, validations, disabled } = run(input, defaultConfig)
     expect(result).toBe(output)
     expect(!disabled).toBeTruthy()
     const validationsByLine = {}
@@ -77,7 +100,7 @@ describe.todo('lint', () => {
       path.resolve(__dirname, './example-ignore.md'),
       { encoding: 'utf8' }
     )
-    const { result, validations, disabled } = run(input)
+    const { result, validations, disabled } = run(input, defaultConfig)
     expect(result).toBe(input)
     expect(validations.length).toBe(0)
     expect(!disabled).toBeTruthy()
@@ -87,7 +110,7 @@ describe.todo('lint', () => {
       path.resolve(__dirname, './example-disabled.md'),
       { encoding: 'utf8' }
     )
-    const { result, validations, disabled } = run(input)
+    const { result, validations, disabled } = run(input, defaultConfig)
     expect(result).toBe(input)
     expect(validations.length).toBe(0)
     expect(disabled).toBe(true)
@@ -101,7 +124,7 @@ describe.todo('lint', () => {
       path.resolve(__dirname, './example-vuepress-fixed.md'),
       { encoding: 'utf8' }
     )
-    const { result, validations } = run(input)
+    const { result, validations } = run(input, defaultConfig)
     expect(result).toBe(output)
     expect(validations.length).toBe(10)
   })
@@ -110,6 +133,6 @@ describe.todo('lint', () => {
       path.resolve(__dirname, './example-article.md'),
       { encoding: 'utf8' }
     )
-    expect(run(input).result).toBe(input)
+    expect(run(input, defaultConfig).result).toBe(input)
   })
 })

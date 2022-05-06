@@ -35,7 +35,7 @@ import {
 } from '../parser'
 import { MARKDOWN_NOSPACE_INSIDE } from './messages'
 
-export const generateHandler = (options: Options): Handler => {
+const generateHandler = (options: Options): Handler => {
   const noSpaceInsideMarkOption = options?.noSpaceInsideMark
 
   return (token: MutableToken, _, group: MutableGroupToken) => {
@@ -77,6 +77,8 @@ export const generateHandler = (options: Options): Handler => {
   }
 }
 
-export default generateHandler({
+export const defaultConfig: Options = {
   noSpaceInsideMark: true
-})
+}
+
+export default generateHandler

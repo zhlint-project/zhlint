@@ -49,7 +49,7 @@ import {
   CONTENT_SPACE_MIXED_WIDTH
 } from './messages'
 
-export const generateHandler = (options: Options): Handler => {
+const generateHandler = (options: Options): Handler => {
   const onlyOneBetweenHalfWidthContentOption =
     options?.spaceBetweenHalfWidthContent
   const noBetweenFullWidthContentOption =
@@ -113,8 +113,10 @@ export const generateHandler = (options: Options): Handler => {
   }
 }
 
-export default generateHandler({
+export const defaultConfig: Options = {
   spaceBetweenHalfWidthContent: true,
   noSpaceBetweenFullWidthContent: true,
   spaceBetweenMixedWidthContent: true
-})
+}
+
+export default generateHandler

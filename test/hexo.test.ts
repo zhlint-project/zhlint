@@ -2,24 +2,47 @@ import { describe, test, expect } from 'vitest'
 
 import run, { Options } from '../src/run'
 
-const lint = (...args: [string, Options?]) => run(...args).result
+const defaultConfig: Options = {
+  rules: {
+    halfWidthPunctuation: `()`,
+    fullWidthPunctuation: `，。：；？！“”‘’`,
+    unifiedPunctuation: 'simplified',
+    spaceBetweenHalfWidthContent: true,
+    noSpaceBetweenFullWidthContent: true,
+    spaceBetweenMixedWidthContent: true,
+    noSpaceBeforePunctuation: true,
+    spaceAfterHalfWidthPunctuation: true,
+    noSpaceAfterFullWidthPunctuation: true,
+    spaceOutsideHalfQuote: true,
+    noSpaceOutsideFullQuote: true,
+    noSpaceInsideQuote: true,
+    spaceOutsideHalfBracket: true,
+    noSpaceOutsideFullBracket: true,
+    noSpaceInsideBracket: true,
+    spaceOutsideCode: true,
+    noSpaceInsideMark: true,
+    trimSpace: true
+  }
+}
 
-describe.todo('lint', () => {
+const getOutput = (str: string) => run(str, defaultConfig).result
+
+describe('lint', () => {
   test('one-line raw', () => {
-    expect(lint('`_x_` {% raw %}hello{% endraw %}')).toBe(
+    expect(getOutput('`_x_` {% raw %}hello{% endraw %}')).toBe(
       '`_x_` {% raw %}hello{% endraw %}'
     )
   })
 
   test('multiline raw', () => {
-    expect(lint(`{% raw %}\n<script>\n</script>\n{% endraw %}`)).toBe(
+    expect(getOutput(`{% raw %}\n<script>\n</script>\n{% endraw %}`)).toBe(
       `{% raw %}\n<script>\n</script>\n{% endraw %}`
     )
   })
 
   test('codeblock', () => {
     expect(
-      lint(
+      getOutput(
         `{% codeblock lang:js %}\nalias： [‘/manage’ ，‘/administer’ ，‘/administrate’ ]\n{% endcodeblock %}`
       )
     ).toBe(

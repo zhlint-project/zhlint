@@ -19,7 +19,7 @@ import {
   Options
 } from './util'
 
-export const generateHandler = (options: Options): Handler => {
+const generateHandler = (options: Options): Handler => {
   const trimSpaceOption = options?.trimSpace
 
   return (_: MutableToken, index: number, group: MutableGroupToken) => {
@@ -42,6 +42,9 @@ export const generateHandler = (options: Options): Handler => {
   }
 }
 
-export default generateHandler({
+export const defaultConfig: Options = {
   trimSpace: true
-})
+}
+
+export default generateHandler
+

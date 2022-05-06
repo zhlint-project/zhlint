@@ -47,7 +47,7 @@ import {
   QUOTE_SPACE_OUTSIDE
 } from './messages'
 
-export const generateHandler = (options: Options): Handler => {
+const generateHandler = (options: Options): Handler => {
   const noSpaceInsideQuoteOption = options?.noSpaceInsideQuote
   const spaceOutsideHalfQuoteOption = options?.spaceOutsideHalfQuote
   const noSpaceOutsideFullQuoteOption = options.noSpaceOutsideFullQuote
@@ -187,8 +187,10 @@ export const generateHandler = (options: Options): Handler => {
   }
 }
 
-export default generateHandler({
+export const defaultConfig: Options = {
   spaceOutsideHalfQuote: true,
   noSpaceInsideQuote: true,
   noSpaceOutsideFullQuote: true
-})
+}
+
+export default generateHandler
