@@ -26,6 +26,7 @@ import {
   GroupTokenType,
   Handler,
   isContentType,
+  isFullWidthPair,
   MarkSideType,
   MutableGroupToken,
   MutableToken,
@@ -45,11 +46,6 @@ import {
   BRACKET_NOSPACE_OUTSIDE,
   BRACKET_SPACE_OUTSIDE
 } from './messages'
-
-const fullWidthOption = `“”‘’（）「『』」`
-
-const isFullWidthPunctuation = (str: string): boolean =>
-  fullWidthOption.indexOf(str) >= 0
 
 export const generateHandler = (options: Options): Handler => {
   const noInsideBracketOption = options?.noSpaceInsideBracket
@@ -102,8 +98,8 @@ export const generateHandler = (options: Options): Handler => {
         )
         if (spaceHost) {
           const isFullWidth =
-            isFullWidthPunctuation(token.content) ||
-            isFullWidthPunctuation(contentTokenAfter.content)
+            isFullWidthPair(token.content) ||
+            isFullWidthPair(contentTokenAfter.content)
           
             // 2.1.1 any-full-bracket
             // 2.1.2 right-half-bracket x left-half-bracket
@@ -141,7 +137,7 @@ export const generateHandler = (options: Options): Handler => {
             token
           )
           if (spaceHost) {
-            const isFullWidth = isFullWidthPunctuation(token.content)
+            const isFullWidth = isFullWidthPair(token.content)
 
             // 2.2.1 content/right-quote/code x left-full-bracket
             // 2.2.2 content/right-quote/code x left-half-bracket
@@ -174,7 +170,7 @@ export const generateHandler = (options: Options): Handler => {
             contentTokenAfter
           )
           if (spaceHost) {
-            const isFullWidth = isFullWidthPunctuation(token.content)
+            const isFullWidth = isFullWidthPair(token.content)
 
             // 2.3.1 right-full-bracket x content/left-quote/code
             // 2.4.2 right-half-bracket x content/left-quote/code

@@ -442,7 +442,4 @@ describe('lint by rules', () => {
       expect(getOutput('foo ( bar ) baz', options)).toBe('foo( bar )baz')
     })
   })
-  describe.todo('combo cases', () => {
-    // TODO:
-  })
 })

@@ -32,6 +32,11 @@ export const SHORTHAND_PAIR_SET: CharSet = {
   [`’`]: `‘`
 }
 
+const fullWidthPairs = `“”‘’（）「」『』《》〈〉【】`
+
+export const isFullWidthPair = (str: string): boolean =>
+  fullWidthPairs.indexOf(str) >= 0
+
 // Reusable
 
 type Pair = {
