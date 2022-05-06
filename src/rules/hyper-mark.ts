@@ -3,67 +3,76 @@
  *
  * This rule is to ensure all the existing spaces should be outside hyper
  * marks like *, _, [, ], etc.
- * 
+ *
  * Options:
  * - noSpaceInsideMark: boolean | undefined
  *
  * For example:
- * - `x ** yyy ** z` should be `x **yyy** z`
+ * - `x _ ** yyy ** _ z` should be `x _**yyy**_ z`
  *
- * The challenging points include:
- * - identify the side of a certain hyper mark
- * - cases with multiple hyper marks together
- * - merge existing HYPER_SPACE validations if necessary
- *
- * Note:
- * No judgement if a space should or shouldn't exist.
+ * Details:
+ * - left-mark x left-mark: `x _ **yyy**_ z`
+ *                             ^^^
+ * - right-mark x right-mark: `x _**yyy** _ z`
+ *                                      ^^^
+ * - left-mark x non-mark: `x _** yyy**_ z`
+ *                              ^^^
+ * - non-mark x right-mark: `x _**yyy **_ z`
+ *                                 ^^^
  */
 
 import {
   Options,
-  findExpectedVisibleTokenBefore,
-  findExpectedVisibleTokenAfter,
-  findMarkSeqBetween,
-  checkSpaceAfter
+  checkSpaceAfter,
+  findTokenAfter
 } from './util'
 import {
   Handler,
+  MarkSideType,
   MutableGroupToken,
   MutableToken,
   SingleTokenType
 } from '../parser'
-import { MARKDOWN_NOSPACE_INSIDE, MARKDOWN_SPACE_OUTSIDE } from './messages'
+import { MARKDOWN_NOSPACE_INSIDE } from './messages'
 
 export const generateHandler = (options: Options): Handler => {
   const noSpaceInsideMarkOption = options?.noSpaceInsideMark
 
   return (token: MutableToken, _, group: MutableGroupToken) => {
+    // skip if there is no options
     if (!noSpaceInsideMarkOption) {
       return
     }
 
-    if (token.type !== SingleTokenType.MARK_HYPER) {
+    // skip non-after-token situations
+    const tokenAfter = findTokenAfter(group, token)
+    if (!tokenAfter) {
       return
     }
 
-    const tokenBefore = findExpectedVisibleTokenBefore(group, token)
-    const tokenAfter = findExpectedVisibleTokenAfter(group, token)
-    if (tokenBefore && tokenAfter) {
-      const { spaceHost, tokenSeq } = findMarkSeqBetween(
-        group,
-        tokenBefore,
-        tokenAfter
-      )
-      if (spaceHost) {
-        tokenSeq.forEach((target) => {
-          if (target !== spaceHost) {
-            if (target.modifiedSpaceAfter) {
-              checkSpaceAfter(spaceHost, ' ', MARKDOWN_SPACE_OUTSIDE)
-            }
-            checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
-          }
-        })
-      }
+    // skip non-mark situations
+    if (
+      token.type !== SingleTokenType.MARK_HYPER &&
+      tokenAfter.type !== SingleTokenType.MARK_HYPER
+    ) {
+      return
+    }
+
+    // 1. left x left, right x right
+    // 2. left x non-mark
+    // 3. non-mark x right
+    if (token.markSide === tokenAfter.markSide) {
+      checkSpaceAfter(token, '', MARKDOWN_NOSPACE_INSIDE)
+    } else if (
+      token.markSide === MarkSideType.LEFT &&
+      tokenAfter.type !== SingleTokenType.MARK_HYPER
+    ) {
+      checkSpaceAfter(token, '', MARKDOWN_NOSPACE_INSIDE)
+    } else if (
+      tokenAfter.markSide === MarkSideType.RIGHT &&
+      token.type !== SingleTokenType.MARK_HYPER
+    ) {
+      checkSpaceAfter(token, '', MARKDOWN_NOSPACE_INSIDE)
     }
   }
 }

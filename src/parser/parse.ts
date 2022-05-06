@@ -183,7 +183,7 @@ const toMutableMark = (mark: Mark): MutableMark => {
 }
 
 export const toMutableResult = (result: ParseResult): MutableParseResult => {
-  result.tokens.forEach(toMutableToken)
+  toMutableToken(result.tokens)
   result.marks.forEach(toMutableMark)
   return result as MutableParseResult
 }

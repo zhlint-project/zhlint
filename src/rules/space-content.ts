@@ -16,10 +16,6 @@
  *   - `false`: no space between width-mixed content
  *   - `undefined`: do nothing, just keep the original format
  *
- * Note:
- * The challenging part is to skip hyper marks and put the space (if any) into
- * the right places.
- *
  * Examples (betweenMixedWidthContent = true):
  * - *a*啊 -> *a* 啊
  * - *a *啊 -> *a* 啊
@@ -41,18 +37,17 @@ import {
   MutableToken
 } from '../parser'
 import {
-  CONTENT_NOSPACE_FULL_WIDTH,
-  CONTENT_NOSPACE_MIXED_WIDTH,
-  CONTENT_SPACE_HALF_WIDTH,
-  CONTENT_SPACE_MIXED_WIDTH,
-  MARKDOWN_NOSPACE_INSIDE
-} from './messages'
-import {
   checkSpaceAfter,
   findExpectedVisibleTokenAfter,
   findMarkSeqBetween,
   Options
 } from './util'
+import {
+  CONTENT_NOSPACE_FULL_WIDTH,
+  CONTENT_NOSPACE_MIXED_WIDTH,
+  CONTENT_SPACE_HALF_WIDTH,
+  CONTENT_SPACE_MIXED_WIDTH
+} from './messages'
 
 export const generateHandler = (options: Options): Handler => {
   const onlyOneBetweenHalfWidthContentOption =
@@ -67,29 +62,22 @@ export const generateHandler = (options: Options): Handler => {
       return
     }
 
-    // skip tokens without content token next
+    // skip non-content after-tokens
     const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
     if (!contentTokenAfter || !isContentType(contentTokenAfter.type)) {
       return
     }
 
-    const { spaceHost, tokenSeq } = findMarkSeqBetween(
-      group,
-      token,
-      contentTokenAfter
-    )
+    // find the space host
+    const { spaceHost } = findMarkSeqBetween(group, token, contentTokenAfter)
 
     // skip if the space host is not found
     if (!spaceHost) {
       return
     }
 
-    // between the content with same width
-    // - one space on the host between hal-width content
-    // - no space in other places
-    // between the content with different width
-    // - 0/1 space on the host
-    // - no space in other places
+    // 1. half x half, full x full
+    // 2. half x full, full x half
     if (contentTokenAfter.type === token.type) {
       // skip without custom option
       if (token.type === CharType.CONTENT_HALF) {
@@ -102,43 +90,25 @@ export const generateHandler = (options: Options): Handler => {
         }
       }
 
-      // set the space between
-      tokenSeq.forEach((target) => {
-        if (target === contentTokenAfter) {
-          return
-        }
-        if (target === spaceHost) {
-          checkSpaceAfter(
-            target,
-            token.type === CharType.CONTENT_HALF ? ' ' : '',
-            token.type === CharType.CONTENT_HALF
-              ? CONTENT_SPACE_HALF_WIDTH
-              : CONTENT_NOSPACE_FULL_WIDTH
-          )
-        } else {
-          checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
-        }
-      })
+      const spaceAfter = token.type === CharType.CONTENT_HALF ? ' ' : ''
+      const message =
+        token.type === CharType.CONTENT_HALF
+          ? CONTENT_SPACE_HALF_WIDTH
+          : CONTENT_NOSPACE_FULL_WIDTH
+
+      checkSpaceAfter(spaceHost, spaceAfter, message)
     } else {
       // skip without custom option
       if (typeof betweenMixedWidthContentOption === 'undefined') {
         return
       }
 
-      // set the space between
-      tokenSeq.forEach((target) => {
-        if (target === spaceHost) {
-          checkSpaceAfter(
-            target,
-            betweenMixedWidthContentOption ? ' ' : '',
-            betweenMixedWidthContentOption
-              ? CONTENT_SPACE_MIXED_WIDTH
-              : CONTENT_NOSPACE_MIXED_WIDTH
-          )
-        } else {
-          checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
-        }
-      })
+      const spaceAfter = betweenMixedWidthContentOption ? ' ' : ''
+      const message = betweenMixedWidthContentOption
+        ? CONTENT_SPACE_MIXED_WIDTH
+        : CONTENT_NOSPACE_MIXED_WIDTH
+
+      checkSpaceAfter(spaceHost, spaceAfter, message)
     }
   }
 }

@@ -15,17 +15,27 @@
  * - noSpaceAfterFullWidthPunctuation: boolean | undefined
  *   - `true`: remove spaces around a full-width punctuation (default)
  *   - `false` or `undefined`: do nothing, just keep the original format
+ * 
+ * Details:
+ * - noSpaceBeforePunctuation:
+ *   content/right-quote/right-bracket/code x punctuation
+ * - spaceAfterHalfWidthPunctuation:
+ *   half x content/left-quote/left-bracket/code
+ * - noSpaceAfterFullWidthPunctuation:
+ *   full x content/left-quote/left-bracket/code
  */
 
 import {
   CharType,
+  GroupTokenType,
   Handler,
   isContentType,
   isPunctuationType,
+  MarkSideType,
   MutableGroupToken,
-  MutableToken
+  MutableToken,
+  SingleTokenType
 } from '../parser'
-import { MARKDOWN_NOSPACE_INSIDE, PUNCTUATION_NOSPACE_AFTER, PUNCTUATION_NOSPACE_BEFORE, PUNCTUATION_SPACE_AFTER } from './messages'
 import {
   checkSpaceAfter,
   findExpectedVisibleTokenAfter,
@@ -33,6 +43,11 @@ import {
   findMarkSeqBetween,
   Options
 } from './util'
+import {
+  PUNCTUATION_NOSPACE_AFTER,
+  PUNCTUATION_NOSPACE_BEFORE,
+  PUNCTUATION_SPACE_AFTER
+} from './messages'
 
 const normalPunctuationList = `,.;:?!，。；：？！`.split('')
 const isNormalPunctuation = (char: string): boolean =>
@@ -46,7 +61,7 @@ export const generateHandler = (options: Options): Handler => {
     options?.noSpaceAfterFullWidthPunctuation
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
-    // skip non-punctuation tokens and find normal punctuations
+    // skip non-punctuation tokens and non-normal punctuations
     if (!isPunctuationType(token.type)) {
       return
     }
@@ -54,56 +69,66 @@ export const generateHandler = (options: Options): Handler => {
       return
     }
 
-    // deal with the content token before
+    // 1. content/right-quote/right-bracket/code x punctuation
     if (noBeforePunctuationOption) {
       const contentTokenBefore = findExpectedVisibleTokenBefore(group, token)
-      if (contentTokenBefore && isContentType(contentTokenBefore.type)) {
-        const { spaceHost, tokenSeq } = findMarkSeqBetween(
+      if (contentTokenBefore && (
+        // content
+        isContentType(contentTokenBefore.type) ||
+        // right-quote
+        contentTokenBefore.type === GroupTokenType.GROUP ||
+        // right-bracket
+        (contentTokenBefore.type === SingleTokenType.MARK_BRACKETS &&
+          contentTokenBefore.markSide === MarkSideType.RIGHT) ||
+        // code
+        contentTokenBefore.type === SingleTokenType.HYPER_CODE
+      )) {
+        const { spaceHost } = findMarkSeqBetween(
           group,
           contentTokenBefore,
           token
         )
 
-        // no space
         if (spaceHost) {
           checkSpaceAfter(spaceHost, '', PUNCTUATION_NOSPACE_BEFORE)
         }
-        tokenSeq.forEach((target) => {
-          if (target !== token && token !== spaceHost) {
-            checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
-          }
-        })
       }
     }
 
-    // deal with the content token after
+    // 2. half/full x content/left-quote/left-bracket/code
     if (
-      (token.type === CharType.PUNCTUATION_FULL &&
+      (token.modifiedType === CharType.PUNCTUATION_FULL &&
         noAfterFullWidthPunctuationOption) ||
-      (token.type === CharType.PUNCTUATION_HALF &&
+      (token.modifiedType === CharType.PUNCTUATION_HALF &&
         oneAfterHalfWidthPunctuationOption)
     ) {
+      const spaceAfter = token.type === CharType.PUNCTUATION_HALF ? ' ' : ''
+      const message =
+        token.type === CharType.PUNCTUATION_HALF
+          ? PUNCTUATION_SPACE_AFTER
+          : PUNCTUATION_NOSPACE_AFTER
+
       const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
-      if (contentTokenAfter && isContentType(contentTokenAfter.type)) {
-        const { spaceHost, tokenSeq } = findMarkSeqBetween(
+      if (contentTokenAfter && (
+        // content
+        isContentType(contentTokenAfter.type) ||
+        // left-quote
+        contentTokenAfter.type === GroupTokenType.GROUP ||
+        // left-bracket
+        (contentTokenAfter.type === SingleTokenType.MARK_BRACKETS &&
+          contentTokenAfter.markSide === MarkSideType.LEFT) ||
+        // code
+        contentTokenAfter.type === SingleTokenType.HYPER_CODE
+      )) {
+        const { spaceHost } = findMarkSeqBetween(
           group,
           token,
           contentTokenAfter
         )
 
-        // check the space after
         if (spaceHost) {
-          checkSpaceAfter(
-            spaceHost,
-            token.type === CharType.PUNCTUATION_HALF ? ' ' : '',
-            token.type === CharType.PUNCTUATION_HALF ? PUNCTUATION_SPACE_AFTER : PUNCTUATION_NOSPACE_AFTER
-          )
+          checkSpaceAfter(spaceHost, spaceAfter, message)
         }
-        tokenSeq.forEach((target) => {
-          if (target !== spaceHost && target !== contentTokenAfter) {
-            checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
-          }
-        })
       }
     }
   }

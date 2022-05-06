@@ -13,104 +13,56 @@
  *   - `false`: no space outside
  *   - `undefined`: do nothing, just keep the original format
  *
- * Note:
- * This rule just simply add one more space outside the inline code. However,
- * the space might not be the proper position since there might be some quotes,
- * brackets, marks between the inline code and the content, which should
- * involve another following rule called `hyper-space-position` to handle.
+ * Details:
+ * - code x code
+ * - content x code
+ * - code x content
  */
 
-import {
-  findNonHyperVisibleTokenAfter,
-  findNonHyperVisibleTokenBefore,
-  Options,
-  findMarkSeqBetween,
-  checkSpaceAfter
-} from './util'
+import { Options, findTokenAfter, checkSpaceAfter } from './util'
 import {
   Handler,
+  isContentType,
   MutableGroupToken,
   MutableToken,
   SingleTokenType
 } from '../parser'
-import {
-  MARKDOWN_NOSPACE_INSIDE,
-  CODE_NOSPACE_OUTSIDE,
-  CODE_SPACE_OUTSIDE
-} from './messages'
+import { CODE_NOSPACE_OUTSIDE, CODE_SPACE_OUTSIDE } from './messages'
 
 export const generateHandler = (options: Options): Handler => {
   const needSpaceOption = options?.spaceOutsideCode
+  const spaceAfter = needSpaceOption ? ' ' : ''
+  const message = needSpaceOption ? CODE_SPACE_OUTSIDE : CODE_NOSPACE_OUTSIDE
   const handleHyperSpaceOption: Handler = (
     token: MutableToken,
     _,
     group: MutableGroupToken
   ) => {
-    // Do nothing if there is no options.
+    // skip if there is no options
     if (typeof needSpaceOption === 'undefined') {
       return
     }
 
-    // Do nothing if the current token is not inline code.
-    if (token.type !== SingleTokenType.HYPER_CODE) {
+    // skip non-after-token situations
+    const tokenAfter = findTokenAfter(group, token)
+    if (!tokenAfter) {
       return
     }
 
-    // For inline code, make sure whether each side has besides:
-    // - content
-    // - punctuation
-    // - brackets
-    // - quotes
-    // If it has, then ensure there is one or there is no space outside
-    // when it's a content token.
-    const nonHyperVisibleTokenBefore = findNonHyperVisibleTokenBefore(
-      group,
-      token
-    )
-    if (nonHyperVisibleTokenBefore) {
-      const { spaceHost, tokenSeq } = findMarkSeqBetween(
-        group,
-        nonHyperVisibleTokenBefore,
-        token
-      )
-      if (spaceHost) {
-        tokenSeq.forEach((target) => {
-          if (target === spaceHost) {
-            checkSpaceAfter(
-              target,
-              needSpaceOption ? ' ' : '',
-              needSpaceOption ? CODE_SPACE_OUTSIDE : CODE_NOSPACE_OUTSIDE
-            )
-          } else {
-            checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
-          }
-        })
-      }
+    // skip non-code situations
+    if (
+      token.type !== SingleTokenType.HYPER_CODE &&
+      tokenAfter.type !== SingleTokenType.HYPER_CODE
+    ) {
+      return
     }
 
-    const nonHyperVisibleTokenAfter = findNonHyperVisibleTokenAfter(
-      group,
-      token
-    )
-    if (nonHyperVisibleTokenAfter) {
-      const { spaceHost, tokenSeq } = findMarkSeqBetween(
-        group,
-        token,
-        nonHyperVisibleTokenAfter
-      )
-      if (spaceHost) {
-        tokenSeq.forEach((target) => {
-          if (target === spaceHost) {
-            checkSpaceAfter(
-              target,
-              needSpaceOption ? ' ' : '',
-              needSpaceOption ? CODE_SPACE_OUTSIDE : CODE_NOSPACE_OUTSIDE
-            )
-          } else {
-            checkSpaceAfter(target, '', MARKDOWN_NOSPACE_INSIDE)
-          }
-        })
-      }
+    // 1. code x code
+    // 2. content x code, code x content
+    if (token.type === token.type) {
+      checkSpaceAfter(token, spaceAfter, message)
+    } else if (isContentType(token.type) || isContentType(tokenAfter.type)) {
+      checkSpaceAfter(token, spaceAfter, message)
     }
   }
   return handleHyperSpaceOption

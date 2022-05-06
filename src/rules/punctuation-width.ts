@@ -4,8 +4,8 @@
  * This rule will format each punctuation into the right width options.
  *
  * Options:
- * - halfWidthPunctuation: string
- * - fullWidthPunctuation: string
+ * - halfWidthPunctuation: string = `()`
+ * - fullWidthPunctuation: string = `，。：；？！“”‘’`
  */
 
 import {
@@ -138,7 +138,7 @@ export const generateHandler = (options: Options): Handler => {
     _,
     group: MutableGroupToken
   ) => {
-    // For punctuation, quote, bracket only.
+    // skip non-punctuation/quote/bracket situations
     if (
       !isPunctuationType(token.type) &&
       token.type !== SingleTokenType.MARK_BRACKETS &&
@@ -147,12 +147,12 @@ export const generateHandler = (options: Options): Handler => {
       return
     }
 
-    // Skip half width punctuation between half width content without space.
+    // skip half-width punctuations between half-width content without space
     if (needKeep(group, token)) {
       return
     }
 
-    // For punctuation in the alter width map.
+    // 1. normal punctuations in the alter width map
     if (isPunctuationType(token.type)) {
       const content = token.modifiedContent
       if (fullWidthMap[content]) {
@@ -173,7 +173,7 @@ export const generateHandler = (options: Options): Handler => {
       return
     }
 
-    // For brackets in the alter width map.
+    // 2. brackets in the alter width map
     if (token.type === SingleTokenType.MARK_BRACKETS) {
       const content = token.modifiedContent
       if (fullWidthMap[content]) {
@@ -194,7 +194,7 @@ export const generateHandler = (options: Options): Handler => {
       return
     }
 
-    // For quotes in the alter pair map
+    // 3. quotes in the alter pair map
     const startContent = (token as MutableGroupToken).modifiedStartContent
     const endContent = (token as MutableGroupToken).modifiedEndContent
     if (fullWidthPairMap[startContent]) {

@@ -26,3 +26,5 @@ export const CONTENT_NOSPACE_MIXED_WIDTH = '此处中英文内容之间需要一
 export const QUOTE_NOSPACE_INSIDE = '此处引号的内部不需要空格'
 export const QUOTE_NOSPACE_OUTSIDE = '此处引号的外部不需要空格'
 export const QUOTE_SPACE_OUTSIDE = '此处引号的外部需要一个空格'
+
+export const TRIM_SPACE = '此处需要去除外部空格'

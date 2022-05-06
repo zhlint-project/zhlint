@@ -5,7 +5,7 @@
  * Usually, it's just about Chinese quotes.
  * 
  * Options:
- * - unifiedPunctuation: "traditional" | "simplified" | undefined
+ * - unifiedPunctuation: "simplified" (default) | "traditional" | undefined
  */
 
 import { GroupTokenType, Handler, MutableToken } from "../parser"
@@ -61,6 +61,7 @@ export const generateHandler = (options: Options): Handler => {
       // do nothing
     }
   }
+
   const message =
     unifiedOption === 'simplified'
       ? PUNCTUATION_UNIFICATION_SIMPLIFIED

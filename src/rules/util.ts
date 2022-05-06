@@ -28,10 +28,14 @@ export type Options = {
   spaceAfterHalfWidthPunctuation?: boolean
   noSpaceAfterFullWidthPunctuation?: boolean
 
-  // space around quote and bracket
-  spaceOutsideQuote?: boolean
+  // space around quote
+  spaceOutsideHalfQuote?: boolean
+  noSpaceOutsideFullQuote?: boolean
   noSpaceInsideQuote?: boolean
-  spaceOutsideBracket?: boolean
+
+  // space around bracket
+  spaceOutsideHalfBracket?: boolean
+  noSpaceOutsideFullBracket?: boolean
   noSpaceInsideBracket?: boolean
 
   // space around code
@@ -39,6 +43,9 @@ export type Options = {
 
   // space around mark
   noSpaceInsideMark?: boolean
+
+  // trim space
+  trimSpace?: boolean
 
   // test
   skip?: {
@@ -282,8 +289,8 @@ const findSpaceHostInHyperMarkSeq = (
 
 export const findMarkSeqBetween = (
   group: GroupToken,
-  before: Token,
-  after: Token
+  before: Token | undefined,
+  after: Token | undefined
 ): {
   spaceHost?: Token
   markSeq: Token[]

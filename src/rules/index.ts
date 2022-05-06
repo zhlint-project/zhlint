@@ -1,6 +1,9 @@
 import { Handler } from '../parser'
 import { Options } from './util'
 
+import defaultSpaceTrimHandler, {
+  generateHandler as genSpaceTrimGenerateHandler
+} from './space-trim'
 import defaultHyperCodeHandler, {
   generateHandler as genHyperCodeHandler
 } from './hyper-code'
@@ -28,8 +31,9 @@ import defaultSpaceOfBracketHandler, {
 
 export const generateHandlers = (options: Options): Handler[] => {
   return [
-    genHyperCodeHandler(options),
+    genSpaceTrimGenerateHandler(options),
     genHyperMarkHandler(options),
+    genHyperCodeHandler(options),
     genPunctuationWidthHandler(options),
     genPunctuationUnificationHandler(options),
     genSpaceOfContentHandler(options),
@@ -40,8 +44,9 @@ export const generateHandlers = (options: Options): Handler[] => {
 }
 
 const defaultHandlers: Handler[] = [
-  defaultHyperCodeHandler,
+  defaultSpaceTrimHandler,
   defaultHyperMarkHandler,
+  defaultHyperCodeHandler,
   defaultPunctuationWidthHandler,
   defaultPunctuationUnificationHandler,
   defaultSpaceOfContentHandler,
