@@ -21,11 +21,11 @@ import {
   removeValidationOnTarget
 } from './util'
 
-const defaultZhUnits = `年月日天号时分秒`
+const defaultSkippedZhUnits = `年月日天号时分秒`
 
 const generateHandler = (options: Options): Handler => {
-  const noSpaceBeforeZhUnits = options?.noSpaceBeforeZhUnits || ''
-  const matcherStr = noSpaceBeforeZhUnits
+  const skippedZhUnits = options?.skipZhUnits || ''
+  const matcherStr = skippedZhUnits
     .split('')
     .filter((x) => checkCharType(x) === CharType.CONTENT_FULL)
     .join('')
@@ -79,7 +79,7 @@ const generateHandler = (options: Options): Handler => {
 }
 
 export const defaultConfig: Options = {
-  noSpaceBeforeZhUnits: defaultZhUnits
+  skipZhUnits: defaultSkippedZhUnits
 }
 
 export default generateHandler

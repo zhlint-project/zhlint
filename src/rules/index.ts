@@ -9,6 +9,8 @@ import genHyperMarkHandler from './hyper-mark'
 import genPunctuationWidthHandler from './punctuation-width'
 import genPunctuationUnificationHandler from './punctuation-unification'
 
+import genAbbrsHandler from './case-abbrs'
+
 import genSpaceOfContentHandler from './space-content'
 import genSpaceOfPunctuationHandler from './space-punctuation'
 import genSpaceOfQuoteHandler from './space-quote'
@@ -27,12 +29,14 @@ export const generateHandlers = (options: Options): Handler[] => {
     genPunctuationWidthHandler(options),
     genPunctuationUnificationHandler(options),
 
+    genAbbrsHandler(options),
+
     genSpaceOfContentHandler(options),
     genSpaceOfPunctuationHandler(options),
     genSpaceOfQuoteHandler(options),
     genSpaceOfBracketHandler(options),
     genSpaceOfLinebreakHandler(options),
-    
+
     genZhUnitsHandler(options),
   ]
 }

@@ -19,6 +19,42 @@ type Warning = {
   message: string
 }
 
+export const defaultConfig: Options = {
+  rules: {
+    halfWidthPunctuation: `()`,
+    fullWidthPunctuation: `，。：；？！“”‘’`,
+    unifiedPunctuation: 'simplified',
+    spaceBetweenHalfWidthContent: true,
+    noSpaceBetweenFullWidthContent: true,
+    spaceBetweenMixedWidthContent: true,
+    noSpaceBeforePunctuation: true,
+    spaceAfterHalfWidthPunctuation: true,
+    noSpaceAfterFullWidthPunctuation: true,
+    spaceOutsideHalfQuote: true,
+    noSpaceOutsideFullQuote: true,
+    noSpaceInsideQuote: true,
+    spaceOutsideHalfBracket: true,
+    noSpaceOutsideFullBracket: true,
+    noSpaceInsideBracket: true,
+    spaceOutsideCode: true,
+    noSpaceInsideMark: true,
+    trimSpace: true,
+    skipZhUnits: `年月日天号时分秒`,
+    skipAbbrs: [
+      'Mr.',
+      'Mrs.',
+      'Dr.',
+      'Jr.',
+      'Sr.',
+      'vs.',
+      'etc.',
+      'i.e.',
+      'e.g.',
+      'a.k.a.'
+    ]
+  }
+}
+
 const getOutput = (...args: [string, Options?]) => run(...args).result
 
 const lint = (
@@ -445,29 +481,6 @@ describe('lint by rules', () => {
 })
 
 describe('lint by cases', () => {
-  const defaultConfig: Options = {
-    rules: {
-      halfWidthPunctuation: `()`,
-      fullWidthPunctuation: `，。：；？！“”‘’`,
-      unifiedPunctuation: 'simplified',
-      spaceBetweenHalfWidthContent: true,
-      noSpaceBetweenFullWidthContent: true,
-      spaceBetweenMixedWidthContent: true,
-      noSpaceBeforePunctuation: true,
-      spaceAfterHalfWidthPunctuation: true,
-      noSpaceAfterFullWidthPunctuation: true,
-      spaceOutsideHalfQuote: true,
-      noSpaceOutsideFullQuote: true,
-      noSpaceInsideQuote: true,
-      spaceOutsideHalfBracket: true,
-      noSpaceOutsideFullBracket: true,
-      noSpaceInsideBracket: true,
-      spaceOutsideCode: true,
-      noSpaceInsideMark: true,
-      trimSpace: true,
-      noSpaceBeforeZhUnits: `年月日天号时分秒`
-    }
-  }
   test('[case-linebreak] keep the linebreaks', () => {
     expect(
       getOutput(
@@ -486,16 +499,17 @@ describe('lint by cases', () => {
     `.trim()
     )
   })
-  test('datetime', () => {
+  test('[case-zh-units]', () => {
     expect(getOutput('2019年06月26号 2019-06-26 12:00', defaultConfig)).toBe(
       '2019年06月26号 2019-06-26 12:00'
     )
   })
-  test.todo('abbr', () => {
+  test('[case-abbrs]', () => {
     expect(getOutput('运行时 + 编译器 vs. 只包含运行时', defaultConfig)).toBe(
       '运行时 + 编译器 vs. 只包含运行时'
     )
   })
+
   test('URL', () => {
     expect(getOutput('Vue.js 是什么', defaultConfig)).toBe('Vue.js 是什么')
     expect(getOutput('www.vuejs.org', defaultConfig)).toBe('www.vuejs.org')

@@ -1,33 +1,11 @@
 import { describe, test, expect } from 'vitest'
 
 import run, { Options } from '../src/run'
+import { defaultConfig } from './rules.test'
 
 const getOutput = (...args: [string, Options?]) => run(...args).result
 
 describe('lint by issues', () => {
-  const defaultConfig: Options = {
-    rules: {
-      halfWidthPunctuation: `()`,
-      fullWidthPunctuation: `，。：；？！“”‘’`,
-      unifiedPunctuation: 'simplified',
-      spaceBetweenHalfWidthContent: true,
-      noSpaceBetweenFullWidthContent: true,
-      spaceBetweenMixedWidthContent: true,
-      noSpaceBeforePunctuation: true,
-      spaceAfterHalfWidthPunctuation: true,
-      noSpaceAfterFullWidthPunctuation: true,
-      spaceOutsideHalfQuote: true,
-      noSpaceOutsideFullQuote: true,
-      noSpaceInsideQuote: true,
-      spaceOutsideHalfBracket: true,
-      noSpaceOutsideFullBracket: true,
-      noSpaceInsideBracket: true,
-      spaceOutsideCode: true,
-      noSpaceInsideMark: true,
-      trimSpace: true
-    }
-  }
-
   // https://github.com/Jinjiang/zhlint/issues/11
   test('#11: hyphen between number', () => {
     expect(getOutput('1-1', defaultConfig)).toBe('1-1')

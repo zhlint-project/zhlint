@@ -19,6 +19,9 @@ export type Options = {
   fullWidthPunctuation?: string
   unifiedPunctuation?: 'traditional' | 'simplified'
 
+  // case: abbrs
+  skipAbbrs?: string[]
+
   // space around content
   spaceBetweenHalfWidthContent?: boolean
   noSpaceBetweenFullWidthContent?: boolean
@@ -48,8 +51,8 @@ export type Options = {
   // trim space
   trimSpace?: boolean
 
-  // number x Chinese unit
-  noSpaceBeforeZhUnits?: string
+  // case: number x Chinese unit
+  skipZhUnits?: string
 
   // test
   skip?: {

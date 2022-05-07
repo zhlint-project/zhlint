@@ -2,30 +2,8 @@ import { describe, test, expect } from 'vitest'
 
 import fs from 'fs'
 import path from 'path'
-import run, { Options } from '../src/run'
-
-const defaultConfig: Options = {
-  rules: {
-    halfWidthPunctuation: `()`,
-    fullWidthPunctuation: `，。：；？！“”‘’`,
-    unifiedPunctuation: 'simplified',
-    spaceBetweenHalfWidthContent: true,
-    noSpaceBetweenFullWidthContent: true,
-    spaceBetweenMixedWidthContent: true,
-    noSpaceBeforePunctuation: true,
-    spaceAfterHalfWidthPunctuation: true,
-    noSpaceAfterFullWidthPunctuation: true,
-    spaceOutsideHalfQuote: true,
-    noSpaceOutsideFullQuote: true,
-    noSpaceInsideQuote: true,
-    spaceOutsideHalfBracket: true,
-    noSpaceOutsideFullBracket: true,
-    noSpaceInsideBracket: true,
-    spaceOutsideCode: true,
-    noSpaceInsideMark: true,
-    trimSpace: true
-  }
-}
+import run from '../src/run'
+import { defaultConfig } from './rules.test'
 
 const parsePosition = (str, index) => {
   const rows = str.split('\n')
