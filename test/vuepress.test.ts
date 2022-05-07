@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest'
 
 import run from '../src/run'
-import { defaultConfig } from './rules.test'
+import { defaultConfig } from './prepare'
 
 const getOutput = (str: string) => run(str, defaultConfig).result
 
@@ -24,16 +24,16 @@ const customTitleOutput = `:::
 自动在中文和 English 之间加入空格
 :::`
 
-describe('lint', () => {
-  test('simple custom container', () => {
+describe('vuepress lint', () => {
+  test('[vuepress] simple custom container', () => {
     expect(getOutput(simpleInput)).toBe(simpleOutput)
   })
 
-  test('custom container with default title', () => {
+  test('[vuepress] custom container with default title', () => {
     expect(getOutput(defaultTitleInput)).toBe(defaultTitleOutput)
   })
 
-  test('custom container with custom title', () => {
+  test('[vuepress] custom container with custom title', () => {
     expect(getOutput(customTitleInput)).toBe(customTitleOutput)
   })
 })

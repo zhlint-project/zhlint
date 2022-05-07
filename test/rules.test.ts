@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
 
-import run, { Options } from '../src/run'
+import { Options } from '../src/run'
 import { ValidationTarget } from '../src/report'
 import {
   BRACKET_NOSPACE_INSIDE,
@@ -13,65 +13,7 @@ import {
   QUOTE_NOSPACE_INSIDE
 } from '../src/rules/messages'
 
-type Warning = {
-  index: number
-  target: ValidationTarget
-  message: string
-}
-
-export const defaultConfig: Options = {
-  rules: {
-    halfWidthPunctuation: `()`,
-    fullWidthPunctuation: `，。：；？！“”‘’`,
-    unifiedPunctuation: 'simplified',
-    spaceBetweenHalfWidthContent: true,
-    noSpaceBetweenFullWidthContent: true,
-    spaceBetweenMixedWidthContent: true,
-    noSpaceBeforePunctuation: true,
-    spaceAfterHalfWidthPunctuation: true,
-    noSpaceAfterFullWidthPunctuation: true,
-    spaceOutsideHalfQuote: true,
-    noSpaceOutsideFullQuote: true,
-    noSpaceInsideQuote: true,
-    spaceOutsideHalfBracket: true,
-    noSpaceOutsideFullBracket: true,
-    noSpaceInsideBracket: true,
-    spaceOutsideCode: true,
-    noSpaceInsideMark: true,
-    trimSpace: true,
-    skipZhUnits: `年月日天号时分秒`,
-    skipAbbrs: [
-      'Mr.',
-      'Mrs.',
-      'Dr.',
-      'Jr.',
-      'Sr.',
-      'vs.',
-      'etc.',
-      'i.e.',
-      'e.g.',
-      'a.k.a.'
-    ]
-  }
-}
-
-const getOutput = (...args: [string, Options?]) => run(...args).result
-
-const lint = (
-  ...args: [string, Options?]
-): {
-  output: string
-  warnings: Warning[]
-} => {
-  const output = run(...args)
-  return {
-    output: output.result,
-    warnings: output.validations.map((validation) => {
-      const { index, length, target, message } = validation
-      return { index: index + length, target, message }
-    })
-  }
-}
+import { getOutput, lint, defaultConfig } from './prepare'
 
 describe('lint by rules', () => {
   test('[space-trim] trim the spaces', () => {
@@ -509,20 +451,25 @@ describe('lint by cases', () => {
       '运行时 + 编译器 vs. 只包含运行时'
     )
   })
+  test('[case-ellipsis]', () => {
+    // expect(getOutput('aaa...bbb', defaultConfig)).toBe('aaa...bbb')
+    // expect(getOutput('aaa... bbb', defaultConfig)).toBe('aaa... bbb')
+    expect(getOutput('`aaa`... `bbb`', defaultConfig)).toBe('`aaa` ... `bbb`')
+  })
 
-  test('URL', () => {
+  test('[case] URL', () => {
     expect(getOutput('Vue.js 是什么', defaultConfig)).toBe('Vue.js 是什么')
     expect(getOutput('www.vuejs.org', defaultConfig)).toBe('www.vuejs.org')
     expect(getOutput('https://vuejs.org', defaultConfig)).toBe(
       'https://vuejs.org'
     )
   })
-  test('slash character', () => {
+  test('[case] slash character', () => {
     expect(getOutput('想知道 Vue 与其它库/框架有哪些区别', defaultConfig)).toBe(
       '想知道 Vue 与其它库/框架有哪些区别'
     )
   })
-  test('special characters', () => {
+  test('[case] special characters', () => {
     expect(getOutput('Vue (读音 /vjuː/，类似于)', defaultConfig)).toBe(
       'Vue (读音 /vjuː/，类似于)'
     )
@@ -532,7 +479,7 @@ describe('lint by cases', () => {
       '3 minite(s) left'
     )
   })
-  test('single quote for shorthand', () => {
+  test('[case] single quote for shorthand', () => {
     expect(getOutput(`how many user's here`, defaultConfig)).toBe(
       `how many user's here`
     )
@@ -541,19 +488,19 @@ describe('lint by cases', () => {
     )
     expect(getOutput(`what's going on`, defaultConfig)).toBe(`what's going on`)
   })
-  test('math exp', () => {
+  test('[case] math exp', () => {
     expect(getOutput('1+1=2', defaultConfig)).toBe('1+1=2')
     expect(getOutput('a|b', defaultConfig)).toBe('a|b')
     expect(getOutput('a | b', defaultConfig)).toBe('a | b')
     expect(getOutput('a||b', defaultConfig)).toBe('a||b')
     expect(getOutput('a || b', defaultConfig)).toBe('a || b')
   })
-  test('arrow chars', () => {
+  test('[case] arrow chars', () => {
     expect(getOutput('Chrome 顶部导航 > 窗口 > 任务管理', defaultConfig)).toBe(
       'Chrome 顶部导航 > 窗口 > 任务管理'
     )
   })
-  test('curly brackets', () => {
+  test('[case] curly brackets', () => {
     expect(getOutput('# 简介 {#introduction}', defaultConfig)).toBe(
       '# 简介 {#introduction}'
     )

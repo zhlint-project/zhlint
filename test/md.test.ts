@@ -3,12 +3,12 @@ import { describe, test, expect } from 'vitest'
 import run from '../src/run'
 import markdownParser from '../src/hypers/md'
 import { Data } from '../src/hypers/types'
-import { defaultConfig } from './rules.test'
+import { defaultConfig } from './prepare'
 
 const getOutput = (str: string) => run(str, defaultConfig).result
 
 describe('parser with markdown', () => {
-  test('single paragraph', () => {
+  test('[md parser] single paragraph', () => {
     const text = 'X [xxx](xxx) X *y* __x__ `ss` _0_ ~~asd~~ *asf**asf**adsf*'
     const data: Data = {
       content: text,
@@ -97,48 +97,48 @@ describe('parser with markdown', () => {
   })
 })
 
-describe('lint', () => {
-  test('single paragraph', () => {
+describe('markdown lint', () => {
+  test('[md] single paragraph', () => {
     expect(getOutput('X[ xxx ](xxx)X`hello`world')).toBe(
       'X [xxx](xxx) X `hello` world'
     )
   })
-  test('frontmatter', () => {
+  test('[md] frontmatter', () => {
     expect(
       getOutput('---\ntitle: 介绍\ntype: guide\norder: 2\n---\n## Vue 是什么\n')
     ).toBe('---\ntitle: 介绍\ntype: guide\norder: 2\n---\n## Vue 是什么\n')
   })
-  test('space between raw content', () => {
+  test('[md] space between raw content', () => {
     // 我们 <a id="modal-player" href="#"> 制作了一个视频 </a>
     expect(getOutput('我们<a id="modal-player" href="#">制作了一个视频</a>')).toBe(
       '我们<a id="modal-player" href="#">制作了一个视频</a>'
     )
   })
-  test.todo('space between raw content 2', () => {
+  test.todo('[md] space between raw content 2', () => {
     // 我们 <a id="modal-player" href="#"> 制作了一个视频 </a>
     expect(
       getOutput('Hello<a id="modal-player" href="#">制作了一个视频</a>World')
     ).toBe('Hello <a id="modal-player" href="#">制作了一个视频</a> World')
   })
-  test('space between raw content 3', () => {
+  test('[md] space between raw content 3', () => {
     // 创建一个 <code>。 html</code> 文件<a/>
     expect(getOutput('创建一个 <code>.html</code> 文件')).toBe(
       '创建一个 <code>.html</code> 文件'
     )
   })
-  test('raw content', () => {
+  test('[md] raw content', () => {
     // {% raw %}<div id="app" class="demo">...</div>{% raw %}
     expect(
       getOutput('{% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}')
     ).toBe('{% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}')
   })
-  test('empty lines', () => {
+  test('[md] empty lines', () => {
     expect(getOutput('a\n\nb\n\nc')).toBe('a\n\nb\n\nc')
   })
-  test('inline code', () => {
+  test('[md] inline code', () => {
     expect(getOutput(`改进 \`<todo-item>\` 组件`)).toBe(`改进 \`<todo-item>\` 组件`)
   })
-  test('footnote + inline code at the end', () => {
+  test('[md] footnote + inline code at the end', () => {
     expect(
       getOutput(
         '这样写将始终添加 `errorClass`，但是只有在 `isActive` 是 truthy<sup>[[1]](#footnote-1)</sup> 时才添加 `activeClass`。'
@@ -147,10 +147,10 @@ describe('lint', () => {
       '这样写将始终添加 `errorClass`，但是只有在 `isActive` 是 truthy<sup>[[1]](#footnote-1)</sup> 时才添加 `activeClass`。'
     )
   })
-  test('space between "&" punctuation', () => {
+  test('[md] space between "&" punctuation', () => {
     expect(getOutput('## 访问元素 & 组件')).toBe('## 访问元素 & 组件')
   })
-  test.todo('duplicated space outside hyper content', () => {
+  test.todo('[md] duplicated space outside hyper content', () => {
     expect(
       getOutput(
         '那么你可以通过 [`$forceUpdate`](../api/#vm-forceUpdate) 来做这件事。'
@@ -159,7 +159,7 @@ describe('lint', () => {
       '那么你可以通过 [`$forceUpdate`](../api/#vm-forceUpdate) 来做这件事。'
     )
   })
-  test.todo('opposite side of hyper mark and bracket mark', () => {
+  test.todo('[md] opposite side of hyper mark and bracket mark', () => {
     expect(
       getOutput(
         '注意 **`v-slot` 只能添加在 `<template>` 上** (只有[一种例外情况](#独占默认插槽的缩写语法))，这一点和已经废弃的 [`slot` 特性](#废弃了的语法)不同。'
@@ -168,12 +168,12 @@ describe('lint', () => {
       '注意 **`v-slot` 只能添加在 `<template>` 上** (只有[一种例外情况](#独占默认插槽的缩写语法))，这一点和已经废弃的 [`slot` 特性](#废弃了的语法)不同。'
     )
   })
-  test('space before punctuation', () => {
+  test('[md] space before punctuation', () => {
     expect(getOutput('不过在需要时你也可以提供一个 setter ：')).toBe(
       '不过在需要时你也可以提供一个 setter：'
     )
   })
-  test.todo('periods as ellipsis', () => {
+  test.todo('[md] periods as ellipsis', () => {
     expect(
       getOutput(
         '你可以使用 [`try`...`catch`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch) 作为替代。'
@@ -182,7 +182,7 @@ describe('lint', () => {
       '你可以使用 [`try`...`catch`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch) 作为替代。'
     )
   })
-  test('space between punctuation and hyper content', () => {
+  test('[md] space between punctuation and hyper content', () => {
     expect(
       getOutput(
         'store 实例不再暴露事件触发器 (event emitter) 接口 (`on`, `off`, `emit`)。'
@@ -191,22 +191,22 @@ describe('lint', () => {
       'store 实例不再暴露事件触发器 (event emitter) 接口 (`on`，`off`，`emit`)。'
     )
   })
-  test.todo('html entity', () => {
+  test.todo('[md] html entity', () => {
     expect(
       getOutput('取决于你分心和开始 2.0 最酷的新功能的次数。😉 &nbsp;无法判断时间，')
     ).toBe('取决于你分心和开始 2.0 最酷的新功能的次数。😉 &nbsp;无法判断时间，')
   })
-  test('space between dash', () => {
+  test('[md] space between dash', () => {
     expect(getOutput('可以阅读本页面剩余部分 - 或者从[介绍](index.html)部分')).toBe(
       '可以阅读本页面剩余部分 - 或者从[介绍](index.html)部分'
     )
   })
-  test.todo('space between slash', () => {
+  test.todo('[md] space between slash', () => {
     expect(getOutput('为此还应该引入 `Vue.nextTick`/`vm.$nextTick`。例如：')).toBe(
       '为此还应该引入 `Vue.nextTick`/`vm.$nextTick`。例如：'
     )
   })
-  test.todo('space outside hyper mark and hyper content', () => {
+  test.todo('[md] space outside hyper mark and hyper content', () => {
     expect(
       getOutput(
         '这种写法的更多优点详见：[`v-model` 示例](#带有-debounce-的-v-model移除)。'
@@ -215,7 +215,7 @@ describe('lint', () => {
       '这种写法的更多优点详见：[`v-model` 示例](#带有-debounce-的-v-model移除)。'
     )
   })
-  test('space between punctuation and hyper content', () => {
+  test('[md] space between punctuation and hyper content', () => {
     expect(
       getOutput(
         '对于布尔特性 (它们只要存在就意味着值为 `true`)，`v-bind` 工作起来略有不同'
@@ -224,12 +224,12 @@ describe('lint', () => {
       '对于布尔特性 (它们只要存在就意味着值为 `true`)，`v-bind` 工作起来略有不同'
     )
   })
-  test('star (not punctuation)', () => {
+  test('[md] star (not punctuation)', () => {
     expect(getOutput('切换到 *Archive* 标签，然后再切换回 *Posts*')).toBe(
       '切换到 *Archive* 标签，然后再切换回 *Posts*'
     )
   })
-  test('colon (not datetime)', () => {
+  test('[md] colon (not datetime)', () => {
     expect(
       getOutput(
         '1. 添加全局方法或者属性。如: [vue-custom-element](https://github.com/karol-f/vue-custom-element)'
@@ -238,7 +238,7 @@ describe('lint', () => {
       '1. 添加全局方法或者属性。如：[vue-custom-element](https://github.com/karol-f/vue-custom-element)'
     )
   })
-  test('escaped markdown syntax', () => {
+  test('[md] escaped markdown syntax', () => {
     expect(
       getOutput(
         '2. 开发者向 Vue 挂载包含服务端渲染或用户提供的内容的 HTML 的整个页面。这实质上和问题 \\#1 是相同的，但是有的时候开发者可能没有意识到。这会使得攻击者提供作为普通 HTML 安全但对于 Vue 模板不安全的 HTML 以导致安全漏洞。最佳实践是永远不要向 Vue 挂载可能包含服务端渲染或用户提供的内容。'
@@ -247,7 +247,7 @@ describe('lint', () => {
       '2. 开发者向 Vue 挂载包含服务端渲染或用户提供的内容的 HTML 的整个页面。这实质上和问题 \\#1 是相同的，但是有的时候开发者可能没有意识到。这会使得攻击者提供作为普通 HTML 安全但对于 Vue 模板不安全的 HTML 以导致安全漏洞。最佳实践是永远不要向 Vue 挂载可能包含服务端渲染或用户提供的内容。'
     )
   })
-  test.todo('bracket x html tag', () => {
+  test.todo('[md] bracket x html tag', () => {
     expect(
       getOutput(
         '引入一个<a href="https://zh.wikipedia.org/wiki/工厂方法#工厂">工厂函数 (factory function)</a>使得我们的测试更简洁更易读'
@@ -256,7 +256,7 @@ describe('lint', () => {
       '引入一个<a href="https://zh.wikipedia.org/wiki/工厂方法#工厂">工厂函数 (factory function)</a> 使得我们的测试更简洁更易读'
     )
   })
-  test('special quotes group inside md mark', () => {
+  test('[md] special quotes group inside md mark', () => {
     expect(
       getOutput(
         '更多测试 Vue 组件的知识可翻阅核心团员 [Edd Yerburgh](https://eddyerburgh.me/) 的书[《测试 Vue.js 应用》](https://www.manning.com/books/testing-vuejs-applications)。'
@@ -265,7 +265,7 @@ describe('lint', () => {
       '更多测试 Vue 组件的知识可翻阅核心团员 [Edd Yerburgh](https://eddyerburgh.me/) 的书[《测试 Vue.js 应用》](https://www.manning.com/books/testing-vuejs-applications)。'
     )
   })
-  test('blockquote', () => {
+  test('[md] blockquote', () => {
     expect(
       getOutput(
         'foo\n\n> `components/icons/IconBox.vue`\n> `components/icons/IconCalendar.vue`\n> `components/icons/IconEnvelope.vue`\n\nbar'
@@ -274,17 +274,17 @@ describe('lint', () => {
       'foo\n\n> `components/icons/IconBox.vue`\n> `components/icons/IconCalendar.vue`\n> `components/icons/IconEnvelope.vue`\n\nbar'
     )
   })
-  test('infinite findMarkSeq bug', () => {
+  test('[md] infinite findMarkSeq bug', () => {
     expect(getOutput('注意**局部注册的组件在其子组件中*不可用***。')).toBe(
       '注意**局部注册的组件在其子组件中*不可用***。'
     )
   })
-  test('linebreak', () => {
+  test('[md] linebreak', () => {
     expect(
       getOutput('XXXX\n{% raw %}XXX{% endraw %}\n{% raw %}XXX{% endraw %}\n### XXXX')
     ).toBe('XXXX\n{% raw %}XXX{% endraw %}\n{% raw %}XXX{% endraw %}\n### XXXX')
   })
-  test('space before link', () => {
+  test('[md] space before link', () => {
     expect(getOutput('为了替换 `双向` 指令，见 [示例](#双向过滤器-替换)。')).toBe(
       '为了替换 `双向` 指令，见[示例](#双向过滤器-替换)。'
     )
@@ -292,7 +292,7 @@ describe('lint', () => {
       '详见[自定义指令指南](custom-directive.html)。'
     )
   })
-  test.todo('space for md marker in the front', () => {
+  test.todo('[md] space for md marker in the front', () => {
     expect(
       getOutput(
         '- [`<KeepAlive>` API 参考](/api/built-in-components.html#keepalive)'

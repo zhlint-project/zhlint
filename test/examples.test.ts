@@ -3,7 +3,7 @@ import { describe, test, expect } from 'vitest'
 import fs from 'fs'
 import path from 'path'
 import run from '../src/run'
-import { defaultConfig } from './rules.test'
+import { defaultConfig } from './prepare'
 
 const parsePosition = (str, index) => {
   const rows = str.split('\n')
@@ -42,8 +42,8 @@ const parsePosition = (str, index) => {
 //   27: []
 // }
 
-describe('lint', () => {
-  test.todo('units', () => {
+describe('combo lint', () => {
+  test.todo('rule units', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-units.md'),
       { encoding: 'utf8' }

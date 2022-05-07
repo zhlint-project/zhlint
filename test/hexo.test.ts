@@ -1,24 +1,24 @@
 import { describe, test, expect } from 'vitest'
 
 import run from '../src/run'
-import { defaultConfig } from './rules.test'
+import { defaultConfig } from './prepare'
 
 const getOutput = (str: string) => run(str, defaultConfig).result
 
-describe('lint', () => {
-  test('one-line raw', () => {
+describe('hexo lint', () => {
+  test('[hexo] one-line raw', () => {
     expect(getOutput('`_x_` {% raw %}hello{% endraw %}')).toBe(
       '`_x_` {% raw %}hello{% endraw %}'
     )
   })
 
-  test('multiline raw', () => {
+  test('[hexo] multiline raw', () => {
     expect(getOutput(`{% raw %}\n<script>\n</script>\n{% endraw %}`)).toBe(
       `{% raw %}\n<script>\n</script>\n{% endraw %}`
     )
   })
 
-  test('codeblock', () => {
+  test('[hexo] codeblock', () => {
     expect(
       getOutput(
         `{% codeblock lang:js %}\nalias： [‘/manage’ ，‘/administer’ ，‘/administrate’ ]\n{% endcodeblock %}`
