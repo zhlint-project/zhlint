@@ -8,12 +8,14 @@
  */
 
 import {
+  CharType,
   Handler,
   MutableGroupToken,
   MutableToken
 } from '../parser'
 import { ValidationTarget } from '../report'
 import {
+  findTokenAfter,
   findTokenBefore,
   Options,
   removeValidationOnTarget,
@@ -82,6 +84,12 @@ const generateHandler = (options: Options): Handler => {
   return (token: MutableToken, index: number, group: MutableGroupToken) => {
     // skip non-dot tokens
     if (token.content !== '.') {
+      return
+    }
+
+    // make sure it's the ending dot of the abbr
+    const tokenAfter = findTokenAfter(group, token)
+    if (tokenAfter && tokenAfter.type === CharType.CONTENT_HALF && !token.spaceAfter) {
       return
     }
 
