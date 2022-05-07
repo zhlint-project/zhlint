@@ -1,14 +1,65 @@
 import { Validation, ValidationTarget } from '../report'
 import {
   MarkSideType,
-  MutableSingleToken as SingleToken,
   MutableGroupToken as GroupToken,
   MutableToken as Token,
-  SingleTokenType
+  SingleTokenType,
+  isNonHyperVisibleType,
+  isInvisibleType,
+  isVisibleType,
+  TokenType,
+  CharType
 } from '../parser'
+
+// options
+
+export type Options = {
+  // punctuation
+  halfWidthPunctuation?: string
+  fullWidthPunctuation?: string
+  unifiedPunctuation?: 'traditional' | 'simplified'
+
+  // case: abbrs
+  skipAbbrs?: string[]
+
+  // space around content
+  spaceBetweenHalfWidthContent?: boolean
+  noSpaceBetweenFullWidthContent?: boolean
+  spaceBetweenMixedWidthContent?: boolean
+
+  // space around punctuation
+  noSpaceBeforePunctuation?: boolean
+  spaceAfterHalfWidthPunctuation?: boolean
+  noSpaceAfterFullWidthPunctuation?: boolean
+
+  // space around quote
+  spaceOutsideHalfQuote?: boolean
+  noSpaceOutsideFullQuote?: boolean
+  noSpaceInsideQuote?: boolean
+
+  // space around bracket
+  spaceOutsideHalfBracket?: boolean
+  noSpaceOutsideFullBracket?: boolean
+  noSpaceInsideBracket?: boolean
+
+  // space around code
+  spaceOutsideCode?: boolean
+
+  // space around mark
+  noSpaceInsideMark?: boolean
+
+  // trim space
+  trimSpace?: boolean
+
+  // case: number x Chinese unit
+  skipZhUnits?: string
+}
 
 // find tokens
 
+/**
+ * Find the previous token if exists
+ */
 export const findTokenBefore = (
   group: GroupToken,
   token: Token | undefined
@@ -23,6 +74,9 @@ export const findTokenBefore = (
   return group[index - 1]
 }
 
+/**
+ * Find the next token if exists
+ */
 export const findTokenAfter = (
   group: GroupToken,
   token: Token | undefined
@@ -37,128 +91,163 @@ export const findTokenAfter = (
   return group[index + 1]
 }
 
-export const findContentTokenBefore = (
-  group: GroupToken,
-  token: Token | undefined
-): SingleToken | undefined => {
-  if (!token) {
-    return
-  }
-
-  const index = group.indexOf(token)
-  if (index < 0) {
-    return
-  }
-
-  const tokenBefore = findTokenBefore(group, token)
-  if (!tokenBefore) {
-    return
-  }
-
-  // TODO: type enum
-  if (
-    tokenBefore.type === 'mark-hyper' ||
-    (tokenBefore.type === 'content-hyper' && !isInlineCode(tokenBefore))
-  ) {
-    return findContentTokenBefore(group, group[index - 1])
-  }
-
-  if (tokenBefore.type.match(/^content-/)) {
-    return tokenBefore as SingleToken
-  }
-}
-
-export const findContentTokenAfter = (
-  group: GroupToken,
-  token: Token | undefined
-): SingleToken | undefined => {
-  if (!token) {
-    return
-  }
-
-  const index = group.indexOf(token)
-  if (index < 0) {
-    return
-  }
-
-  const tokenAfter = findTokenAfter(group, token)
-  if (!tokenAfter) {
-    return
-  }
-
-  if (
-    tokenAfter.type === 'mark-hyper' ||
-    (tokenAfter.type === 'content-hyper' && !isInlineCode(tokenAfter))
-  ) {
-    return findContentTokenAfter(group, group[index + 1])
-  }
-
-  if (tokenAfter.type.match(/^content-/)) {
-    return tokenAfter as SingleToken
-  }
-}
-
-export const findNonMarkTokenBefore = (
+/**
+ * Find a certain token before, which:
+ * - group, content, punctuation, and bracket will be passed
+ * - code, container, and unknown will be failed
+ * - hyper mark, html pairs will be skipped
+ */
+export const findNonHyperVisibleTokenBefore = (
   group: GroupToken,
   token: Token | undefined
 ): Token | undefined => {
   if (!token) {
     return
   }
-
-  const index = group.indexOf(token)
-  if (index < 0) {
+  const beforeToken = findTokenBefore(group, token)
+  if (!beforeToken) {
     return
   }
-
-  const tokenBefore = findTokenBefore(group, token)
-  if (!tokenBefore) {
-    return
+  // hyper mark, html pairs: skip
+  if (isInvisibleType(beforeToken.type) || getHtmlTagSide(beforeToken)) {
+    return findNonHyperVisibleTokenBefore(group, beforeToken)
   }
-
-  if (
-    tokenBefore.type.match(/^content-/) ||
-    tokenBefore.type.match(/^punctuation-/) ||
-    tokenBefore.type === 'mark-brackets'
-  ) {
-    return tokenBefore
-  } else if (tokenBefore.type === 'mark-hyper') {
-    return findContentTokenBefore(group, group[index - 1])
+  // content, punctuation, bracket, group: return token
+  if (isNonHyperVisibleType(beforeToken.type)) {
+    return beforeToken
   }
+  // code, unknown, container: return undefined
+  return
 }
 
-export const findNonMarkTokenAfter = (
+/**
+ * Find a certain token after, which:
+ * - group, content, punctuation, and bracket will be passed
+ * - code, container, and unknown will be failed
+ * - hyper mark, html pairs will be skipped
+ */
+export const findNonHyperVisibleTokenAfter = (
   group: GroupToken,
   token: Token | undefined
 ): Token | undefined => {
   if (!token) {
     return
   }
-
-  const index = group.indexOf(token)
-  if (index < 0) {
+  const afterToken = findTokenAfter(group, token)
+  if (!afterToken) {
     return
   }
+  // hyper mark, html pairs: skip
+  if (isInvisibleType(afterToken.type) || getHtmlTagSide(afterToken)) {
+    return findNonHyperVisibleTokenAfter(group, afterToken)
+  }
+  // content, punctuation, bracket, group: return token
+  if (isNonHyperVisibleType(afterToken.type)) {
+    return afterToken
+  }
+  // code, unknown, container: return undefined
+  return
+}
 
-  const tokenAfter = findTokenAfter(group, token)
-  if (!tokenAfter) {
+/**
+ * Find a certain token before, which:
+ * - group, content, punctuation, bracket, and code will be passed
+ * - container, and unknown will be failed
+ * - hyper mark, html pairs will be skipped
+ */
+export const findExpectedVisibleTokenBefore = (
+  group: GroupToken,
+  token: Token | undefined
+): Token | undefined => {
+  if (!token) {
     return
   }
+  const beforeToken = findTokenBefore(group, token)
+  if (!beforeToken) {
+    return
+  }
+  // hyper mark, html pairs: skip
+  if (isInvisibleType(beforeToken.type) || getHtmlTagSide(beforeToken)) {
+    return findNonHyperVisibleTokenBefore(group, beforeToken)
+  }
+  // content, punctuation, bracket, group: return token
+  if (isVisibleType(beforeToken.type)) {
+    return beforeToken
+  }
+  // unknown, container: return undefined
+  return
+}
 
-  if (
-    tokenAfter.type.match(/^content-/) ||
-    tokenAfter.type.match(/^punctuation-/) ||
-    tokenAfter.type === 'mark-brackets'
-  ) {
-    return tokenAfter
-  } else if (tokenAfter.type === 'mark-hyper') {
-    return findNonMarkTokenAfter(group, group[index + 1])
+/**
+ * Find a certain token after, which:
+ * - group, content, punctuation, bracket, and code will be passed
+ * - container, and unknown will be failed
+ * - hyper mark, html pairs will be skipped
+ */
+export const findExpectedVisibleTokenAfter = (
+  group: GroupToken,
+  token: Token | undefined
+): Token | undefined => {
+  if (!token) {
+    return
+  }
+  const beforeAfter = findTokenAfter(group, token)
+  if (!beforeAfter) {
+    return
+  }
+  // hyper mark, html pairs: skip
+  if (isInvisibleType(beforeAfter.type) || getHtmlTagSide(beforeAfter)) {
+    return findNonHyperVisibleTokenAfter(group, beforeAfter)
+  }
+  // content, punctuation, bracket, group: return token
+  if (isVisibleType(beforeAfter.type)) {
+    return beforeAfter
+  }
+  // unknown, container: return undefined
+  return
+}
+
+// hyper mark seq
+
+const isHtmlTag = (token: Token): boolean => {
+  if (token.type !== SingleTokenType.HYPER_UNEXPECTED) {
+    return false
+  }
+  return !!token.content.match(/^<.+>$/)
+}
+
+const getHtmlTagSide = (token: Token): MarkSideType | undefined => {
+  if (!isHtmlTag(token)) {
+    return
+  }
+  if (token.content.match(/^<code.*>.*<\/code.*>$/)) {
+    return
+  }
+  if (token.content.match(/^<[^/].+\/\s*>$/)) {
+    return
+  }
+  if (token.content.match(/^<[^/].+>$/)) {
+    return MarkSideType.LEFT
+  }
+  if (token.content.match(/^<\/.+>$/)) {
+    return MarkSideType.RIGHT
   }
 }
 
-// mark seq
+export const isMarkdownOrHtmlPair = (token: Token): boolean => {
+  return token.type === SingleTokenType.MARK_HYPER || !!getHtmlTagSide(token)
+}
 
-export const spreadMarkSeq = (
+export const getMarkdownOrHtmlSide = (
+  token: Token
+): MarkSideType | undefined => {
+  if (token.type === SingleTokenType.MARK_HYPER) {
+    return token.markSide
+  }
+  return getHtmlTagSide(token)
+}
+
+const spreadHyperMarkSeq = (
   group: GroupToken,
   token: Token,
   seq: Token[],
@@ -166,175 +255,174 @@ export const spreadMarkSeq = (
 ): void => {
   if (isBackward) {
     const tokenBefore = findTokenBefore(group, token)
-    if (tokenBefore && tokenBefore.type === SingleTokenType.MARK_HYPER) {
+    if (tokenBefore && isMarkdownOrHtmlPair(tokenBefore)) {
       seq.unshift(tokenBefore)
-      spreadMarkSeq(group, tokenBefore, seq, isBackward)
+      spreadHyperMarkSeq(group, tokenBefore, seq, isBackward)
     }
   } else {
     const tokenAfter = findTokenAfter(group, token)
-    if (tokenAfter && tokenAfter.type === SingleTokenType.MARK_HYPER) {
+    if (tokenAfter && isMarkdownOrHtmlPair(tokenAfter)) {
       seq.push(tokenAfter)
-      spreadMarkSeq(group, tokenAfter, seq, isBackward)
+      spreadHyperMarkSeq(group, tokenAfter, seq, isBackward)
     }
   }
 }
 
-export const findMarkSeq = (group: GroupToken, token: Token): Token[] => {
+export const findHyperMarkSeq = (group: GroupToken, token: Token): Token[] => {
   const seq: Token[] = [token]
-  spreadMarkSeq(group, token, seq, false)
-  spreadMarkSeq(group, token, seq, true)
+  spreadHyperMarkSeq(group, token, seq, false)
+  spreadHyperMarkSeq(group, token, seq, true)
   return seq
 }
 
-// others
-
-export const findSpaceAfterHost = (
+const findSpaceHostInHyperMarkSeq = (
   group: GroupToken,
-  firstPossibleHost: Token | undefined,
-  lastPossibleHost: Token | undefined
+  hyperMarkSeq: Token[]
 ): Token | undefined => {
-  // If either first or last possible host then directly return another.
-  // If neither first nor last possible host then return nothing.
-  // If first equals to last then return it directly.
-  if (!firstPossibleHost && !lastPossibleHost) {
+  // Return nothing if the seq is empty
+  if (!hyperMarkSeq.length) {
     return
   }
-  if (!firstPossibleHost) {
-    // If first token doesn't exist (no left extra content)
-    // and last token is left side mark, then no after space
-    if (getMarkSide(lastPossibleHost) === MarkSideType.LEFT) {
-      return
+
+  const firstMark = hyperMarkSeq[0]
+  const lastMark = hyperMarkSeq[hyperMarkSeq.length - 1]
+  const firstMarkSide = getMarkdownOrHtmlSide(firstMark)
+  const lastMarkSide = getMarkdownOrHtmlSide(lastMark)
+  
+  const tokenBefore = findTokenBefore(group, firstMark)
+  if (!tokenBefore) {
+    return
+  }
+
+  // Return nothing if any token is not a mark.
+  if (!firstMarkSide || !lastMarkSide) {
+    return
+  }
+
+  // If first and last mark have the same side, then return:
+  // - token before first mark if they are the left side
+  // - last mark if they are the right side
+  if (firstMarkSide === lastMarkSide) {
+    if (firstMarkSide === MarkSideType.LEFT) {
+      return tokenBefore
     }
-    return lastPossibleHost
-  }
-  if (!lastPossibleHost) {
-    return firstPossibleHost
-  }
-  if (firstPossibleHost === lastPossibleHost) {
-    return firstPossibleHost
-  }
-
-  // If first and last both exists but different.
-  // Detech whether this mark seq is on the left side or right.
-  const secondPossibleHost = findTokenAfter(group, firstPossibleHost)
-  const sideSecond = getMarkSide(secondPossibleHost)
-  const sideLast = getMarkSide(lastPossibleHost)
-
-  // If first and last mark have the same side, then return
-  if (sideSecond === sideLast) {
-    // - first mark if it's the left side
-    // - last mark if it's the right side
-    return sideSecond === MarkSideType.LEFT
-      ? firstPossibleHost
-      : lastPossibleHost
+    return lastMark
   }
 
   // If first mark is the left side and last mark is the right side,
   // that usually means multiple marks partially overlapped.
   // This situation is abnormal but technically exists.
   // We'd better do nothing and leave this issue to human.
-  if (sideSecond === MarkSideType.LEFT) {
+  if (firstMarkSide === MarkSideType.LEFT) {
     return
   }
 
   // If first mark is the right side and last mark is the left side,
   // that usually means multiple marks closely near eath other.
   // We'd better find the gap outside the both sides of marks.
-  let tempToken: Token = lastPossibleHost
-  while (tempToken !== firstPossibleHost) {
-    if (tempToken.markSide === MarkSideType.RIGHT) {
-      return tempToken
+  let target: Token | undefined = tokenBefore
+  while (target && target !== lastMark) {
+    const nextToken = findTokenAfter(group, target)
+    if (
+      nextToken &&
+      getMarkdownOrHtmlSide(nextToken) === MarkSideType.LEFT
+    ) {
+      return target
     }
-    tempToken = findTokenBefore(group, tempToken) as Token
+    target = nextToken
   }
-  return firstPossibleHost
+  return tokenBefore
 }
 
-export const isInlineCode = (token: Token): boolean => {
-  // html tags, raw content
-  if (token.type === 'content-hyper') {
-    if (token.content.match(/\n/)) {
-      // Usually it's hexo custom containers.
-      return false
+export const findMarkSeqBetween = (
+  group: GroupToken,
+  before: Token | undefined,
+  after: Token | undefined
+): {
+  spaceHost?: Token
+  markSeq: Token[]
+  tokenSeq: Token[]
+} => {
+  if (!before || !after) {
+    return {
+      spaceHost: undefined,
+      markSeq: [],
+      tokenSeq: []
     }
-    if (token.content.match(/^<code.*>.*<\/code.*>$/)) {
-      // Usually it's <code>...</code>.
+  }
+
+  const firstMark = findTokenAfter(group, before)
+  const firstVisible = findExpectedVisibleTokenAfter(group, before)
+  if (!firstMark || firstVisible !== after) {
+    return {
+      spaceHost: undefined,
+      markSeq: [],
+      tokenSeq: []
+    }
+  }
+  if (firstMark === after) {
+    return {
+      spaceHost: before,
+      markSeq: [],
+      tokenSeq: [before]
+    }
+  }
+
+  const markSeq = findHyperMarkSeq(group, firstMark)
+  const spaceHost = findSpaceHostInHyperMarkSeq(group, markSeq)
+
+  return {
+    spaceHost,
+    markSeq,
+    tokenSeq: [before, ...markSeq]
+  }
+}
+
+// special cases
+
+export const isHalfWidthPunctuationWithoutSpaceAround = (group: GroupToken, token: Token): boolean => {
+  const tokenBefore = findTokenBefore(group, token)
+  const tokenAfter = findTokenAfter(group, token)
+
+  if (
+    token.type === CharType.PUNCTUATION_HALF &&
+    tokenBefore &&
+    tokenBefore.type === CharType.CONTENT_HALF &&
+    tokenAfter &&
+    tokenAfter.type === CharType.CONTENT_HALF
+  ) {
+    return !tokenBefore.spaceAfter && !token.spaceAfter
+  }
+
+  return false
+}
+
+export const isSuccessiveHalfWidthPunctuation = (group: GroupToken, token: Token): boolean => {
+  if (token.type === CharType.PUNCTUATION_HALF) {
+    const tokenBefore = findTokenBefore(group, token)
+    const tokenAfter = findTokenAfter(group, token)
+    if (
+      (tokenBefore &&
+        tokenBefore.type === CharType.PUNCTUATION_HALF &&
+        !tokenBefore.spaceAfter) ||
+      (tokenAfter &&
+        tokenAfter.type === CharType.PUNCTUATION_HALF &&
+        !token.spaceAfter)
+    ) {
       return true
     }
-    if (token.content.match(/^<.+>$/)) {
-      // Usually it's other HTML tags.
-      return false
-    }
-    // Usually it's `...`.
-    return true
   }
   return false
 }
 
-export const isUnexpectedHtmlTag = (token: Token): boolean => {
-  // html tags, raw content
-  if (token.type === 'content-hyper') {
-    if (token.content.match(/\n/)) {
-      // Usually it's hexo custom containers.
-      return false
-    }
-    if (token.content.match(/^<code.*>.*<\/code.*>$/)) {
-      // Usually it's <code>...</code>.
-      return false
-    }
-    if (token.content.match(/^<.+>$/)) {
-      // Usually it's other HTML tags.
-      return true
-    }
-    // Usually it's `...`.
-    return false
-  }
-  return false
-}
+// validations helpers
 
-export const isHyperTag = (token: Token): boolean => {
-  // markdown tags
-  if (token.type === 'content-hyper') {
-    return !isInlineCode(token)
-  }
-  if (token.type === 'mark-hyper') {
-    return true
-  }
-  return false
-}
-
-export const getMarkSide = (
-  token: Token | undefined
-): MarkSideType | undefined => {
-  if (!token) {
-    return
-  }
-  if (token.markSide) {
-    return token.markSide
-  }
-  if (token.type === 'content-hyper' && !isInlineCode(token)) {
-    // non-inline-code html
-    if (token.content.match(/^<[^/].+>$/)) {
-      // <...>
-      return MarkSideType.LEFT
-    } else if (token.content.match(/^<\/.+>$/)) {
-      // </...>
-      return MarkSideType.RIGHT
-    }
-  }
-}
-
-// validations
-
-export const addValidation = (
+const createValidation = (
   token: Token,
-  name: string,
   target: ValidationTarget,
-  message: string
-): void => {
-  if (!token.validations) {
-    token.validations = []
-  }
+  message: string,
+  name: string
+): Validation => {
   const validation: Validation = {
     index: token.index,
     length: token.length,
@@ -344,13 +432,104 @@ export const addValidation = (
   }
   if (target === ValidationTarget.START_CONTENT) {
     validation.index = (token as GroupToken).startIndex
+    validation.length = 0
   } else if (target === ValidationTarget.END_CONTENT) {
-    validation.index = (token as GroupToken).startIndex
-    validation.length =
-      (token as GroupToken).endIndex - (token as GroupToken).startIndex + 1
+    validation.index = (token as GroupToken).endIndex
+    validation.length = 0
   } else if (target === ValidationTarget.INNER_SPACE_BEFORE) {
     validation.index = (token as GroupToken).startIndex
+    validation.length = (token as GroupToken).startContent.length
   }
+  return validation
+}
+
+export const setValidationOnTarget = (
+  token: Token,
+  target: ValidationTarget,
+  message: string,
+  name: string,
+): void => {
+  const validation = createValidation(token, target, message, name)
+  removeValidationOnTarget(token, target)
+  token.validations.push(validation)
+}
+
+export const hasValidationOnTarget = (
+  token: Token,
+  target: ValidationTarget
+): boolean => {
+  return token.validations.some((validation) => validation.target === target)
+}
+
+export const removeValidationOnTarget = (
+  token: Token,
+  target: ValidationTarget
+): void => {
+  token.validations = token.validations.filter(
+    (validation) => validation.target !== target
+  )
+}
+
+// validation checkers
+
+type Checker = (
+  token: Token,
+  value: string,
+  message: string
+) => void
+
+const genChecker = (key: keyof Token | keyof GroupToken, target: ValidationTarget): Checker => {
+  return (token: Token, value: string, message: string) => {
+    if (token[key] !== value) {
+      token[key] = value
+      setValidationOnTarget(token, target, message, '')
+    }
+  }
+}
+
+export const checkSpaceAfter: Checker = genChecker(
+  'modifiedSpaceAfter',
+  ValidationTarget.SPACE_AFTER
+)
+
+export const checkStartContent: Checker = genChecker(
+  'modifiedStartContent',
+  ValidationTarget.START_CONTENT
+)
+
+export const checkEndContent: Checker = genChecker(
+  'modifiedEndContent',
+  ValidationTarget.END_CONTENT
+)
+
+export const checkInnerSpaceBefore: Checker = genChecker(
+  'modifiedInnerSpaceBefore',
+  ValidationTarget.INNER_SPACE_BEFORE
+)
+
+export const checkContent = (
+  token: Token,
+  value: string,
+  type: TokenType,
+  message: string
+): void => {
+  if (token.modifiedContent === value) {
+    return
+  }
+  token.modifiedContent = value
+  token.modifiedType = type
+  setValidationOnTarget(token, ValidationTarget.CONTENT, message, '')
+}
+
+// legacy validation helpers
+
+export const addValidation = (
+  token: Token,
+  name: string,
+  target: ValidationTarget,
+  message: string
+): void => {
+  const validation = createValidation(token, target, message, name)
   token.validations.push(validation)
 }
 
