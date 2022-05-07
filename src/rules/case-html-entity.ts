@@ -57,7 +57,7 @@ const generateHandler = (options: Options): Handler => {
     // revert half-width content
     tokenAfter.modifiedContent = tokenAfter.content
     tokenAfter.modifiedType = tokenAfter.type
-    tokenAfter.modifiedSpaceAfter = token.spaceAfter
+    tokenAfter.modifiedSpaceAfter = tokenAfter.spaceAfter
     removeValidationOnTarget(tokenAfter, ValidationTarget.CONTENT)
     removeValidationOnTarget(tokenAfter, ValidationTarget.SPACE_AFTER)
 
@@ -71,7 +71,7 @@ const generateHandler = (options: Options): Handler => {
     if (nextToken) {
       const { spaceHost } = findMarkSeqBetween(group, thirdToken, nextToken)
       if (spaceHost) {
-        spaceHost.modifiedSpaceAfter = token.spaceAfter
+        spaceHost.modifiedSpaceAfter = spaceHost.spaceAfter
         removeValidationOnTarget(spaceHost, ValidationTarget.SPACE_AFTER)
       }
     }
