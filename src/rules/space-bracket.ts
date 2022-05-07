@@ -7,7 +7,7 @@
  * - noSpaceInsideBracket: boolean | undefined
  * - spaceOutsideHalfBracket: boolean | undefined
  * - nospaceOutsideFullBracket: boolean | undefined
- * 
+ *
  * Details:
  * - noSpaceInsideBracket:
  *   - left-bracket x anything
@@ -23,6 +23,7 @@
  */
 
 import {
+  CharType,
   GroupTokenType,
   Handler,
   isContentType,
@@ -79,41 +80,56 @@ const generateHandler = (options: Options): Handler => {
       }
     }
 
+    // skip bracket between half-width content without spaces
+    const isFullWidth = isFullWidthPair(token.modifiedContent)
+    const contentTokenBefore = findNonHyperVisibleTokenBefore(group, token)
+    const contentTokenAfter = findNonHyperVisibleTokenAfter(group, token)
+    const { spaceHost: beforeSpaceHost, tokenSeq: beforeTokenSeq } =
+      findMarkSeqBetween(group, contentTokenBefore, token)
+    const { spaceHost: afterSpaceHost, tokenSeq: afterTokenSeq } =
+      findMarkSeqBetween(group, token, contentTokenAfter)
+    if (
+      contentTokenBefore &&
+      contentTokenAfter &&
+      contentTokenBefore.type === CharType.CONTENT_HALF &&
+      contentTokenAfter.type === CharType.CONTENT_HALF &&
+      beforeTokenSeq.filter((x) => x.spaceAfter).length === 0 &&
+      afterTokenSeq.filter((x) => x.spaceAfter).length === 0
+    ) {
+      return
+    }
+
     // 2. spaces outside half/full bracket
     if (
       typeof spaceOutsideHalfBracketOption !== 'undefined' ||
       noSpaceOutsideFullBracketOption
     ) {
       // 2.1 right-bracket x left-bracket
-      const contentTokenAfter = findNonHyperVisibleTokenAfter(group, token)
       if (contentTokenAfter) {
         if (
           token.markSide === MarkSideType.RIGHT &&
           contentTokenAfter.markSide === MarkSideType.LEFT
         ) {
-        const { spaceHost } = findMarkSeqBetween(
-          group,
-          token,
-          contentTokenAfter
-        )
-        if (spaceHost) {
-          const isFullWidth =
-            isFullWidthPair(token.modifiedContent) ||
-            isFullWidthPair(contentTokenAfter.modifiedContent)
-          
+          if (afterSpaceHost) {
+            const hasFullWidth =
+              isFullWidth || isFullWidthPair(contentTokenAfter.modifiedContent)
+
             // 2.1.1 any-full-bracket
             // 2.1.2 right-half-bracket x left-half-bracket
-            if (isFullWidth) {
+            if (hasFullWidth) {
               if (noSpaceOutsideFullBracketOption) {
                 checkSpaceAfter(token, '', BRACKET_NOSPACE_OUTSIDE)
               }
             } else {
-              if (spaceOutsideHalfBracketOption) {
-                const spaceAfter = spaceOutsideHalfBracketOption ? ' ' : ''
-                const message = spaceOutsideHalfBracketOption
-                  ? BRACKET_SPACE_OUTSIDE
-                  : BRACKET_NOSPACE_OUTSIDE
-                checkSpaceAfter(token, spaceAfter, message)
+              // skip no spaces between
+              if (afterTokenSeq.filter((x) => x.spaceAfter).length > 0) {
+                if (spaceOutsideHalfBracketOption) {
+                  const spaceAfter = spaceOutsideHalfBracketOption ? ' ' : ''
+                  const message = spaceOutsideHalfBracketOption
+                    ? BRACKET_SPACE_OUTSIDE
+                    : BRACKET_NOSPACE_OUTSIDE
+                  checkSpaceAfter(token, spaceAfter, message)
+                }
               }
             }
           }
@@ -123,27 +139,18 @@ const generateHandler = (options: Options): Handler => {
       // 2.2 content/right-quote/code x left-bracket
       // 2.3 right-racket x content/left-quote/code
       if (token.markSide === MarkSideType.LEFT) {
-        const contentTokenBefore = findNonHyperVisibleTokenBefore(group, token)
         if (
-          contentTokenBefore && (
-            isContentType(contentTokenBefore.type) ||
+          contentTokenBefore &&
+          (isContentType(contentTokenBefore.type) ||
             contentTokenBefore.type === GroupTokenType.GROUP ||
-            contentTokenBefore.type === SingleTokenType.HYPER_CODE
-          )
+            contentTokenBefore.type === SingleTokenType.HYPER_CODE)
         ) {
-          const { spaceHost } = findMarkSeqBetween(
-            group,
-            contentTokenBefore,
-            token
-          )
-          if (spaceHost) {
-            const isFullWidth = isFullWidthPair(token.modifiedContent)
-
+          if (beforeSpaceHost) {
             // 2.2.1 content/right-quote/code x left-full-bracket
             // 2.2.2 content/right-quote/code x left-half-bracket
             if (isFullWidth) {
               if (noSpaceOutsideFullBracketOption) {
-                checkSpaceAfter(spaceHost, '', BRACKET_NOSPACE_OUTSIDE)
+                checkSpaceAfter(beforeSpaceHost, '', BRACKET_NOSPACE_OUTSIDE)
               }
             } else {
               if (typeof spaceOutsideHalfBracketOption !== 'undefined') {
@@ -151,32 +158,24 @@ const generateHandler = (options: Options): Handler => {
                 const message = spaceOutsideHalfBracketOption
                   ? BRACKET_SPACE_OUTSIDE
                   : BRACKET_NOSPACE_OUTSIDE
-                checkSpaceAfter(spaceHost, spaceAfter, message)
+                checkSpaceAfter(beforeSpaceHost, spaceAfter, message)
               }
             }
           }
         }
       } else {
         if (
-          contentTokenAfter && (
-            isContentType(contentTokenAfter.type) ||
+          contentTokenAfter &&
+          (isContentType(contentTokenAfter.type) ||
             contentTokenAfter.type === GroupTokenType.GROUP ||
-            contentTokenAfter.type === SingleTokenType.HYPER_CODE
-          )
+            contentTokenAfter.type === SingleTokenType.HYPER_CODE)
         ) {
-          const { spaceHost } = findMarkSeqBetween(
-            group,
-            token,
-            contentTokenAfter
-          )
-          if (spaceHost) {
-            const isFullWidth = isFullWidthPair(token.modifiedContent)
-
+          if (afterSpaceHost) {
             // 2.3.1 right-full-bracket x content/left-quote/code
             // 2.4.2 right-half-bracket x content/left-quote/code
             if (isFullWidth) {
               if (noSpaceOutsideFullBracketOption) {
-                checkSpaceAfter(spaceHost, '', BRACKET_NOSPACE_OUTSIDE)
+                checkSpaceAfter(afterSpaceHost, '', BRACKET_NOSPACE_OUTSIDE)
               }
             } else {
               if (typeof spaceOutsideHalfBracketOption !== 'undefined') {
@@ -184,7 +183,7 @@ const generateHandler = (options: Options): Handler => {
                 const message = spaceOutsideHalfBracketOption
                   ? BRACKET_SPACE_OUTSIDE
                   : BRACKET_NOSPACE_OUTSIDE
-                checkSpaceAfter(spaceHost, spaceAfter, message)
+                checkSpaceAfter(afterSpaceHost, spaceAfter, message)
               }
             }
           }

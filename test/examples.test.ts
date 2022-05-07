@@ -43,7 +43,7 @@ const parsePosition = (str, index) => {
 // }
 
 describe('combo lint', () => {
-  test.todo('rule units', () => {
+  test('rule units', () => {
     const input = fs.readFileSync(
       path.resolve(__dirname, './example-units.md'),
       { encoding: 'utf8' }

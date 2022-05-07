@@ -402,8 +402,10 @@ describe('lint by rules', () => {
       const options: Options = {
         rules: { spaceOutsideHalfBracket: true }
       }
-      expect(getOutput('foo(bar)baz', options)).toBe('foo (bar) baz')
       expect(getOutput('foo ( bar ) baz', options)).toBe('foo ( bar ) baz')
+
+      // skip content x bracket x content without space
+      expect(getOutput('foo(bar)baz', options)).toBe('foo(bar)baz')
     })
     test('one space outside', () => {
       const options: Options = {
@@ -485,7 +487,7 @@ describe('lint by cases', () => {
   test('[case] half-content x mark x half-content', () => {
     expect(getOutput('a__[b](x)__c', defaultConfig)).toBe('a__[b](x)__c')
   })
-  test.todo('[case] plural brackets', () => {
+  test('[case] plural brackets', () => {
     expect(getOutput('3 minite(s) left', defaultConfig)).toBe(
       '3 minite(s) left'
     )
