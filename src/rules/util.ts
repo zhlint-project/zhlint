@@ -48,6 +48,9 @@ export type Options = {
   // trim space
   trimSpace?: boolean
 
+  // number x Chinese unit
+  noSpaceBeforeZhUnits?: string
+
   // test
   skip?: {
     abbrs?: string[]

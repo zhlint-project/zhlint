@@ -464,7 +464,8 @@ describe('lint by cases', () => {
       noSpaceInsideBracket: true,
       spaceOutsideCode: true,
       noSpaceInsideMark: true,
-      trimSpace: true
+      trimSpace: true,
+      noSpaceBeforeZhUnits: `年月日天号时分秒`
     }
   }
   test('[case-linebreak] keep the linebreaks', () => {
@@ -485,7 +486,7 @@ describe('lint by cases', () => {
     `.trim()
     )
   })
-  test.todo('datetime', () => {
+  test('datetime', () => {
     expect(getOutput('2019年06月26号 2019-06-26 12:00', defaultConfig)).toBe(
       '2019年06月26号 2019-06-26 12:00'
     )
