@@ -18,6 +18,7 @@ import genSpaceOfBracketHandler from './space-bracket'
 import genSpaceOfLinebreakHandler from './space-linebreak'
 
 import genZhUnitsHandler from './case-zh-units'
+import genHtmlEntityHandler from './case-html-entity'
 
 export const generateHandlers = (options: Options): Handler[] => {
   return [
@@ -38,5 +39,6 @@ export const generateHandlers = (options: Options): Handler[] => {
     genSpaceOfLinebreakHandler(options),
 
     genZhUnitsHandler(options),
+    genHtmlEntityHandler(options)
   ]
 }

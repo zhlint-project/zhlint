@@ -191,7 +191,7 @@ describe('markdown lint', () => {
       'store 实例不再暴露事件触发器 (event emitter) 接口 (`on`，`off`，`emit`)。'
     )
   })
-  test.todo('[md] html entity', () => {
+  test('[md] html entity', () => {
     expect(
       getOutput('取决于你分心和开始 2.0 最酷的新功能的次数。😉 &nbsp;无法判断时间，')
     ).toBe('取决于你分心和开始 2.0 最酷的新功能的次数。😉 &nbsp;无法判断时间，')
