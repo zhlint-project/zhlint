@@ -203,15 +203,6 @@ export const isHyperType = (
   )
 }
 
-export const isLegacyHyperContentType = (
-  type: TokenType | CharType
-): type is LegacyHyperContentTokenType => {
-  return (
-    type === SingleTokenType.HYPER_UNEXPECTED ||
-    type === SingleTokenType.HYPER_CODE
-  )
-}
-
 // Token
 
 type CommonToken = {
