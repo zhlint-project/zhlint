@@ -37,4 +37,9 @@ describe('lint by issues', () => {
   test('#23: two dots only', () => {
     expect(getOutput('..', defaultConfig)).toBe('..')
   })
+
+  // https://github.com/Jinjiang/zhlint/issues/35
+  test('#35 parse error', () => {
+    expect(getOutput('x‘x’x', defaultConfig)).toBe('x‘x’x')
+  })
 })
