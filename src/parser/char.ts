@@ -23,7 +23,7 @@ export const checkCharType = (char: string): CharType => {
     return CharType.CONTENT_HALF
   }
 
-  if (',.;:?!~-+*/\\%=&|"\'`()[]{}<>'.indexOf(char) >= 0) {
+  if (',.;:?!~-+*/\\%=&|"\'`()[]{}<>@#$^'.indexOf(char) >= 0) {
     return CharType.PUNCTUATION_HALF
   }
 

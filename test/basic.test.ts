@@ -176,11 +176,18 @@ describe('parser', () => {
         length: 3
       },
       {
-        type: 'content-half',
-        content: '@Vuejs_Events',
+        type: 'punctuation-half',
+        content: '@',
         spaceAfter: '',
         index: 12,
-        length: 13
+        length: 1
+      },
+      {
+        type: 'content-half',
+        content: 'Vuejs_Events',
+        spaceAfter: '',
+        index: 13,
+        length: 12
       },
       {
         type: 'punctuation-full',

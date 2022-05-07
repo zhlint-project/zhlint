@@ -451,6 +451,14 @@ describe('lint by cases', () => {
       '运行时 + 编译器 vs. 只包含运行时'
     )
   })
+  test('[case] backslash', () => {
+    expect(
+      getOutput('This\\# is \\#not a heading but a normal hash', defaultConfig)
+    ).toBe('This\\# is \\#not a heading but a normal hash')
+    expect(getOutput('这个\\#是普通的 \\# 井号而不是标题', defaultConfig)).toBe(
+      '这个\\#是普通的 \\# 井号而不是标题'
+    )
+  })
   test('[case] ellipsis', () => {
     expect(getOutput('aaa...bbb', defaultConfig)).toBe('aaa...bbb')
     expect(getOutput('aaa... bbb', defaultConfig)).toBe('aaa... bbb')
