@@ -451,12 +451,12 @@ describe('lint by cases', () => {
       '运行时 + 编译器 vs. 只包含运行时'
     )
   })
-  test('[case-ellipsis]', () => {
-    // expect(getOutput('aaa...bbb', defaultConfig)).toBe('aaa...bbb')
-    // expect(getOutput('aaa... bbb', defaultConfig)).toBe('aaa... bbb')
-    expect(getOutput('`aaa`... `bbb`', defaultConfig)).toBe('`aaa` ... `bbb`')
+  test('[case] ellipsis', () => {
+    expect(getOutput('aaa...bbb', defaultConfig)).toBe('aaa...bbb')
+    expect(getOutput('aaa... bbb', defaultConfig)).toBe('aaa... bbb')
+    expect(getOutput('aaa ...bbb', defaultConfig)).toBe('aaa ...bbb')
+    expect(getOutput('`aaa` ... `bbb`', defaultConfig)).toBe('`aaa` ... `bbb`')
   })
-
   test('[case] URL', () => {
     expect(getOutput('Vue.js 是什么', defaultConfig)).toBe('Vue.js 是什么')
     expect(getOutput('www.vuejs.org', defaultConfig)).toBe('www.vuejs.org')

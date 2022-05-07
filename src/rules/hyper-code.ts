@@ -59,7 +59,7 @@ const generateHandler = (options: Options): Handler => {
 
     // 1. code x code
     // 2. content x code, code x content
-    if (token.type === token.type) {
+    if (token.type === tokenAfter.type) {
       checkSpaceAfter(token, spaceAfter, message)
     } else if (isContentType(token.type) || isContentType(tokenAfter.type)) {
       checkSpaceAfter(token, spaceAfter, message)

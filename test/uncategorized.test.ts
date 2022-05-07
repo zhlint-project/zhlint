@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest'
 
 import run, { Options } from '../src/run'
-import { defaultConfig } from './rules.test'
+import { defaultConfig } from './prepare'
 
 const getOutput = (...args: [string, Options?]) => run(...args).result
 
