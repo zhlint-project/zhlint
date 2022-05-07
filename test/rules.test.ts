@@ -13,7 +13,7 @@ import {
   QUOTE_NOSPACE_INSIDE
 } from '../src/rules/messages'
 
-import { getOutput, lint, defaultConfig } from './prepare'
+import { getOutput, lint, options } from './prepare'
 
 describe('lint by rules', () => {
   test('[space-trim] trim the spaces', () => {
@@ -433,7 +433,7 @@ describe('lint by cases', () => {
   > bar 
   > baz
     `.trim(),
-        defaultConfig
+        options
       )
     ).toBe(
       `
@@ -444,83 +444,83 @@ describe('lint by cases', () => {
     )
   })
   test('[case-zh-units]', () => {
-    expect(getOutput('2019年06月26号 2019-06-26 12:00', defaultConfig)).toBe(
+    expect(getOutput('2019年06月26号 2019-06-26 12:00', options)).toBe(
       '2019年06月26号 2019-06-26 12:00'
     )
   })
   test('[case-abbrs]', () => {
-    expect(getOutput('运行时 + 编译器 vs. 只包含运行时', defaultConfig)).toBe(
+    expect(getOutput('运行时 + 编译器 vs. 只包含运行时', options)).toBe(
       '运行时 + 编译器 vs. 只包含运行时'
     )
   })
   test('[case] backslash', () => {
     expect(
-      getOutput('This\\# is \\#not a heading but a normal hash', defaultConfig)
+      getOutput('This\\# is \\#not a heading but a normal hash', options)
     ).toBe('This\\# is \\#not a heading but a normal hash')
-    expect(getOutput('这个\\#是普通的 \\# 井号而不是标题', defaultConfig)).toBe(
+    expect(getOutput('这个\\#是普通的 \\# 井号而不是标题', options)).toBe(
       '这个\\#是普通的 \\# 井号而不是标题'
     )
   })
   test('[case] ellipsis', () => {
-    expect(getOutput('aaa...bbb', defaultConfig)).toBe('aaa...bbb')
-    expect(getOutput('aaa... bbb', defaultConfig)).toBe('aaa... bbb')
-    expect(getOutput('aaa ...bbb', defaultConfig)).toBe('aaa ...bbb')
-    expect(getOutput('`aaa` ... `bbb`', defaultConfig)).toBe('`aaa` ... `bbb`')
+    expect(getOutput('aaa...bbb', options)).toBe('aaa...bbb')
+    expect(getOutput('aaa... bbb', options)).toBe('aaa... bbb')
+    expect(getOutput('aaa ...bbb', options)).toBe('aaa ...bbb')
+    expect(getOutput('`aaa` ... `bbb`', options)).toBe('`aaa` ... `bbb`')
   })
   test('[case] URL', () => {
-    expect(getOutput('Vue.js 是什么', defaultConfig)).toBe('Vue.js 是什么')
-    expect(getOutput('www.vuejs.org', defaultConfig)).toBe('www.vuejs.org')
-    expect(getOutput('https://vuejs.org', defaultConfig)).toBe(
+    expect(getOutput('Vue.js 是什么', options)).toBe('Vue.js 是什么')
+    expect(getOutput('www.vuejs.org', options)).toBe('www.vuejs.org')
+    expect(getOutput('https://vuejs.org', options)).toBe(
       'https://vuejs.org'
     )
   })
   test('[case] slash character', () => {
-    expect(getOutput('想知道 Vue 与其它库/框架有哪些区别', defaultConfig)).toBe(
+    expect(getOutput('想知道 Vue 与其它库/框架有哪些区别', options)).toBe(
       '想知道 Vue 与其它库/框架有哪些区别'
     )
   })
   test('[case] special characters', () => {
-    expect(getOutput('Vue (读音 /vjuː/，类似于)', defaultConfig)).toBe(
+    expect(getOutput('Vue (读音 /vjuː/，类似于)', options)).toBe(
       'Vue (读音 /vjuː/，类似于)'
     )
   })
   test('[case] half-content x mark x half-content', () => {
-    expect(getOutput('a__[b](x)__c', defaultConfig)).toBe('a__[b](x)__c')
+    expect(getOutput('a__[b](x)__c', options)).toBe('a__[b](x)__c')
   })
   test('[case] plural brackets', () => {
-    expect(getOutput('3 minite(s) left', defaultConfig)).toBe(
+    expect(getOutput('3 minite(s) left', options)).toBe(
       '3 minite(s) left'
     )
   })
   test('[case] single quote for shorthand', () => {
-    expect(getOutput(`how many user's here`, defaultConfig)).toBe(
+    expect(getOutput(`how many user's here`, options)).toBe(
       `how many user's here`
     )
-    expect(getOutput(`how many users' items here`, defaultConfig)).toBe(
+    expect(getOutput(`how many users' items here`, options)).toBe(
       `how many users' items here`
     )
-    expect(getOutput(`what's going on`, defaultConfig)).toBe(`what's going on`)
+    expect(getOutput(`what's going on`, options)).toBe(`what's going on`)
   })
   test('[case] math exp', () => {
-    expect(getOutput('1+1=2', defaultConfig)).toBe('1+1=2')
-    expect(getOutput('a|b', defaultConfig)).toBe('a|b')
-    expect(getOutput('a | b', defaultConfig)).toBe('a | b')
-    expect(getOutput('a||b', defaultConfig)).toBe('a||b')
-    expect(getOutput('a || b', defaultConfig)).toBe('a || b')
+    expect(getOutput('1+1=2', options)).toBe('1+1=2')
+    expect(getOutput('a|b', options)).toBe('a|b')
+    expect(getOutput('a | b', options)).toBe('a | b')
+    expect(getOutput('a||b', options)).toBe('a||b')
+    expect(getOutput('a || b', options)).toBe('a || b')
   })
   test('[case] arrow chars', () => {
-    expect(getOutput('Chrome 顶部导航 > 窗口 > 任务管理', defaultConfig)).toBe(
+    expect(getOutput('Chrome 顶部导航 > 窗口 > 任务管理', options)).toBe(
       'Chrome 顶部导航 > 窗口 > 任务管理'
     )
   })
   test('[case] curly brackets', () => {
-    expect(getOutput('# 简介 {#introduction}', defaultConfig)).toBe(
+    expect(getOutput('# 简介 {#introduction}', options)).toBe(
       '# 简介 {#introduction}'
     )
-    expect(getOutput('# 简介{#introduction}', defaultConfig)).toBe(
+    expect(getOutput('# 简介{#introduction}', options)).toBe(
       '# 简介 {#introduction}'
     )
-    expect(getOutput('### 托管模式 {#takeover-mode}', defaultConfig)).toBe(
+    expect(getOutput('### 托管模式 {#takeover-mode}', options)).toBe(
       '### 托管模式 {#takeover-mode}'
     )
   })

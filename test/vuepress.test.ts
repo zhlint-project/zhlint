@@ -1,9 +1,9 @@
 import { describe, test, expect } from 'vitest'
 
 import run from '../src/run'
-import { defaultConfig } from './prepare'
+import { options } from './prepare'
 
-const getOutput = (str: string) => run(str, defaultConfig).result
+const getOutput = (str: string) => run(str, options).result
 
 const simpleInput = `:::
 自动在中文和English之间加入空格

@@ -1,9 +1,9 @@
 import { describe, test, expect } from 'vitest'
 
 import run from '../src/run'
-import { defaultConfig } from './prepare'
+import { options } from './prepare'
 
-const getOutput = (str: string) => run(str, defaultConfig).result
+const getOutput = (str: string) => run(str, options).result
 
 describe('hexo lint', () => {
   test('[hexo] one-line raw', () => {

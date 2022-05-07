@@ -3,9 +3,9 @@ import { describe, test, expect } from 'vitest'
 import run from '../src/run'
 import markdownParser from '../src/hypers/md'
 import { Data } from '../src/hypers/types'
-import { defaultConfig } from './prepare'
+import { options } from './prepare'
 
-const getOutput = (str: string) => run(str, defaultConfig).result
+const getOutput = (str: string) => run(str, options).result
 
 describe('parser with markdown', () => {
   test('[md parser] single paragraph', () => {
