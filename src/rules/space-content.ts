@@ -69,7 +69,11 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // find the space host
-    const { spaceHost, tokenSeq } = findMarkSeqBetween(group, token, contentTokenAfter)
+    const { spaceHost, tokenSeq } = findMarkSeqBetween(
+      group,
+      token,
+      contentTokenAfter
+    )
 
     // skip if the space host is not found
     if (!spaceHost) {

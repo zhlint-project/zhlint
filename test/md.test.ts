@@ -114,7 +114,7 @@ describe('markdown lint', () => {
       '我们<a id="modal-player" href="#">制作了一个视频</a>'
     )
   })
-  test.todo('[md] space between raw content 2', () => {
+  test('[md] space between raw content 2', () => {
     // 我们 <a id="modal-player" href="#"> 制作了一个视频 </a>
     expect(
       getOutput('Hello<a id="modal-player" href="#">制作了一个视频</a>World')
@@ -150,7 +150,7 @@ describe('markdown lint', () => {
   test('[md] space between "&" punctuation', () => {
     expect(getOutput('## 访问元素 & 组件')).toBe('## 访问元素 & 组件')
   })
-  test.todo('[md] duplicated space outside hyper content', () => {
+  test('[md] duplicated space outside hyper content', () => {
     expect(
       getOutput(
         '那么你可以通过 [`$forceUpdate`](../api/#vm-forceUpdate) 来做这件事。'
@@ -159,7 +159,7 @@ describe('markdown lint', () => {
       '那么你可以通过 [`$forceUpdate`](../api/#vm-forceUpdate) 来做这件事。'
     )
   })
-  test.todo('[md] opposite side of hyper mark and bracket mark', () => {
+  test('[md] opposite side of hyper mark and bracket mark', () => {
     expect(
       getOutput(
         '注意 **`v-slot` 只能添加在 `<template>` 上** (只有[一种例外情况](#独占默认插槽的缩写语法))，这一点和已经废弃的 [`slot` 特性](#废弃了的语法)不同。'
@@ -201,12 +201,12 @@ describe('markdown lint', () => {
       '可以阅读本页面剩余部分 - 或者从[介绍](index.html)部分'
     )
   })
-  test.todo('[md] space between slash', () => {
+  test('[md] space between slash', () => {
     expect(getOutput('为此还应该引入 `Vue.nextTick`/`vm.$nextTick`。例如：')).toBe(
       '为此还应该引入 `Vue.nextTick`/`vm.$nextTick`。例如：'
     )
   })
-  test.todo('[md] space outside hyper mark and hyper content', () => {
+  test('[md] space outside hyper mark and hyper content', () => {
     expect(
       getOutput(
         '这种写法的更多优点详见：[`v-model` 示例](#带有-debounce-的-v-model移除)。'
@@ -247,7 +247,7 @@ describe('markdown lint', () => {
       '2. 开发者向 Vue 挂载包含服务端渲染或用户提供的内容的 HTML 的整个页面。这实质上和问题 \\#1 是相同的，但是有的时候开发者可能没有意识到。这会使得攻击者提供作为普通 HTML 安全但对于 Vue 模板不安全的 HTML 以导致安全漏洞。最佳实践是永远不要向 Vue 挂载可能包含服务端渲染或用户提供的内容。'
     )
   })
-  test.todo('[md] bracket x html tag', () => {
+  test('[md] bracket x html tag', () => {
     expect(
       getOutput(
         '引入一个<a href="https://zh.wikipedia.org/wiki/工厂方法#工厂">工厂函数 (factory function)</a>使得我们的测试更简洁更易读'
@@ -292,7 +292,7 @@ describe('markdown lint', () => {
       '详见[自定义指令指南](custom-directive.html)。'
     )
   })
-  test.todo('[md] space for md marker in the front', () => {
+  test('[md] space for md marker in the front', () => {
     expect(
       getOutput(
         '- [`<KeepAlive>` API 参考](/api/built-in-components.html#keepalive)'

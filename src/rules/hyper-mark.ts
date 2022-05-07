@@ -24,14 +24,15 @@
 import {
   Options,
   checkSpaceAfter,
-  findTokenAfter
+  findTokenAfter,
+  isMarkdownOrHtmlPair,
+  getMarkdownOrHtmlSide
 } from './util'
 import {
   Handler,
   MarkSideType,
   MutableGroupToken,
-  MutableToken,
-  SingleTokenType
+  MutableToken
 } from '../parser'
 import { MARKDOWN_NOSPACE_INSIDE } from './messages'
 
@@ -52,8 +53,8 @@ const generateHandler = (options: Options): Handler => {
 
     // skip non-mark situations
     if (
-      token.type !== SingleTokenType.MARK_HYPER &&
-      tokenAfter.type !== SingleTokenType.MARK_HYPER
+      !isMarkdownOrHtmlPair(token) &&
+      !isMarkdownOrHtmlPair(tokenAfter)
     ) {
       return
     }
@@ -61,16 +62,18 @@ const generateHandler = (options: Options): Handler => {
     // 1. left x left, right x right
     // 2. left x non-mark
     // 3. non-mark x right
-    if (token.markSide === tokenAfter.markSide) {
+    const markSideBefore = getMarkdownOrHtmlSide(token)
+    const markSideAfter = getMarkdownOrHtmlSide(tokenAfter)
+    if (markSideBefore === markSideAfter) {
       checkSpaceAfter(token, '', MARKDOWN_NOSPACE_INSIDE)
     } else if (
-      token.markSide === MarkSideType.LEFT &&
-      tokenAfter.type !== SingleTokenType.MARK_HYPER
+      markSideBefore === MarkSideType.LEFT &&
+      !isMarkdownOrHtmlPair(tokenAfter)
     ) {
       checkSpaceAfter(token, '', MARKDOWN_NOSPACE_INSIDE)
     } else if (
-      tokenAfter.markSide === MarkSideType.RIGHT &&
-      token.type !== SingleTokenType.MARK_HYPER
+      markSideAfter === MarkSideType.RIGHT &&
+      !isMarkdownOrHtmlPair(token)
     ) {
       checkSpaceAfter(token, '', MARKDOWN_NOSPACE_INSIDE)
     }

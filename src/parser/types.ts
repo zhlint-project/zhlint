@@ -9,7 +9,6 @@ export enum CharType {
   CONTENT_FULL = 'content-full',
   PUNCTUATION_HALF = 'punctuation-half',
   PUNCTUATION_FULL = 'punctuation-full',
-  // TODO: newly added type
   UNKNOWN = 'unknown'
 }
 
@@ -54,8 +53,20 @@ type MutablePair = {
 // Mark
 
 export enum MarkType {
+  /**
+   * Brackets
+   */
   BRACKETS = 'brackets',
+  /**
+   * Inline Markdown marks
+   */
   HYPER = 'hyper',
+  /**
+   * - \`xxx\`
+   * - &lt;code&gt;xxx&lt;/code&gt;
+   * - Hexo/VuePress container
+   * - Other html code
+   */
   RAW = 'raw'
 }
 
@@ -97,10 +108,27 @@ export type PunctuationType =
 export type CharTokenType = ContentType | PunctuationType
 
 export enum SingleTokenType {
+  /**
+   * Brackets
+   */
   MARK_BRACKETS = 'mark-brackets',
+  /**
+   * Inline Markdown marks
+   */
   MARK_HYPER = 'mark-hyper',
-  HYPER_UNEXPECTED = 'hyper-container',
+  /**
+   * - \`xxx\`
+   * - &lt;code&gt;xxx&lt;/code&gt;
+   */
   HYPER_CODE = 'hyper-code',
+  /**
+   * - Hexo/VuePress container
+   * - Other html code
+   */
+  HYPER_UNEXPECTED = 'hyper-container',
+  /**
+   * Unpaired brackets/quotes
+   */
   UNMATCHED = 'unmatched'
 }
 
