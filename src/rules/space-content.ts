@@ -56,7 +56,7 @@ const generateHandler = (options: Options): Handler => {
     options?.noSpaceBetweenFullWidthContent
   const betweenMixedWidthContentOption = options?.spaceBetweenMixedWidthContent
 
-  return (token: MutableToken, index: number, group: MutableGroupToken) => {
+  return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-content tokens
     if (!isContentType(token.type)) {
       return
@@ -69,7 +69,7 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // find the space host
-    const { spaceHost } = findMarkSeqBetween(group, token, contentTokenAfter)
+    const { spaceHost, tokenSeq } = findMarkSeqBetween(group, token, contentTokenAfter)
 
     // skip if the space host is not found
     if (!spaceHost) {
@@ -82,6 +82,13 @@ const generateHandler = (options: Options): Handler => {
       // skip without custom option
       if (token.type === CharType.CONTENT_HALF) {
         if (!onlyOneBetweenHalfWidthContentOption) {
+          return
+        }
+        // skip if half-content x marks x half-content
+        if (
+          tokenSeq.length > 1 &&
+          tokenSeq.filter((token) => token.spaceAfter).length === 0
+        ) {
           return
         }
       } else {

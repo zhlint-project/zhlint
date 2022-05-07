@@ -173,7 +173,7 @@ describe('markdown lint', () => {
       '不过在需要时你也可以提供一个 setter：'
     )
   })
-  test.todo('[md] periods as ellipsis', () => {
+  test('[md] periods as ellipsis', () => {
     expect(
       getOutput(
         '你可以使用 [`try`...`catch`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch) 作为替代。'

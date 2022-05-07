@@ -252,11 +252,15 @@ const findSpaceHostInHyperMarkSeq = (
     return
   }
 
-  const tokenBefore = findTokenBefore(group, hyperMarkSeq[0])
   const firstMark = hyperMarkSeq[0]
   const lastMark = hyperMarkSeq[hyperMarkSeq.length - 1]
   const firstMarkSide = firstMark.markSide
   const lastMarkSide = lastMark.markSide
+  
+  const tokenBefore = findTokenBefore(group, firstMark)
+  if (!tokenBefore) {
+    return
+  }
 
   // Return nothing if any token is not a mark.
   if (!firstMarkSide || !lastMarkSide) {
@@ -284,12 +288,13 @@ const findSpaceHostInHyperMarkSeq = (
   // If first mark is the right side and last mark is the left side,
   // that usually means multiple marks closely near eath other.
   // We'd better find the gap outside the both sides of marks.
-  let tempToken: Token = lastMark
-  while (tempToken !== lastMark) {
-    if (tempToken.markSide === MarkSideType.RIGHT) {
-      return tempToken
+  let target: Token | undefined = tokenBefore
+  while (target && target !== lastMark) {
+    const nextToken = findTokenAfter(group, target)
+    if (nextToken && nextToken.markSide === MarkSideType.LEFT) {
+      return target
     }
-    tempToken = findTokenBefore(group, tempToken) as Token
+    target = nextToken
   }
   return tokenBefore
 }

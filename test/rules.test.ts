@@ -482,7 +482,10 @@ describe('lint by cases', () => {
       'Vue (读音 /vjuː/，类似于)'
     )
   })
-  test.todo('plural brackets', () => {
+  test('[case] half-content x mark x half-content', () => {
+    expect(getOutput('a__[b](x)__c', defaultConfig)).toBe('a__[b](x)__c')
+  })
+  test.todo('[case] plural brackets', () => {
     expect(getOutput('3 minite(s) left', defaultConfig)).toBe(
       '3 minite(s) left'
     )
