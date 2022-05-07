@@ -1,14 +1,14 @@
 import { describe, test, expect } from 'vitest'
 
 import run, { Options } from '../src/run'
-import { defaultConfig } from './prepare'
+import { options } from './prepare'
 
 const getOutput = (...args: [string, Options?]) => run(...args).result
 
 describe('lint by issues', () => {
   // https://github.com/Jinjiang/zhlint/issues/11
   test('#11: hyphen between number', () => {
-    expect(getOutput('1-1', defaultConfig)).toBe('1-1')
+    expect(getOutput('1-1', options)).toBe('1-1')
   })
 
   // https://github.com/Jinjiang/zhlint/issues/13
@@ -30,22 +30,22 @@ describe('lint by issues', () => {
 
 #### \`aria-label\` {#aria-label}
 `
-    expect(getOutput(text, defaultConfig)).toBe(text)
+    expect(getOutput(text, options)).toBe(text)
   })
 
   // https://github.com/Jinjiang/zhlint/issues/23
   test('#23: two dots only', () => {
-    expect(getOutput('..', defaultConfig)).toBe('..')
+    expect(getOutput('..', options)).toBe('..')
   })
 
   // https://github.com/Jinjiang/zhlint/issues/35
   test('#35 parse error', () => {
-    expect(getOutput('x‘x’x', defaultConfig)).toBe('x‘x’x')
+    expect(getOutput('x‘x’x', options)).toBe('x‘x’x')
   })
 
   // https://github.com/Jinjiang/zhlint/issues/36
   test('#36 spaces around marks', () => {
-    expect(getOutput('a* 啊 *', defaultConfig)).toBe('a *啊*')
-    expect(getOutput('a * 啊 *', defaultConfig)).toBe('a *啊*')
+    expect(getOutput('a* 啊 *', options)).toBe('a *啊*')
+    expect(getOutput('a * 啊 *', options)).toBe('a *啊*')
   })
 })

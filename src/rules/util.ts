@@ -53,6 +53,9 @@ export type Options = {
 
   // case: number x Chinese unit
   skipZhUnits?: string
+
+  // custom preset
+  preset?: string
 }
 
 // find tokens

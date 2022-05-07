@@ -3,7 +3,7 @@ import { describe, test, expect } from 'vitest'
 import fs from 'fs'
 import path from 'path'
 import run from '../src/run'
-import { defaultConfig } from './prepare'
+import { options } from './prepare'
 
 const parsePosition = (str, index) => {
   const rows = str.split('\n')
@@ -52,7 +52,7 @@ describe('combo lint', () => {
       path.resolve(__dirname, './example-units-fixed.md'),
       { encoding: 'utf8' }
     )
-    const { result, validations, disabled } = run(input, defaultConfig)
+    const { result, validations, disabled } = run(input, options)
     expect(result).toBe(output)
     expect(!disabled).toBeTruthy()
     const validationsByLine = {}
@@ -78,7 +78,7 @@ describe('combo lint', () => {
       path.resolve(__dirname, './example-ignore.md'),
       { encoding: 'utf8' }
     )
-    const { result, validations, disabled } = run(input, defaultConfig)
+    const { result, validations, disabled } = run(input, options)
     expect(result).toBe(input)
     expect(validations.length).toBe(0)
     expect(!disabled).toBeTruthy()
@@ -88,7 +88,7 @@ describe('combo lint', () => {
       path.resolve(__dirname, './example-disabled.md'),
       { encoding: 'utf8' }
     )
-    const { result, validations, disabled } = run(input, defaultConfig)
+    const { result, validations, disabled } = run(input, options)
     expect(result).toBe(input)
     expect(validations.length).toBe(0)
     expect(disabled).toBe(true)
@@ -102,7 +102,7 @@ describe('combo lint', () => {
       path.resolve(__dirname, './example-vuepress-fixed.md'),
       { encoding: 'utf8' }
     )
-    const { result, validations } = run(input, defaultConfig)
+    const { result, validations } = run(input, options)
     expect(result).toBe(output)
     expect(validations.length).toBe(10)
   })
@@ -111,6 +111,6 @@ describe('combo lint', () => {
       path.resolve(__dirname, './example-article.md'),
       { encoding: 'utf8' }
     )
-    expect(run(input, defaultConfig).result).toBe(input)
+    expect(run(input, options).result).toBe(input)
   })
 })

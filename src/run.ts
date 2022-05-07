@@ -15,7 +15,7 @@ import hexo from './hypers/hexo'
 import vuepress from './hypers/vuepress'
 import md from './hypers/md'
 
-import { generateHandlers } from './rules'
+import generateHandlers, { defaultConfig as defaultRules } from './rules'
 
 const hyperParseInfo = [
   { name: 'ignore', value: ignore },
@@ -74,7 +74,8 @@ const run = (str: string, options: Options = {}): Result => {
 
   // init rules, hyper parsers, rule options, and ignored cases
   const ignoredCases = options.ignoredCases || []
-  const rules = generateHandlers(options.rules || {})
+  const preset = options.rules?.preset === 'default' ? defaultRules : {}
+  const rules = generateHandlers({...preset, ...options.rules})
   let hyperParserList: (string | ((data: Data) => Data))[]
   if (typeof options.hyperParse === 'function') {
     hyperParserList = [options.hyperParse]

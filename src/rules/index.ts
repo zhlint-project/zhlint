@@ -20,7 +20,7 @@ import genSpaceOfLinebreakHandler from './space-linebreak'
 import genZhUnitsHandler from './case-zh-units'
 import genHtmlEntityHandler from './case-html-entity'
 
-export const generateHandlers = (options: Options): Handler[] => {
+const generateHandlers = (options: Options): Handler[] => {
   return [
     genSpaceTrimGenerateHandler(options),
 
@@ -42,3 +42,39 @@ export const generateHandlers = (options: Options): Handler[] => {
     genHtmlEntityHandler(options)
   ]
 }
+
+export const defaultConfig: Options = {
+  halfWidthPunctuation: `()`,
+  fullWidthPunctuation: `，。：；？！“”‘’`,
+  unifiedPunctuation: 'simplified',
+  spaceBetweenHalfWidthContent: true,
+  noSpaceBetweenFullWidthContent: true,
+  spaceBetweenMixedWidthContent: true,
+  noSpaceBeforePunctuation: true,
+  spaceAfterHalfWidthPunctuation: true,
+  noSpaceAfterFullWidthPunctuation: true,
+  spaceOutsideHalfQuote: true,
+  noSpaceOutsideFullQuote: true,
+  noSpaceInsideQuote: true,
+  spaceOutsideHalfBracket: true,
+  noSpaceOutsideFullBracket: true,
+  noSpaceInsideBracket: true,
+  spaceOutsideCode: true,
+  noSpaceInsideMark: true,
+  trimSpace: true,
+  skipZhUnits: `年月日天号时分秒`,
+  skipAbbrs: [
+    'Mr.',
+    'Mrs.',
+    'Dr.',
+    'Jr.',
+    'Sr.',
+    'vs.',
+    'etc.',
+    'i.e.',
+    'e.g.',
+    'a.k.a.'
+  ]
+}
+
+export default generateHandlers
