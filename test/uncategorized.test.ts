@@ -42,4 +42,10 @@ describe('lint by issues', () => {
   test('#35 parse error', () => {
     expect(getOutput('x‘x’x', defaultConfig)).toBe('x‘x’x')
   })
+
+  // https://github.com/Jinjiang/zhlint/issues/36
+  test('#36 spaces around marks', () => {
+    expect(getOutput('a* 啊 *', defaultConfig)).toBe('a *啊*')
+    expect(getOutput('a * 啊 *', defaultConfig)).toBe('a *啊*')
+  })
 })

@@ -16,27 +16,50 @@ import { TRIM_SPACE } from './messages'
 import {
   checkInnerSpaceBefore,
   checkSpaceAfter,
+  findExpectedVisibleTokenBefore,
+  findHyperMarkSeq,
+  isMarkdownOrHtmlPair,
   Options
 } from './util'
 
 const generateHandler = (options: Options): Handler => {
   const trimSpaceOption = options?.trimSpace
 
-  return (_: MutableToken, index: number, group: MutableGroupToken) => {
+  return (token: MutableToken, index: number, group: MutableGroupToken) => {
     if (!trimSpaceOption) {
       return
     }
 
     // make sure it's the whole string
-    // - innerSpaceBefore of the group
-    // - spaceAfter of the last token
     if (!group.startContent && index === 0) {
+      // remove inner space before
       if (group.modifiedInnerSpaceBefore) {
         checkInnerSpaceBefore(group, '', TRIM_SPACE)
       }
+
+      // remove all spaces after beginning marks
+      if (isMarkdownOrHtmlPair(token)) {
+        findHyperMarkSeq(group, token).forEach((x) =>
+          checkSpaceAfter(x, '', TRIM_SPACE)
+        )
+      }
+
+      // get last visible content token -> remove all spaces after
       const lastToken = group[group.length - 1]
       if (lastToken) {
-        checkSpaceAfter(lastToken, '', TRIM_SPACE)
+        // 1. last token is a mark -> find last visible content token
+        // 2. last token is visible content
+        if (isMarkdownOrHtmlPair(lastToken)) {
+          const lastContentToken = findExpectedVisibleTokenBefore(group, token)
+          if (lastContentToken) {
+            findHyperMarkSeq(group, lastToken).forEach((x) =>
+              checkSpaceAfter(x, '', TRIM_SPACE)
+            )
+            checkSpaceAfter(lastContentToken, '', TRIM_SPACE)
+          }
+        } else {
+          checkSpaceAfter(lastToken, '', TRIM_SPACE)
+        }
       }
     }
   }

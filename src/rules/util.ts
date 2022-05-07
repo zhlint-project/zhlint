@@ -274,7 +274,7 @@ const spreadHyperMarkSeq = (
   }
 }
 
-const findHyperMarkSeq = (group: GroupToken, token: Token): Token[] => {
+export const findHyperMarkSeq = (group: GroupToken, token: Token): Token[] => {
   const seq: Token[] = [token]
   spreadHyperMarkSeq(group, token, seq, false)
   spreadHyperMarkSeq(group, token, seq, true)
