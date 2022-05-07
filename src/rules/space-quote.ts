@@ -48,8 +48,8 @@ import {
 } from './messages'
 
 const generateHandler = (options: Options): Handler => {
-  const noSpaceInsideQuoteOption = options?.noSpaceInsideQuote
-  const spaceOutsideHalfQuoteOption = options?.spaceOutsideHalfQuote
+  const noSpaceInsideQuoteOption = options.noSpaceInsideQuote
+  const spaceOutsideHalfQuoteOption = options.spaceOutsideHalfQuote
   const noSpaceOutsideFullQuoteOption = options.noSpaceOutsideFullQuote
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {

@@ -49,8 +49,8 @@ import {
 } from './messages'
 
 const generateHandler = (options: Options): Handler => {
-  const noInsideBracketOption = options?.noSpaceInsideBracket
-  const spaceOutsideHalfBracketOption = options?.spaceOutsideHalfBracket
+  const noInsideBracketOption = options.noSpaceInsideBracket
+  const spaceOutsideHalfBracketOption = options.spaceOutsideHalfBracket
   const noSpaceOutsideFullBracketOption = options.noSpaceOutsideFullBracket
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
@@ -123,7 +123,7 @@ const generateHandler = (options: Options): Handler => {
             } else {
               // skip no spaces between
               if (afterTokenSeq.filter((x) => x.spaceAfter).length > 0) {
-                if (spaceOutsideHalfBracketOption) {
+                if (typeof spaceOutsideHalfBracketOption !== 'undefined') {
                   const spaceAfter = spaceOutsideHalfBracketOption ? ' ' : ''
                   const message = spaceOutsideHalfBracketOption
                     ? BRACKET_SPACE_OUTSIDE

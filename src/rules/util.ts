@@ -53,12 +53,6 @@ export type Options = {
 
   // case: number x Chinese unit
   skipZhUnits?: string
-
-  // test
-  skip?: {
-    abbrs?: string[]
-    ellipsis?: boolean
-  }
 }
 
 // find tokens
