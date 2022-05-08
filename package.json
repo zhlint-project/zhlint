@@ -5,12 +5,7 @@
   "bin": {
     "zhlint": "./bin/index.js"
   },
-  "exports": {
-    "import": "./dist/zhlint.es.js",
-    "require": "./dist/zhlint.umd.js"
-  },
-  "main": "./dist/zhlint.umd.js",
-  "module": "./dist/zhlint.es.js",
+  "main": "./lib/index.js",
   "unpkg": "./dist/zhlint.umd.js",
   "jsdelivr": "./dist/zhlint.umd.js",
   "types": "./dist/zhlint.d.ts",
@@ -18,6 +13,7 @@
     "tsconfig.json",
     "dist/*",
     "bin/*",
+    "lib/*",
     "docs/*.png",
     "docs/logo.svg",
     "README.md"
@@ -26,7 +22,9 @@
     "dev": "vitest",
     "dev:ui": "vitest --ui",
     "build": "pnpm run build:js && pnpm run build:type",
-    "build:js": "vite build",
+    "build:js": "pnpm run build:node && pnpm run build:browser",
+    "build:node": "tsc --project tsconfig-build.json",
+    "build:browser": "vite build",
     "build:type": "api-extractor run --local --verbose",
     "format": "prettier --write .",
     "lint": "eslint {src,test,types}/**.ts --fix",
