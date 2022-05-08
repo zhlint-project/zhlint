@@ -29,7 +29,7 @@
     "build:js": "vite build",
     "build:type": "api-extractor run --local --verbose",
     "format": "prettier --write .",
-    "lint": "eslint {src,test,types}/** --fix",
+    "lint": "eslint {src,test,types}/**.ts --fix",
     "test": "vitest run",
     "coverage": "vitest --coverage",
     "docs": "vitepress dev docs",
