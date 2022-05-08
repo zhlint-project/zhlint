@@ -7,8 +7,8 @@ export const env: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultLogger: Console
 } = {
-  stdout: process.stdout,
-  stderr: process.stderr,
+  stdout: global?.process?.stdout,
+  stderr: global?.process?.stderr,
   defaultLogger: console
 }
 
@@ -158,9 +158,11 @@ export const report = (resultList: Result[], logger = env.defaultLogger) => {
       }
     })
   if (errorCount) {
-    logger.error('Invalid files:')
-    logger.error('- ' + invalidFiles.join('\n- ') + '\n')
-    logger.error(`Found ${errorCount} ${errorCount > 1 ? 'errors' : 'error'}.`)
+    const errors: string[] = []
+    errors.push('Invalid files:')
+    errors.push('- ' + invalidFiles.join('\n- ') + '\n')
+    errors.push(`Found ${errorCount} ${errorCount > 1 ? 'errors' : 'error'}.`)
+    logger.error(errors.join('\n'))
     return 1
   } else {
     logger.log(`No error found.`)
