@@ -1,4 +1,7 @@
+import { ContentType } from '.'
+import { ValidationTarget } from '../report'
 import { checkCharType } from './char'
+import { BRACKET_NOT_CLOSED, BRACKET_NOT_OPEN, QUOTE_NOT_CLOSED, QUOTE_NOT_OPEN } from './messages'
 import {
   CharType,
   SHORTHAND_CHARS,
@@ -14,13 +17,14 @@ import {
   GroupToken,
   GroupTokenType,
   Token,
-  ParseStatus
+  ParseStatus,
+  PunctuationType
 } from './types'
 
 export const handlePunctuation = (
   i: number,
   char: string,
-  type: CharType,
+  type: PunctuationType,
   status: ParseStatus
 ): void => {
   // end the last unfinished token
@@ -39,14 +43,16 @@ export const handlePunctuation = (
     // and finish the token
     addBracketToken(status, i, char, MarkSideType.LEFT)
   } else if (MARK_CHAR_SET.right.indexOf(char) >= 0) {
-    if (!status.lastMark) {
-      throw new Error(`Unmatched closed bracket ${char} at ${i}`)
+    if (!status.lastMark || !status.lastMark.startContent) {
+      addUnmatchedToken(status, i, char)
+      addError(status, i, BRACKET_NOT_OPEN)
+    } else {
+      // generate token as a punctuation
+      addBracketToken(status, i, char, MarkSideType.RIGHT)
+      // end the last unfinished mark
+      // and pop the previous one if exists
+      finalizeCurrentMark(status, i, char)
     }
-    // generate token as a punctuation
-    addBracketToken(status, i, char, MarkSideType.RIGHT)
-    // end the last unfinished mark
-    // and pop the previous one if exists
-    finalizeCurrentMark(status, i, char)
   } else if (GROUP_CHAR_SET.neutral.indexOf(char) >= 0) {
     // - end the last unfinished group
     // - start a new group
@@ -58,10 +64,12 @@ export const handlePunctuation = (
   } else if (GROUP_CHAR_SET.left.indexOf(char) >= 0) {
     initNewGroup(status, i, char)
   } else if (GROUP_CHAR_SET.right.indexOf(char) >= 0) {
-    if (!status.lastGroup) {
-      throw new Error(`Unmatched closed quote ${char} at ${i}`)
+    if (!status.lastGroup || !status.lastGroup.startContent) {
+      addUnmatchedToken(status, i, char)
+      addError(status, i, QUOTE_NOT_OPEN)
+    } else {
+      finalizeCurrentGroup(status, i, char)
     }
-    finalizeCurrentGroup(status, i, char)
   } else {
     addNormalPunctuationToken(status, i, char, type)
   }
@@ -70,14 +78,14 @@ export const handlePunctuation = (
 export const handleContent = (
   i: number,
   char: string,
-  type: CharType,
+  type: ContentType,
   status: ParseStatus
 ): void => {
   // check if type changed and last token unfinished
   // - create new token in the current group
   // - append into current unfinished token
   if (status.lastToken) {
-    if (type !== CharType.UNKNOWN && status.lastToken.type !== type) {
+    if (status.lastToken.type !== type) {
       finalizeLastToken(status, i)
       initNewContent(status, i, char, type)
     } else {
@@ -112,7 +120,9 @@ export const initNewStatus = (str: string, hyperMarks: Mark[]): ParseStatus => {
     groups: [],
 
     markStack: [],
-    groupStack: []
+    groupStack: [],
+
+    errors: []
   }
   return status
 }
@@ -163,7 +173,7 @@ export const addHyperContent = (
   content: string
 ) => {
   const token: SingleToken = {
-    type: SingleTokenType.CONTENT_HYPER,
+    type: getHyperContentType(content),
     index,
     length: content.length,
     content: content,
@@ -236,7 +246,7 @@ const addNormalPunctuationToken = (
   status: ParseStatus,
   index: number,
   char: string,
-  type: CharType
+  type: PunctuationType
 ) => {
   const token: SingleToken = {
     type,
@@ -244,6 +254,21 @@ const addNormalPunctuationToken = (
     length: 1,
     content: char,
     spaceAfter: '' // to be finalized
+  }
+  finalizeCurrentToken(status, token)
+}
+
+const addUnmatchedToken = (
+  status: ParseStatus,
+  i: number,
+  char: string
+): void => {
+  const token: SingleToken = {
+    type: SingleTokenType.UNMATCHED,
+    index: i,
+    length: 1,
+    content: char,
+    spaceAfter: ''
   }
   finalizeCurrentToken(status, token)
 }
@@ -298,7 +323,7 @@ export const initNewContent = (
   status: ParseStatus,
   index: number,
   char: string,
-  type: CharType
+  type: ContentType
 ) => {
   status.lastToken = {
     type,
@@ -386,4 +411,69 @@ export const isShorthand = (
     }
   }
   return false
+}
+
+export const getHyperContentType = (content: string): SingleTokenType => {
+  if (content.match(/\n/)) {
+    // Usually it's hexo custom containers.
+    return SingleTokenType.HYPER_UNEXPECTED
+  }
+  if (content.match(/^<code.*>.*<\/code.*>$/)) {
+    // Usually it's <code>...</code>.
+    return SingleTokenType.HYPER_CODE
+  }
+  if (content.match(/^<.+>$/)) {
+    // Usually it's other HTML tags.
+    return SingleTokenType.HYPER_UNEXPECTED
+  }
+  // Usually it's `...`.
+  return SingleTokenType.HYPER_CODE
+}
+
+// error handling
+
+const addError = (
+  status: ParseStatus,
+  index: number,
+  message: string
+): void => {
+  status.errors.push({
+    name: '',
+    index,
+    length: 0,
+    message,
+    target: ValidationTarget.CONTENT
+  })
+}
+
+export const handleErrors = (status: ParseStatus): void => {
+  // record an error if the last mark not fully resolved
+  const lastMark = status.lastMark
+  if (lastMark && lastMark.type === MarkType.BRACKETS && !lastMark.endContent) {
+    addError(status, lastMark.startIndex, BRACKET_NOT_CLOSED)
+  }
+
+  // record an error if `markStack` not fully resolved
+  if (status.markStack.length > 0) {
+    status.markStack.forEach((mark) => {
+      if (mark !== lastMark) {
+        addError(status, mark.startIndex, BRACKET_NOT_CLOSED)
+      }
+    })
+  }
+
+  // record an error if the last group not fully resolved
+  const lastGroup = status.lastGroup
+  if (lastGroup && lastGroup.startContent && !lastGroup.endContent) {
+    addError(status, lastGroup.startIndex, QUOTE_NOT_CLOSED)
+  }
+
+  // record an error if `groupStack` not fully resolved
+  if (status.groupStack.length > 0) {
+    status.groupStack.forEach((group) => {
+      if (group !== lastGroup && group.startContent && !group.endContent) {
+        addError(status, group.startIndex, QUOTE_NOT_CLOSED)
+      }
+    })
+  }
 }

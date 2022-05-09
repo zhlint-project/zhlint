@@ -1,3 +1,5 @@
+import { isContentType, isPunctuationType } from '.'
+import { Validation } from '../report'
 import { checkCharType } from './char'
 import {
   CharType,
@@ -7,11 +9,11 @@ import {
   MarkSideType,
   MarkType,
   MutableSingleToken,
-  GroupToken,
   MutableGroupToken,
   MutableToken,
   Token,
-  ParseStatus
+  ParseStatus,
+  ParseResult
 } from './types'
 import {
   appendContent,
@@ -24,14 +26,9 @@ import {
   handleContent,
   handlePunctuation,
   initNewStatus,
-  isShorthand
+  isShorthand,
+  handleErrors
 } from './util'
-
-export type ParseResult = {
-  tokens: GroupToken
-  groups: GroupToken[]
-  marks: Mark[]
-}
 
 /**
  * Parse a string into several tokens.
@@ -109,57 +106,43 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
       // - space after a token
       // - inner space before a group
       finalizeLastToken(status, i)
-      if (!status.lastGroup) {
-        throw new Error(`Unmatched token group at ${i}`)
-      }
-      const spaceLength = getConnectingSpaceLength(str, i)
-      const spaces = str.substring(i, i + spaceLength)
-      if (status.lastGroup.length) {
-        const lastToken = getPreviousToken(status)
-        if (lastToken) {
-          lastToken.spaceAfter = spaces
+      if (status.lastGroup) {
+        const spaceLength = getConnectingSpaceLength(str, i)
+        const spaces = str.substring(i, i + spaceLength)
+        if (status.lastGroup.length) {
+          const lastToken = getPreviousToken(status)
+          if (lastToken) {
+            lastToken.spaceAfter = spaces
+          }
+        } else {
+          status.lastGroup.innerSpaceBefore = spaces
         }
-      } else {
-        status.lastGroup.innerSpaceBefore = spaces
-      }
-      if (spaceLength - 1 > 0) {
-        i += spaceLength - 1
+        if (spaceLength - 1 > 0) {
+          i += spaceLength - 1
+        }
       }
     } else if (isShorthand(str, status, i, char)) {
       appendContent(status, char)
-    } else if (
-      type === CharType.PUNCTUATION_FULL ||
-      type === CharType.PUNCTUATION_HALF
-    ) {
+    } else if (isPunctuationType(type)) {
       handlePunctuation(i, char, type, status)
-    } else if (
-      type === CharType.CONTENT_FULL ||
-      type === CharType.CONTENT_HALF ||
-      type === CharType.UNKNOWN
-    ) {
+    } else if (isContentType(type)) {
       handleContent(i, char, type, status)
+    } else if (type === CharType.EMPTY) {
+      // Nothing
+    } else {
+      handleContent(i, char, CharType.CONTENT_HALF, status)
     }
   }
   finalizeLastToken(status, str.length)
 
-  // throw an error if `markStack` or `groupStack` not fully flushed
-  if (status.markStack.length > 0) {
-    const mark = status.markStack[status.markStack.length - 1]
-    throw new Error(
-      `Unmatched closed bracket ${mark.startContent} at ${mark.startIndex}`
-    )
-  }
-  if (status.groupStack.length > 0) {
-    const group = status.groupStack[status.groupStack.length - 1]
-    throw new Error(
-      `Unmatched closed quote ${group.startContent} at ${group.startIndex}`
-    )
-  }
+  // handle all the unmatched parsing tokens
+  handleErrors(status)
 
   return {
     tokens: status.tokens,
     groups: status.groups,
-    marks: status.marks
+    marks: status.marks,
+    errors: status.errors
   }
 }
 
@@ -167,6 +150,7 @@ export type MutableParseResult = {
   tokens: MutableGroupToken
   groups: MutableGroupToken[]
   marks: MutableMark[]
+  errors: Validation[]
 }
 
 const toMutableToken = (token: Token): MutableToken => {
@@ -199,7 +183,7 @@ const toMutableMark = (mark: Mark): MutableMark => {
 }
 
 export const toMutableResult = (result: ParseResult): MutableParseResult => {
-  result.tokens.forEach(toMutableToken)
+  toMutableToken(result.tokens)
   result.marks.forEach(toMutableMark)
   return result as MutableParseResult
 }

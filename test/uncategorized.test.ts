@@ -1,21 +1,18 @@
 import { describe, test, expect } from 'vitest'
 
 import run, { Options } from '../src/run'
+import { options } from './prepare'
 
-const lint = (...args) => run(...(args as [string, Options])).result
+const getOutput = (...args: [string, Options?]) => run(...args).result
 
-describe('uncategorized cases', () => {
+describe('lint by issues', () => {
   // https://github.com/Jinjiang/zhlint/issues/11
   test('#11: hyphen between number', () => {
-    expect(lint('1-1')).toBe('1 - 1')
+    expect(getOutput('1-1', options)).toBe('1-1')
   })
-  // https://github.com/Jinjiang/zhlint/issues/23
-  test('#23: two dots only', () => {
-    expect(lint('..')).toBe(
-      '..'
-    )
-  })
-  test('VitePress tags', () => {
+
+  // https://github.com/Jinjiang/zhlint/issues/13
+  test('#13 VitePress tags', () => {
     const text = `![Chrome 开发者工具正在通过标签展示无障碍访问的 input 框的名字](./images/AccessibleLabelChromeDevTools.png)
 
 :::warning 警告：
@@ -33,6 +30,22 @@ describe('uncategorized cases', () => {
 
 #### \`aria-label\` {#aria-label}
 `
-    expect(lint(text)).toBe(text)
+    expect(getOutput(text, options)).toBe(text)
+  })
+
+  // https://github.com/Jinjiang/zhlint/issues/23
+  test('#23: two dots only', () => {
+    expect(getOutput('..', options)).toBe('..')
+  })
+
+  // https://github.com/Jinjiang/zhlint/issues/35
+  test('#35 parse error', () => {
+    expect(getOutput('x‘x’x', options)).toBe('x‘x’x')
+  })
+
+  // https://github.com/Jinjiang/zhlint/issues/36
+  test('#36 spaces around marks', () => {
+    expect(getOutput('a* 啊 *', options)).toBe('a *啊*')
+    expect(getOutput('a * 啊 *', options)).toBe('a *啊*')
   })
 })

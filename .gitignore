@@ -64,8 +64,10 @@ typings/
 # personal plan
 todo
 
+# temp files
 .DS_Store
-
 temp
 
+# generated files
 dist
+lib

@@ -1,32 +1,84 @@
-import { ValidationTarget } from '../report'
+/**
+ * @fileoverview
+ *
+ * This rule is used to revert changes of HTML entities.
+ * 
+ * Details:
+ * - to match `&<half-width-content>;`
+ */
+
 import {
   CharType,
   Handler,
-  MutableGroupToken as GroupToken,
-  MutableToken as Token
+  MutableGroupToken,
+  MutableToken
 } from '../parser'
-import { findTokenBefore, removeValidation } from './util'
+import { ValidationTarget } from '../report'
+import {
+  findMarkSeqBetween,
+  findNonHyperVisibleTokenAfter,
+  findTokenAfter,
+  Options,
+  removeValidationOnTarget,
+} from './util'
 
-const caseHtmlEntityHandler: Handler = (token: Token, _, group: GroupToken) => {
-  if (token.content === ';') {
-    const tokenBefore = findTokenBefore(group, token)
+const generateHandler = (options: Options): Handler => {
+  options
+
+  return (token: MutableToken, _: number, group: MutableGroupToken) => {
+    // skip non-& tokens
+    if (token.content !== '&') {
+      return
+    }
+
+    // skip non-half-width-content tokens
+    const tokenAfter = findTokenAfter(group, token)
     if (
-      tokenBefore &&
-      tokenBefore.type === CharType.CONTENT_HALF &&
-      !tokenBefore.spaceAfter
+      !tokenAfter ||
+      tokenAfter.type !== CharType.CONTENT_HALF ||
+      token.spaceAfter
     ) {
-      const tokenBeforeBefore = findTokenBefore(group, tokenBefore)
-      if (
-        tokenBeforeBefore &&
-        tokenBeforeBefore.content === '&' &&
-        !tokenBeforeBefore.spaceAfter
-      ) {
-        removeValidation(token, 'unify-punctuation', ValidationTarget.CONTENT)
-        token.modifiedContent = ';'
-        token.modifiedSpaceAfter = token.spaceAfter
+      return
+    }
+
+    // skip non-semicolon tokens
+    const thirdToken = findTokenAfter(group, tokenAfter)
+    if (!thirdToken || thirdToken.content !== ';' || tokenAfter.spaceAfter) {
+      return
+    }
+
+    // revert &
+    token.modifiedContent = token.content
+    token.modifiedType = token.type
+    token.modifiedSpaceAfter = token.spaceAfter
+    removeValidationOnTarget(token, ValidationTarget.CONTENT)
+    removeValidationOnTarget(token, ValidationTarget.SPACE_AFTER)
+
+    // revert half-width content
+    tokenAfter.modifiedContent = tokenAfter.content
+    tokenAfter.modifiedType = tokenAfter.type
+    tokenAfter.modifiedSpaceAfter = tokenAfter.spaceAfter
+    removeValidationOnTarget(tokenAfter, ValidationTarget.CONTENT)
+    removeValidationOnTarget(tokenAfter, ValidationTarget.SPACE_AFTER)
+
+    // revert ;
+    thirdToken.modifiedContent = thirdToken.content
+    thirdToken.modifiedType = thirdToken.type
+    removeValidationOnTarget(thirdToken, ValidationTarget.CONTENT)
+    removeValidationOnTarget(thirdToken, ValidationTarget.SPACE_AFTER)
+
+    const nextToken = findNonHyperVisibleTokenAfter(group, thirdToken)
+    if (nextToken) {
+      const { spaceHost } = findMarkSeqBetween(group, thirdToken, nextToken)
+      if (spaceHost) {
+        spaceHost.modifiedSpaceAfter = spaceHost.spaceAfter
+        removeValidationOnTarget(spaceHost, ValidationTarget.SPACE_AFTER)
       }
     }
   }
 }
 
-export default caseHtmlEntityHandler
+export const defaultConfig: Options = {
+}
+
+export default generateHandler

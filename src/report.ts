@@ -7,8 +7,8 @@ export const env: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultLogger: Console
 } = {
-  stdout: process.stdout,
-  stderr: process.stderr,
+  stdout: global?.process?.stdout,
+  stderr: global?.process?.stderr,
   defaultLogger: console
 }
 
@@ -47,6 +47,8 @@ const getPositionByOffset = (str: string, offset: number): Position => {
   return position
 }
 
+// TODO: move validation types to a more general place
+
 export enum ValidationTarget {
   CONTENT = 'content',
   START_CONTENT = 'startContent',
@@ -69,13 +71,24 @@ const generateMarker = (str: string, index: number): string => {
   let halfWidthCount = 0
   for (let i = 0; i < prefix.length; i++) {
     const charType = checkCharType(prefix[i])
-    if (charType === CharType.CONTENT_FULL || charType === CharType.PUNCTUATION_FULL) {
+    if (
+      charType === CharType.CONTENT_FULL ||
+      charType === CharType.PUNCTUATION_FULL
+    ) {
       fullWidthCount++
-    } else if (charType === CharType.CONTENT_HALF || charType === CharType.PUNCTUATION_HALF || charType === CharType.SPACE) {
+    } else if (
+      charType === CharType.CONTENT_HALF ||
+      charType === CharType.PUNCTUATION_HALF ||
+      charType === CharType.SPACE
+    ) {
       halfWidthCount++
     }
   }
-  return ' '.repeat(halfWidthCount) + '　'.repeat(fullWidthCount) + `${chalk.red('^')}`
+  return (
+    ' '.repeat(halfWidthCount) +
+    '　'.repeat(fullWidthCount) +
+    `${chalk.red('^')}`
+  )
 }
 
 export const reportItem = (
@@ -145,9 +158,11 @@ export const report = (resultList: Result[], logger = env.defaultLogger) => {
       }
     })
   if (errorCount) {
-    logger.error('Invalid files:')
-    logger.error('- ' + invalidFiles.join('\n- ') + '\n')
-    logger.error(`Found ${errorCount} ${errorCount > 1 ? 'errors' : 'error'}.`)
+    const errors: string[] = []
+    errors.push('Invalid files:')
+    errors.push('- ' + invalidFiles.join('\n- ') + '\n')
+    errors.push(`Found ${errorCount} ${errorCount > 1 ? 'errors' : 'error'}.`)
+    logger.error(errors.join('\n'))
     return 1
   } else {
     logger.log(`No error found.`)
