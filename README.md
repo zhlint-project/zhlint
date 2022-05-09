@@ -12,6 +12,9 @@ npm install zhlint -g
 
 # or through yarn
 yarn global add zhlint
+
+# or through pnpm
+pnpm add zhlint -g
 ```
 
 ## Usage
@@ -43,7 +46,8 @@ The validation report might look like this:
 const { run, report } = require('zhlint')
 
 const value = '自动在中文和English之间加入空格'
-const output = run(value)
+const options = { rules: { preset: 'default' }}
+const output = run(value, options)
 
 // print '自动在中文和 English 之间加入空格''
 console.log(output.result)
@@ -55,14 +59,15 @@ report([output])
 And the format of validation report is more like this:
 
 ```bash
-1:6 - There should be a space between a half-width content and a full-width content
+1:6 - 此处中英文内容之间需要一个空格
 
 自动在中文和English之间加入空格
-           ^
-1:13 - There should be a space between a half-width content and a full-width content
+　　　　　　^
+
+1:13 - 此处中英文内容之间需要一个空格
 
 自动在中文和English之间加入空格
-                  ^
+       　　　　　　^
 Invalid files:
 - foo.md
 
@@ -75,12 +80,12 @@ You could find a JavaScript file `dist/zhlint.js` as a standalone version. To us
 
 ![](./docs/screenshot-browser.png)
 
-#### API
+## API
 
 - `run(str: string, options?: Options): Result`: Lint a certain file.
   - parameters:
     - `str`: The text content you want to lint.
-    - `options`: Some options for advanced usage.
+    - `options`: Some options to config.
   - returns:
     - The result of a single piece of input string. It contains fixed text content as `value` and the infor of all `validations`.
 - `report(results: Result[], logger?: Console): void`: Print out the validation reports for each file.
@@ -88,26 +93,54 @@ You could find a JavaScript file `dist/zhlint.js` as a standalone version. To us
     - `results`: An array for all linted results.
     - `logger`: The logger instance, by default it's `console` in Node.js/browser.
 
-#### Other type defs and advanced usage
+### Options
 
-- `Result`: `{ file?: string, origin: string, result: string, validations: Validation[] }`
+Customize your own linting config and other advanced options.
+
+```ts
+type Options = {
+  rules?: RuleOptions
+  hyperParse?: string[]
+  ignoredCases?: IgnoredCase[]
+  logger?: Console
+}
+```
+
+- `rules`: customize the linting config. It could be `undefined` which means linting nothing. It could be `{ preset: 'default' }` which just uses the default config. For more details of `RuleOptions`, please see [supported rules](#supported-rules)
+- `hyperParse`: customize the hyper parser by their names. It could be `undefined` which means just use default [ignored cases parser](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/ignore.js), [Markdown parser](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/md.js) and the [Hexo tags parser](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/hexo.js).
+- `ignoredCases`: provide exception cases which you would like to skip.
+  - `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
+    - Just follows a certain format inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
+- `logger`: same to the parameter in `report(...)`.
+
+### Output
+
+```ts
+type Result = {
+  file?: string
+  origin: string
+  result: string
+  validations: Validation[]
+}
+
+type Validation = {
+  index: number
+  length: number
+  message: string
+}
+```
+
+- `Result`
   - `file`: The file name. It's an optional field which is only used in CLI.
   - `origin`: the original text content.
   - `result`: the finally fixed text content.
   - `validations`: All the validation information.
-- `Validation`: `{ index: number, length: number, name: string, target: string, message: string }`
+- `Validation`
   - `index`: The index of the target token in the input string.
   - `length`: The length of the target token in the input string.
-    <!-- - `name`: The name of the rule that the token disobeys to. -->
-    <!-- - `target`: The target part of the target token, like the `content` or the `spaceAfter` that, etc. -->
+  <!-- - `name`: The name of the rule that the token disobeys to. -->
+  <!-- - `target`: The target part of the target token, like the `content` or the `spaceAfter` that, etc. -->
   - `message`: The description of this validation in natural language.
-- `Options`: `{ rules?: string[], hyperParse?: string[], ignoredCases?: IgnoredCase[], logger?: Console }`: Customize your own rules and other advanced options.
-  - `rules`: customize the linting rules by their names, could be `undefined` which means just use the default [rules](https://github.com/Jinjiang/zhlint/tree/master/src/rules).
-  - `hyperParse`: customize the hyper parser by their names, could be `undefined` which means just use default [ignored cases parser](https://github.com/Jinjiang/zhlint/tree/master/src/parsers/ignore.js), [Markdown parser](https://github.com/Jinjiang/zhlint/tree/master/src/parsers/md.js) and the [Hexo tags parser](https://github.com/Jinjiang/zhlint/tree/master/src/parsers/hexo.js).
-  - `ignoredCases`: provide exception cases which you would like to skip.
-  - `logger`: same to the parameter in `report(...)`.
-- `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
-  - Just follows a certain format inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
 
 ## Features
 
@@ -166,34 +199,147 @@ _Almost the rules come from the past translation experiences in [W3C HTML Chines
 
 _... and this part might be controversial. So if you don't feel well at some point, we definitely would love to know and improve. Opening an [issue](https://github.com/jinjiang/zhlint/issues) is always welcome. Then we could discuss about the possible better option or decision._
 
-- `mark-raw`: keep one space out of the inline code in markdown
-  - `` text`text`text `` -> `` text `text` text ``
-- `mark-hyper`: move the space outside of the markdown marks
-  - `text[ text ](link)text` -> `text [text](link) text`
-- `unify-punctuation`: unify all punctuations with same meaning, as part of the translation conventions, the punctuation should be full-width except brackets.
-  - `中文, 中文.` -> `中文，中文。`
-- `case-abbr`: escape cases with half-width dots like `Mr.`, `e.g.`.
-  - `Mr.` -> `Mr.`
-- `space-full-width-content`: keep one space between half-width content and full-width content
-  - `中文English中文` -> `中文 English 中文`
-- `space-punctuation`: keep no space between full-width punctuation and the content besides, keep one space between half-width punctuation and the content besides
-  - `中文 ， 中文` -> `中文，中文`
-- `case-math-exp`: overwrite cases with math expressions
-  - `1+1=2` -> `1 + 1 = 2`
-- `case-backslash`: deal with the backslash specially to avoid unpredictable result
-  - `这实质上和问题 \#1 是相同的`
-- `space-brackets`: keep one space outside and no space inside a pair of brackets when it's half-width, keep no space inside or outside when it's full-width
-- `space-quotes`: keep one space outside and no space inside a pair of brackets when it's half-width, keep no space inside or outside when it's full-width
-- `case-traditional`: unify all quotes, as part of the translation conventions.
-  - `a「b」c` -> `a“b”c`
-- `case-datetime`: deal with the date & time specially to avoid unpredictable result
-  - `2020/01/02 01:20:30`
-- `case-datetime-zh`: deal with the Chinese date & time format specially to avoid unpredictable result
-  - `中文2020年1月1日0天0号0时0分00秒`
-- `case-ellipsis`: deal with the continuous dots as ellipsis specially to avoid unpredictable result
-  - `中文...中文...a...b...中文...中文...a...b...`
-- `case-html-entity`: deal with the HTML entities specially to avoid unpredicutable result
-  - `中文&lt; &amp; &gt;中文`
-- `case-raw`: deal with the inline code in markdown specially to avoid unpredictable result
-  - `` `Vue.nextTick`/`vm.$nextTick` ``
-- `case-linebreak`: deal with the linebreak (2 spaces at the end of a line) in markdown specially to avoid unpredictable result
+```ts
+type RuleOptions = {
+  /* PRESET */
+
+  // Custom preset, currently only support:
+  // - `'default'`
+  preset?: string
+
+  /* PUNCTUATIONS */
+
+  // Convert these punctuations into half-width.
+  // default preset: `()`
+  // e.g. `（文字）` -> `(文字)`
+  halfWidthPunctuation?: string
+
+  // Convert these punctuations into full-width.
+  // default preset: `，。：；？！“”‘’`
+  // e.g. `文字,文字.` -> `文字，文字。`
+  fullWidthPunctuation?: string
+
+  // Convert traditional Chinese punctuations into simplified ones or vice versa.
+  // default preset: `simplified`
+  // e.g. `「文字」` -> `“文字”`
+  unifiedPunctuation?: 'traditional' | 'simplified'
+
+  // Special case: skip `fullWidthPunctuation` for abbreviations.
+  // default preset:
+  // `['Mr.','Mrs.','Dr.','Jr.','Sr.','vs.','etc.','i.e.','e.g.','a.k.a']`
+  skipAbbrs?: string[]
+
+  /* SPACES AROUND CONTENT */
+
+  // default preset: `true`
+  // - `true`: one space
+  // - `undefined`: do nothing
+  // e.g. `foo  bar` -> `foo bar`
+  spaceBetweenHalfWidthContent?: boolean
+
+  // default preset: `true`
+  // - `true`: zero space
+  // - `undefined`: do nothing
+  // e.g. `文 字` -> `文字`
+  noSpaceBetweenFullWidthContent?: boolean
+
+  // default preset: `true`
+  // - `true`: one space
+  // - `false`: zero space
+  // - `undefined`: do nothing
+  // e.g. `文字 foo文字` -> `文字 foo 文字` (`true`)
+  // e.g. `文字foo 文字` -> `文字foo文字` (`false`)
+  spaceBetweenMixedWidthContent?: boolean
+
+  // Special case: skip `spaceBetweenMixedWidthContent`
+  // for numbers x Chinese units.
+  // default preset: `年月日天号时分秒`
+  skipZhUnits?: string
+
+  /* SPACES AROUND PUNCTUATIONS */
+
+  // default preset: `true`
+  // - `true`: zero space
+  // - `undefined`: do nothing
+  // e.g. `文字 ，文字` -> `文字，文字`
+  noSpaceBeforePunctuation?: boolean
+
+  // default preset: `true`
+  // - `true`: one space
+  // - `false`: zero space
+  // - `undefined`: do nothing
+  // e.g. `文字,文字` -> `文字, 文字` (`true`)
+  // e.g. `文字, 文字` -> `文字,文字` (`false`)
+  spaceAfterHalfWidthPunctuation?: boolean
+
+  // default preset: `true`
+  // - `true`: zero space
+  // - `undefined`: do nothing
+  // e.g. `文字， 文字` -> `文字，文字`
+  noSpaceAfterFullWidthPunctuation?: boolean
+
+  /* SPACES AROUND QUOTES */
+
+  // default preset: `true`
+  // - `true`: one space
+  // - `false`: zero space
+  // - `undefined`: do nothing
+  // e.g. `文字 "文字"文字` -> `文字 "文字" 文字` (`true`)
+  // e.g. `文字"文字" 文字` -> `文字"文字"文字` (`false`)
+  spaceOutsideHalfQuote?: boolean
+
+  // default preset: `true`
+  // - `true`: zero space
+  // - `undefined`: do nothing
+  // e.g. `文字 “文字” 文字` -> `文字“文字”文字`
+  noSpaceOutsideFullQuote?: boolean
+
+  // default preset: `true`
+  // - `true`: zero space
+  // - `undefined`: do nothing
+  // e.g. `文字“ 文字 ”文字` -> `文字“文字”文字`
+  noSpaceInsideQuote?: boolean
+
+  /* SPACES AROUND BRACKETS */
+
+  // default preset: `true`
+  // - `true`: one space
+  // - `false`: zero space
+  // - `undefined`: do nothing
+  spaceOutsideHalfBracket?: boolean
+
+  // default preset: `true`
+  // - `true`: zero space
+  // - `undefined`: do nothing
+  noSpaceOutsideFullBracket?: boolean
+
+  // default preset: `true`
+  // - `true`: zero space
+  // - `undefined`: do nothing
+  noSpaceInsideBracket?: boolean
+
+  /* SPACES AROUND CODE */
+
+  // default preset: `true`
+  // - `true`: one space
+  // - `false`: zero space
+  // - `undefined`: do nothing
+  // e.g. '文字 `code`文字' -> '文字 `code` 文字' ('true')
+  // e.g. '文字`code` 文字' -> '文字`code`文字' ('false')
+  spaceOutsideCode?: boolean
+
+  /* SPACES AROUND MARKDOWN/HTML TAGS */
+
+  // default `true`
+  // - `true`: zero space
+  // - `undefined`: do nothing
+  // e.g. `文字** foo **文字` -> `文字 **foo** 文字`
+  noSpaceInsideMark?: boolean
+
+  /* SPACES AT THE BEGINNING/END */
+
+  // default `true`
+  // e.g. ` 文字 ` -> `文字`
+  trimSpace?: boolean
+}
+```
