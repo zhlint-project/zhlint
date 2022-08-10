@@ -58,3 +58,30 @@ describe('lint by issues', () => {
     expect(getOutput('1) 项目符号', options)).toBe('1) 项目符号')
   })
 })
+
+describe('lint from v3.cn.vuejs.org', () => {
+  test('#63 computed()', () => {
+    expect(getOutput('computed()', options)).toBe('computed()')
+  })
+  test('spaces around ()', () => {
+    expect(getOutput('key（string 或者 Symbol）', options)).toBe('key (string 或者 Symbol)')
+  })
+  test('spaces around **', () => {
+    expect(getOutput('**prop 以原始的形式传入，但还需作转换。** 在这种情况中', options)).toBe('**prop 以原始的形式传入，但还需作转换。** 在这种情况中')
+  })
+  test('spaces around {}', () => {
+    expect(getOutput('## 什么是 Vue？ {#what-is-vue}', options)).toBe('## 什么是 Vue？ {#what-is-vue}')
+  })
+  test('spaces around () and “”', () => {
+    expect(getOutput('将静态的 HTML “激活” (hydrate) 为', options)).toBe('将静态的 HTML “激活” (hydrate) 为')
+  })
+  test('spaces around `` and 、', () => {
+    expect(getOutput('`attrs` 、 `emit` 和 `slots`', options)).toBe('`attrs`、`emit` 和 `slots`')
+  })
+  test('spaces around [``] and 、', () => {
+    expect(getOutput('实例的 [`$attrs`](/api/component-instance.html#attrs)、 [`$emit`](/api/component-instance.html#emit)', options)).toBe('实例的 [`$attrs`](/api/component-instance.html#attrs)、[`$emit`](/api/component-instance.html#emit)')
+  })
+  test('spaces around [``] and （）', () => {
+    expect(getOutput('应用级的 [`app.config.errorHandler`](/api/application.html#app-config-errorhandler)（前提是这个函数已经定义），', options)).toBe('应用级的 [`app.config.errorHandler`](/api/application.html#app-config-errorhandler) (前提是这个函数已经定义)，')
+  })
+})
