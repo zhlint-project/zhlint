@@ -1,7 +1,7 @@
 /**
  * @fileoverview
  *
- * This rule is triming spaces of the whole string
+ * This rule is triming spaces of the whole string.
  *
  * Options
  * - trimSpace: boolean | undefined
