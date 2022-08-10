@@ -48,4 +48,13 @@ describe('lint by issues', () => {
     expect(getOutput('a* 啊 *', options)).toBe('a *啊*')
     expect(getOutput('a * 啊 *', options)).toBe('a *啊*')
   })
+
+  // https://github.com/Jinjiang/zhlint/issues/18
+  test('#18 unmatched brackets', () => {
+    // still have warnings but the parser won't be crashed anymore
+    // console.log(run('中文 ;-)', options))
+    // console.log(run('1) 项目符号', options))
+    expect(getOutput('中文 ;-)', options)).toBe('中文 ;-)')
+    expect(getOutput('1) 项目符号', options)).toBe('1) 项目符号')
+  })
 })
