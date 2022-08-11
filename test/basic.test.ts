@@ -12,7 +12,6 @@ import {
   travel
 } from '../src/parser'
 import join from '../src/join'
-import processRule from '../src/process-rule'
 import findIgnoredMarks from '../src/ignore'
 
 const purify = (arr) =>
@@ -629,104 +628,24 @@ describe('travel', () => {
     const records: any[] = []
     travel(
       tokens,
-      () => true,
-      (token, index, tokens, result) =>
-        records.push({ token, index, tokens, result })
+      (token, index, tokens) =>
+        records.push({ token, index, tokens })
     )
     expect(clone(records)).toEqual([
       {
         token: expectedTokens[0],
         tokens: expectedTokens,
-        index: 0,
-        result: true
+        index: 0
       },
       {
         token: expectedTokens[1],
         tokens: expectedTokens,
-        index: 1,
-        result: true
+        index: 1
       },
       {
         token: expectedTokens[2],
         tokens: expectedTokens,
-        index: 2,
-        result: true
-      }
-    ])
-  })
-  test('filter by type', () => {
-    const { tokens } = parse('遵守JavaScript编码规范非常重要')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const records: any[] = []
-    travel(
-      tokens,
-      { type: CharType.CONTENT_HALF },
-      (token, index, tokens, result) =>
-        records.push({ token, index, tokens, result })
-    )
-    expect(clone(records)).toEqual([
-      {
-        token: expectedTokens[1],
-        tokens: expectedTokens,
-        index: 1,
-        result: true
-      }
-    ])
-  })
-  test('filter by string match', () => {
-    const { tokens } = parse('遵守JavaScript编码规范非常重要')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const records: any[] = []
-    travel(tokens, '规范', (token, index, tokens, result) =>
-      records.push({ token, index, tokens, result })
-    )
-    expect(clone(records)).toEqual([
-      {
-        token: expectedTokens[2],
-        tokens: expectedTokens,
-        index: 2,
-        result: ['规范']
-      }
-    ])
-  })
-  test('filter by regexp match', () => {
-    const { tokens } = parse('遵守JavaScript编码规范非常重要')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const records: any[] = []
-    travel(tokens, /[a-z]{3}/, (token, index, tokens, result) =>
-      records.push({ token, index, tokens, result })
-    )
-    expect(clone(records)).toEqual([
-      {
-        token: expectedTokens[1],
-        tokens: expectedTokens,
-        index: 1,
-        result: ['ava']
-      }
-    ])
-  })
-  test('filter by function', () => {
-    const { tokens } = parse('遵守JavaScript编码规范非常重要')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const records: any[] = []
-    travel(
-      tokens,
-      (_, index) => !!index,
-      (token, index, tokens, result) =>
-        records.push({ token, index, tokens, result })
-    )
-    expect(clone(records)).toEqual([
-      {
-        token: expectedTokens[1],
-        tokens: expectedTokens,
-        index: 1,
-        result: true
-      },
-      {
-        token: expectedTokens[2],
-        tokens: expectedTokens,
-        index: 2,
-        result: true
+        index: 2
       }
     ])
   })
@@ -758,16 +677,15 @@ describe('join', () => {
 describe('process rules', () => {
   test('replace half-width brackets into full-width', () => {
     const data = toMutableResult(parse(`关注(watch)你关心的仓库。`))
-    processRule(data, {
-      filter: { type: SingleTokenType.MARK_BRACKETS },
-      handler: (token: MutableToken) => {
+    travel(data.tokens,
+      (token: MutableToken) => {
         token.modifiedContent =
           {
             '(': '（',
             ')': '）'
           }[token.content] || token.content
       }
-    })
+    )
     expect(join(data.tokens)).toBe(`关注（watch）你关心的仓库。`)
   })
 })

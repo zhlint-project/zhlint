@@ -4,8 +4,7 @@ import { IgnoredCase, IgnoredMark } from './ignore'
 import { Options as RuleOptions } from './rules/util'
 
 import replaceBlocks from './replace-block'
-import { parse, toMutableResult } from './parser'
-import processRule from './process-rule'
+import { parse, toMutableResult, travel } from './parser'
 import join from './join'
 import findIgnoredMarks from './ignore'
 import { env } from './report'
@@ -135,7 +134,7 @@ const run = (str: string, options: Options = {}): Result => {
       const ignoredMarks = findIgnoredMarks(value, status.ignoredByRules, logger)
 
       rules.forEach((rule) => {
-        processRule(result, rule)
+        travel(result.tokens, rule)
         if (global.__DEV__) {
           const currentValue = join(result.tokens, ignoredMarks, [], start)
           if (lastValue !== currentValue) {

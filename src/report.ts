@@ -47,8 +47,6 @@ const getPositionByOffset = (str: string, offset: number): Position => {
   return position
 }
 
-// TODO: move validation types to a more general place
-
 export enum ValidationTarget {
   CONTENT = 'content',
   START_CONTENT = 'startContent',
@@ -58,11 +56,16 @@ export enum ValidationTarget {
 }
 
 export type Validation = {
+  // the type and content of message
   name: string
-  target: ValidationTarget
+  message: string
+
+  // position of the token
   index: number
   length: number
-  message: string
+
+  // which part of the token the error comes from
+  target: ValidationTarget
 }
 
 const generateMarker = (str: string, index: number): string => {
@@ -129,11 +132,17 @@ export const reportItem = (
 }
 
 export type Result = {
+  // the basic info and availability of the file
   file?: string
   disabled: boolean
+
+  // the original content of the file
   origin: string
+
+  // all the error messages
   validations: Validation[]
 }
+
 
 export const report = (resultList: Result[], logger = env.defaultLogger) => {
   let errorCount = 0
