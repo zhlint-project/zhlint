@@ -125,28 +125,11 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // 1. normal punctuations in the alter width map
-    if (isPunctuationType(token.type)) {
-      const content = token.modifiedContent
-      if (fullWidthMap[content]) {
-        checkContent(
-          token,
-          fullWidthMap[content],
-          CharType.PUNCTUATION_FULL,
-          PUNCTUATION_FULL_WIDTH
-        )
-      } else if (halfWidthMap[content]) {
-        checkContent(
-          token,
-          halfWidthMap[content],
-          CharType.PUNCTUATION_HALF,
-          PUNCTUATION_HALF_WIDTH
-        )
-      }
-      return
-    }
-
     // 2. brackets in the alter width map
-    if (token.type === SingleTokenType.MARK_BRACKETS) {
+    if (
+      isPunctuationType(token.type) ||
+      token.type === SingleTokenType.MARK_BRACKETS
+    ) {
       const content = token.modifiedContent
       if (fullWidthMap[content]) {
         checkContent(
