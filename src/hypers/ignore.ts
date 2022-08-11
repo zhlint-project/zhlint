@@ -1,5 +1,5 @@
 import { IgnoredCase } from '../ignore'
-import { Data } from './types'
+import { ParsedStatus } from './types'
 
 const ignoredCaseMatcher =
   /^(?:(?<prefix>.+?)-,)?(?<textStart>.+?)(?:,(?<textEnd>.+?))?(?:,-(?<suffix>.+?))?$/
@@ -18,7 +18,7 @@ const parseIngoredCase = (text: string): IgnoredCase | undefined => {
   }
 }
 
-const parser = (data: Data): Data => {
+const parser = (data: ParsedStatus): ParsedStatus => {
   const { ignoredByRules, content: raw } = data
   const matcher = /<!--\s*zhlint\s*ignore:\s*(.+?)\s*-->/g
   let result: RegExpExecArray | null

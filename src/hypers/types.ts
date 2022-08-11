@@ -16,7 +16,7 @@ export type Block = {
   end: number
 }
 
-export type Data = {
+export type ParsedStatus = {
   content: string
   modifiedContent: string
   ignoredByRules: IgnoredCase[]

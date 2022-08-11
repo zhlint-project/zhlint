@@ -1,4 +1,4 @@
-import { Data } from './types'
+import { ParsedStatus } from './types'
 
 // TODO: ::: tips 提示...
 //
@@ -10,7 +10,7 @@ import { Data } from './types'
 // - `(:::)` + `(?=\n|$)`
 const matcher = /(?<=^|\n)(:::.*)\n([\s\S]+?)\n(:::)(?=\n|$)/g
 
-const parser = (data: Data): Data => {
+const parser = (data: ParsedStatus): ParsedStatus => {
   data.modifiedContent = data.modifiedContent.replace(
     matcher,
     (
