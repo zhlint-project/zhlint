@@ -45,6 +45,7 @@ We can parse a piece of _plain text content_ into structured tokens:
 **Parsing options**
 
 - `noSinglePair: true | undefined = true`: with this option on, the parser will report if there is any unpaired quotes or brackets.
+- Additionally, there is no option for that, however, for a better analysis further, the parser will treat single quotes as a letter when it's between English letters without spaces (_as a shorthand_) e.g. `what's up`.
 
 **Simplified token types**
 
@@ -55,14 +56,14 @@ To simplify the structure, _we remove spaces from token types_ as a property to 
 
 So eventually, token have these types:
 
-- `LETTERS_HALF`* (content-half)
-- `LETTERS_FULL`* (content-full)
+- `LETTERS_HALF`
+- `LETTERS_FULL`
 - `PUNCTUATION_HALF`
 - `PUNCTUATION_FULL`
-- `HYPER_WRAPPER`* (mark-hyper)
-- `HYPER_WRAPPER_BRACKET`* (mark-bracket)
-- `HYPER_CONTENT`* (hyper unexpected)
-- `HYPER_CONTENT_CODE`* (hyper code)
+- `HYPER_WRAPPER`
+- `HYPER_WRAPPER_BRACKET`
+- `HYPER_CONTENT`
+- `HYPER_CONTENT_CODE`
 - `GROUP`
 - `UNMATCHED`
 - `UNKNOWN`

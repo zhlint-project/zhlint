@@ -32,7 +32,7 @@
 import {
   CharType,
   Handler,
-  isContentType,
+  isLettersType,
   MutableGroupToken,
   MutableToken
 } from '../parser'
@@ -58,13 +58,13 @@ const generateHandler = (options: Options): Handler => {
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-content tokens
-    if (!isContentType(token.type)) {
+    if (!isLettersType(token.type)) {
       return
     }
 
     // skip non-content after-tokens
     const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
-    if (!contentTokenAfter || !isContentType(contentTokenAfter.type)) {
+    if (!contentTokenAfter || !isLettersType(contentTokenAfter.type)) {
       return
     }
 
@@ -84,7 +84,7 @@ const generateHandler = (options: Options): Handler => {
     // 2. half x full, full x half
     if (contentTokenAfter.type === token.type) {
       // skip without custom option
-      if (token.type === CharType.CONTENT_HALF) {
+      if (token.type === CharType.LETTERS_HALF) {
         if (!onlyOneBetweenHalfWidthContentOption) {
           return
         }
@@ -101,9 +101,9 @@ const generateHandler = (options: Options): Handler => {
         }
       }
 
-      const spaceAfter = token.type === CharType.CONTENT_HALF ? ' ' : ''
+      const spaceAfter = token.type === CharType.LETTERS_HALF ? ' ' : ''
       const message =
-        token.type === CharType.CONTENT_HALF
+        token.type === CharType.LETTERS_HALF
           ? CONTENT_SPACE_HALF_WIDTH
           : CONTENT_NOSPACE_FULL_WIDTH
 

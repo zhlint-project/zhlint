@@ -32,12 +32,12 @@ import {
   CharType,
   GroupTokenType,
   Handler,
-  isContentType,
+  isLettersType,
   isPunctuationType,
   MarkSideType,
   MutableGroupToken,
   MutableToken,
-  SingleTokenType
+  HyperTokenType
 } from '../parser'
 import {
   checkSpaceAfter,
@@ -90,14 +90,14 @@ const generateHandler = (options: Options): Handler => {
       if (
         contentTokenBefore &&
         // content
-        (isContentType(contentTokenBefore.type) ||
+        (isLettersType(contentTokenBefore.type) ||
           // right-quote
           contentTokenBefore.type === GroupTokenType.GROUP ||
           // right-bracket
-          (contentTokenBefore.type === SingleTokenType.MARK_BRACKETS &&
+          (contentTokenBefore.type === HyperTokenType.HYPER_WRAPPER_BRACKET &&
             contentTokenBefore.markSide === MarkSideType.RIGHT) ||
           // code
-          contentTokenBefore.type === SingleTokenType.HYPER_CODE)
+          contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
       ) {
         const { spaceHost } = findMarkSeqBetween(
           group,
@@ -128,14 +128,14 @@ const generateHandler = (options: Options): Handler => {
       if (
         contentTokenAfter &&
         // content
-        (isContentType(contentTokenAfter.type) ||
+        (isLettersType(contentTokenAfter.type) ||
           // left-quote
           contentTokenAfter.type === GroupTokenType.GROUP ||
           // left-bracket
-          (contentTokenAfter.type === SingleTokenType.MARK_BRACKETS &&
+          (contentTokenAfter.type === HyperTokenType.HYPER_WRAPPER_BRACKET &&
             contentTokenAfter.markSide === MarkSideType.LEFT) ||
           // code
-          contentTokenAfter.type === SingleTokenType.HYPER_CODE)
+          contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
       ) {
         const { spaceHost } = findMarkSeqBetween(
           group,

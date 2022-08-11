@@ -11,7 +11,7 @@ import {
   SingleTokenType,
   Mark,
   MarkType
-} from '../src/parser/index'
+} from '../src/parser'
 
 export {
   Options,
@@ -27,7 +27,7 @@ export {
   SingleTokenType,
   Mark,
   MarkType,
-  ParsedStatus as Data,
+  ParsedStatus,
   ParserIgnoredCase,
   Block
 }

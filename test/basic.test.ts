@@ -1,15 +1,13 @@
 import { describe, test, expect } from 'vitest'
 
 import {
-  CharType,
   checkCharType,
   Mark,
   MarkType,
   MutableToken,
   parse,
-  SingleTokenType,
+  travel,
   toMutableResult,
-  travel
 } from '../src/parser'
 import join from '../src/join'
 import findIgnoredMarks from '../src/ignore'
@@ -26,7 +24,7 @@ describe('check char type', () => {
     expect(checkCharType(' ')).toBe('space')
   })
   test('digit', () => {
-    expect(checkCharType('0')).toBe('content-half')
+    expect(checkCharType('0')).toBe('letters-half')
   })
   test('latin punctuation', () => {
     expect(checkCharType(',')).toBe('punctuation-half')
@@ -39,23 +37,23 @@ describe('check char type', () => {
     expect(checkCharType('”')).toBe('punctuation-full')
   })
   test('latin', () => {
-    expect(checkCharType('a')).toBe('content-half')
-    expect(checkCharType('C')).toBe('content-half')
-    expect(checkCharType('Ô')).toBe('content-half')
-    expect(checkCharType('Ś')).toBe('content-half')
-    expect(checkCharType('Ʒ')).toBe('content-half')
+    expect(checkCharType('a')).toBe('letters-half')
+    expect(checkCharType('C')).toBe('letters-half')
+    expect(checkCharType('Ô')).toBe('letters-half')
+    expect(checkCharType('Ś')).toBe('letters-half')
+    expect(checkCharType('Ʒ')).toBe('letters-half')
   })
   test('greek', () => {
-    expect(checkCharType('α')).toBe('content-half')
+    expect(checkCharType('α')).toBe('letters-half')
   })
   test('cjk', () => {
-    expect(checkCharType('中')).toBe('content-full')
-    expect(checkCharType('五')).toBe('content-full')
-    expect(checkCharType('䔷')).toBe('content-full')
-    expect(checkCharType('𢙺')).toBe('content-full')
-    expect(checkCharType('𢙽')).toBe('content-full')
-    expect(checkCharType('中')).toBe('content-full')
-    expect(checkCharType('⻍')).toBe('content-full')
+    expect(checkCharType('中')).toBe('letters-full')
+    expect(checkCharType('五')).toBe('letters-full')
+    expect(checkCharType('䔷')).toBe('letters-full')
+    expect(checkCharType('𢙺')).toBe('letters-full')
+    expect(checkCharType('𢙽')).toBe('letters-full')
+    expect(checkCharType('中')).toBe('letters-full')
+    expect(checkCharType('⻍')).toBe('letters-full')
   })
   test('emoji', () => {
     expect(checkCharType('😀')).toBe('unknown')
@@ -67,21 +65,21 @@ describe('parser', () => {
     const { tokens, marks, groups } = parse('遵守JavaScript编码规范非常重要')
     expect(purify(tokens)).toEqual([
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '遵守',
         spaceAfter: '',
         index: 0,
         length: 2
       },
       {
-        type: 'content-half',
+        type: 'letters-half',
         content: 'JavaScript',
         spaceAfter: '',
         index: 2,
         length: 10
       },
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '编码规范非常重要',
         spaceAfter: '',
         index: 12,
@@ -103,14 +101,14 @@ describe('parser', () => {
     expect(marks).toEqual([mark])
     expect(purify(tokens)).toEqual([
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '关注',
         spaceAfter: '',
         index: 0,
         length: 2
       },
       {
-        type: 'mark-brackets',
+        type: 'wrapper-bracket',
         content: '(',
         spaceAfter: '',
         index: 2,
@@ -119,14 +117,14 @@ describe('parser', () => {
         mark
       },
       {
-        type: 'content-half',
+        type: 'letters-half',
         content: 'watch',
         spaceAfter: '',
         index: 3,
         length: 5
       },
       {
-        type: 'mark-brackets',
+        type: 'wrapper-bracket',
         content: ')',
         spaceAfter: '',
         index: 8,
@@ -135,7 +133,7 @@ describe('parser', () => {
         mark
       },
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '你关心的仓库',
         spaceAfter: '',
         index: 9,
@@ -154,7 +152,7 @@ describe('parser', () => {
     const { tokens } = parse('如果你有任何问题，请联系@Vuejs_Events！')
     expect(purify(tokens)).toEqual([
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '如果你有任何问题',
         spaceAfter: '',
         index: 0,
@@ -168,7 +166,7 @@ describe('parser', () => {
         length: 1
       },
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '请联系',
         spaceAfter: '',
         index: 9,
@@ -182,7 +180,7 @@ describe('parser', () => {
         length: 1
       },
       {
-        type: 'content-half',
+        type: 'letters-half',
         content: 'Vuejs_Events',
         spaceAfter: '',
         index: 13,
@@ -201,14 +199,14 @@ describe('parser', () => {
     const { tokens } = parse('每个版本的更新日志见 GitHub 。')
     expect(purify(tokens)).toEqual([
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '每个版本的更新日志见',
         index: 0,
         length: 10,
         spaceAfter: ' '
       },
       {
-        type: 'content-half',
+        type: 'letters-half',
         content: 'GitHub',
         index: 11,
         length: 6,
@@ -237,49 +235,49 @@ describe('parser', () => {
     expect(marks).toEqual([mark])
     expect(purify(tokens)).toEqual([
       {
-        type: 'content-half',
+        type: 'letters-half',
         content: 'Vue',
         index: 0,
         length: 2 - 0 + 1,
         spaceAfter: ' '
       },
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '也可以在',
         index: 4,
         length: 7 - 4 + 1,
         spaceAfter: ' '
       },
       {
-        type: 'content-half',
+        type: 'letters-half',
         content: 'unpkg',
         index: 9,
         length: 13 - 9 + 1,
         spaceAfter: ' '
       },
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '和',
         index: 15,
         length: 15 - 15 + 1,
         spaceAfter: ' '
       },
       {
-        type: 'content-half',
+        type: 'letters-half',
         content: 'cdnjs',
         index: 17,
         length: 21 - 17 + 1,
         spaceAfter: ' '
       },
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '上获取',
         index: 23,
         length: 25 - 23 + 1,
         spaceAfter: ' '
       },
       {
-        type: 'mark-brackets',
+        type: 'wrapper-bracket',
         content: '(',
         index: 27,
         length: 1,
@@ -288,21 +286,21 @@ describe('parser', () => {
         spaceAfter: ' '
       },
       {
-        type: 'content-half',
+        type: 'letters-half',
         content: 'cdnjs',
         index: 29,
         length: 33 - 29 + 1,
         spaceAfter: ' '
       },
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '的版本更新可能略滞后',
         index: 35,
         length: 44 - 35 + 1,
         spaceAfter: ''
       },
       {
-        type: 'mark-brackets',
+        type: 'wrapper-bracket',
         content: ')',
         index: 45,
         length: 1,
@@ -316,7 +314,7 @@ describe('parser', () => {
     const { tokens } = parse('对于制作原型或学习,你可以这样使用最新版本:')
     expect(purify(tokens)).toEqual([
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '对于制作原型或学习',
         index: 0,
         length: 8 - 0 + 1,
@@ -330,7 +328,7 @@ describe('parser', () => {
         spaceAfter: ''
       },
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '你可以这样使用最新版本',
         index: 10,
         length: 20 - 10 + 1,
@@ -351,7 +349,7 @@ describe('parser', () => {
     )
     expect(purify(tokens)).toEqual([
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '该指令的意思是',
         index: 0,
         length: 6 - 0 + 1,
@@ -366,49 +364,49 @@ describe('parser', () => {
       },
       [
         {
-          type: 'content-full',
+          type: 'letters-full',
           content: '将这个元素节点的',
           index: 10 + 1,
           length: 17 - 10 + 1,
           spaceAfter: ' '
         },
         {
-          type: 'content-half',
+          type: 'letters-half',
           content: 'title',
           index: 19 + 1,
           length: 23 - 19 + 1,
           spaceAfter: ' '
         },
         {
-          type: 'content-full',
+          type: 'letters-full',
           content: '特性和',
           index: 25 + 1,
           length: 27 - 25 + 1,
           spaceAfter: ' '
         },
         {
-          type: 'content-half',
+          type: 'letters-half',
           content: 'Vue',
           index: 29 + 1,
           length: 31 - 29 + 1,
           spaceAfter: ' '
         },
         {
-          type: 'content-full',
+          type: 'letters-full',
           content: '实例的',
           index: 33 + 1,
           length: 35 - 33 + 1,
           spaceAfter: ' '
         },
         {
-          type: 'content-half',
+          type: 'letters-half',
           content: 'message',
           index: 37 + 1,
           length: 43 - 37 + 1,
           spaceAfter: ' '
         },
         {
-          type: 'content-full',
+          type: 'letters-full',
           content: '属性保持一致',
           index: 45 + 1,
           length: 50 - 45 + 1,
@@ -446,14 +444,14 @@ describe('parser with hyper marks', () => {
     const { tokens, marks, groups } = parse('X [xxx](xxx) X', [hyperMark])
     expect(purify(tokens)).toEqual([
       {
-        type: 'content-half',
+        type: 'letters-half',
         content: 'X',
         index: 0,
         length: 1,
         spaceAfter: ' '
       },
       {
-        type: 'mark-hyper',
+        type: 'wrapper',
         content: '[',
         index: 2,
         length: 1,
@@ -462,14 +460,14 @@ describe('parser with hyper marks', () => {
         mark: hyperMark
       },
       {
-        type: 'content-half',
+        type: 'letters-half',
         content: 'xxx',
         index: 3,
         length: 3,
         spaceAfter: ''
       },
       {
-        type: 'mark-hyper',
+        type: 'wrapper',
         content: '](xxx)',
         index: 6,
         length: 6,
@@ -478,7 +476,7 @@ describe('parser with hyper marks', () => {
         mark: hyperMark
       },
       {
-        type: 'content-half',
+        type: 'letters-half',
         content: 'X',
         index: 13,
         length: 1,
@@ -501,14 +499,14 @@ describe('parser with hyper marks', () => {
     ])
     expect(purify(tokens)).toEqual([
       {
-        type: 'hyper-code',
+        type: 'hyper-content-code',
         content: '`v-bind:style`',
         index: 0,
         length: 14,
         spaceAfter: ' '
       },
       {
-        type: 'content-full',
+        type: 'letters-full',
         content: '的对象语法',
         index: 15,
         length: 5,
@@ -601,21 +599,21 @@ describe('find ignored marks', () => {
 describe('travel', () => {
   const expectedTokens = [
     {
-      type: 'content-full',
+      type: 'letters-full',
       content: '遵守',
       index: 0,
       length: 1 - 0 + 1,
       spaceAfter: ''
     },
     {
-      type: 'content-half',
+      type: 'letters-half',
       content: 'JavaScript',
       index: 2,
       length: 11 - 2 + 1,
       spaceAfter: ''
     },
     {
-      type: 'content-full',
+      type: 'letters-full',
       content: '编码规范非常重要',
       index: 12,
       length: 19 - 12 + 1,

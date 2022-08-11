@@ -35,7 +35,7 @@ const generateHandler = (options: Options): Handler => {
     const tokenAfter = findTokenAfter(group, token)
     if (
       !tokenAfter ||
-      tokenAfter.type !== CharType.CONTENT_HALF ||
+      tokenAfter.type !== CharType.LETTERS_HALF ||
       token.spaceAfter
     ) {
       return

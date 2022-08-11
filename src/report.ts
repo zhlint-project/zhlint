@@ -75,12 +75,12 @@ const generateMarker = (str: string, index: number): string => {
   for (let i = 0; i < prefix.length; i++) {
     const charType = checkCharType(prefix[i])
     if (
-      charType === CharType.CONTENT_FULL ||
+      charType === CharType.LETTERS_FULL ||
       charType === CharType.PUNCTUATION_FULL
     ) {
       fullWidthCount++
     } else if (
-      charType === CharType.CONTENT_HALF ||
+      charType === CharType.LETTERS_HALF ||
       charType === CharType.PUNCTUATION_HALF ||
       charType === CharType.SPACE
     ) {

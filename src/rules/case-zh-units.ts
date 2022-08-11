@@ -27,13 +27,13 @@ const generateHandler = (options: Options): Handler => {
   const skippedZhUnits = options?.skipZhUnits || ''
   const matcherStr = skippedZhUnits
     .split('')
-    .filter((x) => checkCharType(x) === CharType.CONTENT_FULL)
+    .filter((x) => checkCharType(x) === CharType.LETTERS_FULL)
     .join('')
   const unitMatcher = new RegExp(`^[${matcherStr}]`)
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // make sure the content is a number
-    if (token.type === CharType.CONTENT_HALF && token.content.match(/^\d+$/)) {
+    if (token.type === CharType.LETTERS_HALF && token.content.match(/^\d+$/)) {
       // make sure the content after is a Chinese unit
       const tokenAfter = findNonHyperVisibleTokenAfter(group, token)
       if (tokenAfter && tokenAfter.content.match(unitMatcher)) {

@@ -28,10 +28,10 @@ import {
 } from './util'
 import {
   Handler,
-  isContentType,
+  isLettersType,
   MutableGroupToken,
   MutableToken,
-  SingleTokenType
+  HyperTokenType
 } from '../parser'
 import { CODE_NOSPACE_OUTSIDE, CODE_SPACE_OUTSIDE } from './messages'
 
@@ -50,7 +50,7 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // skip non-code tokens
-    if (token.type !== SingleTokenType.HYPER_CODE) {
+    if (token.type !== HyperTokenType.HYPER_CONTENT_CODE) {
       return
     }
 
@@ -63,14 +63,14 @@ const generateHandler = (options: Options): Handler => {
       findMarkSeqBetween(group, token, contentTokenAfter)
 
     // content x code
-    if (contentTokenBefore && isContentType(contentTokenBefore.type)) {
+    if (contentTokenBefore && isLettersType(contentTokenBefore.type)) {
       beforeSpaceHost && checkSpaceAfter(beforeSpaceHost, spaceAfter, message)
     }
     // code x content or code x code
     if (
       contentTokenAfter &&
-      (isContentType(contentTokenAfter.type) ||
-        contentTokenAfter.type === SingleTokenType.HYPER_CODE)
+      (isLettersType(contentTokenAfter.type) ||
+        contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
     ) {
       afterSpaceHost && checkSpaceAfter(afterSpaceHost, spaceAfter, message)
     }

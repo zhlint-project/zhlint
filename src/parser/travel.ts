@@ -1,8 +1,15 @@
 import {
-  Handler,
   MutableGroupToken,
-  GroupToken
+  GroupToken,
+  MutableToken,
+  Token
 } from './types'
+
+export type Handler = (
+  token: MutableToken | Token,
+  index: number,
+  group: MutableGroupToken | GroupToken
+) => void
 
 export const travel = (
   group: MutableGroupToken | GroupToken,

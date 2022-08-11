@@ -3,8 +3,8 @@ import {
   MarkSideType,
   MutableGroupToken as GroupToken,
   MutableToken as Token,
-  SingleTokenType,
-  isNonHyperVisibleType,
+  HyperTokenType,
+  isNonCodeVisibleType,
   isInvisibleType,
   isVisibleType,
   TokenType,
@@ -119,7 +119,7 @@ export const findNonHyperVisibleTokenBefore = (
     return findNonHyperVisibleTokenBefore(group, beforeToken)
   }
   // content, punctuation, bracket, group: return token
-  if (isNonHyperVisibleType(beforeToken.type)) {
+  if (isNonCodeVisibleType(beforeToken.type)) {
     return beforeToken
   }
   // code, unknown, container: return undefined
@@ -148,7 +148,7 @@ export const findNonHyperVisibleTokenAfter = (
     return findNonHyperVisibleTokenAfter(group, afterToken)
   }
   // content, punctuation, bracket, group: return token
-  if (isNonHyperVisibleType(afterToken.type)) {
+  if (isNonCodeVisibleType(afterToken.type)) {
     return afterToken
   }
   // code, unknown, container: return undefined
@@ -216,7 +216,7 @@ export const findExpectedVisibleTokenAfter = (
 // hyper mark seq
 
 const isHtmlTag = (token: Token): boolean => {
-  if (token.type !== SingleTokenType.HYPER_UNEXPECTED) {
+  if (token.type !== HyperTokenType.HYPER_CONTENT) {
     return false
   }
   return !!token.content.match(/^<.+>$/)
@@ -241,13 +241,13 @@ const getHtmlTagSide = (token: Token): MarkSideType | undefined => {
 }
 
 export const isMarkdownOrHtmlPair = (token: Token): boolean => {
-  return token.type === SingleTokenType.MARK_HYPER || !!getHtmlTagSide(token)
+  return token.type === HyperTokenType.HYPER_WRAPPER || !!getHtmlTagSide(token)
 }
 
 export const getMarkdownOrHtmlSide = (
   token: Token
 ): MarkSideType | undefined => {
-  if (token.type === SingleTokenType.MARK_HYPER) {
+  if (token.type === HyperTokenType.HYPER_WRAPPER) {
     return token.markSide
   }
   return getHtmlTagSide(token)
@@ -393,9 +393,9 @@ export const isHalfWidthPunctuationWithoutSpaceAround = (group: GroupToken, toke
   if (
     token.type === CharType.PUNCTUATION_HALF &&
     tokenBefore &&
-    tokenBefore.type === CharType.CONTENT_HALF &&
+    tokenBefore.type === CharType.LETTERS_HALF &&
     tokenAfter &&
-    tokenAfter.type === CharType.CONTENT_HALF
+    tokenAfter.type === CharType.LETTERS_HALF
   ) {
     return !tokenBefore.spaceAfter && !token.spaceAfter
   }

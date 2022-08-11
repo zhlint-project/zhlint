@@ -26,12 +26,12 @@
 import {
   GroupTokenType,
   Handler,
-  isContentType,
+  isLettersType,
   isFullWidthPair,
   MarkSideType,
   MutableGroupToken,
   MutableToken,
-  SingleTokenType
+  HyperTokenType
 } from '../parser'
 import {
   checkInnerSpaceBefore,
@@ -123,8 +123,8 @@ const generateHandler = (options: Options): Handler => {
       const contentTokenBefore = findNonHyperVisibleTokenBefore(group, token)
       if (
         contentTokenBefore &&
-        (isContentType(contentTokenBefore.type) ||
-          contentTokenBefore.type === SingleTokenType.HYPER_CODE)
+        (isLettersType(contentTokenBefore.type) ||
+          contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
       ) {
         const { spaceHost } = findMarkSeqBetween(
           group,
@@ -155,8 +155,8 @@ const generateHandler = (options: Options): Handler => {
       // 2.3 right-quote x content/punctuation/code
       if (
         contentTokenAfter &&
-        (isContentType(contentTokenAfter.type) ||
-          contentTokenAfter.type === SingleTokenType.HYPER_CODE)
+        (isLettersType(contentTokenAfter.type) ||
+          contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
       ) {
         const { spaceHost } = findMarkSeqBetween(
           group,
