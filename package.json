@@ -58,7 +58,7 @@
     "@types/react": "^17.0.38",
     "@typescript-eslint/eslint-plugin": "^5.9.0",
     "@typescript-eslint/parser": "^5.9.0",
-    "@vitest/ui": "^0.0.139",
+    "@vitest/ui": "^0.21.1",
     "eslint": "^8.6.0",
     "prettier": "^2.5.1",
     "react": "^17.0.2",
