@@ -75,7 +75,8 @@ const run = (str: string, options: Options = {}): Result => {
   // init rules, hyper parsers, rule options, and ignored cases
   const ignoredCases = options.ignoredCases || []
   const preset = options.rules?.preset === 'default' ? defaultRules : {}
-  const rules = generateHandlers({...preset, ...options.rules})
+  const ruleOptions = { ...preset, ...options.rules }
+  const rules = generateHandlers(ruleOptions)
   let hyperParserList: (string | ((data: Data) => Data))[]
   if (typeof options.hyperParse === 'function') {
     hyperParserList = [options.hyperParse]
@@ -126,7 +127,7 @@ const run = (str: string, options: Options = {}): Result => {
         logger.log('[Original block value]')
         logger.log(lastValue)
       }
-      const result = toMutableResult(parse(value, marks))
+      const result = toMutableResult(parse(value, marks), ruleOptions)
       parsingErrors.push(...result.errors)
       const ignoredMarks = findIgnoredMarks(value, data.ignoredByRules, logger)
 

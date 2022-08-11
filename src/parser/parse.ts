@@ -29,6 +29,7 @@ import {
   isShorthand,
   handleErrors
 } from './util'
+import { Options as RuleOptions } from '../rules/util'
 
 /**
  * Parse a string into several tokens.
@@ -182,7 +183,11 @@ const toMutableMark = (mark: Mark): MutableMark => {
   return mutableMark
 }
 
-export const toMutableResult = (result: ParseResult): MutableParseResult => {
+export const toMutableResult = (result: ParseResult, options: RuleOptions = {}): MutableParseResult => {
+  if (!options.noSinglePair) {
+    result.errors.length = 0
+  }
+
   toMutableToken(result.tokens)
   result.marks.forEach(toMutableMark)
   return result as MutableParseResult

@@ -14,6 +14,9 @@ import {
 // options
 
 export type Options = {
+  // parsing
+  noSinglePair?: boolean
+
   // punctuation
   halfWidthPunctuation?: string
   fullWidthPunctuation?: string
