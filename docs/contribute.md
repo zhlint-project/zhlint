@@ -1,6 +1,16 @@
 # Contribution guide
 
-## Commands
+## How to start
+
+(wip)
+
+## Workflow
+
+(wip)
+
+## Project setup
+
+### Commands
 
 Dev and debug
 
@@ -29,7 +39,7 @@ Docs
 - `docs:serve`
 - `docs:deploy`
 
-## Output
+### Output
 
 - Bin: `./bin/index.js` (CJS)
 - Node.js: `./lib/index.js` (CJS)
@@ -40,7 +50,7 @@ Docs
   - `tsconfig.json`
   - `docs/*.{svg,png}`, `README.md`
 
-## File structure
+### File structure
 
 Temp
 
