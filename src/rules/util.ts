@@ -171,9 +171,9 @@ export const findExpectedVisibleTokenBefore = (
   }
   // hyper mark, html pairs: skip
   if (isInvisibleType(beforeToken.type) || getHtmlTagSide(beforeToken)) {
-    return findNonHyperVisibleTokenBefore(group, beforeToken)
+    return findExpectedVisibleTokenBefore(group, beforeToken)
   }
-  // content, punctuation, bracket, group: return token
+  // content, punctuation, bracket, group, code: return token
   if (isVisibleType(beforeToken.type)) {
     return beforeToken
   }
@@ -194,17 +194,17 @@ export const findExpectedVisibleTokenAfter = (
   if (!token) {
     return
   }
-  const beforeAfter = findTokenAfter(group, token)
-  if (!beforeAfter) {
+  const afterToken = findTokenAfter(group, token)
+  if (!afterToken) {
     return
   }
   // hyper mark, html pairs: skip
-  if (isInvisibleType(beforeAfter.type) || getHtmlTagSide(beforeAfter)) {
-    return findNonHyperVisibleTokenAfter(group, beforeAfter)
+  if (isInvisibleType(afterToken.type) || getHtmlTagSide(afterToken)) {
+    return findExpectedVisibleTokenAfter(group, afterToken)
   }
-  // content, punctuation, bracket, group: return token
-  if (isVisibleType(beforeAfter.type)) {
-    return beforeAfter
+  // content, punctuation, bracket, group, code: return token
+  if (isVisibleType(afterToken.type)) {
+    return afterToken
   }
   // unknown, container: return undefined
   return

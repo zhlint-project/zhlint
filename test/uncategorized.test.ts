@@ -83,12 +83,14 @@ describe('lint from v3.cn.vuejs.org', () => {
       '将静态的 HTML“激活”(hydrate) 为'
     )
   })
-  test.todo('spaces around `` and 、', () => {
+  // https://github.com/Jinjiang/zhlint/issues/72
+  test('#72 spaces around `` and 、', () => {
     expect(getOutput('`attrs` 、 `emit` 和 `slots`', options)).toBe(
       '`attrs`、`emit` 和 `slots`'
     )
   })
-  test.todo('spaces around [``] and 、', () => {
+  // https://github.com/Jinjiang/zhlint/issues/70
+  test('#70 spaces around [``] and 、', () => {
     expect(
       getOutput(
         '实例的 [`$attrs`](/api/component-instance.html#attrs)、 [`$emit`](/api/component-instance.html#emit)',
@@ -98,7 +100,8 @@ describe('lint from v3.cn.vuejs.org', () => {
       '实例的 [`$attrs`](/api/component-instance.html#attrs)、[`$emit`](/api/component-instance.html#emit)'
     )
   })
-  test.todo('spaces around [``] and （）', () => {
+  // https://github.com/Jinjiang/zhlint/issues/71
+  test('#71 spaces around [``] and （）', () => {
     expect(
       getOutput(
         '应用级的 [`app.config.errorHandler`](/api/application.html#app-config-errorhandler)（前提是这个函数已经定义），',
