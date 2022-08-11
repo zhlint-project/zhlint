@@ -26,11 +26,13 @@ To support morden text formats like HTML, Markdown, etc., we need to integrate t
 - Hexo tags: e.g. `{% gist gist_id [filename] %}`.
 - markdown-it-container (VuePress custom containers): e.g. `::: warning\n*here be dragons*\n:::`.
 
+After that, an input string would be parsed into a string with several _slots_. For each slot, it can hold a piece of _plain text content_ to process further.
+
 ### Tokens
 
-After that, for each piece of plain text content from the input, we can parse them into structured tokens:
+We can parse a piece of _plain text content_ into structured tokens:
 
-- **Groups**: Usually the content wrapped by a pair of quotes. The quotes should always be paired, which means every left quote should technically have a paired right quote accordingly. A piece of plain text content actually composes several nested groups. So the groups determine the whole structure of the plain text content.
+- **Groups**: Usually the content wrapped by a pair of quotes. The quotes should always be paired, which means every left quote should technically have a paired right quote accordingly. A piece of _plain text content_ actually composes several nested groups. So the groups determine the whole structure of the _plain text content_.
 - **Marks**: Usually a pair of brackets, not the content they wrap. The brackets should always be paired, which means every left bracket should technically have a paired right bracket accordingly. We don't track the nested structure of brackets since in real world the usage of brackets are very flexible, like a hyper format. So we just track their positions without structures.
 - **Letters**: Have 2 types: half-width (English) and full-width (Chinese). Concequtive half-width letters or concequtive full-width letters can be considered as one token.
 - **Punctuations**: Except quotes and brackets, have 2 types: half-width and full-width.
@@ -76,7 +78,7 @@ Each token has these properties:
 
 <!-- TODO: an example x2 -->
 
-The whole structure of a piece of plain text content could be parsed as:
+The whole structure of a piece of _plain text content_ could be parsed as:
 
 - `tokens`: all the content as a group without quotes
 - `groups`: all groups collected
@@ -247,7 +249,7 @@ Abbreviations for tokens
 - D = code
 - U = unknown
 
-<!-- TODO: example -->
+<!-- TODO: an example -->
 
 Abbreviations for token properties
 
@@ -257,7 +259,7 @@ Abbreviations for token properties
 - -w- = wrappers (both sides)
 - s = spaces
 
-<!-- TODO: example -->
+<!-- TODO: an example -->
 
 Abbreviations for rules
 
@@ -296,13 +298,69 @@ Then for special cases, we put them into:
 
 ## Joining and returning
 
-<!-- TODO: join and return -->
+After processing all the rules, it's time to join all the tokens back together as the result of a string.
+
+1. For each piece of _plain text content_, join the tokens together as a string.
+    - During this process, we read all the `modified` content and spaces instead of their original ones, except the token is under ignored scope.
+2. Embed those strings back into the _slots_ and generate the final output as a string.
+    - Besides the generated string, it also returns the original string and all the validation results for further usage.
 
 ## Reports
 
-<!-- TODO: reports -->
+After getting the validation results, we can print them out for reports.
+
+The type def of the validation result:
+
+```ts
+type Result = {
+  // the basic info and availability of the file
+  file?: string
+  disabled: boolean
+
+  // the original content of the file
+  origin: string
+
+  // all the error messages
+  validations: Validation[]
+}
+
+type Validation = {
+  // the type and content of message
+  name: string
+  message: string
+
+  // position of the token
+  index: number
+  length: number
+
+  // which part of the token the error comes from
+  target: ValidationTarget
+}
+
+enum ValidationTarget {
+  // the main content
+  CONTENT
+  // the space after the content
+  SPACE_AFTER
+
+  // for quotes, the left/right quote
+  START_CONTENT
+  END_CONTENT
+  // for quotes, space after the left quote
+  INNER_SPACE_BEFORE
+}
+```
+
+The exported `report` function will analysze the results and print them out in terminal properly, including:
+
+- calculate the line and column of the token
+- point the error position out with a caret marker below
+- count the total number of errors
+- using colored output in terminal if possible
 
 ## For dev
 
-- `global.__DEV__`
-- `env.stdout`, `env.stderr`, and `env.defaultLogger`
+In the source code, there is a `global.__DEV__` variable which can be used to detect whether it's in the dev/debug mode. In this mode, the default output will go to:
+
+- `./stdout.log`
+- `./stderr.log`
