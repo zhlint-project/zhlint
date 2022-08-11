@@ -14,7 +14,7 @@ case-math-exp：1+1=2 1 + 1 = 2 1 + 2=3 2020/01/01 2020-01-01 vue-custom-element
 
 case-backslash：a \# b 中文\# __中文__ \# 中文 __\#__ __中文__\#中文__\#__
 
-space-brackets：(x)a(b)c (d) e (f) g (h) i(j)k (l) m __(a)__ b (__c__) d(e)
+space-brackets：(x)a(b)c (d) e (f) g (h) i (j) k (l) m __(a)__ b (__c__) d(e)
 
 space-quotes：a“hello world”b
 
