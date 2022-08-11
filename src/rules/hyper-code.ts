@@ -19,7 +19,13 @@
  * - code x content
  */
 
-import { Options, findTokenAfter, checkSpaceAfter } from './util'
+import {
+  Options,
+  checkSpaceAfter,
+  findExpectedVisibleTokenAfter,
+  findExpectedVisibleTokenBefore,
+  findMarkSeqBetween
+} from './util'
 import {
   Handler,
   isContentType,
@@ -43,26 +49,30 @@ const generateHandler = (options: Options): Handler => {
       return
     }
 
+    // skip non-code tokens
+    if (token.type !== SingleTokenType.HYPER_CODE) {
+      return
+    }
+
     // skip non-after-token situations
-    const tokenAfter = findTokenAfter(group, token)
-    if (!tokenAfter) {
-      return
-    }
+    const contentTokenBefore = findExpectedVisibleTokenBefore(group, token)
+    const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
+    const { spaceHost: beforeSpaceHost } =
+      findMarkSeqBetween(group, contentTokenBefore, token)
+    const { spaceHost: afterSpaceHost } =
+      findMarkSeqBetween(group, token, contentTokenAfter)
 
-    // skip non-code situations
+    // content x code
+    if (contentTokenBefore && isContentType(contentTokenBefore.type)) {
+      beforeSpaceHost && checkSpaceAfter(beforeSpaceHost, spaceAfter, message)
+    }
+    // code x content or code x code
     if (
-      token.type !== SingleTokenType.HYPER_CODE &&
-      tokenAfter.type !== SingleTokenType.HYPER_CODE
+      contentTokenAfter &&
+      (isContentType(contentTokenAfter.type) ||
+        contentTokenAfter.type === SingleTokenType.HYPER_CODE)
     ) {
-      return
-    }
-
-    // 1. code x code
-    // 2. content x code, code x content
-    if (token.type === tokenAfter.type) {
-      checkSpaceAfter(token, spaceAfter, message)
-    } else if (isContentType(token.type) || isContentType(tokenAfter.type)) {
-      checkSpaceAfter(token, spaceAfter, message)
+      afterSpaceHost && checkSpaceAfter(afterSpaceHost, spaceAfter, message)
     }
   }
   return handleHyperSpaceOption

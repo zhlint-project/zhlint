@@ -30,14 +30,15 @@ import {
   isFullWidthPair,
   MarkSideType,
   MutableGroupToken,
+  MutableSingleToken,
   MutableToken,
   SingleTokenType
 } from '../parser'
 import {
   checkSpaceAfter,
+  findExpectedVisibleTokenAfter,
+  findExpectedVisibleTokenBefore,
   findMarkSeqBetween,
-  findNonHyperVisibleTokenAfter,
-  findNonHyperVisibleTokenBefore,
   findTokenAfter,
   findTokenBefore,
   Options
@@ -47,6 +48,44 @@ import {
   BRACKET_NOSPACE_OUTSIDE,
   BRACKET_SPACE_OUTSIDE
 } from './messages'
+
+const shouldSkip = (
+  before: MutableToken | undefined,
+  beforeTokenSeq: MutableToken[],
+  token: MutableSingleToken,
+  afterTokenSeq: MutableToken[],
+  after: MutableToken | undefined
+): boolean => {
+  if (!before || !after) {
+    return false
+  }
+  if (
+    isFullWidthPair(token.content) ||
+    isFullWidthPair(token.modifiedContent)
+  ) {
+    return false
+  }
+  if (
+    beforeTokenSeq.filter((x) => x.spaceAfter).length ||
+    afterTokenSeq.filter((x) => x.spaceAfter).length
+  ) {
+    return false
+  }
+  return (
+    // x(x
+    //  ^
+    (before.type === CharType.CONTENT_HALF ||
+      // x()
+      //  ^
+      (before.content === '(' && token.content === ')')) &&
+    // x)x
+    //  ^
+    (after.type === CharType.CONTENT_HALF ||
+      // ()x
+      //  ^
+      (token.content === '(' && after.content === ')'))
+  )
+}
 
 const generateHandler = (options: Options): Handler => {
   const noInsideBracketOption = options.noSpaceInsideBracket
@@ -81,20 +120,21 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // skip bracket between half-width content without spaces
-    const isFullWidth = isFullWidthPair(token.modifiedContent)
-    const contentTokenBefore = findNonHyperVisibleTokenBefore(group, token)
-    const contentTokenAfter = findNonHyperVisibleTokenAfter(group, token)
+    // or empty brackets beside half-width content without spaces
+    const contentTokenBefore = findExpectedVisibleTokenBefore(group, token)
+    const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
     const { spaceHost: beforeSpaceHost, tokenSeq: beforeTokenSeq } =
       findMarkSeqBetween(group, contentTokenBefore, token)
     const { spaceHost: afterSpaceHost, tokenSeq: afterTokenSeq } =
       findMarkSeqBetween(group, token, contentTokenAfter)
     if (
-      contentTokenBefore &&
-      contentTokenAfter &&
-      contentTokenBefore.type === CharType.CONTENT_HALF &&
-      contentTokenAfter.type === CharType.CONTENT_HALF &&
-      beforeTokenSeq.filter((x) => x.spaceAfter).length === 0 &&
-      afterTokenSeq.filter((x) => x.spaceAfter).length === 0
+      shouldSkip(
+        contentTokenBefore,
+        beforeTokenSeq,
+        token,
+        afterTokenSeq,
+        contentTokenAfter
+      )
     ) {
       return
     }
@@ -104,6 +144,8 @@ const generateHandler = (options: Options): Handler => {
       typeof spaceOutsideHalfBracketOption !== 'undefined' ||
       noSpaceOutsideFullBracketOption
     ) {
+      const isFullWidth = isFullWidthPair(token.modifiedContent)
+
       // 2.1 right-bracket x left-bracket
       if (contentTokenAfter) {
         if (
@@ -148,7 +190,11 @@ const generateHandler = (options: Options): Handler => {
           if (beforeSpaceHost) {
             // 2.2.1 content/right-quote/code x left-full-bracket
             // 2.2.2 content/right-quote/code x left-half-bracket
-            if (isFullWidth) {
+            if (
+              isFullWidth ||
+              (contentTokenBefore.type === GroupTokenType.GROUP &&
+                isFullWidthPair(contentTokenBefore.modifiedEndContent))
+            ) {
               if (noSpaceOutsideFullBracketOption) {
                 checkSpaceAfter(beforeSpaceHost, '', BRACKET_NOSPACE_OUTSIDE)
               }
@@ -173,7 +219,11 @@ const generateHandler = (options: Options): Handler => {
           if (afterSpaceHost) {
             // 2.3.1 right-full-bracket x content/left-quote/code
             // 2.4.2 right-half-bracket x content/left-quote/code
-            if (isFullWidth) {
+            if (
+              isFullWidth ||
+              (contentTokenAfter.type === GroupTokenType.GROUP &&
+                isFullWidthPair(contentTokenAfter.modifiedStartContent))
+            ) {
               if (noSpaceOutsideFullBracketOption) {
                 checkSpaceAfter(afterSpaceHost, '', BRACKET_NOSPACE_OUTSIDE)
               }

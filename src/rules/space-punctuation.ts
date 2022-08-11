@@ -54,7 +54,7 @@ import {
   PUNCTUATION_SPACE_AFTER
 } from './messages'
 
-const normalPunctuationList = `,.;:?!，。；：？！`.split('')
+const normalPunctuationList = `,.;:?!，、。；：？！`.split('')
 const isNormalPunctuation = (char: string): boolean =>
   normalPunctuationList.indexOf(char) >= 0
 
