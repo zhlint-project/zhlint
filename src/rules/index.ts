@@ -44,6 +44,7 @@ const generateHandlers = (options: Options): Handler[] => {
 }
 
 export const defaultConfig: Options = {
+  noSinglePair: true,
   halfWidthPunctuation: `()`,
   fullWidthPunctuation: `，。：；？！“”‘’`,
   unifiedPunctuation: 'simplified',

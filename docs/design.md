@@ -42,6 +42,12 @@ We can parse a piece of _plain text content_ into structured tokens:
 
 <!-- TODO: an example -->
 
+**Parsing options**
+
+- `noSinglePair: true | undefined = true`: with this option on, the parser will report if there is any unpaired quotes or brackets.
+
+**Simplified token types**
+
 To simplify the structure, _we remove spaces from token types_ as a property to other tokens, since the modifications of them are always related to their tokens besides.
 
 - For each group token, we add `innerSpaceBefore` and `spaceAfter` properties. Any of them could be an empty string or spaces.
