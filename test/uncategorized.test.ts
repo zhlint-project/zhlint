@@ -111,4 +111,20 @@ describe('lint from v3.cn.vuejs.org', () => {
       '应用级的 [`app.config.errorHandler`](/api/application.html#app-config-errorhandler) (前提是这个函数已经定义)，'
     )
   })
+  test('#74 wrong parsing on api/index.md', () => {
+    const text = `---
+title: API 参考
+sidebar: false
+page: true
+footer: false
+---
+
+<script setup>
+import ApiIndex from './ApiIndex.vue'
+</script>
+
+<ApiIndex />
+`
+    expect(getOutput(text, options)).toBe(text)
+  })
 })
