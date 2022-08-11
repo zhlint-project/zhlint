@@ -1,3 +1,14 @@
+/**
+ * @fileOverview
+ * 
+ * This file contains the types for the parser.
+ * 
+ * - Chars
+ * - Pairs
+ * - Marks
+ * - Tokens
+ */
+
 // Char
 
 import { Validation } from '../report'
@@ -5,8 +16,8 @@ import { Validation } from '../report'
 export enum CharType {
   EMPTY = 'empty',
   SPACE = 'space',
-  CONTENT_HALF = 'content-half',
-  CONTENT_FULL = 'content-full',
+  LETTERS_HALF = 'letters-half',
+  LETTERS_FULL = 'letters-full',
   PUNCTUATION_HALF = 'punctuation-half',
   PUNCTUATION_FULL = 'punctuation-full',
   UNKNOWN = 'unknown'
@@ -16,11 +27,11 @@ type CharSet = {
   [setName: string]: string
 }
 
-export const MARK_CHAR_SET: CharSet = {
+export const BRACKET_CHAR_SET: CharSet = {
   left: '(（',
   right: ')）'
 }
-export const GROUP_CHAR_SET: CharSet = {
+export const QUOTE_CHAR_SET: CharSet = {
   left: `“‘《〈『「【{`,
   right: `”’》〉』」】}`,
   neutral: `'"`
@@ -31,10 +42,10 @@ export const SHORTHAND_PAIR_SET: CharSet = {
   [`’`]: `‘`
 }
 
-const fullWidthPairs = `“”‘’（）「」『』《》〈〉【】`
+const FULL_WIDTH_PAIRS = `“”‘’（）「」『』《》〈〉【】`
 
 export const isFullWidthPair = (str: string): boolean =>
-  fullWidthPairs.indexOf(str) >= 0
+  FULL_WIDTH_PAIRS.indexOf(str) >= 0
 
 // Reusable
 
@@ -52,6 +63,10 @@ type MutablePair = {
 
 // Mark
 
+/**
+ * Marks are hyper info, including content and wrappers.
+ * They are categorized by parsers, not by usage.
+ */
 export enum MarkType {
   /**
    * Brackets
@@ -99,69 +114,69 @@ export const isRawMark = (mark: Mark): mark is RawMark => {
 
 // Token type
 
-export type ContentType = CharType.CONTENT_FULL | CharType.CONTENT_HALF
+export type LettersType = CharType.LETTERS_FULL | CharType.LETTERS_HALF
 
 export type PunctuationType =
   | CharType.PUNCTUATION_FULL
   | CharType.PUNCTUATION_HALF
 
-export type CharTokenType = ContentType | PunctuationType
+export type ContentTokenType = LettersType | PunctuationType
 
-export enum SingleTokenType {
+/**
+ * TODO: paired html tags should be hyper wrapper
+ */
+export enum HyperTokenType {
   /**
    * Brackets
    */
-  MARK_BRACKETS = 'mark-brackets',
+  HYPER_WRAPPER_BRACKET = 'wrapper-bracket',
   /**
    * Inline Markdown marks
    */
-  MARK_HYPER = 'mark-hyper',
+  HYPER_WRAPPER = 'wrapper',
   /**
    * - \`xxx\`
    * - &lt;code&gt;xxx&lt;/code&gt;
    */
-  HYPER_CODE = 'hyper-code',
+  HYPER_CONTENT_CODE = 'hyper-content-code',
   /**
    * - Hexo/VuePress container
    * - Other html code
    */
-  HYPER_UNEXPECTED = 'hyper-container',
+  HYPER_CONTENT = 'hyper-content',
   /**
    * Unpaired brackets/quotes
    */
-  UNMATCHED = 'unmatched'
+  UNMATCHED = 'unmatched',
+  /**
+   * For indeterminate tokens
+   */
+  INDETERMINATED = 'indeterminated',
 }
 
 export enum GroupTokenType {
   GROUP = 'group'
 }
 
-export type TokenType = CharTokenType | SingleTokenType | GroupTokenType
+export type SingleTokenType = ContentTokenType | HyperTokenType
 
-export type NonHyperVisibleTokenType =
-  | ContentType
-  | PunctuationType
-  | SingleTokenType.MARK_BRACKETS
+export type TokenType = SingleTokenType | GroupTokenType
+
+export type NonCodeVisibleTokenType =
+  | ContentTokenType
+  | HyperTokenType.HYPER_WRAPPER_BRACKET
   | GroupTokenType.GROUP
 
 export type VisibleTokenType =
-  | NonHyperVisibleTokenType
-  | SingleTokenType.HYPER_CODE
+  | NonCodeVisibleTokenType
+  | HyperTokenType.HYPER_CONTENT_CODE
 
-export type InvisibleTokenType = SingleTokenType.MARK_HYPER
+export type InvisibleTokenType = HyperTokenType.HYPER_WRAPPER
 
-export type HyperTokenType =
-  | SingleTokenType.MARK_HYPER
-  | SingleTokenType.HYPER_CODE
-
-export type LegacyHyperContentTokenType =
-  | SingleTokenType.HYPER_UNEXPECTED
-  | SingleTokenType.HYPER_CODE
-
-export const isContentType = (
+export const isLettersType = (
   type: TokenType | CharType
-): type is ContentType => {
-  return type === CharType.CONTENT_FULL || type === CharType.CONTENT_HALF
+): type is LettersType => {
+  return type === CharType.LETTERS_FULL || type === CharType.LETTERS_HALF
 }
 
 export const isPunctuationType = (
@@ -172,13 +187,13 @@ export const isPunctuationType = (
   )
 }
 
-export const isNonHyperVisibleType = (
+export const isNonCodeVisibleType = (
   type: TokenType | CharType
-): type is ContentType => {
+): type is LettersType => {
   return (
-    isContentType(type) ||
+    isLettersType(type) ||
     isPunctuationType(type) ||
-    type === SingleTokenType.MARK_BRACKETS ||
+    type === HyperTokenType.HYPER_WRAPPER_BRACKET ||
     type === GroupTokenType.GROUP
   )
 }
@@ -186,21 +201,13 @@ export const isNonHyperVisibleType = (
 export const isVisibleType = (
   type: TokenType | CharType
 ): type is VisibleTokenType => {
-  return isNonHyperVisibleType(type) || type === SingleTokenType.HYPER_CODE
+  return isNonCodeVisibleType(type) || type === HyperTokenType.HYPER_CONTENT_CODE
 }
 
 export const isInvisibleType = (
   type: TokenType | CharType
 ): type is InvisibleTokenType => {
-  return type === SingleTokenType.MARK_HYPER
-}
-
-export const isHyperType = (
-  type: TokenType | CharType
-): type is HyperTokenType => {
-  return (
-    type === SingleTokenType.MARK_HYPER || type === SingleTokenType.HYPER_CODE
-  )
+  return type === HyperTokenType.HYPER_WRAPPER
 }
 
 // Token
@@ -216,21 +223,20 @@ type CommonToken = {
   markSide?: MarkSideType
 }
 
-type MutableCommonToken = {
+type MutableCommonToken = CommonToken & {
   modifiedContent: string
   modifiedSpaceAfter: string
   validations: Validation[]
 }
 
 export type SingleToken = CommonToken & {
-  type: CharTokenType | SingleTokenType
+  type: SingleTokenType
 }
 
-export type MutableSingleToken = CommonToken &
-  MutableCommonToken & {
-    type: CharTokenType | SingleTokenType
-    modifiedType: CharTokenType | SingleTokenType
-  }
+export type MutableSingleToken = MutableCommonToken & {
+  type: SingleTokenType
+  modifiedType: SingleTokenType
+}
 
 export type GroupToken = Array<Token> &
   CommonToken &
@@ -240,7 +246,6 @@ export type GroupToken = Array<Token> &
   }
 
 export type MutableGroupToken = Array<MutableToken> &
-  CommonToken &
   MutableCommonToken &
   Pair &
   MutablePair & {
@@ -253,45 +258,3 @@ export type MutableGroupToken = Array<MutableToken> &
 export type Token = SingleToken | GroupToken
 
 export type MutableToken = MutableSingleToken | MutableGroupToken
-
-// Status
-
-export type ParseStatus = {
-  lastToken?: Token
-  lastGroup?: GroupToken
-  lastMark?: Mark
-
-  tokens: GroupToken
-  marks: Mark[]
-  groups: GroupToken[]
-
-  markStack: Mark[]
-  groupStack: GroupToken[]
-
-  errors: Validation[]
-}
-
-export type ParseResult = {
-  tokens: GroupToken
-  groups: GroupToken[]
-  marks: Mark[]
-  errors: Validation[]
-}
-
-// Travel
-
-export type FilterFunction = (
-  token: MutableToken | Token,
-  index: number,
-  group: MutableGroupToken | GroupToken
-) => boolean | RegExpMatchArray | null
-
-export type Filter = FilterFunction | string | RegExp | { type: TokenType }
-
-export type Handler = (
-  token: MutableToken | Token,
-  index: number,
-  group: MutableGroupToken | GroupToken,
-  matched: boolean | RegExpMatchArray | null,
-  marks: MutableMark[] | Mark[]
-) => void

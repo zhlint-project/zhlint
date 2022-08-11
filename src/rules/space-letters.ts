@@ -32,14 +32,14 @@
 import {
   CharType,
   Handler,
-  isContentType,
+  isLettersType,
   MutableGroupToken,
   MutableToken
 } from '../parser'
 import {
   checkSpaceAfter,
-  findExpectedVisibleTokenAfter,
-  findMarkSeqBetween,
+  findVisibleTokenAfter,
+  findWrappersBetween,
   Options
 } from './util'
 import {
@@ -51,25 +51,25 @@ import {
 
 const generateHandler = (options: Options): Handler => {
   const onlyOneBetweenHalfWidthContentOption =
-    options?.spaceBetweenHalfWidthContent
+    options?.spaceBetweenHalfWidthLetters
   const noBetweenFullWidthContentOption =
-    options?.noSpaceBetweenFullWidthContent
-  const betweenMixedWidthContentOption = options?.spaceBetweenMixedWidthContent
+    options?.noSpaceBetweenFullWidthLetters
+  const betweenMixedWidthContentOption = options?.spaceBetweenMixedWidthLetters
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-content tokens
-    if (!isContentType(token.type)) {
+    if (!isLettersType(token.type)) {
       return
     }
 
     // skip non-content after-tokens
-    const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
-    if (!contentTokenAfter || !isContentType(contentTokenAfter.type)) {
+    const contentTokenAfter = findVisibleTokenAfter(group, token)
+    if (!contentTokenAfter || !isLettersType(contentTokenAfter.type)) {
       return
     }
 
     // find the space host
-    const { spaceHost, tokenSeq } = findMarkSeqBetween(
+    const { spaceHost, tokens } = findWrappersBetween(
       group,
       token,
       contentTokenAfter
@@ -84,14 +84,14 @@ const generateHandler = (options: Options): Handler => {
     // 2. half x full, full x half
     if (contentTokenAfter.type === token.type) {
       // skip without custom option
-      if (token.type === CharType.CONTENT_HALF) {
+      if (token.type === CharType.LETTERS_HALF) {
         if (!onlyOneBetweenHalfWidthContentOption) {
           return
         }
         // skip if half-content x marks x half-content
         if (
-          tokenSeq.length > 1 &&
-          tokenSeq.filter((token) => token.spaceAfter).length === 0
+          tokens.length > 1 &&
+          tokens.filter((token) => token.spaceAfter).length === 0
         ) {
           return
         }
@@ -101,9 +101,9 @@ const generateHandler = (options: Options): Handler => {
         }
       }
 
-      const spaceAfter = token.type === CharType.CONTENT_HALF ? ' ' : ''
+      const spaceAfter = token.type === CharType.LETTERS_HALF ? ' ' : ''
       const message =
-        token.type === CharType.CONTENT_HALF
+        token.type === CharType.LETTERS_HALF
           ? CONTENT_SPACE_HALF_WIDTH
           : CONTENT_NOSPACE_FULL_WIDTH
 

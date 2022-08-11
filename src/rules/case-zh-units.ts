@@ -14,9 +14,9 @@ import {
 } from '../parser'
 import { ValidationTarget } from '../report'
 import {
-  findMarkSeqBetween,
-  findNonHyperVisibleTokenAfter,
-  findNonHyperVisibleTokenBefore,
+  findWrappersBetween,
+  findNonCodeVisibleTokenAfter,
+  findNonCodeVisibleTokenBefore,
   Options,
   removeValidationOnTarget
 } from './util'
@@ -27,30 +27,30 @@ const generateHandler = (options: Options): Handler => {
   const skippedZhUnits = options?.skipZhUnits || ''
   const matcherStr = skippedZhUnits
     .split('')
-    .filter((x) => checkCharType(x) === CharType.CONTENT_FULL)
+    .filter((x) => checkCharType(x) === CharType.LETTERS_FULL)
     .join('')
   const unitMatcher = new RegExp(`^[${matcherStr}]`)
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // make sure the content is a number
-    if (token.type === CharType.CONTENT_HALF && token.content.match(/^\d+$/)) {
+    if (token.type === CharType.LETTERS_HALF && token.content.match(/^\d+$/)) {
       // make sure the content after is a Chinese unit
-      const tokenAfter = findNonHyperVisibleTokenAfter(group, token)
+      const tokenAfter = findNonCodeVisibleTokenAfter(group, token)
       if (tokenAfter && tokenAfter.content.match(unitMatcher)) {
         // make sure there is no space between originally
-        const { spaceHost: spaceHostAfter, tokenSeq: tokenSeqAfter } =
-          findMarkSeqBetween(group, token, tokenAfter)
+        const { spaceHost: spaceHostAfter, tokens: tokenSeqAfter } =
+          findWrappersBetween(group, token, tokenAfter)
         const hasSpaceAfterOriginally = tokenSeqAfter.some((x) => x.spaceAfter)
         if (hasSpaceAfterOriginally) {
           return
         }
 
         // if any token before
-        const tokenBefore = findNonHyperVisibleTokenBefore(group, token)
+        const tokenBefore = findNonCodeVisibleTokenBefore(group, token)
         if (tokenBefore) {
           // make sure there is no space between originally
-          const { spaceHost: spaceHostBefore, tokenSeq: tokenSeqBefore } =
-            findMarkSeqBetween(group, tokenBefore, token)
+          const { spaceHost: spaceHostBefore, tokens: tokenSeqBefore } =
+            findWrappersBetween(group, tokenBefore, token)
           const hasSpaceBeforeOriginally = tokenSeqBefore.some(
             (x) => x.spaceAfter
           )

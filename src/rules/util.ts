@@ -3,8 +3,8 @@ import {
   MarkSideType,
   MutableGroupToken as GroupToken,
   MutableToken as Token,
-  SingleTokenType,
-  isNonHyperVisibleType,
+  HyperTokenType,
+  isNonCodeVisibleType,
   isInvisibleType,
   isVisibleType,
   TokenType,
@@ -26,9 +26,9 @@ export type Options = {
   skipAbbrs?: string[]
 
   // space around content
-  spaceBetweenHalfWidthContent?: boolean
-  noSpaceBetweenFullWidthContent?: boolean
-  spaceBetweenMixedWidthContent?: boolean
+  spaceBetweenHalfWidthLetters?: boolean
+  noSpaceBetweenFullWidthLetters?: boolean
+  spaceBetweenMixedWidthLetters?: boolean
 
   // space around punctuation
   noSpaceBeforePunctuation?: boolean
@@ -49,7 +49,7 @@ export type Options = {
   spaceOutsideCode?: boolean
 
   // space around mark
-  noSpaceInsideMark?: boolean
+  noSpaceInsideWrapper?: boolean
 
   // trim space
   trimSpace?: boolean
@@ -59,6 +59,31 @@ export type Options = {
 
   // custom preset
   preset?: string
+
+  /**
+   * @deprecated
+   * 
+   * Please use `noSpaceInsideWrapper` instead.
+   */
+  noSpaceInsideMark?: boolean
+  /**
+   * @deprecated
+   * 
+   * Please use `spaceBetweenHalfWidthLetters` instead.
+   */
+  spaceBetweenHalfWidthContent?: boolean
+  /**
+   * @deprecated
+   * 
+   * Please use `noSpaceBetweenFullWidthLetters` instead.
+   */
+  noSpaceBetweenFullWidthContent?: boolean
+  /**
+   * @deprecated
+   * 
+   * Please use `spaceBetweenMixedWidthLetters` instead.
+   */
+  spaceBetweenMixedWidthContent?: boolean
 }
 
 // find tokens
@@ -103,7 +128,7 @@ export const findTokenAfter = (
  * - code, container, and unknown will be failed
  * - hyper mark, html pairs will be skipped
  */
-export const findNonHyperVisibleTokenBefore = (
+export const findNonCodeVisibleTokenBefore = (
   group: GroupToken,
   token: Token | undefined
 ): Token | undefined => {
@@ -116,10 +141,10 @@ export const findNonHyperVisibleTokenBefore = (
   }
   // hyper mark, html pairs: skip
   if (isInvisibleType(beforeToken.type) || getHtmlTagSide(beforeToken)) {
-    return findNonHyperVisibleTokenBefore(group, beforeToken)
+    return findNonCodeVisibleTokenBefore(group, beforeToken)
   }
   // content, punctuation, bracket, group: return token
-  if (isNonHyperVisibleType(beforeToken.type)) {
+  if (isNonCodeVisibleType(beforeToken.type)) {
     return beforeToken
   }
   // code, unknown, container: return undefined
@@ -132,7 +157,7 @@ export const findNonHyperVisibleTokenBefore = (
  * - code, container, and unknown will be failed
  * - hyper mark, html pairs will be skipped
  */
-export const findNonHyperVisibleTokenAfter = (
+export const findNonCodeVisibleTokenAfter = (
   group: GroupToken,
   token: Token | undefined
 ): Token | undefined => {
@@ -145,10 +170,10 @@ export const findNonHyperVisibleTokenAfter = (
   }
   // hyper mark, html pairs: skip
   if (isInvisibleType(afterToken.type) || getHtmlTagSide(afterToken)) {
-    return findNonHyperVisibleTokenAfter(group, afterToken)
+    return findNonCodeVisibleTokenAfter(group, afterToken)
   }
   // content, punctuation, bracket, group: return token
-  if (isNonHyperVisibleType(afterToken.type)) {
+  if (isNonCodeVisibleType(afterToken.type)) {
     return afterToken
   }
   // code, unknown, container: return undefined
@@ -161,7 +186,7 @@ export const findNonHyperVisibleTokenAfter = (
  * - container, and unknown will be failed
  * - hyper mark, html pairs will be skipped
  */
-export const findExpectedVisibleTokenBefore = (
+export const findVisibleTokenBefore = (
   group: GroupToken,
   token: Token | undefined
 ): Token | undefined => {
@@ -174,7 +199,7 @@ export const findExpectedVisibleTokenBefore = (
   }
   // hyper mark, html pairs: skip
   if (isInvisibleType(beforeToken.type) || getHtmlTagSide(beforeToken)) {
-    return findExpectedVisibleTokenBefore(group, beforeToken)
+    return findVisibleTokenBefore(group, beforeToken)
   }
   // content, punctuation, bracket, group, code: return token
   if (isVisibleType(beforeToken.type)) {
@@ -190,7 +215,7 @@ export const findExpectedVisibleTokenBefore = (
  * - container, and unknown will be failed
  * - hyper mark, html pairs will be skipped
  */
-export const findExpectedVisibleTokenAfter = (
+export const findVisibleTokenAfter = (
   group: GroupToken,
   token: Token | undefined
 ): Token | undefined => {
@@ -203,7 +228,7 @@ export const findExpectedVisibleTokenAfter = (
   }
   // hyper mark, html pairs: skip
   if (isInvisibleType(afterToken.type) || getHtmlTagSide(afterToken)) {
-    return findExpectedVisibleTokenAfter(group, afterToken)
+    return findVisibleTokenAfter(group, afterToken)
   }
   // content, punctuation, bracket, group, code: return token
   if (isVisibleType(afterToken.type)) {
@@ -216,7 +241,7 @@ export const findExpectedVisibleTokenAfter = (
 // hyper mark seq
 
 const isHtmlTag = (token: Token): boolean => {
-  if (token.type !== SingleTokenType.HYPER_UNEXPECTED) {
+  if (token.type !== HyperTokenType.HYPER_CONTENT) {
     return false
   }
   return !!token.content.match(/^<.+>$/)
@@ -240,14 +265,14 @@ const getHtmlTagSide = (token: Token): MarkSideType | undefined => {
   }
 }
 
-export const isMarkdownOrHtmlPair = (token: Token): boolean => {
-  return token.type === SingleTokenType.MARK_HYPER || !!getHtmlTagSide(token)
+export const isWrapper = (token: Token): boolean => {
+  return token.type === HyperTokenType.HYPER_WRAPPER || !!getHtmlTagSide(token)
 }
 
-export const getMarkdownOrHtmlSide = (
+export const getWrapperSide = (
   token: Token
 ): MarkSideType | undefined => {
-  if (token.type === SingleTokenType.MARK_HYPER) {
+  if (token.type === HyperTokenType.HYPER_WRAPPER) {
     return token.markSide
   }
   return getHtmlTagSide(token)
@@ -261,20 +286,20 @@ const spreadHyperMarkSeq = (
 ): void => {
   if (isBackward) {
     const tokenBefore = findTokenBefore(group, token)
-    if (tokenBefore && isMarkdownOrHtmlPair(tokenBefore)) {
+    if (tokenBefore && isWrapper(tokenBefore)) {
       seq.unshift(tokenBefore)
       spreadHyperMarkSeq(group, tokenBefore, seq, isBackward)
     }
   } else {
     const tokenAfter = findTokenAfter(group, token)
-    if (tokenAfter && isMarkdownOrHtmlPair(tokenAfter)) {
+    if (tokenAfter && isWrapper(tokenAfter)) {
       seq.push(tokenAfter)
       spreadHyperMarkSeq(group, tokenAfter, seq, isBackward)
     }
   }
 }
 
-export const findHyperMarkSeq = (group: GroupToken, token: Token): Token[] => {
+export const findConnectedWrappers = (group: GroupToken, token: Token): Token[] => {
   const seq: Token[] = [token]
   spreadHyperMarkSeq(group, token, seq, false)
   spreadHyperMarkSeq(group, token, seq, true)
@@ -292,8 +317,8 @@ const findSpaceHostInHyperMarkSeq = (
 
   const firstMark = hyperMarkSeq[0]
   const lastMark = hyperMarkSeq[hyperMarkSeq.length - 1]
-  const firstMarkSide = getMarkdownOrHtmlSide(firstMark)
-  const lastMarkSide = getMarkdownOrHtmlSide(lastMark)
+  const firstMarkSide = getWrapperSide(firstMark)
+  const lastMarkSide = getWrapperSide(lastMark)
   
   const tokenBefore = findTokenBefore(group, firstMark)
   if (!tokenBefore) {
@@ -331,7 +356,7 @@ const findSpaceHostInHyperMarkSeq = (
     const nextToken = findTokenAfter(group, target)
     if (
       nextToken &&
-      getMarkdownOrHtmlSide(nextToken) === MarkSideType.LEFT
+      getWrapperSide(nextToken) === MarkSideType.LEFT
     ) {
       return target
     }
@@ -340,47 +365,47 @@ const findSpaceHostInHyperMarkSeq = (
   return tokenBefore
 }
 
-export const findMarkSeqBetween = (
+export const findWrappersBetween = (
   group: GroupToken,
   before: Token | undefined,
   after: Token | undefined
 ): {
   spaceHost?: Token
-  markSeq: Token[]
-  tokenSeq: Token[]
+  wrappers: Token[]
+  tokens: Token[]
 } => {
   if (!before || !after) {
     return {
       spaceHost: undefined,
-      markSeq: [],
-      tokenSeq: []
+      wrappers: [],
+      tokens: []
     }
   }
 
   const firstMark = findTokenAfter(group, before)
-  const firstVisible = findExpectedVisibleTokenAfter(group, before)
+  const firstVisible = findVisibleTokenAfter(group, before)
   if (!firstMark || firstVisible !== after) {
     return {
       spaceHost: undefined,
-      markSeq: [],
-      tokenSeq: []
+      wrappers: [],
+      tokens: []
     }
   }
   if (firstMark === after) {
     return {
       spaceHost: before,
-      markSeq: [],
-      tokenSeq: [before]
+      wrappers: [],
+      tokens: [before]
     }
   }
 
-  const markSeq = findHyperMarkSeq(group, firstMark)
+  const markSeq = findConnectedWrappers(group, firstMark)
   const spaceHost = findSpaceHostInHyperMarkSeq(group, markSeq)
 
   return {
     spaceHost,
-    markSeq,
-    tokenSeq: [before, ...markSeq]
+    wrappers: markSeq,
+    tokens: [before, ...markSeq]
   }
 }
 
@@ -393,9 +418,9 @@ export const isHalfWidthPunctuationWithoutSpaceAround = (group: GroupToken, toke
   if (
     token.type === CharType.PUNCTUATION_HALF &&
     tokenBefore &&
-    tokenBefore.type === CharType.CONTENT_HALF &&
+    tokenBefore.type === CharType.LETTERS_HALF &&
     tokenAfter &&
-    tokenAfter.type === CharType.CONTENT_HALF
+    tokenAfter.type === CharType.LETTERS_HALF
   ) {
     return !tokenBefore.spaceAfter && !token.spaceAfter
   }

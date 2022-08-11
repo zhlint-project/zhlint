@@ -26,19 +26,19 @@ import {
   CharType,
   GroupTokenType,
   Handler,
-  isContentType,
+  isLettersType,
   isFullWidthPair,
   MarkSideType,
   MutableGroupToken,
   MutableSingleToken,
   MutableToken,
-  SingleTokenType
+  HyperTokenType
 } from '../parser'
 import {
   checkSpaceAfter,
-  findExpectedVisibleTokenAfter,
-  findExpectedVisibleTokenBefore,
-  findMarkSeqBetween,
+  findVisibleTokenAfter,
+  findVisibleTokenBefore,
+  findWrappersBetween,
   findTokenAfter,
   findTokenBefore,
   Options
@@ -74,13 +74,13 @@ const shouldSkip = (
   return (
     // x(x
     //  ^
-    (before.type === CharType.CONTENT_HALF ||
+    (before.type === CharType.LETTERS_HALF ||
       // x()
       //  ^
       (before.content === '(' && token.content === ')')) &&
     // x)x
     //  ^
-    (after.type === CharType.CONTENT_HALF ||
+    (after.type === CharType.LETTERS_HALF ||
       // ()x
       //  ^
       (token.content === '(' && after.content === ')'))
@@ -94,7 +94,7 @@ const generateHandler = (options: Options): Handler => {
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-bracket tokens
-    if (token.type !== SingleTokenType.MARK_BRACKETS) {
+    if (token.type !== HyperTokenType.HYPER_WRAPPER_BRACKET) {
       return
     }
 
@@ -121,12 +121,12 @@ const generateHandler = (options: Options): Handler => {
 
     // skip bracket between half-width content without spaces
     // or empty brackets beside half-width content without spaces
-    const contentTokenBefore = findExpectedVisibleTokenBefore(group, token)
-    const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
-    const { spaceHost: beforeSpaceHost, tokenSeq: beforeTokenSeq } =
-      findMarkSeqBetween(group, contentTokenBefore, token)
-    const { spaceHost: afterSpaceHost, tokenSeq: afterTokenSeq } =
-      findMarkSeqBetween(group, token, contentTokenAfter)
+    const contentTokenBefore = findVisibleTokenBefore(group, token)
+    const contentTokenAfter = findVisibleTokenAfter(group, token)
+    const { spaceHost: beforeSpaceHost, tokens: beforeTokenSeq } =
+      findWrappersBetween(group, contentTokenBefore, token)
+    const { spaceHost: afterSpaceHost, tokens: afterTokenSeq } =
+      findWrappersBetween(group, token, contentTokenAfter)
     if (
       shouldSkip(
         contentTokenBefore,
@@ -183,9 +183,9 @@ const generateHandler = (options: Options): Handler => {
       if (token.markSide === MarkSideType.LEFT) {
         if (
           contentTokenBefore &&
-          (isContentType(contentTokenBefore.type) ||
+          (isLettersType(contentTokenBefore.type) ||
             contentTokenBefore.type === GroupTokenType.GROUP ||
-            contentTokenBefore.type === SingleTokenType.HYPER_CODE)
+            contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
         ) {
           if (beforeSpaceHost) {
             // 2.2.1 content/right-quote/code x left-full-bracket
@@ -212,9 +212,9 @@ const generateHandler = (options: Options): Handler => {
       } else {
         if (
           contentTokenAfter &&
-          (isContentType(contentTokenAfter.type) ||
+          (isLettersType(contentTokenAfter.type) ||
             contentTokenAfter.type === GroupTokenType.GROUP ||
-            contentTokenAfter.type === SingleTokenType.HYPER_CODE)
+            contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
         ) {
           if (afterSpaceHost) {
             // 2.3.1 right-full-bracket x content/left-quote/code

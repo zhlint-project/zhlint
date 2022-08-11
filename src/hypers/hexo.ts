@@ -1,4 +1,4 @@
-import { Data } from './types'
+import { ParsedStatus } from './types'
 
 // {% x y %}z{% endx %}
 // \{\% ([^ ]+?) [^\%]*?\%\}    ([^ ]+?)        [^\%]*?
@@ -6,7 +6,7 @@ import { Data } from './types'
 // \{\% end(?:\1) \%\}
 const matcher = /\{% ([^ ]+?) [^%]*?%\}(?:\n|\{(?!%)|[^{])*?\{% end(?:\1) %\}/g
 
-const parser = (data: Data): Data => {
+const parser = (data: ParsedStatus): ParsedStatus => {
   data.modifiedContent = data.modifiedContent.replace(
     matcher,
     (raw, name, index) => {

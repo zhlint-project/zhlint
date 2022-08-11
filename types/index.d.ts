@@ -1,7 +1,8 @@
-import { Options, Result } from '../src/run'
+import { Result } from '../src/run'
+import { Options } from '../src/options'
 import { Validation, ValidationTarget } from '../src/report'
 import { IgnoredCase } from '../src/ignore'
-import { Data, Block, ParserIgnoredCase } from '../src/hypers/types'
+import { ParsedStatus, Block, ParserIgnoredCase } from '../src/hypers/types'
 import {
   Handler,
   Token,
@@ -11,7 +12,7 @@ import {
   SingleTokenType,
   Mark,
   MarkType
-} from '../src/parser/index'
+} from '../src/parser'
 
 export {
   Options,
@@ -27,7 +28,7 @@ export {
   SingleTokenType,
   Mark,
   MarkType,
-  Data,
+  ParsedStatus,
   ParserIgnoredCase,
   Block
 }

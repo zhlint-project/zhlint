@@ -2,7 +2,7 @@ import { describe, test, expect } from 'vitest'
 
 import run from '../src/run'
 import markdownParser from '../src/hypers/md'
-import { Data } from '../src/hypers/types'
+import { ParsedStatus } from '../src/hypers/types'
 import { options } from './prepare'
 
 const getOutput = (str: string) => run(str, options).result
@@ -10,7 +10,7 @@ const getOutput = (str: string) => run(str, options).result
 describe('parser with markdown', () => {
   test('[md parser] single paragraph', () => {
     const text = 'X [xxx](xxx) X *y* __x__ `ss` _0_ ~~asd~~ *asf**asf**adsf*'
-    const data: Data = {
+    const data: ParsedStatus = {
       content: text,
       modifiedContent: text,
       ignoredByRules: [],

@@ -89,7 +89,7 @@ const generateHandler = (options: Options): Handler => {
 
     // make sure it's the ending dot of the abbr
     const tokenAfter = findTokenAfter(group, token)
-    if (tokenAfter && tokenAfter.type === CharType.CONTENT_HALF && !token.spaceAfter) {
+    if (tokenAfter && tokenAfter.type === CharType.LETTERS_HALF && !token.spaceAfter) {
       return
     }
 

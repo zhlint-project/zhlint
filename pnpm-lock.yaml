@@ -6,6 +6,7 @@ specifiers:
   '@types/mdast': ^3.0.10
   '@types/node': ^17.0.8
   '@types/react': ^17.0.38
+  '@types/unist': ^2.0.6
   '@typescript-eslint/eslint-plugin': ^5.9.0
   '@typescript-eslint/parser': ^5.9.0
   '@vitest/ui': ^0.21.1
@@ -39,6 +40,7 @@ devDependencies:
   '@types/mdast': 3.0.10
   '@types/node': 17.0.8
   '@types/react': 17.0.38
+  '@types/unist': 2.0.6
   '@typescript-eslint/eslint-plugin': 5.9.0_xux5spn4yyd22lzbw6clzt7aza
   '@typescript-eslint/parser': 5.9.0_z3gsmzc3xu6w45afpmnsgzwvm4
   '@vitest/ui': 0.21.1

@@ -1,4 +1,4 @@
-import { isContentType, isPunctuationType } from '.'
+import { isLettersType, isPunctuationType } from '.'
 import { Validation } from '../report'
 import { checkCharType } from './char'
 import {
@@ -12,8 +12,7 @@ import {
   MutableGroupToken,
   MutableToken,
   Token,
-  ParseStatus,
-  ParseResult
+  GroupToken
 } from './types'
 import {
   appendContent,
@@ -30,6 +29,35 @@ import {
   handleErrors
 } from './util'
 import { Options as RuleOptions } from '../rules/util'
+
+export type ParseStatus = {
+  lastToken?: Token
+  lastGroup?: GroupToken
+  lastMark?: Mark
+
+  tokens: GroupToken
+  marks: Mark[]
+  groups: GroupToken[]
+
+  markStack: Mark[]
+  groupStack: GroupToken[]
+
+  errors: Validation[]
+}
+
+export type ParseResult = {
+  tokens: GroupToken
+  groups: GroupToken[]
+  marks: Mark[]
+  errors: Validation[]
+}
+
+export type MutableParseResult = {
+  tokens: MutableGroupToken
+  groups: MutableGroupToken[]
+  marks: MutableMark[]
+  errors: Validation[]
+}
 
 /**
  * Parse a string into several tokens.
@@ -126,12 +154,12 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
       appendContent(status, char)
     } else if (isPunctuationType(type)) {
       handlePunctuation(i, char, type, status)
-    } else if (isContentType(type)) {
+    } else if (isLettersType(type)) {
       handleContent(i, char, type, status)
     } else if (type === CharType.EMPTY) {
       // Nothing
     } else {
-      handleContent(i, char, CharType.CONTENT_HALF, status)
+      handleContent(i, char, CharType.LETTERS_HALF, status)
     }
   }
   finalizeLastToken(status, str.length)
@@ -145,13 +173,6 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
     marks: status.marks,
     errors: status.errors
   }
-}
-
-export type MutableParseResult = {
-  tokens: MutableGroupToken
-  groups: MutableGroupToken[]
-  marks: MutableMark[]
-  errors: Validation[]
 }
 
 const toMutableToken = (token: Token): MutableToken => {
