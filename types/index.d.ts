@@ -1,4 +1,5 @@
-import { Options, Result } from '../src/run'
+import { Result } from '../src/run'
+import { Options } from '../src/options'
 import { Validation, ValidationTarget } from '../src/report'
 import { IgnoredCase } from '../src/ignore'
 import { ParsedStatus, Block, ParserIgnoredCase } from '../src/hypers/types'

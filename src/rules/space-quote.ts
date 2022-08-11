@@ -36,9 +36,9 @@ import {
 import {
   checkInnerSpaceBefore,
   checkSpaceAfter,
-  findMarkSeqBetween,
-  findNonHyperVisibleTokenAfter,
-  findNonHyperVisibleTokenBefore,
+  findWrappersBetween,
+  findNonCodeVisibleTokenAfter,
+  findNonCodeVisibleTokenBefore,
   Options
 } from './util'
 import {
@@ -87,12 +87,12 @@ const generateHandler = (options: Options): Handler => {
       noSpaceOutsideFullQuoteOption
     ) {
       // 2.1 right-quote x left-quote
-      const contentTokenAfter = findNonHyperVisibleTokenAfter(group, token)
+      const contentTokenAfter = findNonCodeVisibleTokenAfter(group, token)
       if (
         contentTokenAfter &&
         contentTokenAfter.type === GroupTokenType.GROUP
       ) {
-        const { spaceHost } = findMarkSeqBetween(
+        const { spaceHost } = findWrappersBetween(
           group,
           token,
           contentTokenAfter
@@ -120,13 +120,13 @@ const generateHandler = (options: Options): Handler => {
       }
 
       // 2.2 content/code x left-quote
-      const contentTokenBefore = findNonHyperVisibleTokenBefore(group, token)
+      const contentTokenBefore = findNonCodeVisibleTokenBefore(group, token)
       if (
         contentTokenBefore &&
         (isLettersType(contentTokenBefore.type) ||
           contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
       ) {
-        const { spaceHost } = findMarkSeqBetween(
+        const { spaceHost } = findWrappersBetween(
           group,
           contentTokenBefore,
           token
@@ -158,7 +158,7 @@ const generateHandler = (options: Options): Handler => {
         (isLettersType(contentTokenAfter.type) ||
           contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
       ) {
-        const { spaceHost } = findMarkSeqBetween(
+        const { spaceHost } = findWrappersBetween(
           group,
           token,
           contentTokenAfter

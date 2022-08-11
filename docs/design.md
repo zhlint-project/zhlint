@@ -138,7 +138,7 @@ We are figuring out all the requirements by several options below:
 
 **For hyper wrappers**
 
-- `noSpaceInsideWrapper` (`noSpaceInsideMark`)
+- `noSpaceInsideWrapper`
   - Type: `true | undefined`
   - Default: `true`
   - This rule is to ensure all the existing spaces should be outside hyper wrappers like `*`, `_`, `[`, `]`, etc.
@@ -168,9 +168,9 @@ These options can format and determine punctuations to be used.
 
 Determine whether to keep a space outside code x content.
 
-- `spaceBetweenHalfWidthLetters: true | undefined = true`* (`spaceBetweenHalfWidthContent`)
-- `noSpaceBetweenFullWidthLetters: true | undefined = true`* (`noSpaceBetweenFullWidthContent`)
-- `spaceBetweenMixedWidthLetters: true | false | undefined = true`* (`spaceBetweenMixedWidthContent`)
+- `spaceBetweenHalfWidthLetters: true | undefined = true`
+- `noSpaceBetweenFullWidthLetters: true | undefined = true`
+- `spaceBetweenMixedWidthLetters: true | false | undefined = true`
 
 Determine spaces between letters (half-width x half-width, full-width x full-width, half-width x full-width).
 
@@ -230,7 +230,7 @@ We achieve this via 2 rules:
 First of all, there are some independent rules we can do ahead.
 
 - `space-trim` for option `trimSpace`
-- `space-wrapper` (`hyper-mark`) for option `noSpaceInsideWrapper`
+- `space-wrapper` for option `noSpaceInsideWrapper`
 
 For the else part, we can draw a table of token combinations to rules to guide the implementation:
 

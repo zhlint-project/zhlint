@@ -122,6 +122,9 @@ export type PunctuationType =
 
 export type ContentTokenType = LettersType | PunctuationType
 
+/**
+ * TODO: paired html tags should be hyper wrapper
+ */
 export enum HyperTokenType {
   /**
    * Brackets

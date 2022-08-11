@@ -25,8 +25,8 @@ import {
   Options,
   checkSpaceAfter,
   findTokenAfter,
-  isMarkdownOrHtmlPair,
-  getMarkdownOrHtmlSide
+  isWrapper,
+  getWrapperSide
 } from './util'
 import {
   Handler,
@@ -37,7 +37,7 @@ import {
 import { MARKDOWN_NOSPACE_INSIDE } from './messages'
 
 const generateHandler = (options: Options): Handler => {
-  const noSpaceInsideMarkOption = options?.noSpaceInsideMark
+  const noSpaceInsideMarkOption = options?.noSpaceInsideWrapper
 
   return (token: MutableToken, _, group: MutableGroupToken) => {
     // skip if there is no options
@@ -53,8 +53,8 @@ const generateHandler = (options: Options): Handler => {
 
     // skip non-mark situations
     if (
-      !isMarkdownOrHtmlPair(token) &&
-      !isMarkdownOrHtmlPair(tokenAfter)
+      !isWrapper(token) &&
+      !isWrapper(tokenAfter)
     ) {
       return
     }
@@ -62,18 +62,18 @@ const generateHandler = (options: Options): Handler => {
     // 1. left x left, right x right
     // 2. left x non-mark
     // 3. non-mark x right
-    const markSideBefore = getMarkdownOrHtmlSide(token)
-    const markSideAfter = getMarkdownOrHtmlSide(tokenAfter)
+    const markSideBefore = getWrapperSide(token)
+    const markSideAfter = getWrapperSide(tokenAfter)
     if (markSideBefore === markSideAfter) {
       checkSpaceAfter(token, '', MARKDOWN_NOSPACE_INSIDE)
     } else if (
       markSideBefore === MarkSideType.LEFT &&
-      !isMarkdownOrHtmlPair(tokenAfter)
+      !isWrapper(tokenAfter)
     ) {
       checkSpaceAfter(token, '', MARKDOWN_NOSPACE_INSIDE)
     } else if (
       markSideAfter === MarkSideType.RIGHT &&
-      !isMarkdownOrHtmlPair(token)
+      !isWrapper(token)
     ) {
       checkSpaceAfter(token, '', MARKDOWN_NOSPACE_INSIDE)
     }

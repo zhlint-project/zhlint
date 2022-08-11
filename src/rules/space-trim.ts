@@ -16,9 +16,9 @@ import { TRIM_SPACE } from './messages'
 import {
   checkInnerSpaceBefore,
   checkSpaceAfter,
-  findExpectedVisibleTokenBefore,
-  findHyperMarkSeq,
-  isMarkdownOrHtmlPair,
+  findVisibleTokenBefore,
+  findConnectedWrappers,
+  isWrapper,
   Options
 } from './util'
 
@@ -38,8 +38,8 @@ const generateHandler = (options: Options): Handler => {
       }
 
       // remove all spaces after beginning marks
-      if (isMarkdownOrHtmlPair(token)) {
-        findHyperMarkSeq(group, token).forEach((x) =>
+      if (isWrapper(token)) {
+        findConnectedWrappers(group, token).forEach((x) =>
           checkSpaceAfter(x, '', TRIM_SPACE)
         )
       }
@@ -49,10 +49,10 @@ const generateHandler = (options: Options): Handler => {
       if (lastToken) {
         // 1. last token is a mark -> find last visible content token
         // 2. last token is visible content
-        if (isMarkdownOrHtmlPair(lastToken)) {
-          const lastContentToken = findExpectedVisibleTokenBefore(group, token)
+        if (isWrapper(lastToken)) {
+          const lastContentToken = findVisibleTokenBefore(group, token)
           if (lastContentToken) {
-            findHyperMarkSeq(group, lastToken).forEach((x) =>
+            findConnectedWrappers(group, lastToken).forEach((x) =>
               checkSpaceAfter(x, '', TRIM_SPACE)
             )
             checkSpaceAfter(lastContentToken, '', TRIM_SPACE)

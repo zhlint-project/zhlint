@@ -41,9 +41,9 @@ import {
 } from '../parser'
 import {
   checkSpaceAfter,
-  findExpectedVisibleTokenAfter,
-  findExpectedVisibleTokenBefore,
-  findMarkSeqBetween,
+  findVisibleTokenAfter,
+  findVisibleTokenBefore,
+  findWrappersBetween,
   isHalfWidthPunctuationWithoutSpaceAround,
   isSuccessiveHalfWidthPunctuation,
   Options
@@ -86,7 +86,7 @@ const generateHandler = (options: Options): Handler => {
 
     // 1. content/right-quote/right-bracket/code x punctuation
     if (noBeforePunctuationOption) {
-      const contentTokenBefore = findExpectedVisibleTokenBefore(group, token)
+      const contentTokenBefore = findVisibleTokenBefore(group, token)
       if (
         contentTokenBefore &&
         // content
@@ -99,7 +99,7 @@ const generateHandler = (options: Options): Handler => {
           // code
           contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
       ) {
-        const { spaceHost } = findMarkSeqBetween(
+        const { spaceHost } = findWrappersBetween(
           group,
           contentTokenBefore,
           token
@@ -124,7 +124,7 @@ const generateHandler = (options: Options): Handler => {
           ? PUNCTUATION_SPACE_AFTER
           : PUNCTUATION_NOSPACE_AFTER
 
-      const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
+      const contentTokenAfter = findVisibleTokenAfter(group, token)
       if (
         contentTokenAfter &&
         // content
@@ -137,7 +137,7 @@ const generateHandler = (options: Options): Handler => {
           // code
           contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
       ) {
-        const { spaceHost } = findMarkSeqBetween(
+        const { spaceHost } = findWrappersBetween(
           group,
           token,
           contentTokenAfter

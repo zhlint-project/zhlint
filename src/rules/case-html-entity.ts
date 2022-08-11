@@ -15,8 +15,8 @@ import {
 } from '../parser'
 import { ValidationTarget } from '../report'
 import {
-  findMarkSeqBetween,
-  findNonHyperVisibleTokenAfter,
+  findWrappersBetween,
+  findNonCodeVisibleTokenAfter,
   findTokenAfter,
   Options,
   removeValidationOnTarget,
@@ -67,9 +67,9 @@ const generateHandler = (options: Options): Handler => {
     removeValidationOnTarget(thirdToken, ValidationTarget.CONTENT)
     removeValidationOnTarget(thirdToken, ValidationTarget.SPACE_AFTER)
 
-    const nextToken = findNonHyperVisibleTokenAfter(group, thirdToken)
+    const nextToken = findNonCodeVisibleTokenAfter(group, thirdToken)
     if (nextToken) {
-      const { spaceHost } = findMarkSeqBetween(group, thirdToken, nextToken)
+      const { spaceHost } = findWrappersBetween(group, thirdToken, nextToken)
       if (spaceHost) {
         spaceHost.modifiedSpaceAfter = spaceHost.spaceAfter
         removeValidationOnTarget(spaceHost, ValidationTarget.SPACE_AFTER)

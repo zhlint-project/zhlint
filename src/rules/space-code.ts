@@ -22,9 +22,9 @@
 import {
   Options,
   checkSpaceAfter,
-  findExpectedVisibleTokenAfter,
-  findExpectedVisibleTokenBefore,
-  findMarkSeqBetween
+  findVisibleTokenAfter,
+  findVisibleTokenBefore,
+  findWrappersBetween
 } from './util'
 import {
   Handler,
@@ -55,12 +55,12 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // skip non-after-token situations
-    const contentTokenBefore = findExpectedVisibleTokenBefore(group, token)
-    const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
+    const contentTokenBefore = findVisibleTokenBefore(group, token)
+    const contentTokenAfter = findVisibleTokenAfter(group, token)
     const { spaceHost: beforeSpaceHost } =
-      findMarkSeqBetween(group, contentTokenBefore, token)
+      findWrappersBetween(group, contentTokenBefore, token)
     const { spaceHost: afterSpaceHost } =
-      findMarkSeqBetween(group, token, contentTokenAfter)
+      findWrappersBetween(group, token, contentTokenAfter)
 
     // content x code
     if (contentTokenBefore && isLettersType(contentTokenBefore.type)) {

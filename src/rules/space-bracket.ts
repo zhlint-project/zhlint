@@ -36,9 +36,9 @@ import {
 } from '../parser'
 import {
   checkSpaceAfter,
-  findExpectedVisibleTokenAfter,
-  findExpectedVisibleTokenBefore,
-  findMarkSeqBetween,
+  findVisibleTokenAfter,
+  findVisibleTokenBefore,
+  findWrappersBetween,
   findTokenAfter,
   findTokenBefore,
   Options
@@ -121,12 +121,12 @@ const generateHandler = (options: Options): Handler => {
 
     // skip bracket between half-width content without spaces
     // or empty brackets beside half-width content without spaces
-    const contentTokenBefore = findExpectedVisibleTokenBefore(group, token)
-    const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
-    const { spaceHost: beforeSpaceHost, tokenSeq: beforeTokenSeq } =
-      findMarkSeqBetween(group, contentTokenBefore, token)
-    const { spaceHost: afterSpaceHost, tokenSeq: afterTokenSeq } =
-      findMarkSeqBetween(group, token, contentTokenAfter)
+    const contentTokenBefore = findVisibleTokenBefore(group, token)
+    const contentTokenAfter = findVisibleTokenAfter(group, token)
+    const { spaceHost: beforeSpaceHost, tokens: beforeTokenSeq } =
+      findWrappersBetween(group, contentTokenBefore, token)
+    const { spaceHost: afterSpaceHost, tokens: afterTokenSeq } =
+      findWrappersBetween(group, token, contentTokenAfter)
     if (
       shouldSkip(
         contentTokenBefore,

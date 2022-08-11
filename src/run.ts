@@ -1,61 +1,16 @@
 import { Block, ParsedStatus } from './hypers/types'
 import { Validation } from './report'
-import { IgnoredCase, IgnoredMark } from './ignore'
-import { Options as RuleOptions } from './rules/util'
+import { IgnoredMark } from './ignore'
+import { Options } from './options'
 
-import replaceBlocks from './replace-block'
+import { normalizeOptions } from './options'
 import { parse, toMutableResult, travel } from './parser'
-import join from './join'
+import generateHandlers from './rules'
 import findIgnoredMarks from './ignore'
-import { env } from './report'
+import join from './join'
+import replaceBlocks from './replace-block'
 
-import ignore from './hypers/ignore'
-import hexo from './hypers/hexo'
-import vuepress from './hypers/vuepress'
-import md from './hypers/md'
-
-import generateHandlers, { defaultConfig as defaultRules } from './rules'
-
-const hyperParseInfo = [
-  { name: 'ignore', value: ignore },
-  { name: 'hexo', value: hexo },
-  { name: 'vuepress', value: vuepress },
-  { name: 'markdown', value: md }
-]
-const arrToMap = <T>(
-  arr: { name: string; value: T }[]
-): { [name: string]: T } =>
-  arr.reduce((current, { name, value }) => {
-    current[name] = value
-    return current
-  }, {})
-
-const hyperParseMap =
-  arrToMap<(status: ParsedStatus) => ParsedStatus>(hyperParseInfo)
-
-const matchCallArray = <T>(calls: unknown[], map: { [name: string]: T }): T[] =>
-  calls
-    .map((call) => {
-      switch (typeof call) {
-        case 'function':
-          return call
-        case 'string':
-          return map[call]
-        default:
-          return null
-      }
-    })
-    .filter(Boolean) as T[]
-
-export type Options = {
-  logger?: Console
-  rules?: RuleOptions
-  // TODO: deprecate string[]
-  hyperParse?:
-    | (string | ((status: ParsedStatus) => ParsedStatus))[]
-    | ((status: ParsedStatus) => ParsedStatus)
-  ignoredCases?: IgnoredCase[]
-}
+export { Options } from './options'
 
 export type Result = {
   file?: string
@@ -72,21 +27,9 @@ const run = (str: string, options: Options = {}): Result => {
     return { origin: str, result: str, validations: [], disabled: true }
   }
 
-  // init logger
-  const logger = options.logger || env.defaultLogger
+  const normalizedOptions = normalizeOptions(options)
 
-  // init rules, hyper parsers, rule options, and ignored cases
-  const ignoredCases = options.ignoredCases || []
-  const preset = options.rules?.preset === 'default' ? defaultRules : {}
-  const ruleOptions = { ...preset, ...options.rules }
-  const rules = generateHandlers(ruleOptions)
-  let hyperParserList: (string | ((status: ParsedStatus) => ParsedStatus))[]
-  if (typeof options.hyperParse === 'function') {
-    hyperParserList = [options.hyperParse]
-  } else {
-    hyperParserList =
-      options.hyperParse || hyperParseInfo.map((item) => item.name)
-  }
+  const { logger, ignoredCases, rules, hyperParse } = normalizedOptions
 
   // init status
   // str -> ignoredByRules, ignoredByParsers
@@ -111,10 +54,10 @@ const run = (str: string, options: Options = {}): Result => {
   const allIgnoredMarks: IgnoredMark[] = []
 
   // Run all the hyper parsers
-  const parsedStatus = matchCallArray<(status: ParsedStatus) => ParsedStatus>(
-    hyperParserList,
-    hyperParseMap
-  ).reduce((current, parse) => parse(current), status)
+  const parsedStatus = hyperParse.reduce(
+    (current, parse) => parse(current),
+    status
+  )
 
   // 1. Parse each block without ignoredByParsers
   // 2. Parse all ignoredByRules into marks for each block
@@ -122,6 +65,7 @@ const run = (str: string, options: Options = {}): Result => {
   // 4. Push all ignored marks into allIgnoredMarks for each block
   // 5. Join all tokens with ignoredMarks and all errors for each block
   // 6. Replace each block back to the string
+  const ruleHandlers = generateHandlers(rules)
   const modifiedBlocks: Block[] = parsedStatus.blocks.map(
     ({ value, marks, start, end }) => {
       let lastValue = value
@@ -129,11 +73,15 @@ const run = (str: string, options: Options = {}): Result => {
         logger.log('[Original block value]')
         logger.log(lastValue)
       }
-      const result = toMutableResult(parse(value, marks), ruleOptions)
+      const result = toMutableResult(parse(value, marks), rules)
       parserErrors.push(...result.errors)
-      const ignoredMarks = findIgnoredMarks(value, status.ignoredByRules, logger)
+      const ignoredMarks = findIgnoredMarks(
+        value,
+        status.ignoredByRules,
+        logger
+      )
 
-      rules.forEach((rule) => {
+      ruleHandlers.forEach((rule) => {
         travel(result.tokens, rule)
         if (global.__DEV__) {
           const currentValue = join(result.tokens, ignoredMarks, [], start)
