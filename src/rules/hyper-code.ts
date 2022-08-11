@@ -19,7 +19,13 @@
  * - code x content
  */
 
-import { Options, checkSpaceAfter, findExpectedVisibleTokenAfter, findExpectedVisibleTokenBefore, findMarkSeqBetween } from './util'
+import {
+  Options,
+  checkSpaceAfter,
+  findExpectedVisibleTokenAfter,
+  findExpectedVisibleTokenBefore,
+  findMarkSeqBetween
+} from './util'
 import {
   Handler,
   isContentType,
