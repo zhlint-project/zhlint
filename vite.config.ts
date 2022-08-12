@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
     sourcemap: true
   },
   define: {
-    'global.__DEV__': mode === 'development'
+    'globalThis.__DEV__': mode === 'development'
   },
   test: {}
 }))
