@@ -3,18 +3,20 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   base: '/zhlint/',
   title: 'zhlint',
+  titleTemplate: false,
   description: 'A linting tool for Chinese text content.',
 
   themeConfig: {
-    nav: [{ text: 'Home', link: '/' }],
-
-    sidebar: [{ link: '/', text: 'zhlint' }],
-
-    repo: 'jinjiang/zhlint',
-    repoLabel: 'GitHub',
-    docsDir: 'docs',
-    docsBranch: 'master',
-    editLinks: true,
-    editLinkText: 'Help us improve this page!'
+    siteTitle: 'zhlint',
+    socialLinks: [
+      {
+        icon: 'github',
+        link: 'https://github.com/Jinjiang/zhlint'
+      }
+    ],
+    editLink: {
+      pattern: 'https://github.com/Jinjiang/zhlint/edit/master/docs/:path',
+      text: 'Help us improve this page!'
+    }
   }
 })
