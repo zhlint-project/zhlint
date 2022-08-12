@@ -1,4 +1,4 @@
-# <img src="./logo.svg" style="vertical-align: middle;"> zhlint
+# ![logo](./logo.svg) zhlint
 
 A linting tool for Chinese text content.
 
@@ -117,16 +117,21 @@ type Options = {
 
 ```ts
 type Result = {
+  // the basic info and availability of the file
   file?: string
+  disabled: boolean
+
+  // the original content of the file
   origin: string
-  result: string
+
+  // all the error messages
   validations: Validation[]
 }
 
 type Validation = {
+  message: string
   index: number
   length: number
-  message: string
 }
 ```
 
@@ -138,8 +143,6 @@ type Validation = {
 - `Validation`
   - `index`: The index of the target token in the input string.
   - `length`: The length of the target token in the input string.
-  <!-- - `name`: The name of the rule that the token disobeys to. -->
-  <!-- - `target`: The target part of the target token, like the `content` or the `spaceAfter` that, etc. -->
   - `message`: The description of this validation in natural language.
 
 ## Features
@@ -149,7 +152,7 @@ type Validation = {
 We support lint your text content in Markdown syntax by default. For example:
 
 ```js
-run('自动在_中文_和**English**之间加入空格')
+run('自动在_中文_和**English**之间加入空格', options)
 ```
 
 It will analyse the Markdown syntax first and extract the pure text content and do the lint job. After that the fixed pure text content could be replaced back to the raw Markdown string and returned as the output `value` in result.
@@ -161,7 +164,7 @@ Specially, we support [Hexo tags syntax](https://hexo.io/docs/tag-plugins) just 
 As a result, we additionally skip the Hexo-style tags by default. For example:
 
 ```js
-run('现在过滤器只能用在插入文本中 (`{% raw %}{{ }}{% endraw %}` tags)。')
+run('现在过滤器只能用在插入文本中 (`{% raw %}{{ }}{% endraw %}` tags)。', options)
 ```
 
 ### Setup ignored cases
@@ -229,19 +232,19 @@ type RuleOptions = {
   // `['Mr.','Mrs.','Dr.','Jr.','Sr.','vs.','etc.','i.e.','e.g.','a.k.a']`
   skipAbbrs?: string[]
 
-  /* SPACES AROUND CONTENT */
+  /* SPACES AROUND LETTERS */
 
   // default preset: `true`
   // - `true`: one space
   // - `undefined`: do nothing
   // e.g. `foo  bar` -> `foo bar`
-  spaceBetweenHalfWidthContent?: boolean
+  spaceBetweenHalfWidthLetters?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文 字` -> `文字`
-  noSpaceBetweenFullWidthContent?: boolean
+  noSpaceBetweenFullWidthLetters?: boolean
 
   // default preset: `true`
   // - `true`: one space
@@ -249,7 +252,7 @@ type RuleOptions = {
   // - `undefined`: do nothing
   // e.g. `文字 foo文字` -> `文字 foo 文字` (`true`)
   // e.g. `文字foo 文字` -> `文字foo文字` (`false`)
-  spaceBetweenMixedWidthContent?: boolean
+  spaceBetweenMixedWidthLetters?: boolean
 
   // Special case: skip `spaceBetweenMixedWidthContent`
   // for numbers x Chinese units.
@@ -328,13 +331,13 @@ type RuleOptions = {
   // e.g. '文字`code` 文字' -> '文字`code`文字' ('false')
   spaceOutsideCode?: boolean
 
-  /* SPACES AROUND MARKDOWN/HTML TAGS */
+  /* SPACES AROUND MARKDOWN/HTML WRAPPERS */
 
   // default `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字** foo **文字` -> `文字 **foo** 文字`
-  noSpaceInsideMark?: boolean
+  noSpaceInsideWrapper?: boolean
 
   /* SPACES AT THE BEGINNING/END */
 
@@ -343,3 +346,12 @@ type RuleOptions = {
   trimSpace?: boolean
 }
 ```
+
+## More information
+
+zhlint is now open sourced on [GitHub](https://github.com/zhlint) and [issues](https://github.com/jinjiang/zhlint/issues) welcome.
+
+<style>
+.vp-doc img { border-radius: 8px; }
+.vp-doc img[alt="logo"] { display: inline-block; vertical-align: middle; }
+</style>

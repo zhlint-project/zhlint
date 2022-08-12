@@ -1,25 +1,30 @@
-import { ContentType } from '.'
 import { ValidationTarget } from '../report'
 import { checkCharType } from './char'
-import { BRACKET_NOT_CLOSED, BRACKET_NOT_OPEN, QUOTE_NOT_CLOSED, QUOTE_NOT_OPEN } from './messages'
+import {
+  BRACKET_NOT_CLOSED,
+  BRACKET_NOT_OPEN,
+  QUOTE_NOT_CLOSED,
+  QUOTE_NOT_OPEN
+} from './messages'
 import {
   CharType,
   SHORTHAND_CHARS,
   SHORTHAND_PAIR_SET,
-  MARK_CHAR_SET,
-  GROUP_CHAR_SET,
+  BRACKET_CHAR_SET,
+  QUOTE_CHAR_SET,
   Mark,
   MarkMap,
   MarkSideType,
   MarkType,
+  LettersType,
   SingleToken,
-  SingleTokenType,
+  HyperTokenType,
   GroupToken,
   GroupTokenType,
   Token,
-  ParseStatus,
   PunctuationType
 } from './types'
+import { ParseStatus } from './parse'
 
 export const handlePunctuation = (
   i: number,
@@ -36,13 +41,13 @@ export const handlePunctuation = (
   // - left quote: start a new unfinished group
   // - right quote: end the current unfinished group
   // - other punctuation: add and end the current token
-  if (MARK_CHAR_SET.left.indexOf(char) >= 0) {
+  if (BRACKET_CHAR_SET.left.indexOf(char) >= 0) {
     // push (save) the current unfinished mark if have
     initNewMark(status, i, char)
     // generate a new token and mark it as a mark punctuation by left
     // and finish the token
     addBracketToken(status, i, char, MarkSideType.LEFT)
-  } else if (MARK_CHAR_SET.right.indexOf(char) >= 0) {
+  } else if (BRACKET_CHAR_SET.right.indexOf(char) >= 0) {
     if (!status.lastMark || !status.lastMark.startContent) {
       addUnmatchedToken(status, i, char)
       addError(status, i, BRACKET_NOT_OPEN)
@@ -53,7 +58,7 @@ export const handlePunctuation = (
       // and pop the previous one if exists
       finalizeCurrentMark(status, i, char)
     }
-  } else if (GROUP_CHAR_SET.neutral.indexOf(char) >= 0) {
+  } else if (QUOTE_CHAR_SET.neutral.indexOf(char) >= 0) {
     // - end the last unfinished group
     // - start a new group
     if (status.lastGroup && char === status.lastGroup.startContent) {
@@ -61,9 +66,9 @@ export const handlePunctuation = (
     } else {
       initNewGroup(status, i, char)
     }
-  } else if (GROUP_CHAR_SET.left.indexOf(char) >= 0) {
+  } else if (QUOTE_CHAR_SET.left.indexOf(char) >= 0) {
     initNewGroup(status, i, char)
-  } else if (GROUP_CHAR_SET.right.indexOf(char) >= 0) {
+  } else if (QUOTE_CHAR_SET.right.indexOf(char) >= 0) {
     if (!status.lastGroup || !status.lastGroup.startContent) {
       addUnmatchedToken(status, i, char)
       addError(status, i, QUOTE_NOT_OPEN)
@@ -78,7 +83,7 @@ export const handlePunctuation = (
 export const handleContent = (
   i: number,
   char: string,
-  type: ContentType,
+  type: LettersType,
   status: ParseStatus
 ): void => {
   // check if type changed and last token unfinished
@@ -148,6 +153,17 @@ export const finalizeCurrentToken = (
 
 // hyper marks
 
+const markTypeToTokenType = (type: MarkType): HyperTokenType => {
+  switch (type) {
+    case MarkType.HYPER:
+      return HyperTokenType.HYPER_WRAPPER
+    case MarkType.BRACKETS:
+      return HyperTokenType.HYPER_WRAPPER_BRACKET
+    case MarkType.RAW:
+      return HyperTokenType.INDETERMINATED
+  }
+}
+
 export const addHyperToken = (
   status: ParseStatus,
   index: number,
@@ -156,7 +172,7 @@ export const addHyperToken = (
   markSide: MarkSideType
 ) => {
   const token: SingleToken = {
-    type: `mark-${mark.type}` as SingleTokenType, // TODO enum
+    type: markTypeToTokenType(mark.type),
     index,
     length: content.length,
     content: content,
@@ -212,7 +228,7 @@ export const addBracketToken = (
   markSide: MarkSideType
 ) => {
   const token: SingleToken = {
-    type: SingleTokenType.MARK_BRACKETS,
+    type: HyperTokenType.HYPER_WRAPPER_BRACKET,
     index,
     length: 1,
     content: char,
@@ -264,7 +280,7 @@ const addUnmatchedToken = (
   char: string
 ): void => {
   const token: SingleToken = {
-    type: SingleTokenType.UNMATCHED,
+    type: HyperTokenType.UNMATCHED,
     index: i,
     length: 1,
     content: char,
@@ -323,7 +339,7 @@ export const initNewContent = (
   status: ParseStatus,
   index: number,
   char: string,
-  type: ContentType
+  type: LettersType
 ) => {
   status.lastToken = {
     type,
@@ -394,12 +410,12 @@ export const isShorthand = (
   if (SHORTHAND_CHARS.indexOf(char) < 0) {
     return false
   }
-  if (!status.lastToken || status.lastToken.type !== CharType.CONTENT_HALF) {
+  if (!status.lastToken || status.lastToken.type !== CharType.LETTERS_HALF) {
     return false
   }
   const nextChar = str[index + 1]
   const nextType = checkCharType(nextChar)
-  if (nextType === CharType.CONTENT_HALF) {
+  if (nextType === CharType.LETTERS_HALF) {
     return true
   }
   if (nextType === CharType.SPACE) {
@@ -413,21 +429,21 @@ export const isShorthand = (
   return false
 }
 
-export const getHyperContentType = (content: string): SingleTokenType => {
+export const getHyperContentType = (content: string): HyperTokenType => {
   if (content.match(/\n/)) {
     // Usually it's hexo custom containers.
-    return SingleTokenType.HYPER_UNEXPECTED
+    return HyperTokenType.HYPER_CONTENT
   }
   if (content.match(/^<code.*>.*<\/code.*>$/)) {
     // Usually it's <code>...</code>.
-    return SingleTokenType.HYPER_CODE
+    return HyperTokenType.HYPER_CONTENT_CODE
   }
   if (content.match(/^<.+>$/)) {
     // Usually it's other HTML tags.
-    return SingleTokenType.HYPER_UNEXPECTED
+    return HyperTokenType.HYPER_CONTENT
   }
   // Usually it's `...`.
-  return SingleTokenType.HYPER_CODE
+  return HyperTokenType.HYPER_CONTENT_CODE
 }
 
 // error handling

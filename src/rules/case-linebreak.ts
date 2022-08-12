@@ -9,7 +9,7 @@
 
 import { Handler, MutableToken } from "../parser";
 import { ValidationTarget } from "../report";
-import { Options, removeValidation } from "./util";
+import { Options, removeValidationOnTarget } from "./util";
 
 const generateHandler = (options: Options): Handler => {
   // do nothing
@@ -17,7 +17,7 @@ const generateHandler = (options: Options): Handler => {
 
   return (token: MutableToken) => {
     if (token.spaceAfter && token.spaceAfter.match(/\n/)) {
-      removeValidation(token, '', ValidationTarget.SPACE_AFTER)
+      removeValidationOnTarget(token, ValidationTarget.SPACE_AFTER)
       token.modifiedSpaceAfter = token.spaceAfter
     }
   }

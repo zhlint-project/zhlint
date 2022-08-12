@@ -5,6 +5,9 @@ type Piece = Block & {
 }
 
 const replaceBlocks = (str: string, blocks: Block[]): string => {
+  if (blocks.length === 0) {
+    return str
+  }
   const pieces = blocks.reduce((pieces: Piece[], block, index) => {
     const { start, end } = block
     const lastPiece = pieces[pieces.length - 1]

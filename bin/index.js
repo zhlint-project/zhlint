@@ -16,6 +16,7 @@ Usage:
   zhlint <input-file-path> --output <output-file-path>
   zhlint <input-file-path> --output=<output-file-path>
   zhlint --help
+  zhlint --version
 
 Examples:
   zhlint foo.md
@@ -37,6 +38,11 @@ const main = () => {
 
   const help = () =>
     console.log(helpMessage)
+
+  if (argv.v || argv.version) {
+    console.log(require('../package.json').version)
+    return
+  }
 
   if (argv.h || argv.help) {
     help()

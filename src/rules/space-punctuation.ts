@@ -32,18 +32,18 @@ import {
   CharType,
   GroupTokenType,
   Handler,
-  isContentType,
+  isLettersType,
   isPunctuationType,
   MarkSideType,
   MutableGroupToken,
   MutableToken,
-  SingleTokenType
+  HyperTokenType
 } from '../parser'
 import {
   checkSpaceAfter,
-  findExpectedVisibleTokenAfter,
-  findExpectedVisibleTokenBefore,
-  findMarkSeqBetween,
+  findVisibleTokenAfter,
+  findVisibleTokenBefore,
+  findWrappersBetween,
   isHalfWidthPunctuationWithoutSpaceAround,
   isSuccessiveHalfWidthPunctuation,
   Options
@@ -54,7 +54,7 @@ import {
   PUNCTUATION_SPACE_AFTER
 } from './messages'
 
-const normalPunctuationList = `,.;:?!，。；：？！`.split('')
+const normalPunctuationList = `,.;:?!，、。；：？！`.split('')
 const isNormalPunctuation = (char: string): boolean =>
   normalPunctuationList.indexOf(char) >= 0
 
@@ -86,20 +86,20 @@ const generateHandler = (options: Options): Handler => {
 
     // 1. content/right-quote/right-bracket/code x punctuation
     if (noBeforePunctuationOption) {
-      const contentTokenBefore = findExpectedVisibleTokenBefore(group, token)
+      const contentTokenBefore = findVisibleTokenBefore(group, token)
       if (
         contentTokenBefore &&
         // content
-        (isContentType(contentTokenBefore.type) ||
+        (isLettersType(contentTokenBefore.type) ||
           // right-quote
           contentTokenBefore.type === GroupTokenType.GROUP ||
           // right-bracket
-          (contentTokenBefore.type === SingleTokenType.MARK_BRACKETS &&
+          (contentTokenBefore.type === HyperTokenType.HYPER_WRAPPER_BRACKET &&
             contentTokenBefore.markSide === MarkSideType.RIGHT) ||
           // code
-          contentTokenBefore.type === SingleTokenType.HYPER_CODE)
+          contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
       ) {
-        const { spaceHost } = findMarkSeqBetween(
+        const { spaceHost } = findWrappersBetween(
           group,
           contentTokenBefore,
           token
@@ -124,20 +124,20 @@ const generateHandler = (options: Options): Handler => {
           ? PUNCTUATION_SPACE_AFTER
           : PUNCTUATION_NOSPACE_AFTER
 
-      const contentTokenAfter = findExpectedVisibleTokenAfter(group, token)
+      const contentTokenAfter = findVisibleTokenAfter(group, token)
       if (
         contentTokenAfter &&
         // content
-        (isContentType(contentTokenAfter.type) ||
+        (isLettersType(contentTokenAfter.type) ||
           // left-quote
           contentTokenAfter.type === GroupTokenType.GROUP ||
           // left-bracket
-          (contentTokenAfter.type === SingleTokenType.MARK_BRACKETS &&
+          (contentTokenAfter.type === HyperTokenType.HYPER_WRAPPER_BRACKET &&
             contentTokenAfter.markSide === MarkSideType.LEFT) ||
           // code
-          contentTokenAfter.type === SingleTokenType.HYPER_CODE)
+          contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
       ) {
-        const { spaceHost } = findMarkSeqBetween(
+        const { spaceHost } = findWrappersBetween(
           group,
           token,
           contentTokenAfter

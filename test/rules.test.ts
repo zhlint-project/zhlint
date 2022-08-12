@@ -30,7 +30,7 @@ describe('lint by rules', () => {
   })
   test('[hyper-mark] the position of spaces around hyper marks (if any)', () => {
     const options: Options = {
-      rules: { noSpaceInsideMark: true }
+      rules: { noSpaceInsideWrapper: true }
     }
     expect(lint('x ** yyy ** z', options)).toEqual({
       output: 'x **yyy** z',
@@ -228,7 +228,7 @@ describe('lint by rules', () => {
   describe('[space-content] the space between content', () => {
     test('one and only one space between half-width content', () => {
       const options: Options = {
-        rules: { spaceBetweenHalfWidthContent: true }
+        rules: { spaceBetweenHalfWidthLetters: true }
       }
       expect(lint('foo bar   baz', options)).toEqual({
         output: 'foo bar baz',
@@ -243,13 +243,13 @@ describe('lint by rules', () => {
     })
     test('no space between full-width content', () => {
       const options: Options = {
-        rules: { noSpaceBetweenFullWidthContent: true }
+        rules: { noSpaceBetweenFullWidthLetters: true }
       }
       expect(getOutput('中文 中文 中 文', options)).toBe('中文中文中文')
     })
     test('one space between mixed-width content', () => {
       const options: Options = {
-        rules: { spaceBetweenMixedWidthContent: true }
+        rules: { spaceBetweenMixedWidthLetters: true }
       }
       expect(getOutput('中文foo 中文 foo中foo文', options)).toBe(
         '中文 foo 中文 foo 中 foo 文'
@@ -257,7 +257,7 @@ describe('lint by rules', () => {
     })
     test('no space between mixed-width content', () => {
       const options: Options = {
-        rules: { spaceBetweenMixedWidthContent: false }
+        rules: { spaceBetweenMixedWidthLetters: false }
       }
       expect(getOutput('中文foo 中文 foo中foo文', options)).toBe(
         '中文foo中文foo中foo文'

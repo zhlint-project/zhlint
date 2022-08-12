@@ -1,4 +1,4 @@
-# <img src="./docs/logo.svg" style="vertical-align: middle;"> zhlint
+# ![logo](docs/logo.svg) zhlint
 
 A linting tool for Chinese text content.
 
@@ -38,7 +38,7 @@ zhlint --help
 
 The validation report might look like this:
 
-![](./docs/screenshot-cli.png)
+![](docs/screenshot-cli.png)
 
 ### As Node.js package
 
@@ -78,20 +78,20 @@ Found 2 errors.
 
 You could find a JavaScript file `dist/zhlint.js` as a standalone version. To use it, for example, you can directly add it into your browser as a `<script>` tag. Then there would be a global variable `zhlint` for you.
 
-![](./docs/screenshot-browser.png)
+![](docs/screenshot-browser.png)
 
 ## API
 
-- `run(str: string, options?: Options): Result`: Lint a certain file.
-  - parameters:
-    - `str`: The text content you want to lint.
-    - `options`: Some options to config.
-  - returns:
-    - The result of a single piece of input string. It contains fixed text content as `value` and the infor of all `validations`.
-- `report(results: Result[], logger?: Console): void`: Print out the validation reports for each file.
-  - parameters:
-    - `results`: An array for all linted results.
-    - `logger`: The logger instance, by default it's `console` in Node.js/browser.
+-   `run(str: string, options?: Options): Result`: Lint a certain file.
+    -   parameters:
+        -   `str`: The text content you want to lint.
+        -   `options`: Some options to config.
+    -   returns:
+        -   The result of a single piece of input string. It contains fixed text content as `value` and the infor of all `validations`.
+-   `report(results: Result[], logger?: Console): void`: Print out the validation reports for each file.
+    -   parameters:
+        -   `results`: An array for all linted results.
+        -   `logger`: The logger instance, by default it's `console` in Node.js/browser.
 
 ### Options
 
@@ -106,41 +106,44 @@ type Options = {
 }
 ```
 
-- `rules`: customize the linting config. It could be `undefined` which means linting nothing. It could be `{ preset: 'default' }` which just uses the default config. For more details of `RuleOptions`, please see [supported rules](#supported-rules)
-- `hyperParse`: customize the hyper parser by their names. It could be `undefined` which means just use default [ignored cases parser](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/ignore.js), [Markdown parser](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/md.js) and the [Hexo tags parser](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/hexo.js).
-- `ignoredCases`: provide exception cases which you would like to skip.
-  - `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
-    - Just follows a certain format inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
-- `logger`: same to the parameter in `report(...)`.
+-   `rules`: customize the linting config. It could be `undefined` which means linting nothing. It could be `{ preset: 'default' }` which just uses the default config. For more details of `RuleOptions`, please see [supported rules](#supported-rules)
+-   `hyperParse`: customize the hyper parser by their names. It could be `undefined` which means just use default [ignored cases parser](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/ignore.js), [Markdown parser](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/md.js) and the [Hexo tags parser](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/hexo.js).
+-   `ignoredCases`: provide exception cases which you would like to skip.
+    -   `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
+        -   Just follows a certain format inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
+-   `logger`: same to the parameter in `report(...)`.
 
 ### Output
 
 ```ts
 type Result = {
+  // the basic info and availability of the file
   file?: string
+  disabled: boolean
+
+  // the original content of the file
   origin: string
-  result: string
+
+  // all the error messages
   validations: Validation[]
 }
 
 type Validation = {
+  message: string
   index: number
   length: number
-  message: string
 }
 ```
 
-- `Result`
-  - `file`: The file name. It's an optional field which is only used in CLI.
-  - `origin`: the original text content.
-  - `result`: the finally fixed text content.
-  - `validations`: All the validation information.
-- `Validation`
-  - `index`: The index of the target token in the input string.
-  - `length`: The length of the target token in the input string.
-  <!-- - `name`: The name of the rule that the token disobeys to. -->
-  <!-- - `target`: The target part of the target token, like the `content` or the `spaceAfter` that, etc. -->
-  - `message`: The description of this validation in natural language.
+-   `Result`
+    -   `file`: The file name. It's an optional field which is only used in CLI.
+    -   `origin`: the original text content.
+    -   `result`: the finally fixed text content.
+    -   `validations`: All the validation information.
+-   `Validation`
+    -   `index`: The index of the target token in the input string.
+    -   `length`: The length of the target token in the input string.
+    -   `message`: The description of this validation in natural language.
 
 ## Features
 
@@ -149,7 +152,7 @@ type Validation = {
 We support lint your text content in Markdown syntax by default. For example:
 
 ```js
-run('自动在_中文_和**English**之间加入空格')
+run('自动在_中文_和**English**之间加入空格', options)
 ```
 
 It will analyse the Markdown syntax first and extract the pure text content and do the lint job. After that the fixed pure text content could be replaced back to the raw Markdown string and returned as the output `value` in result.
@@ -161,7 +164,7 @@ Specially, we support [Hexo tags syntax](https://hexo.io/docs/tag-plugins) just 
 As a result, we additionally skip the Hexo-style tags by default. For example:
 
 ```js
-run('现在过滤器只能用在插入文本中 (`{% raw %}{{ }}{% endraw %}` tags)。')
+run('现在过滤器只能用在插入文本中 (`{% raw %}{{ }}{% endraw %}` tags)。', options)
 ```
 
 ### Setup ignored cases
@@ -189,15 +192,15 @@ run(str, { ignoredCases: { textStart: '( ', textEnd: ' )' } })
 
 ## Supported preproccessors (hyper parsers)
 
-- `ignore`: find all ignored pieces by the HTML comment `<!-- zhlint ignore: ... -->`
-- `hexo`: find all Hexo tags to avoid them being parsed.
-- `markdown`: parse by markdown syntax and find all block-level texts and inline-level marks.
+-   `ignore`: find all ignored pieces by the HTML comment `<!-- zhlint ignore: ... -->`
+-   `hexo`: find all Hexo tags to avoid them being parsed.
+-   `markdown`: parse by markdown syntax and find all block-level texts and inline-level marks.
 
 ## Supported rules
 
-_Almost the rules come from the past translation experiences in [W3C HTML Chinese interest group](https://www.w3.org/html/ig/zh/wiki/Main_Page) and [Vue.js Chinese docsite](https://github.com/vuejs/cn.vuejs.org/wiki)._
+*Almost the rules come from the past translation experiences in [W3C HTML Chinese interest group](https://www.w3.org/html/ig/zh/wiki/Main_Page) and [Vue.js Chinese docsite](https://github.com/vuejs/cn.vuejs.org/wiki).*
 
-_... and this part might be controversial. So if you don't feel well at some point, we definitely would love to know and improve. Opening an [issue](https://github.com/jinjiang/zhlint/issues) is always welcome. Then we could discuss about the possible better option or decision._
+*... and this part might be controversial. So if you don't feel well at some point, we definitely would love to know and improve. Opening an [issue](https://github.com/jinjiang/zhlint/issues) is always welcome. Then we could discuss about the possible better option or decision.*
 
 ```ts
 type RuleOptions = {
@@ -229,19 +232,19 @@ type RuleOptions = {
   // `['Mr.','Mrs.','Dr.','Jr.','Sr.','vs.','etc.','i.e.','e.g.','a.k.a']`
   skipAbbrs?: string[]
 
-  /* SPACES AROUND CONTENT */
+  /* SPACES AROUND LETTERS */
 
   // default preset: `true`
   // - `true`: one space
   // - `undefined`: do nothing
   // e.g. `foo  bar` -> `foo bar`
-  spaceBetweenHalfWidthContent?: boolean
+  spaceBetweenHalfWidthLetters?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文 字` -> `文字`
-  noSpaceBetweenFullWidthContent?: boolean
+  noSpaceBetweenFullWidthLetters?: boolean
 
   // default preset: `true`
   // - `true`: one space
@@ -249,7 +252,7 @@ type RuleOptions = {
   // - `undefined`: do nothing
   // e.g. `文字 foo文字` -> `文字 foo 文字` (`true`)
   // e.g. `文字foo 文字` -> `文字foo文字` (`false`)
-  spaceBetweenMixedWidthContent?: boolean
+  spaceBetweenMixedWidthLetters?: boolean
 
   // Special case: skip `spaceBetweenMixedWidthContent`
   // for numbers x Chinese units.
@@ -328,13 +331,13 @@ type RuleOptions = {
   // e.g. '文字`code` 文字' -> '文字`code`文字' ('false')
   spaceOutsideCode?: boolean
 
-  /* SPACES AROUND MARKDOWN/HTML TAGS */
+  /* SPACES AROUND MARKDOWN/HTML WRAPPERS */
 
   // default `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字** foo **文字` -> `文字 **foo** 文字`
-  noSpaceInsideMark?: boolean
+  noSpaceInsideWrapper?: boolean
 
   /* SPACES AT THE BEGINNING/END */
 
@@ -343,3 +346,8 @@ type RuleOptions = {
   trimSpace?: boolean
 }
 ```
+
+## More information
+
+zhlint is now open sourced on [GitHub](https://github.com/zhlint) and [issues](https://github.com/jinjiang/zhlint/issues) welcome.
+

@@ -7,12 +7,12 @@ export const env: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultLogger: Console
 } = {
-  stdout: global?.process?.stdout,
-  stderr: global?.process?.stderr,
+  stdout: globalThis?.process?.stdout,
+  stderr: globalThis?.process?.stderr,
   defaultLogger: console
 }
 
-if (global.__DEV__) {
+if (globalThis.__DEV__) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const fs = require('fs')
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -47,8 +47,6 @@ const getPositionByOffset = (str: string, offset: number): Position => {
   return position
 }
 
-// TODO: move validation types to a more general place
-
 export enum ValidationTarget {
   CONTENT = 'content',
   START_CONTENT = 'startContent',
@@ -58,11 +56,16 @@ export enum ValidationTarget {
 }
 
 export type Validation = {
+  // the type and content of message
   name: string
-  target: ValidationTarget
+  message: string
+
+  // position of the token
   index: number
   length: number
-  message: string
+
+  // which part of the token the error comes from
+  target: ValidationTarget
 }
 
 const generateMarker = (str: string, index: number): string => {
@@ -72,12 +75,12 @@ const generateMarker = (str: string, index: number): string => {
   for (let i = 0; i < prefix.length; i++) {
     const charType = checkCharType(prefix[i])
     if (
-      charType === CharType.CONTENT_FULL ||
+      charType === CharType.LETTERS_FULL ||
       charType === CharType.PUNCTUATION_FULL
     ) {
       fullWidthCount++
     } else if (
-      charType === CharType.CONTENT_HALF ||
+      charType === CharType.LETTERS_HALF ||
       charType === CharType.PUNCTUATION_HALF ||
       charType === CharType.SPACE
     ) {
@@ -129,11 +132,17 @@ export const reportItem = (
 }
 
 export type Result = {
+  // the basic info and availability of the file
   file?: string
   disabled: boolean
+
+  // the original content of the file
   origin: string
+
+  // all the error messages
   validations: Validation[]
 }
+
 
 export const report = (resultList: Result[], logger = env.defaultLogger) => {
   let errorCount = 0

@@ -4,7 +4,7 @@ import frontmatter from 'remark-frontmatter'
 import * as Ast from 'mdast'
 import { Node, Position } from 'unist'
 import { isRawMark, Mark, MarkSideType, MarkType, RawMark } from '../parser'
-import { Block, Data } from './types'
+import { Block, ParsedStatus } from './types'
 
 // Position related
 
@@ -219,7 +219,7 @@ const processBlockMark = (blockMark: BlockMark, str: string): void => {
     - no text: inline code/break/image/image ref/footnote ref/html
     - marks: emphasis/strong/delete/footnote/link/link ref
  */
-const parser = (data: Data): Data => {
+const parser = (data: ParsedStatus): ParsedStatus => {
   const content = data.content
   const modifiedContent = data.modifiedContent
   const ignoredByParsers = data.ignoredByParsers

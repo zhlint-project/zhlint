@@ -19,13 +19,19 @@
  * - code x content
  */
 
-import { Options, findTokenAfter, checkSpaceAfter } from './util'
+import {
+  Options,
+  checkSpaceAfter,
+  findVisibleTokenAfter,
+  findVisibleTokenBefore,
+  findWrappersBetween
+} from './util'
 import {
   Handler,
-  isContentType,
+  isLettersType,
   MutableGroupToken,
   MutableToken,
-  SingleTokenType
+  HyperTokenType
 } from '../parser'
 import { CODE_NOSPACE_OUTSIDE, CODE_SPACE_OUTSIDE } from './messages'
 
@@ -43,26 +49,30 @@ const generateHandler = (options: Options): Handler => {
       return
     }
 
+    // skip non-code tokens
+    if (token.type !== HyperTokenType.HYPER_CONTENT_CODE) {
+      return
+    }
+
     // skip non-after-token situations
-    const tokenAfter = findTokenAfter(group, token)
-    if (!tokenAfter) {
-      return
-    }
+    const contentTokenBefore = findVisibleTokenBefore(group, token)
+    const contentTokenAfter = findVisibleTokenAfter(group, token)
+    const { spaceHost: beforeSpaceHost } =
+      findWrappersBetween(group, contentTokenBefore, token)
+    const { spaceHost: afterSpaceHost } =
+      findWrappersBetween(group, token, contentTokenAfter)
 
-    // skip non-code situations
+    // content x code
+    if (contentTokenBefore && isLettersType(contentTokenBefore.type)) {
+      beforeSpaceHost && checkSpaceAfter(beforeSpaceHost, spaceAfter, message)
+    }
+    // code x content or code x code
     if (
-      token.type !== SingleTokenType.HYPER_CODE &&
-      tokenAfter.type !== SingleTokenType.HYPER_CODE
+      contentTokenAfter &&
+      (isLettersType(contentTokenAfter.type) ||
+        contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
     ) {
-      return
-    }
-
-    // 1. code x code
-    // 2. content x code, code x content
-    if (token.type === tokenAfter.type) {
-      checkSpaceAfter(token, spaceAfter, message)
-    } else if (isContentType(token.type) || isContentType(tokenAfter.type)) {
-      checkSpaceAfter(token, spaceAfter, message)
+      afterSpaceHost && checkSpaceAfter(afterSpaceHost, spaceAfter, message)
     }
   }
   return handleHyperSpaceOption
