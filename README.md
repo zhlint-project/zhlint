@@ -14,7 +14,7 @@ npm install zhlint -g
 yarn global add zhlint
 
 # or through pnpm
-pnpm add zhlint -logo
+pnpm add zhlint -g
 ```
 
 ## Usage
