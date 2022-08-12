@@ -1,4 +1,4 @@
-# <img src="./logo.svg" style="vertical-align: middle;"> zhlint
+# ![logo](./logo.svg) zhlint
 
 A linting tool for Chinese text content.
 
@@ -14,7 +14,7 @@ npm install zhlint -g
 yarn global add zhlint
 
 # or through pnpm
-pnpm add zhlint -g
+pnpm add zhlint -logo
 ```
 
 ## Usage
@@ -353,4 +353,5 @@ zhlint is now open sourced on [GitHub](https://github.com/zhlint) and [issues](h
 
 <style>
 .vp-doc img { border-radius: 8px; }
+.vp-doc img[alt="logo"] { display: inline-block; vertical-align: middle; }
 </style>
