@@ -7,12 +7,12 @@ export const env: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultLogger: Console
 } = {
-  stdout: global?.process?.stdout,
-  stderr: global?.process?.stderr,
+  stdout: globalThis?.process?.stdout,
+  stderr: globalThis?.process?.stderr,
   defaultLogger: console
 }
 
-if (global.__DEV__) {
+if (globalThis.__DEV__) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const fs = require('fs')
   // eslint-disable-next-line @typescript-eslint/no-var-requires

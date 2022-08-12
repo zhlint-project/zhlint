@@ -367,7 +367,7 @@ The exported `report` function will analysze the results and print them out in t
 
 ## For dev
 
-In the source code, there is a `global.__DEV__` variable which can be used to detect whether it's in the dev/debug mode. In this mode, the default output will go to:
+In the source code, there is a `globalThis.__DEV__` variable which can be used to detect whether it's in the dev/debug mode. In this mode, the default output will go to:
 
 - `./stdout.log`
 - `./stderr.log`

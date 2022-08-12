@@ -69,7 +69,7 @@ const run = (str: string, options: Options = {}): Result => {
   const modifiedBlocks: Block[] = parsedStatus.blocks.map(
     ({ value, marks, start, end }) => {
       let lastValue = value
-      if (global.__DEV__) {
+      if (globalThis.__DEV__) {
         logger.log('[Original block value]')
         logger.log(lastValue)
       }
@@ -83,7 +83,7 @@ const run = (str: string, options: Options = {}): Result => {
 
       ruleHandlers.forEach((rule) => {
         travel(result.tokens, rule)
-        if (global.__DEV__) {
+        if (globalThis.__DEV__) {
           const currentValue = join(result.tokens, ignoredMarks, [], start)
           if (lastValue !== currentValue) {
             logger.log(`[After process by ${rule.name}]`)
@@ -95,7 +95,7 @@ const run = (str: string, options: Options = {}): Result => {
 
       ignoredMarks.forEach((mark) => allIgnoredMarks.push(mark))
       lastValue = join(result.tokens, ignoredMarks, ruleErrors, start)
-      if (global.__DEV__) {
+      if (globalThis.__DEV__) {
         logger.log('[Eventual block value]')
         logger.log(lastValue + '\n')
       }
