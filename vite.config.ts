@@ -15,5 +15,9 @@ export default defineConfig(({ mode }) => ({
   define: {
     'globalThis.__DEV__': mode === 'development'
   },
-  test: {}
+  test: {
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+    },
+  }
 }))
