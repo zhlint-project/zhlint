@@ -12,6 +12,9 @@ const travelInlines = node => {
 }
 
 const travelBlocks = node => {
+  if (node.type === 'html') {
+    node.value = ''
+  }
   if (node.children) {
     node.children.forEach((child) => {
       travelBlocks(child)

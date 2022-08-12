@@ -351,7 +351,3 @@ type RuleOptions = {
 
 zhlint is now open sourced on [GitHub](https://github.com/zhlint) and [issues](https://github.com/jinjiang/zhlint/issues) welcome.
 
-<style>
-.vp-doc img { border-radius: 8px; }
-.vp-doc img[alt="logo"] { display: inline-block; vertical-align: middle; }
-</style>
