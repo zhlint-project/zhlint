@@ -1,3 +1,7 @@
+---
+title: zhlint
+---
+
 # ![logo](./logo.svg) zhlint
 
 A linting tool for Chinese text content.

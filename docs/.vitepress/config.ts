@@ -7,7 +7,10 @@ export default defineConfig({
   description: 'A linting tool for Chinese text content.',
 
   themeConfig: {
-    siteTitle: 'zhlint',
+    nav: [
+      { text: 'Home', link: '/' },
+      { text: 'Playground', link: '/playground' },
+    ],
     socialLinks: [
       {
         icon: 'github',
