@@ -5,5 +5,5 @@
   "parserOptions": { "project": ["./tsconfig.json"] },
   "plugins": ["@typescript-eslint"],
   "rules": {},
-  "ignorePatterns": ["bin/*", "docs/*", "dist/*"]
+  "ignorePatterns": ["bin/*", "coverage/*", "dist/*", "docs/*", "lib/*"]
 }
