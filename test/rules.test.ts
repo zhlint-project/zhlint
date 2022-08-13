@@ -470,9 +470,7 @@ describe('lint by cases', () => {
   test('[case] URL', () => {
     expect(getOutput('Vue.js 是什么', options)).toBe('Vue.js 是什么')
     expect(getOutput('www.vuejs.org', options)).toBe('www.vuejs.org')
-    expect(getOutput('https://vuejs.org', options)).toBe(
-      'https://vuejs.org'
-    )
+    expect(getOutput('https://vuejs.org', options)).toBe('https://vuejs.org')
   })
   test('[case] slash character', () => {
     expect(getOutput('想知道 Vue 与其它库/框架有哪些区别', options)).toBe(
@@ -488,9 +486,7 @@ describe('lint by cases', () => {
     expect(getOutput('a__[b](x)__c', options)).toBe('a__[b](x)__c')
   })
   test('[case] plural brackets', () => {
-    expect(getOutput('3 minite(s) left', options)).toBe(
-      '3 minite(s) left'
-    )
+    expect(getOutput('3 minite(s) left', options)).toBe('3 minite(s) left')
   })
   test('[case] single quote for shorthand', () => {
     expect(getOutput(`how many user's here`, options)).toBe(

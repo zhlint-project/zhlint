@@ -57,10 +57,16 @@ const generateHandler = (options: Options): Handler => {
     // skip non-after-token situations
     const contentTokenBefore = findVisibleTokenBefore(group, token)
     const contentTokenAfter = findVisibleTokenAfter(group, token)
-    const { spaceHost: beforeSpaceHost } =
-      findWrappersBetween(group, contentTokenBefore, token)
-    const { spaceHost: afterSpaceHost } =
-      findWrappersBetween(group, token, contentTokenAfter)
+    const { spaceHost: beforeSpaceHost } = findWrappersBetween(
+      group,
+      contentTokenBefore,
+      token
+    )
+    const { spaceHost: afterSpaceHost } = findWrappersBetween(
+      group,
+      token,
+      contentTokenAfter
+    )
 
     // content x code
     if (contentTokenBefore && isLettersType(contentTokenBefore.type)) {

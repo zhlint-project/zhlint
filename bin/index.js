@@ -36,8 +36,7 @@ Examples:
 const main = () => {
   const argv = minimist(process.argv.slice(2))
 
-  const help = () =>
-    console.log(helpMessage)
+  const help = () => console.log(helpMessage)
 
   if (argv.v || argv.version) {
     console.log(require('../package.json').version)

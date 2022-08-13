@@ -7,7 +7,7 @@
  * - noSpaceInsideQuote: boolean | undefined
  * - spaceOutsideHalfQuote: boolean | undefined
  * - noSpaceOutsideFullQuote: boolean | undefined
- * 
+ *
  * Details:
  * - noSpaceInsideQuote:
  *   - left-quote x right-quote

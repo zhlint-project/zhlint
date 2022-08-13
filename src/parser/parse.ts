@@ -204,7 +204,10 @@ const toMutableMark = (mark: Mark): MutableMark => {
   return mutableMark
 }
 
-export const toMutableResult = (result: ParseResult, options: RuleOptions = {}): MutableParseResult => {
+export const toMutableResult = (
+  result: ParseResult,
+  options: RuleOptions = {}
+): MutableParseResult => {
   if (!options.noSinglePair) {
     result.errors.length = 0
   }

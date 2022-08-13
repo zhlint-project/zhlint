@@ -143,7 +143,6 @@ export type Result = {
   validations: Validation[]
 }
 
-
 export const report = (resultList: Result[], logger = env.defaultLogger) => {
   let errorCount = 0
   const invalidFiles: string[] = []

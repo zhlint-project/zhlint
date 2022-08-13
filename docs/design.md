@@ -147,8 +147,8 @@ We are figuring out all the requirements by several options below:
 
 **For the width/choices of punctuations/brackets/quotes**
 
-- ``halfWidthPunctuation: string? = `()` ``
-- ``fullWidthPunctuation: string? = `，。：；？！“”‘’` ``
+- `` halfWidthPunctuation: string? = `()`  ``
+- `` fullWidthPunctuation: string? = `，。：；？！“”‘’`  ``
 - `unifiedPunctuation: "simplified" (default) | "traditional" | undefined`
 
 These options can format and determine punctuations to be used.
@@ -159,7 +159,7 @@ These options can format and determine punctuations to be used.
   - Type: `true | false | undefined`
   - Default: `true`
   - Examples:
-    - ``xxx `foo` xxx``
+    - `` xxx `foo` xxx ``
     - `xxx <code>foo</code> xxx`
   - Values:
     - `true`: keep one space outside (default)
@@ -234,16 +234,16 @@ First of all, there are some independent rules we can do ahead.
 
 For the else part, we can draw a table of token combinations to rules to guide the implementation:
 
-| Target | L    | P    | Qo   | Qi   | Bo   | Bi   | D    | U    |
-| ------ | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-| L      | 1    | 2    | (4)  | (3)  | (6)  | (5)  | 7    | -    |
-| P      | 2    | 2    | 2    | (3)  | 2    | (5)  | 2    | -    |
-| Qo     | 4    | 2    | 4    | (3)  | (6)  | (5)  | 4    | -    |
-| Qi     | 3    | 3    | 3    | 3    | 3    | 3    | 3    | 3    |
-| Bo     | 6    | 2    | 6    | (3)  | 6    | (5)  | 6    | -    |
-| Bi     | 5    | 5    | 5    | 5    | 5    | 5    | 5    | 5    |
-| D      | 7    | 2    | (4)  | (3)  | (6)  | (5)  | 7    | -    |
-| U      | -    | -    | -    | (3)  | -    | (5)  | -    | -    |
+| Target | L   | P   | Qo  | Qi  | Bo  | Bi  | D   | U   |
+| ------ | --- | --- | --- | --- | --- | --- | --- | --- |
+| L      | 1   | 2   | (4) | (3) | (6) | (5) | 7   | -   |
+| P      | 2   | 2   | 2   | (3) | 2   | (5) | 2   | -   |
+| Qo     | 4   | 2   | 4   | (3) | (6) | (5) | 4   | -   |
+| Qi     | 3   | 3   | 3   | 3   | 3   | 3   | 3   | 3   |
+| Bo     | 6   | 2   | 6   | (3) | 6   | (5) | 6   | -   |
+| Bi     | 5   | 5   | 5   | 5   | 5   | 5   | 5   | 5   |
+| D      | 7   | 2   | (4) | (3) | (6) | (5) | 7   | -   |
+| U      | -   | -   | -   | (3) | -   | (5) | -   | -   |
 
 Abbreviations for tokens
 
@@ -308,9 +308,9 @@ Then for special cases, we put them into:
 After processing all the rules, it's time to join all the tokens back together as the result of a string.
 
 1. For each piece of _plain text content_, join the tokens together as a string.
-    - During this process, we read all the `modified` content and spaces instead of their original ones, except the token is under ignored scope.
+   - During this process, we read all the `modified` content and spaces instead of their original ones, except the token is under ignored scope.
 2. Embed those strings back into the _slots_ and generate the final output as a string.
-    - Besides the generated string, it also returns the original string and all the validation results for further usage.
+   - Besides the generated string, it also returns the original string and all the validation results for further usage.
 
 ## Reports
 
