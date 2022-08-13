@@ -6,7 +6,7 @@
  * Options:
  * - halfWidthPunctuation: string = `()`
  * - fullWidthPunctuation: string = `，。：；？！“”‘’`
- * 
+ *
  * Details:
  * - skip half-width punctuations between half-width content without space
  * - skip successive multiple half-width punctuations

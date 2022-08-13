@@ -5,17 +5,17 @@ import markdown from 'remark-parse'
 import frontmatter from 'remark-frontmatter'
 import { toMarkdown } from 'mdast-util-to-markdown'
 
-const travelInlines = node => {
+const travelInlines = (node) => {
   if (node.type === 'image' && !path.isAbsolute(node.url)) {
     node.url = path.relative('.', path.resolve('docs', node.url))
   }
 }
 
-const travelBlocks = node => {
-  if (node.type === 'html') {
-    node.value = ''
-  }
+const travelBlocks = (node) => {
   if (node.children) {
+    node.children = node.children.filter(
+      (child) => child.type !== 'html' && child.type !== 'yaml'
+    )
     node.children.forEach((child) => {
       travelBlocks(child)
     })

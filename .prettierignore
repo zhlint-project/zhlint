@@ -1,5 +1,11 @@
+coverage
 dist
-docs-legacy
+docs/.vitepress/dist
+docs/zhlint.es.js
+lib
 node_modules
+temp
 test/*.md
 pnpm-lock.yaml
+README.md
+README.zh-CN.md

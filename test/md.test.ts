@@ -110,9 +110,9 @@ describe('markdown lint', () => {
   })
   test('[md] space between raw content', () => {
     // 我们 <a id="modal-player" href="#"> 制作了一个视频 </a>
-    expect(getOutput('我们<a id="modal-player" href="#">制作了一个视频</a>')).toBe(
-      '我们<a id="modal-player" href="#">制作了一个视频</a>'
-    )
+    expect(
+      getOutput('我们<a id="modal-player" href="#">制作了一个视频</a>')
+    ).toBe('我们<a id="modal-player" href="#">制作了一个视频</a>')
   })
   test('[md] space between raw content 2', () => {
     // 我们 <a id="modal-player" href="#"> 制作了一个视频 </a>
@@ -136,7 +136,9 @@ describe('markdown lint', () => {
     expect(getOutput('a\n\nb\n\nc')).toBe('a\n\nb\n\nc')
   })
   test('[md] inline code', () => {
-    expect(getOutput(`改进 \`<todo-item>\` 组件`)).toBe(`改进 \`<todo-item>\` 组件`)
+    expect(getOutput(`改进 \`<todo-item>\` 组件`)).toBe(
+      `改进 \`<todo-item>\` 组件`
+    )
   })
   test('[md] footnote + inline code at the end', () => {
     expect(
@@ -193,18 +195,20 @@ describe('markdown lint', () => {
   })
   test('[md] html entity', () => {
     expect(
-      getOutput('取决于你分心和开始 2.0 最酷的新功能的次数。😉 &nbsp;无法判断时间，')
+      getOutput(
+        '取决于你分心和开始 2.0 最酷的新功能的次数。😉 &nbsp;无法判断时间，'
+      )
     ).toBe('取决于你分心和开始 2.0 最酷的新功能的次数。😉 &nbsp;无法判断时间，')
   })
   test('[md] space between dash', () => {
-    expect(getOutput('可以阅读本页面剩余部分 - 或者从[介绍](index.html)部分')).toBe(
-      '可以阅读本页面剩余部分 - 或者从[介绍](index.html)部分'
-    )
+    expect(
+      getOutput('可以阅读本页面剩余部分 - 或者从[介绍](index.html)部分')
+    ).toBe('可以阅读本页面剩余部分 - 或者从[介绍](index.html)部分')
   })
   test('[md] space between slash', () => {
-    expect(getOutput('为此还应该引入 `Vue.nextTick`/`vm.$nextTick`。例如：')).toBe(
-      '为此还应该引入 `Vue.nextTick`/`vm.$nextTick`。例如：'
-    )
+    expect(
+      getOutput('为此还应该引入 `Vue.nextTick`/`vm.$nextTick`。例如：')
+    ).toBe('为此还应该引入 `Vue.nextTick`/`vm.$nextTick`。例如：')
   })
   test('[md] space outside hyper mark and hyper content', () => {
     expect(
@@ -281,13 +285,15 @@ describe('markdown lint', () => {
   })
   test('[md] linebreak', () => {
     expect(
-      getOutput('XXXX\n{% raw %}XXX{% endraw %}\n{% raw %}XXX{% endraw %}\n### XXXX')
+      getOutput(
+        'XXXX\n{% raw %}XXX{% endraw %}\n{% raw %}XXX{% endraw %}\n### XXXX'
+      )
     ).toBe('XXXX\n{% raw %}XXX{% endraw %}\n{% raw %}XXX{% endraw %}\n### XXXX')
   })
   test('[md] space before link', () => {
-    expect(getOutput('为了替换 `双向` 指令，见 [示例](#双向过滤器-替换)。')).toBe(
-      '为了替换 `双向` 指令，见[示例](#双向过滤器-替换)。'
-    )
+    expect(
+      getOutput('为了替换 `双向` 指令，见 [示例](#双向过滤器-替换)。')
+    ).toBe('为了替换 `双向` 指令，见[示例](#双向过滤器-替换)。')
     expect(getOutput('详见 [自定义指令指南](custom-directive.html)。')).toBe(
       '详见[自定义指令指南](custom-directive.html)。'
     )

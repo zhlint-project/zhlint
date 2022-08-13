@@ -1,8 +1,8 @@
 /**
  * @fileOverview
- * 
+ *
  * This file contains the types for the parser.
- * 
+ *
  * - Chars
  * - Pairs
  * - Marks
@@ -151,7 +151,7 @@ export enum HyperTokenType {
   /**
    * For indeterminate tokens
    */
-  INDETERMINATED = 'indeterminated',
+  INDETERMINATED = 'indeterminated'
 }
 
 export enum GroupTokenType {
@@ -201,7 +201,9 @@ export const isNonCodeVisibleType = (
 export const isVisibleType = (
   type: TokenType | CharType
 ): type is VisibleTokenType => {
-  return isNonCodeVisibleType(type) || type === HyperTokenType.HYPER_CONTENT_CODE
+  return (
+    isNonCodeVisibleType(type) || type === HyperTokenType.HYPER_CONTENT_CODE
+  )
 }
 
 export const isInvisibleType = (

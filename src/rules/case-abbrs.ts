@@ -2,23 +2,18 @@
  * @fileoverview
  *
  * This rule is used to revert changes of abbreviations.
- * 
+ *
  * Details:
  * - the point is rever the trailing dot
  */
 
-import {
-  CharType,
-  Handler,
-  MutableGroupToken,
-  MutableToken
-} from '../parser'
+import { CharType, Handler, MutableGroupToken, MutableToken } from '../parser'
 import { ValidationTarget } from '../report'
 import {
   findTokenAfter,
   findTokenBefore,
   Options,
-  removeValidationOnTarget,
+  removeValidationOnTarget
 } from './util'
 
 const defaultSkippedAbbrs = [
@@ -89,7 +84,11 @@ const generateHandler = (options: Options): Handler => {
 
     // make sure it's the ending dot of the abbr
     const tokenAfter = findTokenAfter(group, token)
-    if (tokenAfter && tokenAfter.type === CharType.LETTERS_HALF && !token.spaceAfter) {
+    if (
+      tokenAfter &&
+      tokenAfter.type === CharType.LETTERS_HALF &&
+      !token.spaceAfter
+    ) {
       return
     }
 

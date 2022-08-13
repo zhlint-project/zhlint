@@ -2,24 +2,19 @@
  * @fileoverview
  *
  * This rule is used to revert changes of HTML entities.
- * 
+ *
  * Details:
  * - to match `&<half-width-content>;`
  */
 
-import {
-  CharType,
-  Handler,
-  MutableGroupToken,
-  MutableToken
-} from '../parser'
+import { CharType, Handler, MutableGroupToken, MutableToken } from '../parser'
 import { ValidationTarget } from '../report'
 import {
   findWrappersBetween,
   findNonCodeVisibleTokenAfter,
   findTokenAfter,
   Options,
-  removeValidationOnTarget,
+  removeValidationOnTarget
 } from './util'
 
 const generateHandler = (options: Options): Handler => {
@@ -78,7 +73,6 @@ const generateHandler = (options: Options): Handler => {
   }
 }
 
-export const defaultConfig: Options = {
-}
+export const defaultConfig: Options = {}
 
 export default generateHandler

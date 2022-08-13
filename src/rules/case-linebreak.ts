@@ -1,15 +1,15 @@
 /**
  * @fileoverview
- * 
+ *
  * This rule is used to revert changes of spaceAfter with linebreaks.
  * And it's compulsory.
- * 
+ *
  * TODO: better blockquote and indentation handling in markdown
  */
 
-import { Handler, MutableToken } from "../parser";
-import { ValidationTarget } from "../report";
-import { Options, removeValidationOnTarget } from "./util";
+import { Handler, MutableToken } from '../parser'
+import { ValidationTarget } from '../report'
+import { Options, removeValidationOnTarget } from './util'
 
 const generateHandler = (options: Options): Handler => {
   // do nothing

@@ -52,10 +52,7 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // skip non-mark situations
-    if (
-      !isWrapper(token) &&
-      !isWrapper(tokenAfter)
-    ) {
+    if (!isWrapper(token) && !isWrapper(tokenAfter)) {
       return
     }
 
@@ -66,15 +63,9 @@ const generateHandler = (options: Options): Handler => {
     const markSideAfter = getWrapperSide(tokenAfter)
     if (markSideBefore === markSideAfter) {
       checkSpaceAfter(token, '', MARKDOWN_NOSPACE_INSIDE)
-    } else if (
-      markSideBefore === MarkSideType.LEFT &&
-      !isWrapper(tokenAfter)
-    ) {
+    } else if (markSideBefore === MarkSideType.LEFT && !isWrapper(tokenAfter)) {
       checkSpaceAfter(token, '', MARKDOWN_NOSPACE_INSIDE)
-    } else if (
-      markSideAfter === MarkSideType.RIGHT &&
-      !isWrapper(token)
-    ) {
+    } else if (markSideAfter === MarkSideType.RIGHT && !isWrapper(token)) {
       checkSpaceAfter(token, '', MARKDOWN_NOSPACE_INSIDE)
     }
   }

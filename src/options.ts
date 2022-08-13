@@ -63,19 +63,14 @@ const DEPRECATED_OPTIONS = {
   noSpaceInsideMark: 'noSpaceInsideWrapper',
   spaceBetweenHalfWidthContent: 'spaceBetweenHalfWidthLetters',
   noSpaceBetweenFullWidthContent: 'noSpaceBetweenFullWidthLetters',
-  spaceBetweenMixedWidthContent: 'spaceBetweenMixedWidthLetters',
+  spaceBetweenMixedWidthContent: 'spaceBetweenMixedWidthLetters'
 }
 
-const deprecateOptions = (
-  ruleOption: RuleOptions,
-  logger: Console
-): void => {
+const deprecateOptions = (ruleOption: RuleOptions, logger: Console): void => {
   for (const oldKey in DEPRECATED_OPTIONS) {
     const newKey = DEPRECATED_OPTIONS[oldKey]
     if (ruleOption[oldKey]) {
-      logger.warn(
-        `[deprecate] ${oldKey} is deprecated, use ${newKey} instead`
-      )
+      logger.warn(`[deprecate] ${oldKey} is deprecated, use ${newKey} instead`)
       ruleOption[newKey] = ruleOption[newKey] ?? ruleOption[oldKey]
       delete ruleOption[oldKey]
     }
@@ -94,8 +89,7 @@ export const normalizeOptions = (options: Options): NormalizedOptions => {
   if (typeof options.hyperParse === 'function') {
     hyperParse = [options.hyperParse]
   } else {
-    hyperParse =
-      options.hyperParse || hyperParseInfo.map((item) => item.name)
+    hyperParse = options.hyperParse || hyperParseInfo.map((item) => item.name)
   }
 
   const normoalizedOptions: NormalizedOptions = {
@@ -110,4 +104,3 @@ export const normalizeOptions = (options: Options): NormalizedOptions => {
 
   return normoalizedOptions
 }
-
