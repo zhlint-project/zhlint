@@ -13,7 +13,9 @@ const travelInlines = (node) => {
 
 const travelBlocks = (node) => {
   if (node.children) {
-    node.children = node.children.filter(child => child.type !== 'html' && child.type !== 'yaml')
+    node.children = node.children.filter(
+      (child) => child.type !== 'html' && child.type !== 'yaml'
+    )
     node.children.forEach((child) => {
       travelBlocks(child)
     })

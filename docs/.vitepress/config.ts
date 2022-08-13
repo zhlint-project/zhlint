@@ -9,7 +9,7 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Playground', link: '/playground' },
+      { text: 'Playground', link: '/playground' }
     ],
     socialLinks: [
       {

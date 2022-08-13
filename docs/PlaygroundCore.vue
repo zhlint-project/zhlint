@@ -11,11 +11,11 @@ const output = ref('Report:')
 const rows = ref(10)
 
 const lint = () => {
-  const result = run(input.value, { rules: { preset: 'default' }})
+  const result = run(input.value, { rules: { preset: 'default' } })
   const outputValues = []
   report([result], {
-    log: x => outputValues.push(x),
-    error: x => outputValues.push(x)
+    log: (x) => outputValues.push(x),
+    error: (x) => outputValues.push(x)
   })
   output.value = 'Report:\n\n' + outputValues.join('\n')
 }
@@ -34,7 +34,7 @@ const inputUpdate = () => {
 }
 
 const format = () => {
-  input.value = run(input.value, { rules: { preset: 'default' }}).result
+  input.value = run(input.value, { rules: { preset: 'default' } }).result
   lint()
 }
 
@@ -66,7 +66,7 @@ onMounted(() => {
   border-radius: 8px;
   color: var(--vp-c-text-code);
   background-color: var(--vp-c-bg-mute);
-  transition: background-color .5s, color .5s, border-color .5s;
+  transition: background-color 0.5s, color 0.5s, border-color 0.5s;
 }
 .container textarea:hover {
   border-color: var(--vp-c-brand);

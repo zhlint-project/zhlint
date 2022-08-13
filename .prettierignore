@@ -1,6 +1,7 @@
 coverage
 dist
 docs/.vitepress/dist
+docs/zhlint.es.js
 lib
 node_modules
 temp
