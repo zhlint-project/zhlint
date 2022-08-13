@@ -15,7 +15,7 @@
  * - noSpaceAfterFullWidthPunctuation: boolean | undefined
  *   - `true`: remove spaces around a full-width punctuation (default)
  *   - `false` or `undefined`: do nothing, just keep the original format
- * 
+ *
  * Details:
  * - noSpaceBeforePunctuation:
  *   content/right-quote/right-bracket/code x punctuation
@@ -23,7 +23,7 @@
  *   half x content/left-quote/left-bracket/code
  * - noSpaceAfterFullWidthPunctuation:
  *   full x content/left-quote/left-bracket/code
- * 
+ *
  * - skip half-width punctuations between half-width content without space
  * - skip successive multiple half-width punctuations
  */
@@ -118,7 +118,8 @@ const generateHandler = (options: Options): Handler => {
       (token.modifiedType === CharType.PUNCTUATION_HALF &&
         oneAfterHalfWidthPunctuationOption)
     ) {
-      const spaceAfter = token.modifiedType === CharType.PUNCTUATION_HALF ? ' ' : ''
+      const spaceAfter =
+        token.modifiedType === CharType.PUNCTUATION_HALF ? ' ' : ''
       const message =
         token.modifiedType === CharType.PUNCTUATION_HALF
           ? PUNCTUATION_SPACE_AFTER

@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => ({
   },
   test: {
     coverage: {
-      reporter: ['text', 'json', 'html'],
-    },
+      reporter: ['text', 'json', 'html']
+    }
   }
 }))

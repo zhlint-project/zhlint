@@ -7,7 +7,7 @@ import {
   MutableToken,
   parse,
   travel,
-  toMutableResult,
+  toMutableResult
 } from '../src/parser'
 import join from '../src/join'
 import findIgnoredMarks from '../src/ignore'
@@ -624,10 +624,8 @@ describe('travel', () => {
     const { tokens } = parse('遵守JavaScript编码规范非常重要')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const records: any[] = []
-    travel(
-      tokens,
-      (token, index, tokens) =>
-        records.push({ token, index, tokens })
+    travel(tokens, (token, index, tokens) =>
+      records.push({ token, index, tokens })
     )
     expect(clone(records)).toEqual([
       {
@@ -675,15 +673,13 @@ describe('join', () => {
 describe('process rules', () => {
   test('replace half-width brackets into full-width', () => {
     const data = toMutableResult(parse(`关注(watch)你关心的仓库。`))
-    travel(data.tokens,
-      (token: MutableToken) => {
-        token.modifiedContent =
-          {
-            '(': '（',
-            ')': '）'
-          }[token.content] || token.content
-      }
-    )
+    travel(data.tokens, (token: MutableToken) => {
+      token.modifiedContent =
+        {
+          '(': '（',
+          ')': '）'
+        }[token.content] || token.content
+    })
     expect(join(data.tokens)).toBe(`关注（watch）你关心的仓库。`)
   })
 })

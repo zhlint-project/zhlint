@@ -7,11 +7,7 @@
  * - trimSpace: boolean | undefined
  */
 
-import {
-  Handler,
-  MutableGroupToken,
-  MutableToken
-} from '../parser'
+import { Handler, MutableGroupToken, MutableToken } from '../parser'
 import { TRIM_SPACE } from './messages'
 import {
   checkInnerSpaceBefore,
@@ -70,4 +66,3 @@ export const defaultConfig: Options = {
 }
 
 export default generateHandler
-

@@ -62,25 +62,25 @@ export type Options = {
 
   /**
    * @deprecated
-   * 
+   *
    * Please use `noSpaceInsideWrapper` instead.
    */
   noSpaceInsideMark?: boolean
   /**
    * @deprecated
-   * 
+   *
    * Please use `spaceBetweenHalfWidthLetters` instead.
    */
   spaceBetweenHalfWidthContent?: boolean
   /**
    * @deprecated
-   * 
+   *
    * Please use `noSpaceBetweenFullWidthLetters` instead.
    */
   noSpaceBetweenFullWidthContent?: boolean
   /**
    * @deprecated
-   * 
+   *
    * Please use `spaceBetweenMixedWidthLetters` instead.
    */
   spaceBetweenMixedWidthContent?: boolean
@@ -269,9 +269,7 @@ export const isWrapper = (token: Token): boolean => {
   return token.type === HyperTokenType.HYPER_WRAPPER || !!getHtmlTagSide(token)
 }
 
-export const getWrapperSide = (
-  token: Token
-): MarkSideType | undefined => {
+export const getWrapperSide = (token: Token): MarkSideType | undefined => {
   if (token.type === HyperTokenType.HYPER_WRAPPER) {
     return token.markSide
   }
@@ -299,7 +297,10 @@ const spreadHyperMarkSeq = (
   }
 }
 
-export const findConnectedWrappers = (group: GroupToken, token: Token): Token[] => {
+export const findConnectedWrappers = (
+  group: GroupToken,
+  token: Token
+): Token[] => {
   const seq: Token[] = [token]
   spreadHyperMarkSeq(group, token, seq, false)
   spreadHyperMarkSeq(group, token, seq, true)
@@ -319,7 +320,7 @@ const findSpaceHostInHyperMarkSeq = (
   const lastMark = hyperMarkSeq[hyperMarkSeq.length - 1]
   const firstMarkSide = getWrapperSide(firstMark)
   const lastMarkSide = getWrapperSide(lastMark)
-  
+
   const tokenBefore = findTokenBefore(group, firstMark)
   if (!tokenBefore) {
     return
@@ -354,10 +355,7 @@ const findSpaceHostInHyperMarkSeq = (
   let target: Token | undefined = tokenBefore
   while (target && target !== lastMark) {
     const nextToken = findTokenAfter(group, target)
-    if (
-      nextToken &&
-      getWrapperSide(nextToken) === MarkSideType.LEFT
-    ) {
+    if (nextToken && getWrapperSide(nextToken) === MarkSideType.LEFT) {
       return target
     }
     target = nextToken
@@ -411,7 +409,10 @@ export const findWrappersBetween = (
 
 // special cases
 
-export const isHalfWidthPunctuationWithoutSpaceAround = (group: GroupToken, token: Token): boolean => {
+export const isHalfWidthPunctuationWithoutSpaceAround = (
+  group: GroupToken,
+  token: Token
+): boolean => {
   const tokenBefore = findTokenBefore(group, token)
   const tokenAfter = findTokenAfter(group, token)
 
@@ -428,7 +429,10 @@ export const isHalfWidthPunctuationWithoutSpaceAround = (group: GroupToken, toke
   return false
 }
 
-export const isSuccessiveHalfWidthPunctuation = (group: GroupToken, token: Token): boolean => {
+export const isSuccessiveHalfWidthPunctuation = (
+  group: GroupToken,
+  token: Token
+): boolean => {
   if (token.type === CharType.PUNCTUATION_HALF) {
     const tokenBefore = findTokenBefore(group, token)
     const tokenAfter = findTokenAfter(group, token)
@@ -478,7 +482,7 @@ export const setValidationOnTarget = (
   token: Token,
   target: ValidationTarget,
   message: string,
-  name: string,
+  name: string
 ): void => {
   const validation = createValidation(token, target, message, name)
   removeValidationOnTarget(token, target)
@@ -503,13 +507,12 @@ export const removeValidationOnTarget = (
 
 // validation checkers
 
-type Checker = (
-  token: Token,
-  value: string,
-  message: string
-) => void
+type Checker = (token: Token, value: string, message: string) => void
 
-const genChecker = (key: keyof Token | keyof GroupToken, target: ValidationTarget): Checker => {
+const genChecker = (
+  key: keyof Token | keyof GroupToken,
+  target: ValidationTarget
+): Checker => {
   return (token: Token, value: string, message: string) => {
     if (token[key] !== value) {
       token[key] = value

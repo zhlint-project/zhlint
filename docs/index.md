@@ -46,7 +46,7 @@ The validation report might look like this:
 const { run, report } = require('zhlint')
 
 const value = '自动在中文和English之间加入空格'
-const options = { rules: { preset: 'default' }}
+const options = { rules: { preset: 'default' } }
 const output = run(value, options)
 
 // print '自动在中文和 English 之间加入空格''
@@ -164,7 +164,10 @@ Specially, we support [Hexo tags syntax](https://hexo.io/docs/tag-plugins) just 
 As a result, we additionally skip the Hexo-style tags by default. For example:
 
 ```js
-run('现在过滤器只能用在插入文本中 (`{% raw %}{{ }}{% endraw %}` tags)。', options)
+run(
+  '现在过滤器只能用在插入文本中 (`{% raw %}{{ }}{% endraw %}` tags)。',
+  options
+)
 ```
 
 ### Setup ignored cases
