@@ -58,7 +58,12 @@ const parser$3 = (data) => {
   });
   return data;
 };
-const matcher = /(?<=^|\n)(:::.*)\n([\s\S]+?)\n(:::)(?=\n|$)/g;
+let matcher;
+try {
+  matcher = new RegExp("(?<=^|\\n)(:::.*)\\n([\\s\\S]+?)\\n(:::)(?=\\n|$)", "g");
+} catch {
+  matcher = /(:::.*)\n([\s\S]+?)\n(:::)/g;
+}
 const parser$2 = (data) => {
   data.modifiedContent = data.modifiedContent.replace(matcher, (raw, start, content, end, index2) => {
     const { length } = raw;
