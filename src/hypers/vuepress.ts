@@ -8,7 +8,13 @@ import { ParsedStatus } from './types'
 // - `(.+)`
 // - `\n`
 // - `(:::)` + `(?=\n|$)`
-const matcher = /(?<=^|\n)(:::.*)\n([\s\S]+?)\n(:::)(?=\n|$)/g
+let matcher: RegExp
+
+try {
+  matcher = new RegExp('(?<=^|\\n)(:::.*)\\n([\\s\\S]+?)\\n(:::)(?=\\n|$)', 'g')
+} catch {
+  matcher = /(:::.*)\n([\s\S]+?)\n(:::)/g
+}
 
 const parser = (data: ParsedStatus): ParsedStatus => {
   data.modifiedContent = data.modifiedContent.replace(
