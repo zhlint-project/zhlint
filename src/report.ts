@@ -78,14 +78,14 @@ const generateMarker = (str: string, index: number): string => {
     const charType = checkCharType(prefix[i])
     if (
       charType === CharType.LETTERS_FULL ||
-      charType === CharType.PUNCTUATION_FULL &&
-      adjustedFullWidthPunctuations.indexOf(prefix[i]) === -1
+      (charType === CharType.PUNCTUATION_FULL &&
+        adjustedFullWidthPunctuations.indexOf(prefix[i]) === -1)
     ) {
       fullWidthCount++
     } else if (
       charType === CharType.LETTERS_HALF ||
-      charType === CharType.PUNCTUATION_HALF &&
-      adjustedFullWidthPunctuations.indexOf(prefix[i]) !== -1 ||
+      (charType === CharType.PUNCTUATION_HALF &&
+        adjustedFullWidthPunctuations.indexOf(prefix[i]) !== -1) ||
       charType === CharType.SPACE
     ) {
       halfWidthCount++

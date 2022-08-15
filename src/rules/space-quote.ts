@@ -105,7 +105,10 @@ const generateHandler = (options: Options): Handler => {
         if (spaceHost) {
           const fullWidth =
             isFullWidth(token.modifiedEndContent, adjustedFullWidthOption) ||
-            isFullWidth(contentTokenAfter.modifiedStartContent, adjustedFullWidthOption)
+            isFullWidth(
+              contentTokenAfter.modifiedStartContent,
+              adjustedFullWidthOption
+            )
           // 2.1.1 right-full-quote x left-full-quote
           // 2.1.2 right-half-quote x left-half-quote
           if (fullWidth) {
@@ -137,7 +140,10 @@ const generateHandler = (options: Options): Handler => {
           token
         )
         if (spaceHost) {
-          const fullWidth = isFullWidth(token.modifiedStartContent, adjustedFullWidthOption)
+          const fullWidth = isFullWidth(
+            token.modifiedStartContent,
+            adjustedFullWidthOption
+          )
 
           // 2.2.1 content/code x left-full-quote
           // 2.2.2 content/code x left-half-quote
@@ -169,7 +175,10 @@ const generateHandler = (options: Options): Handler => {
           contentTokenAfter
         )
         if (spaceHost) {
-          const fullWidth = isFullWidth(token.modifiedEndContent, adjustedFullWidthOption)
+          const fullWidth = isFullWidth(
+            token.modifiedEndContent,
+            adjustedFullWidthOption
+          )
 
           // 2.3.1 right-full-quote x content/code
           // 2.3.2 right-half-quote x content/code

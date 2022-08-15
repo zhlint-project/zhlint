@@ -149,7 +149,10 @@ const generateHandler = (options: Options): Handler => {
       typeof spaceOutsideHalfBracketOption !== 'undefined' ||
       noSpaceOutsideFullBracketOption
     ) {
-      const fullWidth = isFullWidth(token.modifiedContent, adjustedFullWidthOption)
+      const fullWidth = isFullWidth(
+        token.modifiedContent,
+        adjustedFullWidthOption
+      )
 
       // 2.1 right-bracket x left-bracket
       if (contentTokenAfter) {
@@ -159,7 +162,11 @@ const generateHandler = (options: Options): Handler => {
         ) {
           if (afterSpaceHost) {
             const hasFullWidth =
-              fullWidth || isFullWidth(contentTokenAfter.modifiedContent, adjustedFullWidthOption)
+              fullWidth ||
+              isFullWidth(
+                contentTokenAfter.modifiedContent,
+                adjustedFullWidthOption
+              )
 
             // 2.1.1 any-full-bracket
             // 2.1.2 right-half-bracket x left-half-bracket
@@ -198,7 +205,10 @@ const generateHandler = (options: Options): Handler => {
             if (
               fullWidth ||
               (contentTokenBefore.type === GroupTokenType.GROUP &&
-                isFullWidth(contentTokenBefore.modifiedEndContent, adjustedFullWidthOption))
+                isFullWidth(
+                  contentTokenBefore.modifiedEndContent,
+                  adjustedFullWidthOption
+                ))
             ) {
               if (noSpaceOutsideFullBracketOption) {
                 checkSpaceAfter(beforeSpaceHost, '', BRACKET_NOSPACE_OUTSIDE)
@@ -227,7 +237,10 @@ const generateHandler = (options: Options): Handler => {
             if (
               fullWidth ||
               (contentTokenAfter.type === GroupTokenType.GROUP &&
-                isFullWidth(contentTokenAfter.modifiedStartContent, adjustedFullWidthOption))
+                isFullWidth(
+                  contentTokenAfter.modifiedStartContent,
+                  adjustedFullWidthOption
+                ))
             ) {
               if (noSpaceOutsideFullBracketOption) {
                 checkSpaceAfter(afterSpaceHost, '', BRACKET_NOSPACE_OUTSIDE)

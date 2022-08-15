@@ -149,9 +149,12 @@ We are figuring out all the requirements by several options below:
 
 - `` halfWidthPunctuation: string? = `()`  ``
 - `` fullWidthPunctuation: string? = `，。：；？！“”‘’`  ``
+- `` adjustedFullWidthPunctuation: string? = `“”‘’` ``
 - `unifiedPunctuation: "simplified" (default) | "traditional" | undefined`
 
 These options can format and determine punctuations to be used.
+
+The option `adjustedFullWidthPunctuation` defines which full-width punctuations zhlint will treat them as half-width punctuations when processing the further spaces issues around them. Usually it's just about quotes since the full-width quotes in morder Chinese fonts actually are only rendered in half-width.
 
 **For spaces**
 
