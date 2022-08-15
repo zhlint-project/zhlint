@@ -7141,15 +7141,16 @@ var ValidationTarget;
   ValidationTarget2["SPACE_AFTER"] = "spaceAfter";
   ValidationTarget2["INNER_SPACE_BEFORE"] = "innerSpaceBefore";
 })(ValidationTarget || (ValidationTarget = {}));
+const adjustedFullWidthPunctuations = `\u201C\u201D\u2018\u2019`;
 const generateMarker = (str, index2) => {
   const prefix = str.substring(0, index2);
   let fullWidthCount = 0;
   let halfWidthCount = 0;
   for (let i = 0; i < prefix.length; i++) {
     const charType = checkCharType(prefix[i]);
-    if (charType === CharType.LETTERS_FULL || charType === CharType.PUNCTUATION_FULL) {
+    if (charType === CharType.LETTERS_FULL || charType === CharType.PUNCTUATION_FULL && adjustedFullWidthPunctuations.indexOf(prefix[i]) === -1) {
       fullWidthCount++;
-    } else if (charType === CharType.LETTERS_HALF || charType === CharType.PUNCTUATION_HALF || charType === CharType.SPACE) {
+    } else if (charType === CharType.LETTERS_HALF || charType === CharType.PUNCTUATION_HALF && adjustedFullWidthPunctuations.indexOf(prefix[i]) !== -1 || charType === CharType.SPACE) {
       halfWidthCount++;
     }
   }
@@ -7460,10 +7461,7 @@ const isShorthand = (str, status, index2, char) => {
   }
   const nextChar = str[index2 + 1];
   const nextType = checkCharType(nextChar);
-  if (nextType === CharType.LETTERS_HALF) {
-    return true;
-  }
-  if (nextType === CharType.SPACE) {
+  if (nextType === CharType.LETTERS_HALF || nextType === CharType.SPACE) {
     if (!status.lastGroup) {
       return true;
     }
@@ -8131,9 +8129,15 @@ const widthSidePairList = [
   [`"`, `\u201C`, `\u201D`],
   [`'`, `\u2018`, `\u2019`]
 ];
+const checkAdjusted = (token, adjusted) => {
+  if (adjusted.indexOf(token.modifiedContent) >= 0) {
+    token.modifiedType = CharType.PUNCTUATION_HALF;
+  }
+};
 const parseOptions = (options) => {
   const halfWidthOption = (options == null ? void 0 : options.halfWidthPunctuation) || "";
   const fullWidthOption = (options == null ? void 0 : options.fullWidthPunctuation) || "";
+  const adjustedFullWidthOption = (options == null ? void 0 : options.adjustedFullWidthPunctuation) || "";
   const halfWidthMap = {};
   const fullWidthMap = {};
   const fullWidthPairMap = {};
@@ -8157,11 +8161,12 @@ const parseOptions = (options) => {
   return {
     halfWidthMap,
     fullWidthMap,
-    fullWidthPairMap
+    fullWidthPairMap,
+    adjusted: adjustedFullWidthOption
   };
 };
 const generateHandler$b = (options) => {
-  const { halfWidthMap, fullWidthMap, fullWidthPairMap } = parseOptions(options);
+  const { halfWidthMap, fullWidthMap, fullWidthPairMap, adjusted } = parseOptions(options);
   const handleHyperSpaceOption = (token, _, group) => {
     if (!isPunctuationType(token.type) && token.type !== HyperTokenType.HYPER_WRAPPER_BRACKET && token.type !== GroupTokenType.GROUP) {
       return;
@@ -8176,6 +8181,7 @@ const generateHandler$b = (options) => {
       const content = token.modifiedContent;
       if (fullWidthMap[content]) {
         checkContent(token, fullWidthMap[content], CharType.PUNCTUATION_FULL, PUNCTUATION_FULL_WIDTH);
+        checkAdjusted(token, adjusted);
       } else if (halfWidthMap[content]) {
         checkContent(token, halfWidthMap[content], CharType.PUNCTUATION_HALF, PUNCTUATION_HALF_WIDTH);
       }
@@ -8424,10 +8430,14 @@ const generateHandler$5 = (options) => {
     }
   };
 };
+const isFullWidth$1 = (char, adjusted) => {
+  return isFullWidthPair(char) && adjusted.indexOf(char) === -1;
+};
 const generateHandler$4 = (options) => {
   const noSpaceInsideQuoteOption = options.noSpaceInsideQuote;
   const spaceOutsideHalfQuoteOption = options.spaceOutsideHalfQuote;
   const noSpaceOutsideFullQuoteOption = options.noSpaceOutsideFullQuote;
+  const adjustedFullWidthOption = options.adjustedFullWidthPunctuation || "";
   return (token, _, group) => {
     if (token.type !== GroupTokenType.GROUP) {
       return;
@@ -8450,8 +8460,8 @@ const generateHandler$4 = (options) => {
       if (contentTokenAfter && contentTokenAfter.type === GroupTokenType.GROUP) {
         const { spaceHost } = findWrappersBetween(group, token, contentTokenAfter);
         if (spaceHost) {
-          const isFullWidth = isFullWidthPair(token.modifiedEndContent) || isFullWidthPair(contentTokenAfter.modifiedStartContent);
-          if (isFullWidth) {
+          const fullWidth = isFullWidth$1(token.modifiedEndContent, adjustedFullWidthOption) || isFullWidth$1(contentTokenAfter.modifiedStartContent, adjustedFullWidthOption);
+          if (fullWidth) {
             if (noSpaceOutsideFullQuoteOption) {
               checkSpaceAfter(spaceHost, "", QUOTE_SPACE_OUTSIDE);
             }
@@ -8468,8 +8478,8 @@ const generateHandler$4 = (options) => {
       if (contentTokenBefore && (isLettersType(contentTokenBefore.type) || contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)) {
         const { spaceHost } = findWrappersBetween(group, contentTokenBefore, token);
         if (spaceHost) {
-          const isFullWidth = isFullWidthPair(token.modifiedStartContent);
-          if (isFullWidth) {
+          const fullWidth = isFullWidth$1(token.modifiedStartContent, adjustedFullWidthOption);
+          if (fullWidth) {
             if (noSpaceOutsideFullQuoteOption) {
               checkSpaceAfter(spaceHost, "", QUOTE_NOSPACE_OUTSIDE);
             }
@@ -8485,8 +8495,8 @@ const generateHandler$4 = (options) => {
       if (contentTokenAfter && (isLettersType(contentTokenAfter.type) || contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)) {
         const { spaceHost } = findWrappersBetween(group, token, contentTokenAfter);
         if (spaceHost) {
-          const isFullWidth = isFullWidthPair(token.modifiedEndContent);
-          if (isFullWidth) {
+          const fullWidth = isFullWidth$1(token.modifiedEndContent, adjustedFullWidthOption);
+          if (fullWidth) {
             if (noSpaceOutsideFullQuoteOption) {
               checkSpaceAfter(spaceHost, "", QUOTE_NOSPACE_OUTSIDE);
             }
@@ -8501,6 +8511,9 @@ const generateHandler$4 = (options) => {
       }
     }
   };
+};
+const isFullWidth = (char, adjusted) => {
+  return isFullWidthPair(char) && adjusted.indexOf(char) === -1;
 };
 const shouldSkip = (before, beforeTokenSeq, token, afterTokenSeq, after) => {
   if (!before || !after) {
@@ -8518,6 +8531,7 @@ const generateHandler$3 = (options) => {
   const noInsideBracketOption = options.noSpaceInsideBracket;
   const spaceOutsideHalfBracketOption = options.spaceOutsideHalfBracket;
   const noSpaceOutsideFullBracketOption = options.noSpaceOutsideFullBracket;
+  const adjustedFullWidthOption = options.adjustedFullWidthPunctuation || "";
   return (token, _, group) => {
     if (token.type !== HyperTokenType.HYPER_WRAPPER_BRACKET) {
       return;
@@ -8543,11 +8557,11 @@ const generateHandler$3 = (options) => {
       return;
     }
     if (typeof spaceOutsideHalfBracketOption !== "undefined" || noSpaceOutsideFullBracketOption) {
-      const isFullWidth = isFullWidthPair(token.modifiedContent);
+      const fullWidth = isFullWidth(token.modifiedContent, adjustedFullWidthOption);
       if (contentTokenAfter) {
         if (token.markSide === MarkSideType.RIGHT && contentTokenAfter.markSide === MarkSideType.LEFT) {
           if (afterSpaceHost) {
-            const hasFullWidth = isFullWidth || isFullWidthPair(contentTokenAfter.modifiedContent);
+            const hasFullWidth = fullWidth || isFullWidth(contentTokenAfter.modifiedContent, adjustedFullWidthOption);
             if (hasFullWidth) {
               if (noSpaceOutsideFullBracketOption) {
                 checkSpaceAfter(token, "", BRACKET_NOSPACE_OUTSIDE);
@@ -8567,7 +8581,7 @@ const generateHandler$3 = (options) => {
       if (token.markSide === MarkSideType.LEFT) {
         if (contentTokenBefore && (isLettersType(contentTokenBefore.type) || contentTokenBefore.type === GroupTokenType.GROUP || contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)) {
           if (beforeSpaceHost) {
-            if (isFullWidth || contentTokenBefore.type === GroupTokenType.GROUP && isFullWidthPair(contentTokenBefore.modifiedEndContent)) {
+            if (fullWidth || contentTokenBefore.type === GroupTokenType.GROUP && isFullWidth(contentTokenBefore.modifiedEndContent, adjustedFullWidthOption)) {
               if (noSpaceOutsideFullBracketOption) {
                 checkSpaceAfter(beforeSpaceHost, "", BRACKET_NOSPACE_OUTSIDE);
               }
@@ -8583,7 +8597,7 @@ const generateHandler$3 = (options) => {
       } else {
         if (contentTokenAfter && (isLettersType(contentTokenAfter.type) || contentTokenAfter.type === GroupTokenType.GROUP || contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)) {
           if (afterSpaceHost) {
-            if (isFullWidth || contentTokenAfter.type === GroupTokenType.GROUP && isFullWidthPair(contentTokenAfter.modifiedStartContent)) {
+            if (fullWidth || contentTokenAfter.type === GroupTokenType.GROUP && isFullWidth(contentTokenAfter.modifiedStartContent, adjustedFullWidthOption)) {
               if (noSpaceOutsideFullBracketOption) {
                 checkSpaceAfter(afterSpaceHost, "", BRACKET_NOSPACE_OUTSIDE);
               }
@@ -8699,6 +8713,7 @@ const defaultConfig = {
   noSinglePair: true,
   halfWidthPunctuation: `()`,
   fullWidthPunctuation: `\uFF0C\u3002\uFF1A\uFF1B\uFF1F\uFF01\u201C\u201D\u2018\u2019`,
+  adjustedFullWidthPunctuation: `\u201C\u201D\u2018\u2019`,
   unifiedPunctuation: "simplified",
   spaceBetweenHalfWidthLetters: true,
   noSpaceBetweenFullWidthLetters: true,

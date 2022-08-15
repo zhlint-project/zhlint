@@ -229,6 +229,13 @@ type RuleOptions = {
   // e.g. `文字,文字.` -> `文字，文字。`
   fullWidthPunctuation?: string
 
+  // Treat these full-width punctuations as half-fullWidthPunctuation
+  // when processing the spaces issues around them.
+  // Since something like quotes in morder Chinese fonts are
+  // only rendered in half-width.
+  // default preset: `“”‘’`
+  adjustedFullWidthPunctuation?: string
+
   // Convert traditional Chinese punctuations into simplified ones or vice versa.
   // default preset: `simplified`
   // e.g. `「文字」` -> `“文字”`
