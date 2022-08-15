@@ -58,10 +58,7 @@ const defaultHalfWidthOption = `()`
 const defaultFullWidthOption = `，。：；？！“”‘’`
 const defaultAdjustedFullWidthOption = `“”‘’`
 
-const checkAdjusted = (
-  token: MutableToken,
-  adjusted: string
-): void => {
+const checkAdjusted = (token: MutableToken, adjusted: string): void => {
   if (adjusted.indexOf(token.modifiedContent) >= 0) {
     token.modifiedType = CharType.PUNCTUATION_HALF
   }
