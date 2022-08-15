@@ -40,7 +40,7 @@ describe('lint by issues', () => {
 
   // https://github.com/Jinjiang/zhlint/issues/35
   test('#35 parse error', () => {
-    expect(getOutput('x‘x’x', options)).toBe('x‘x’x')
+    expect(getOutput('x‘x’x', options)).toBe('x ‘x’ x')
   })
 
   // https://github.com/Jinjiang/zhlint/issues/36
@@ -80,7 +80,7 @@ describe('lint from v3.cn.vuejs.org', () => {
   // https://github.com/Jinjiang/zhlint/issues/69
   test('#69 spaces around () and “”', () => {
     expect(getOutput('将静态的 HTML “激活” (hydrate) 为', options)).toBe(
-      '将静态的 HTML“激活”(hydrate) 为'
+      '将静态的 HTML “激活” (hydrate) 为'
     )
   })
   // https://github.com/Jinjiang/zhlint/issues/72

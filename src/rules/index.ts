@@ -45,6 +45,7 @@ export const defaultConfig: Options = {
   noSinglePair: true,
   halfWidthPunctuation: `()`,
   fullWidthPunctuation: `，。：；？！“”‘’`,
+  adjustedFullWidthPunctuation: `“”‘’`,
   unifiedPunctuation: 'simplified',
   spaceBetweenHalfWidthLetters: true,
   noSpaceBetweenFullWidthLetters: true,

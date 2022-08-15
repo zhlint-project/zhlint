@@ -6,6 +6,7 @@
  * Options:
  * - halfWidthPunctuation: string = `()`
  * - fullWidthPunctuation: string = `，。：；？！“”‘’`
+ * - adjustedFullWidthPunctuation: string = `“”‘’`
  *
  * Details:
  * - skip half-width punctuations between half-width content without space
@@ -55,6 +56,16 @@ const widthSidePairList: WidthSidePairList = [
 
 const defaultHalfWidthOption = `()`
 const defaultFullWidthOption = `，。：；？！“”‘’`
+const defaultAdjustedFullWidthOption = `“”‘’`
+
+const checkAdjusted = (
+  token: MutableToken,
+  adjusted: string
+): void => {
+  if (adjusted.indexOf(token.modifiedContent) >= 0) {
+    token.modifiedType = CharType.PUNCTUATION_HALF
+  }
+}
 
 const parseOptions = (
   options: Options
@@ -62,9 +73,11 @@ const parseOptions = (
   halfWidthMap: AlterMap
   fullWidthMap: AlterMap
   fullWidthPairMap: AlterPairMap
+  adjusted: string
 } => {
   const halfWidthOption = options?.halfWidthPunctuation || ''
   const fullWidthOption = options?.fullWidthPunctuation || ''
+  const adjustedFullWidthOption = options?.adjustedFullWidthPunctuation || ''
 
   const halfWidthMap: AlterMap = {}
   const fullWidthMap: AlterMap = {}
@@ -93,12 +106,14 @@ const parseOptions = (
   return {
     halfWidthMap,
     fullWidthMap,
-    fullWidthPairMap
+    fullWidthPairMap,
+    adjusted: adjustedFullWidthOption
   }
 }
 
 const generateHandler = (options: Options): Handler => {
-  const { halfWidthMap, fullWidthMap, fullWidthPairMap } = parseOptions(options)
+  const { halfWidthMap, fullWidthMap, fullWidthPairMap, adjusted } =
+    parseOptions(options)
 
   const handleHyperSpaceOption: Handler = (
     token: MutableToken,
@@ -138,6 +153,7 @@ const generateHandler = (options: Options): Handler => {
           CharType.PUNCTUATION_FULL,
           PUNCTUATION_FULL_WIDTH
         )
+        checkAdjusted(token, adjusted)
       } else if (halfWidthMap[content]) {
         checkContent(
           token,
@@ -184,7 +200,8 @@ const generateHandler = (options: Options): Handler => {
 
 export const defaultConfig: Options = {
   halfWidthPunctuation: defaultHalfWidthOption,
-  fullWidthPunctuation: defaultFullWidthOption
+  fullWidthPunctuation: defaultFullWidthOption,
+  adjustedFullWidthPunctuation: defaultAdjustedFullWidthOption
 }
 
 export default generateHandler
