@@ -47,10 +47,15 @@ import {
   QUOTE_SPACE_OUTSIDE
 } from './messages'
 
+const isFullWidth = (char: string, adjusted: string): boolean => {
+  return isFullWidthPair(char) && adjusted.indexOf(char) === -1
+}
+
 const generateHandler = (options: Options): Handler => {
   const noSpaceInsideQuoteOption = options.noSpaceInsideQuote
   const spaceOutsideHalfQuoteOption = options.spaceOutsideHalfQuote
   const noSpaceOutsideFullQuoteOption = options.noSpaceOutsideFullQuote
+  const adjustedFullWidthOption = options.adjustedFullWidthPunctuation || ''
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-group tokens
@@ -98,12 +103,12 @@ const generateHandler = (options: Options): Handler => {
           contentTokenAfter
         )
         if (spaceHost) {
-          const isFullWidth =
-            isFullWidthPair(token.modifiedEndContent) ||
-            isFullWidthPair(contentTokenAfter.modifiedStartContent)
+          const fullWidth =
+            isFullWidth(token.modifiedEndContent, adjustedFullWidthOption) ||
+            isFullWidth(contentTokenAfter.modifiedStartContent, adjustedFullWidthOption)
           // 2.1.1 right-full-quote x left-full-quote
           // 2.1.2 right-half-quote x left-half-quote
-          if (isFullWidth) {
+          if (fullWidth) {
             if (noSpaceOutsideFullQuoteOption) {
               checkSpaceAfter(spaceHost, '', QUOTE_SPACE_OUTSIDE)
             }
@@ -132,11 +137,11 @@ const generateHandler = (options: Options): Handler => {
           token
         )
         if (spaceHost) {
-          const isFullWidth = isFullWidthPair(token.modifiedStartContent)
+          const fullWidth = isFullWidth(token.modifiedStartContent, adjustedFullWidthOption)
 
           // 2.2.1 content/code x left-full-quote
           // 2.2.2 content/code x left-half-quote
-          if (isFullWidth) {
+          if (fullWidth) {
             if (noSpaceOutsideFullQuoteOption) {
               checkSpaceAfter(spaceHost, '', QUOTE_NOSPACE_OUTSIDE)
             }
@@ -152,7 +157,7 @@ const generateHandler = (options: Options): Handler => {
         }
       }
 
-      // 2.3 right-quote x content/punctuation/code
+      // 2.3 right-quote x content/code
       if (
         contentTokenAfter &&
         (isLettersType(contentTokenAfter.type) ||
@@ -164,11 +169,11 @@ const generateHandler = (options: Options): Handler => {
           contentTokenAfter
         )
         if (spaceHost) {
-          const isFullWidth = isFullWidthPair(token.modifiedEndContent)
+          const fullWidth = isFullWidth(token.modifiedEndContent, adjustedFullWidthOption)
 
           // 2.3.1 right-full-quote x content/code
           // 2.3.2 right-half-quote x content/code
-          if (isFullWidth) {
+          if (fullWidth) {
             if (noSpaceOutsideFullQuoteOption) {
               checkSpaceAfter(spaceHost, '', QUOTE_NOSPACE_OUTSIDE)
             }

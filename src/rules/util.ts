@@ -20,6 +20,7 @@ export type Options = {
   // punctuation
   halfWidthPunctuation?: string
   fullWidthPunctuation?: string
+  adjustedFullWidthPunctuation?: string
   unifiedPunctuation?: 'traditional' | 'simplified'
 
   // case: abbrs

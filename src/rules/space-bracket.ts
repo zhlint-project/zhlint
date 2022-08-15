@@ -49,6 +49,10 @@ import {
   BRACKET_SPACE_OUTSIDE
 } from './messages'
 
+const isFullWidth = (char: string, adjusted: string): boolean => {
+  return isFullWidthPair(char) && adjusted.indexOf(char) === -1
+}
+
 const shouldSkip = (
   before: MutableToken | undefined,
   beforeTokenSeq: MutableToken[],
@@ -91,6 +95,7 @@ const generateHandler = (options: Options): Handler => {
   const noInsideBracketOption = options.noSpaceInsideBracket
   const spaceOutsideHalfBracketOption = options.spaceOutsideHalfBracket
   const noSpaceOutsideFullBracketOption = options.noSpaceOutsideFullBracket
+  const adjustedFullWidthOption = options.adjustedFullWidthPunctuation || ''
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-bracket tokens
@@ -144,7 +149,7 @@ const generateHandler = (options: Options): Handler => {
       typeof spaceOutsideHalfBracketOption !== 'undefined' ||
       noSpaceOutsideFullBracketOption
     ) {
-      const isFullWidth = isFullWidthPair(token.modifiedContent)
+      const fullWidth = isFullWidth(token.modifiedContent, adjustedFullWidthOption)
 
       // 2.1 right-bracket x left-bracket
       if (contentTokenAfter) {
@@ -154,7 +159,7 @@ const generateHandler = (options: Options): Handler => {
         ) {
           if (afterSpaceHost) {
             const hasFullWidth =
-              isFullWidth || isFullWidthPair(contentTokenAfter.modifiedContent)
+              fullWidth || isFullWidth(contentTokenAfter.modifiedContent, adjustedFullWidthOption)
 
             // 2.1.1 any-full-bracket
             // 2.1.2 right-half-bracket x left-half-bracket
@@ -191,9 +196,9 @@ const generateHandler = (options: Options): Handler => {
             // 2.2.1 content/right-quote/code x left-full-bracket
             // 2.2.2 content/right-quote/code x left-half-bracket
             if (
-              isFullWidth ||
+              fullWidth ||
               (contentTokenBefore.type === GroupTokenType.GROUP &&
-                isFullWidthPair(contentTokenBefore.modifiedEndContent))
+                isFullWidth(contentTokenBefore.modifiedEndContent, adjustedFullWidthOption))
             ) {
               if (noSpaceOutsideFullBracketOption) {
                 checkSpaceAfter(beforeSpaceHost, '', BRACKET_NOSPACE_OUTSIDE)
@@ -220,9 +225,9 @@ const generateHandler = (options: Options): Handler => {
             // 2.3.1 right-full-bracket x content/left-quote/code
             // 2.4.2 right-half-bracket x content/left-quote/code
             if (
-              isFullWidth ||
+              fullWidth ||
               (contentTokenAfter.type === GroupTokenType.GROUP &&
-                isFullWidthPair(contentTokenAfter.modifiedStartContent))
+                isFullWidth(contentTokenAfter.modifiedStartContent, adjustedFullWidthOption))
             ) {
               if (noSpaceOutsideFullBracketOption) {
                 checkSpaceAfter(afterSpaceHost, '', BRACKET_NOSPACE_OUTSIDE)
