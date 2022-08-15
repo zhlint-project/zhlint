@@ -415,10 +415,7 @@ export const isShorthand = (
   }
   const nextChar = str[index + 1]
   const nextType = checkCharType(nextChar)
-  if (nextType === CharType.LETTERS_HALF) {
-    return true
-  }
-  if (nextType === CharType.SPACE) {
+  if (nextType === CharType.LETTERS_HALF || nextType === CharType.SPACE) {
     if (!status.lastGroup) {
       return true
     }
