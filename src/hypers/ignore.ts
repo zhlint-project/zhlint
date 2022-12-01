@@ -4,7 +4,7 @@ import { ParsedStatus } from './types'
 const ignoredCaseMatcher =
   /^(?:(?<prefix>.+?)-,)?(?<textStart>.+?)(?:,(?<textEnd>.+?))?(?:,-(?<suffix>.+?))?$/
 
-const parseIngoredCase = (text: string): IgnoredCase | undefined => {
+export const parseIngoredCase = (text: string): IgnoredCase | undefined => {
   const matchResult = text.match(ignoredCaseMatcher)
   if (matchResult) {
     const { prefix, textStart, textEnd, suffix } =

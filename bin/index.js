@@ -3,7 +3,7 @@
 const fs = require('fs')
 const minimist = require('minimist')
 const glob = require('glob')
-const { run, report } = require('../')
+const { readRc, runWithConfig, report } = require('../')
 
 const helpMessage = `
 This is zhlint!
@@ -17,6 +17,17 @@ Usage:
   zhlint <input-file-path> --output=<output-file-path>
   zhlint --help
   zhlint --version
+
+Config arguments:
+
+  --config <filepath>
+    .zhlintrc by default
+
+  --ignore <filepath>
+    .zhlintignore by default
+
+  --dir    <path>
+    current directory by default
 
 Examples:
   zhlint foo.md
@@ -56,14 +67,16 @@ const main = () => {
 
   if (argv._ && argv._.length) {
     const [filePattern] = [...argv._]
+    const configDir = argv.dir
+    const configPath = argv.config
+    const ignorePath = argv.ignore
+    const config = readRc(configDir, configPath, ignorePath)
     try {
       const files = glob.sync(filePattern)
       const resultList = files.map((file) => {
         console.log(`[start] ${file}`)
         const origin = fs.readFileSync(file, { encoding: 'utf8' })
-        const { result, validations } = run(origin, {
-          rules: { preset: 'default' }
-        })
+        const { result, validations } = runWithConfig(origin, config)
         return {
           file,
           origin,
