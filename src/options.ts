@@ -133,7 +133,7 @@ export const normalizedConfig = (
   if (Array.isArray(config.hyperParsers)) {
     hyperParse = config.hyperParsers
   }
-  hyperParse.forEach(x => {
+  hyperParse.forEach((x) => {
     if (!hyperParseMap[x]) {
       logger.log(`The hyper parser ${x} is invalid.`)
       return
@@ -143,7 +143,7 @@ export const normalizedConfig = (
 
   // ignored cases
   if (config.ignores) {
-    config.ignores.forEach(x => {
+    config.ignores.forEach((x) => {
       const ignoredCase = parseIngoredCase(x)
       if (ignoredCase) {
         options.ignoredCases.push(ignoredCase)
@@ -155,4 +155,3 @@ export const normalizedConfig = (
 
   return options
 }
-

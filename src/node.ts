@@ -7,7 +7,7 @@ const r: (str: string) => Record<string, () => any> = () => ({
   resolve: () => '',
   existsSync: () => false,
   readFileSync: () => '',
-  readJSONSync: () => ({}),
+  readJSONSync: () => ({})
 })
 
 if (typeof require === 'undefined') {

@@ -25,7 +25,10 @@ export const run = (str: string, options: Options = {}): Result => {
   return lint(str, normalizedOptions)
 }
 
-export const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
+export const lint = (
+  str: string,
+  normalizedOptions: NormalizedOptions
+): Result => {
   // return if the file is totally ignored
   const disabledMatcher = /<!--\s*zhlint\s*disabled\s*-->/g
   if (str.match(disabledMatcher)) {

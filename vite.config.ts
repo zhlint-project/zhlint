@@ -16,9 +16,7 @@ export default defineConfig(({ mode }) => ({
   define: {
     'globalThis.__DEV__': mode === 'development'
   },
-  plugins: [
-    nodePolyfills() as any
-  ],
+  plugins: [nodePolyfills() as any],
   test: {
     coverage: {
       reporter: ['text', 'json', 'html']
