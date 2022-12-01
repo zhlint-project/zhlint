@@ -2,6 +2,7 @@
 
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
+import nodePolyfills from 'vite-plugin-node-stdlib-browser'
 
 export default defineConfig(({ mode }) => ({
   build: {
@@ -15,6 +16,7 @@ export default defineConfig(({ mode }) => ({
   define: {
     'globalThis.__DEV__': mode === 'development'
   },
+  plugins: [nodePolyfills() as any],
   test: {
     coverage: {
       reporter: ['text', 'json', 'html']
