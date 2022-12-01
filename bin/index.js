@@ -70,12 +70,12 @@ const main = () => {
     const configDir = argv.dir
     const configPath = argv.config
     const ignorePath = argv.ignore
+    const config = readRc(configDir, configPath, ignorePath)
     try {
       const files = glob.sync(filePattern)
       const resultList = files.map((file) => {
         console.log(`[start] ${file}`)
         const origin = fs.readFileSync(file, { encoding: 'utf8' })
-        const config = readRc(configDir, configPath, ignorePath)
         const { result, validations } = runWithConfig(origin, config)
         return {
           file,
