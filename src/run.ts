@@ -1,7 +1,7 @@
 import { Block, ParsedStatus } from './hypers/types'
 import { Validation } from './report'
 import { IgnoredMark } from './ignore'
-import { Options } from './options'
+import { NormalizedOptions, Options } from './options'
 
 import { normalizeOptions } from './options'
 import { parse, toMutableResult, travel } from './parser'
@@ -20,14 +20,17 @@ export type Result = {
   validations: Validation[]
 }
 
-const run = (str: string, options: Options = {}): Result => {
+export const run = (str: string, options: Options = {}): Result => {
+  const normalizedOptions = normalizeOptions(options)
+  return lint(str, normalizedOptions)
+}
+
+export const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
   // return if the file is totally ignored
   const disabledMatcher = /<!--\s*zhlint\s*disabled\s*-->/g
   if (str.match(disabledMatcher)) {
     return { origin: str, result: str, validations: [], disabled: true }
   }
-
-  const normalizedOptions = normalizeOptions(options)
 
   const { logger, ignoredCases, rules, hyperParse } = normalizedOptions
 

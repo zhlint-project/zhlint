@@ -11,14 +11,14 @@ export type Options = {
   ignoredCases?: IgnoredCase[]
 }
 
-type NormalizedOptions = {
+export type NormalizedOptions = {
   logger: Console
   rules: RuleOptions
   hyperParse: Array<(status: ParsedStatus) => ParsedStatus>
   ignoredCases: IgnoredCase[]
 }
 
-import ignore from './hypers/ignore'
+import ignore, { parseIngoredCase } from './hypers/ignore'
 import hexo from './hypers/hexo'
 import vuepress from './hypers/vuepress'
 import md from './hypers/md'
@@ -26,6 +26,7 @@ import md from './hypers/md'
 import { defaultConfig as defaultRules } from './rules'
 
 import { env } from './report'
+import { Config } from './rc'
 
 const hyperParseInfo = [
   { name: 'ignore', value: ignore },
@@ -104,3 +105,54 @@ export const normalizeOptions = (options: Options): NormalizedOptions => {
 
   return normoalizedOptions
 }
+
+export const normalizedConfig = (
+  config: Config,
+  logger: Console = env.defaultLogger
+): NormalizedOptions => {
+  const options: NormalizedOptions = {
+    logger,
+    rules: {},
+    hyperParse: [],
+    ignoredCases: []
+  }
+  let hyperParse: string[] = []
+
+  // preset
+  if (config.preset === 'default') {
+    options.rules = { ...defaultRules }
+    hyperParse = hyperParseInfo.map((item) => item.name)
+  }
+
+  // rules
+  if (config.rules) {
+    options.rules = { ...options.rules, ...config.rules }
+  }
+
+  // hyper parsers
+  if (Array.isArray(config.hyperParsers)) {
+    hyperParse = config.hyperParsers
+  }
+  hyperParse.forEach(x => {
+    if (!hyperParseMap[x]) {
+      logger.log(`The hyper parser ${x} is invalid.`)
+      return
+    }
+    options.hyperParse.push(hyperParseMap[x])
+  })
+
+  // ignored cases
+  if (config.ignores) {
+    config.ignores.forEach(x => {
+      const ignoredCase = parseIngoredCase(x)
+      if (ignoredCase) {
+        options.ignoredCases.push(ignoredCase)
+      } else {
+        logger.log(`The format of ignore case: "${x}" is invalid.`)
+      }
+    })
+  }
+
+  return options
+}
+
