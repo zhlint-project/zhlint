@@ -1,7 +1,7 @@
 import { Options } from '../options'
 
 import { resolve } from 'path'
-import { existsSync, readFileSync, readJSONSync } from 'fs-extra'
+import { existsSync, readFileSync } from 'fs'
 
 import { env } from '../report'
 
@@ -51,6 +51,12 @@ export type Config = {
   ignores?: string[]
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const readJSONSync = (filepath: string): any => {
+  const output = readFileSync(filepath, { encoding: 'utf8' })
+  return JSON.parse(output)
+}
+
 const resolveConfig = (
   normalizedConfigPath: string | undefined,
   normalizedIgnorePath: string | undefined,
@@ -61,9 +67,7 @@ const resolveConfig = (
   }
   if (normalizedConfigPath) {
     try {
-      const config: Config = readJSONSync(normalizedConfigPath, {
-        encoding: 'utf8'
-      })
+      const config: Config = readJSONSync(normalizedConfigPath)
       if (typeof config.preset === 'string') {
         result.preset = config.preset
       }

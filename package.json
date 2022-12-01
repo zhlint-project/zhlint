@@ -75,9 +75,7 @@
     "vitepress": "1.0.0-alpha.4"
   },
   "dependencies": {
-    "@types/fs-extra": "^9.0.13",
     "chalk": "^4.0.0",
-    "fs-extra": "^11.1.0",
     "glob": "^7.1.6",
     "minimist": "^1.2.0",
     "node-stdlib-browser": "^1.2.0",
