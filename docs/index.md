@@ -44,6 +44,46 @@ The validation report might look like this:
 
 ![](./screenshot-cli.png)
 
+#### Advanced usage
+
+zhlint also supports rc and ignore config files for custom rules:
+
+<details>
+
+```bash
+# .zhlintrc by default
+zhlint --config <filepath>
+
+# .zhlintignore by default
+zhlint --ignore <filepath>
+
+# current directory by default
+zhlint --dir <path>
+```
+
+In the config file, you can write a JSON like:
+
+```json
+{
+  "preset": "default",
+  "rules": {
+    "adjustedFullWidthPunctuation": ""
+  }
+}
+```
+
+For more details, see [supported rules](#supported-rules).
+
+In the ignore file, you can write some lines of ignored cases like:
+
+```txt
+( , )
+```
+
+For more details, see [setup ignored cases](#setup-ignored-cases).
+
+</details>
+
 ### As Node.js package
 
 ```js
@@ -78,6 +118,29 @@ Invalid files:
 Found 2 errors.
 ```
 
+#### Advanced usage
+
+zhlint also supports rc and ignore config files for custom rules:
+
+<details>
+
+```js
+const { readRc, runWithConfig } = require('zhlint')
+
+const value = '自动在中文和English之间加入空格'
+
+const dir = '...' // the target directory path
+const configPath = '...' // the config file path
+const ignorePath = '...' // the ignore file path
+
+const config = readRc(dir, configPath, ignorePath)
+const output = runWithConfig(value, config)
+
+// ... further actions
+```
+
+</details>
+
 ### As a standalone package
 
 You could find a JavaScript file `dist/zhlint.js` as a standalone version. To use it, for example, you can directly add it into your browser as a `<script>` tag. Then there would be a global variable `zhlint` for you.
@@ -96,6 +159,8 @@ You could find a JavaScript file `dist/zhlint.js` as a standalone version. To us
   - parameters:
     - `results`: An array for all linted results.
     - `logger`: The logger instance, by default it's `console` in Node.js/browser.
+- `readRc: (dir: string, config: string, ignore: string, logger?: Console) => Config`: Read config from rc file(s). For rc (run command).
+- `runWithConfig(str: string, config: Config): Result`: Lint a certain file with rc config. For rc (run command).
 
 ### Options
 
@@ -116,6 +181,13 @@ type Options = {
   - `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
     - Just follows a certain format inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
 - `logger`: same to the parameter in `report(...)`.
+
+### RC Config
+
+- `preset`: `string` (optional)
+- `rules`: `RuleOptions` without the `preset` field. (optional)
+- `hyperParsers`: `string[]` (optional)
+- `ignores`: `string[]` and the priority is lower than `.zhlintignore`. (optional)
 
 ### Output
 
@@ -148,6 +220,8 @@ type Validation = {
   - `index`: The index of the target token in the input string.
   - `length`: The length of the target token in the input string.
   - `message`: The description of this validation in natural language.
+
+### Advanced usage
 
 ## Features
 
@@ -195,6 +269,12 @@ or just pass it through as an option:
 
 ```js
 run(str, { ignoredCases: { textStart: '( ', textEnd: ' )' } })
+```
+
+If you want to ignore the whole file, you can also add this HTML comment:
+
+```md
+<!-- zhlint disabled -->
 ```
 
 ## Supported preproccessors (hyper parsers)
