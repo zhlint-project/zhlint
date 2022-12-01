@@ -57,7 +57,7 @@ const resolveConfig = (
   logger: Console = env.defaultLogger
 ): Config => {
   const result: Config = {
-    preset: 'deafult'
+    preset: 'default'
   }
   if (normalizedConfigPath) {
     try {
