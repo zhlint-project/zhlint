@@ -2,8 +2,9 @@ import { Block, ParsedStatus } from './hypers/types'
 import { Validation } from './report'
 import { IgnoredMark } from './ignore'
 import { NormalizedOptions, Options } from './options'
+import { Config } from './rc'
 
-import { normalizeOptions } from './options'
+import { normalizeOptions, normalizeConfig } from './options'
 import { parse, toMutableResult, travel } from './parser'
 import generateHandlers from './rules'
 import findIgnoredMarks from './ignore'
@@ -25,10 +26,12 @@ export const run = (str: string, options: Options = {}): Result => {
   return lint(str, normalizedOptions)
 }
 
-export const lint = (
-  str: string,
-  normalizedOptions: NormalizedOptions
-): Result => {
+export const runWithConfig = (str: string, config: Config): Result => {
+  const normalizedOptions = normalizeConfig(config)
+  return lint(str, normalizedOptions)
+}
+
+const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
   // return if the file is totally ignored
   const disabledMatcher = /<!--\s*zhlint\s*disabled\s*-->/g
   if (str.match(disabledMatcher)) {

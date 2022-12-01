@@ -3,7 +3,7 @@
 const fs = require('fs')
 const minimist = require('minimist')
 const glob = require('glob')
-const { lint, report, readRc } = require('../')
+const { readRc, runWithConfig, report } = require('../')
 
 const helpMessage = `
 This is zhlint!
@@ -76,7 +76,7 @@ const main = () => {
         console.log(`[start] ${file}`)
         const origin = fs.readFileSync(file, { encoding: 'utf8' })
         const config = readRc(configDir, configPath, ignorePath)
-        const { result, validations } = lint(origin, config)
+        const { result, validations } = runWithConfig(origin, config)
         return {
           file,
           origin,

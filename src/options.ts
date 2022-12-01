@@ -106,7 +106,7 @@ export const normalizeOptions = (options: Options): NormalizedOptions => {
   return normoalizedOptions
 }
 
-export const normalizedConfig = (
+export const normalizeConfig = (
   config: Config,
   logger: Console = env.defaultLogger
 ): NormalizedOptions => {

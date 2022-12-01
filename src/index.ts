@@ -1,4 +1,4 @@
-import { run, lint } from './run'
+import { run, runWithConfig } from './run'
 import { report } from './report'
 import { readRc } from './rc'
 
@@ -6,4 +6,4 @@ import { readRc } from './rc'
 // - run(str, options): { origin, result, validations, disabled }
 // - report(result[{ file, origin, validations, disabled }], logger?)
 
-export { run, report, readRc, lint }
+export { run, report, readRc, runWithConfig }
