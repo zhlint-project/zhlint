@@ -1,5 +1,5 @@
 import { IgnoredMark } from './ignore'
-import { Validation } from './report'
+import { Validation, ValidationTarget } from './report'
 import {
   MutableGroupToken as GroupToken,
   MutableToken as Token
@@ -9,16 +9,16 @@ const isInRange = (start: number, end: number, mark: IgnoredMark) => {
   return start <= mark.end && end >= mark.start
 }
 
-type IgnoredFlags = {
-  START: boolean
-  INNER_SPACE: boolean
-  CONTENT: true
-  END: true
-  SPACE_AFTER: true
-}
+type IgnoredFlags = Record<ValidationTarget, boolean>
 
 const isIgnored = (token: Token, marks: IgnoredMark[] = []): IgnoredFlags => {
-  const result = {} as IgnoredFlags
+  const result: IgnoredFlags = {
+    [ValidationTarget.CONTENT]: false,
+    [ValidationTarget.SPACE_AFTER]: false,
+    [ValidationTarget.START_CONTENT]: false,
+    [ValidationTarget.END_CONTENT]: false,
+    [ValidationTarget.INNER_SPACE_BEFORE]: false,
+  }
 
   // - group: startContent, innerSpaceBefore, endContent, spaceAfter
   // - single: raw, spaceAfter
@@ -33,7 +33,7 @@ const isIgnored = (token: Token, marks: IgnoredMark[] = []): IgnoredFlags => {
         spaceAfter
       } = token
       if (isInRange(index, index + (startContent || '').length, mark)) {
-        result.START = true
+        result[ValidationTarget.SPACE_AFTER] = true
       }
       if (
         isInRange(
@@ -42,10 +42,10 @@ const isIgnored = (token: Token, marks: IgnoredMark[] = []): IgnoredFlags => {
           mark
         )
       ) {
-        result.INNER_SPACE = true
+        result[ValidationTarget.INNER_SPACE_BEFORE] = true
       }
       if (isInRange(endIndex, endIndex + (endContent || '').length, mark)) {
-        result.END = true
+        result[ValidationTarget.END_CONTENT] = true
       }
       if (
         isInRange(
@@ -54,12 +54,12 @@ const isIgnored = (token: Token, marks: IgnoredMark[] = []): IgnoredFlags => {
           mark
         )
       ) {
-        result.SPACE_AFTER = true
+        result[ValidationTarget.SPACE_AFTER] = true
       }
     } else {
       const { index, content, spaceAfter } = token
       if (isInRange(index, index + (content || '').length, mark)) {
-        result.CONTENT = true
+        result[ValidationTarget.CONTENT] = true
       }
       if (
         isInRange(
@@ -68,50 +68,67 @@ const isIgnored = (token: Token, marks: IgnoredMark[] = []): IgnoredFlags => {
           mark
         )
       ) {
-        result.SPACE_AFTER = true
+        result[ValidationTarget.SPACE_AFTER] = true
       }
     }
   })
   return result
 }
 
+const recordValidations = (
+  token: Token,
+  offset = 0,
+  ignoredFlags: IgnoredFlags,
+  validations: Validation[] = []
+): void => {
+  token.validations.forEach((v) => {
+    if (!ignoredFlags[v.target]) {
+      validations.push({ ...v, index: v.index + offset })
+    }
+  })
+}
+
 /**
  * Join tokens back into string
+ * @param tokens the target group token, the index is relative to the block it belongs to
+ * @param offset the index of the block, relative to the file it belongs to
+ * @param ignoredMarks the ignored marks, the index is relative to the block it belongs to
+ * @param validations the validation list result
+ * @param isChild whether the group token is a child token of the block
  */
 const join = (
   tokens: GroupToken,
+  offset = 0,
   ignoredMarks: IgnoredMark[] = [],
   validations: Validation[] = [],
-  start = 0
+  isChild?: boolean
 ): string => {
   const ignoredFlags = isIgnored(tokens, ignoredMarks)
-  // innerSpaceBefore
+  if (!isChild) {
+    recordValidations(tokens, offset, ignoredFlags, validations)
+  }
   return [
-    ignoredFlags.START ? tokens.startContent : tokens.modifiedStartContent,
-    ignoredFlags.INNER_SPACE
+    ignoredFlags[ValidationTarget.START_CONTENT] ? tokens.startContent : tokens.modifiedStartContent,
+    ignoredFlags[ValidationTarget.INNER_SPACE_BEFORE]
       ? tokens.innerSpaceBefore
       : tokens.modifiedInnerSpaceBefore,
     ...tokens.map((token) => {
-      const ignoredPieces = isIgnored(token, ignoredMarks)
-      // validate content, spaceAfter
-      if (Array.isArray(token.validations)) {
-        token.validations.forEach((v) =>
-          validations.push({ ...v, index: v.index + start })
-        )
-      }
-      return Array.isArray(token)
-        ? join(token, ignoredMarks, validations, start)
-        : [
-            ignoredPieces.CONTENT ? token.content : token.modifiedContent,
-            ignoredPieces.SPACE_AFTER
-              ? token.spaceAfter
-              : token.modifiedSpaceAfter
-          ]
-            .filter(Boolean)
-            .join('')
+      const subIgnoredFlags = isIgnored(token, ignoredMarks)
+      recordValidations(token, offset, subIgnoredFlags, validations)
+      if (!Array.isArray(token)) {
+        return [
+          subIgnoredFlags[ValidationTarget.CONTENT] ? token.content : token.modifiedContent,
+          subIgnoredFlags[ValidationTarget.SPACE_AFTER]
+            ? token.spaceAfter
+            : token.modifiedSpaceAfter
+        ]
+          .filter(Boolean)
+          .join('')
+        }
+      return join(token, offset, ignoredMarks, validations, true)
     }),
-    ignoredFlags.END ? tokens.endContent : tokens.modifiedEndContent,
-    ignoredFlags.SPACE_AFTER ? tokens.spaceAfter : tokens.modifiedSpaceAfter
+    ignoredFlags[ValidationTarget.END_CONTENT] ? tokens.endContent : tokens.modifiedEndContent,
+    ignoredFlags[ValidationTarget.SPACE_AFTER] ? tokens.spaceAfter : tokens.modifiedSpaceAfter
   ]
     .filter(Boolean)
     .join('')

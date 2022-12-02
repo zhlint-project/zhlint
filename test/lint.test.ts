@@ -14,4 +14,12 @@ describe('lint with different arguments', () => {
       })
     ).toBe('汉字和English之间需要有空格比如 half width content。')
   })
+  test('ignored cases from Vue docs', () => {
+    const output = run('# SSR？ {#ssr}', {
+      ...options,
+      ignoredCases: [{ textStart: '？ {#' }]
+    })
+    expect(output.result).toBe('# SSR？ {#ssr}')
+    expect(output.validations.length).toBe(0)
+  })
 })
