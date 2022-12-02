@@ -40,9 +40,11 @@ const findIgnoredMarks = (
       const nextPossibleCurrentIndex = possibleStart + textStart.length
 
       if (!end) {
-        logger.log(
-          `ignore: ${str.substring(possibleStart, nextPossibleCurrentIndex)}`
-        )
+        if (globalThis.__DEV__) {
+          logger.log(
+            `ignore: ${str.substring(possibleStart, nextPossibleCurrentIndex)}`
+          )
+        }
         marks.push({
           start: possibleStart,
           end: nextPossibleCurrentIndex
@@ -56,7 +58,9 @@ const findIgnoredMarks = (
         if (endIndex === -1) {
           return
         } else {
-          logger.log(`ignore: ${str.substring(possibleStart, possibleEnd)}`)
+          if (globalThis.__DEV__) {
+            logger.log(`ignore: ${str.substring(possibleStart, possibleEnd)}`)
+          }
           marks.push({
             start: possibleStart,
             end: possibleEnd
