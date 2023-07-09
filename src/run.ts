@@ -1,7 +1,8 @@
-import { Block, ParsedStatus } from './hypers/types'
-import { Validation } from './report'
-import { NormalizedOptions, Options } from './options'
-import { Config } from './rc'
+import type { ParsedBlock, ParsedStatus, ParserIgnoredCase } from './hypers/types'
+import type { Validation } from './report'
+import type { NormalizedOptions, Options } from './options'
+import type { Config } from './rc'
+import type { IgnoredCase } from './ignore'
 
 import { normalizeOptions, normalizeConfig } from './options'
 import { parse, toMutableResult, travel } from './parser'
@@ -10,7 +11,15 @@ import findIgnoredMarks from './ignore'
 import join from './join'
 import replaceBlocks from './replace-block'
 
-export { Options } from './options'
+export type { Options } from './options'
+
+export type DebugInfo = {
+  blocks: ParsedBlock[];
+  ignoredCases: IgnoredCase[];
+  ignoredByParsers: ParserIgnoredCase[];
+  parserErrors: Validation[];
+  ruleErrors: Validation[];
+}
 
 export type Result = {
   file?: string
@@ -18,6 +27,7 @@ export type Result = {
   origin: string
   result: string
   validations: Validation[]
+  __debug__?: DebugInfo
 }
 
 export const run = (str: string, options: Options = {}): Result => {
@@ -72,7 +82,7 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
   // 4. Join all tokens with ignoredMarks and all errors for each block
   // 5. Replace each block back to the string
   const ruleHandlers = generateHandlers(rules)
-  const modifiedBlocks: Block[] = parsedStatus.blocks.map(
+  const modifiedBlocks: ParsedBlock[] = parsedStatus.blocks.map(
     ({ value, marks, start, end }) => {
       let lastValue = value
       if (globalThis.__DEV__) {
@@ -104,18 +114,30 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
         logger.log('[Eventual block value]')
         logger.log(lastValue + '\n')
       }
+
       return {
+        ...result,
         start,
         end,
-        value: lastValue
-      } as Block
+        value: lastValue,
+        originValue: value
+      }
     }
   )
+
+  const debugInfo = {
+    blocks: modifiedBlocks,
+    ignoredCases: parsedStatus.ignoredByRules,
+    ignoredByParsers: parsedStatus.ignoredByParsers,
+    parserErrors,
+    ruleErrors
+  }
 
   return {
     origin: str,
     result: replaceBlocks(str, modifiedBlocks),
-    validations: [...parserErrors, ...ruleErrors]
+    validations: [...parserErrors, ...ruleErrors],
+    __debug__: debugInfo
   }
 }
 

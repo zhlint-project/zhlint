@@ -1,5 +1,5 @@
-import { IgnoredCase } from '../ignore'
-import { Mark } from '../parser'
+import type { IgnoredCase } from '../ignore'
+import type { Mark, MutableParseResult } from '../parser'
 
 export type ParserIgnoredCase = {
   name: string
@@ -22,4 +22,8 @@ export type ParsedStatus = {
   ignoredByRules: IgnoredCase[]
   ignoredByParsers: ParserIgnoredCase[]
   blocks: Block[]
+}
+
+export type ParsedBlock = Block & MutableParseResult & {
+  originValue: string
 }

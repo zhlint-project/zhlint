@@ -1,10 +1,10 @@
-import { Block } from './hypers/types'
+import type { ParsedBlock } from './hypers/types'
 
-type Piece = Block & {
+type Piece = ParsedBlock & {
   nonBlock?: boolean
 }
 
-const replaceBlocks = (str: string, blocks: Block[]): string => {
+const replaceBlocks = (str: string, blocks: ParsedBlock[]): string => {
   if (blocks.length === 0) {
     return str
   }
