@@ -3,6 +3,7 @@ import type { Validation } from './report'
 import type { NormalizedOptions, Options } from './options'
 import type { Config } from './rc'
 import type { IgnoredCase } from './ignore'
+import type { Piece } from './replace-block'
 
 import { normalizeOptions, normalizeConfig } from './options'
 import { parse, toMutableResult, travel } from './parser'
@@ -14,6 +15,7 @@ import replaceBlocks from './replace-block'
 export type { Options } from './options'
 
 export type DebugInfo = {
+  pieces: Piece[];
   blocks: ParsedBlock[];
   ignoredCases: IgnoredCase[];
   ignoredByParsers: ParserIgnoredCase[];
@@ -125,7 +127,10 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
     }
   )
 
+  const result = replaceBlocks(str, modifiedBlocks)
+
   const debugInfo = {
+    pieces: result.pieces,
     blocks: modifiedBlocks,
     ignoredCases: parsedStatus.ignoredByRules,
     ignoredByParsers: parsedStatus.ignoredByParsers,
@@ -135,7 +140,7 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
 
   return {
     origin: str,
-    result: replaceBlocks(str, modifiedBlocks),
+    result: result.value,
     validations: [...parserErrors, ...ruleErrors],
     __debug__: debugInfo
   }
