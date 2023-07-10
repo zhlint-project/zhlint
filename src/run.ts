@@ -6,7 +6,7 @@ import type { IgnoredCase } from './ignore'
 import type { Piece } from './replace-block'
 
 import { normalizeOptions, normalizeConfig } from './options'
-import { parse, toMutableResult, travel } from './parser'
+import { MutableToken, parse, toMutableResult, travel } from './parser'
 import generateHandlers from './rules'
 import findIgnoredMarks from './ignore'
 import join from './join'
@@ -19,8 +19,10 @@ export type DebugInfo = {
   blocks: ParsedBlock[];
   ignoredCases: IgnoredCase[];
   ignoredByParsers: ParserIgnoredCase[];
+  ignoredTokens: MutableToken[];
   parserErrors: Validation[];
   ruleErrors: Validation[];
+  skippedRuleErrors: Validation[];
 }
 
 export type Result = {
@@ -69,8 +71,10 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
     ]
   }
 
+  const ignoredTokens: MutableToken[] = []
   const parserErrors: Validation[] = []
   const ruleErrors: Validation[] = []
+  const skippedRuleErrors: Validation[] = []
 
   // Run all the hyper parsers
   const parsedStatus = hyperParse.reduce(
@@ -87,12 +91,15 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
   const modifiedBlocks: ParsedBlock[] = parsedStatus.blocks.map(
     ({ value, marks, start, end }) => {
       let lastValue = value
+
       if (globalThis.__DEV__) {
         logger.log('[Original block value]')
         logger.log(lastValue)
       }
+
       const result = toMutableResult(parse(value, marks), rules)
       parserErrors.push(...result.errors)
+
       const ignoredMarks = findIgnoredMarks(
         value,
         status.ignoredByRules,
@@ -102,7 +109,7 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
       ruleHandlers.forEach((rule) => {
         travel(result.tokens, rule)
         if (globalThis.__DEV__) {
-          const currentValue = join(result.tokens, start, ignoredMarks, [])
+          const currentValue = join(result.tokens, start, ignoredMarks, [], [], [])
           if (lastValue !== currentValue) {
             logger.log(`[After process by ${rule.name}]`)
             logger.log(currentValue)
@@ -111,7 +118,8 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
         }
       })
 
-      lastValue = join(result.tokens, start, ignoredMarks, ruleErrors)
+      lastValue = join(result.tokens, start, ignoredMarks, ignoredTokens, ruleErrors, skippedRuleErrors)
+
       if (globalThis.__DEV__) {
         logger.log('[Eventual block value]')
         logger.log(lastValue + '\n')
@@ -129,13 +137,15 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
 
   const result = replaceBlocks(str, modifiedBlocks)
 
-  const debugInfo = {
+  const debugInfo: DebugInfo = {
     pieces: result.pieces,
     blocks: modifiedBlocks,
     ignoredCases: parsedStatus.ignoredByRules,
     ignoredByParsers: parsedStatus.ignoredByParsers,
+    ignoredTokens,
     parserErrors,
-    ruleErrors
+    ruleErrors,
+    skippedRuleErrors
   }
 
   return {
