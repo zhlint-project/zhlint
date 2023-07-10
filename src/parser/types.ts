@@ -58,7 +58,9 @@ type Pair = {
 
 type MutablePair = {
   modifiedStartContent: string
+  ignoredStartContent?: string
   modifiedEndContent: string
+  ignoredEndContent?: string
 }
 
 // Mark
@@ -227,7 +229,9 @@ type CommonToken = {
 
 type MutableCommonToken = CommonToken & {
   modifiedContent: string
+  ignoredContent?: string
   modifiedSpaceAfter: string
+  ignoredSpaceAfter?: string
   validations: Validation[]
 }
 
@@ -238,6 +242,7 @@ export type SingleToken = CommonToken & {
 export type MutableSingleToken = MutableCommonToken & {
   type: SingleTokenType
   modifiedType: SingleTokenType
+  ignoredType?: SingleTokenType
 }
 
 export type GroupToken = Array<Token> &
@@ -253,8 +258,10 @@ export type MutableGroupToken = Array<MutableToken> &
   MutablePair & {
     type: GroupTokenType
     modifiedType: GroupTokenType
+    ignoredType?: GroupTokenType
     innerSpaceBefore: string
     modifiedInnerSpaceBefore: string
+    ignoredInnerSpaceBefore?: string
   }
 
 export type Token = SingleToken | GroupToken

@@ -22,7 +22,7 @@ export type DebugInfo = {
   ignoredTokens: MutableToken[];
   parserErrors: Validation[];
   ruleErrors: Validation[];
-  skippedRuleErrors: Validation[];
+  ignoredRuleErrors: Validation[];
 }
 
 export type Result = {
@@ -74,7 +74,7 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
   const ignoredTokens: MutableToken[] = []
   const parserErrors: Validation[] = []
   const ruleErrors: Validation[] = []
-  const skippedRuleErrors: Validation[] = []
+  const ignoredRuleErrors: Validation[] = []
 
   // Run all the hyper parsers
   const parsedStatus = hyperParse.reduce(
@@ -118,7 +118,7 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
         }
       })
 
-      lastValue = join(result.tokens, start, ignoredMarks, ignoredTokens, ruleErrors, skippedRuleErrors)
+      lastValue = join(result.tokens, start, ignoredMarks, ignoredTokens, ruleErrors, ignoredRuleErrors)
 
       if (globalThis.__DEV__) {
         logger.log('[Eventual block value]')
@@ -145,7 +145,7 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
     ignoredTokens,
     parserErrors,
     ruleErrors,
-    skippedRuleErrors
+    ignoredRuleErrors
   }
 
   return {
