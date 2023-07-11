@@ -291,7 +291,7 @@ function basename(path, ext) {
   if (ext !== void 0 && typeof ext !== "string") {
     throw new TypeError('"ext" argument must be a string');
   }
-  assertPath$1(path);
+  assertPath$2(path);
   index2 = path.length;
   if (ext === void 0 || !ext.length || ext.length > path.length) {
     while (index2--) {
@@ -346,7 +346,7 @@ function dirname(path) {
   var end;
   var unmatchedSlash;
   var index2;
-  assertPath$1(path);
+  assertPath$2(path);
   if (!path.length) {
     return ".";
   }
@@ -372,7 +372,7 @@ function extname(path) {
   var unmatchedSlash;
   var code;
   var index2;
-  assertPath$1(path);
+  assertPath$2(path);
   index2 = path.length;
   while (index2--) {
     code = path.charCodeAt(index2);
@@ -406,7 +406,7 @@ function join$1() {
   var index2 = -1;
   var joined;
   while (++index2 < arguments.length) {
-    assertPath$1(arguments[index2]);
+    assertPath$2(arguments[index2]);
     if (arguments[index2]) {
       joined = joined === void 0 ? arguments[index2] : joined + "/" + arguments[index2];
     }
@@ -416,7 +416,7 @@ function join$1() {
 function normalize$4(path) {
   var absolute;
   var value;
-  assertPath$1(path);
+  assertPath$2(path);
   absolute = path.charCodeAt(0) === 47;
   value = normalizeString(path, !absolute);
   if (!value.length && !absolute) {
@@ -492,7 +492,7 @@ function normalizeString(path, allowAboveRoot) {
   }
   return result;
 }
-function assertPath$1(path) {
+function assertPath$2(path) {
   if (typeof path !== "string") {
     throw new TypeError("Path must be a string. Received " + JSON.stringify(path));
   }
@@ -574,33 +574,33 @@ function setPath(path) {
 function getDirname() {
   return typeof this.path === "string" ? p.dirname(this.path) : void 0;
 }
-function setDirname(dirname2) {
-  assertPath(this.path, "dirname");
-  this.path = p.join(dirname2 || "", this.basename);
+function setDirname(dirname3) {
+  assertPath$1(this.path, "dirname");
+  this.path = p.join(dirname3 || "", this.basename);
 }
 function getBasename() {
   return typeof this.path === "string" ? p.basename(this.path) : void 0;
 }
-function setBasename(basename2) {
-  assertNonEmpty(basename2, "basename");
-  assertPart(basename2, "basename");
-  this.path = p.join(this.dirname || "", basename2);
+function setBasename(basename3) {
+  assertNonEmpty(basename3, "basename");
+  assertPart(basename3, "basename");
+  this.path = p.join(this.dirname || "", basename3);
 }
 function getExtname() {
   return typeof this.path === "string" ? p.extname(this.path) : void 0;
 }
-function setExtname(extname2) {
-  assertPart(extname2, "extname");
-  assertPath(this.path, "extname");
-  if (extname2) {
-    if (extname2.charCodeAt(0) !== 46) {
+function setExtname(extname3) {
+  assertPart(extname3, "extname");
+  assertPath$1(this.path, "extname");
+  if (extname3) {
+    if (extname3.charCodeAt(0) !== 46) {
       throw new Error("`extname` must start with `.`");
     }
-    if (extname2.indexOf(".", 1) > -1) {
+    if (extname3.indexOf(".", 1) > -1) {
       throw new Error("`extname` cannot contain multiple dots");
     }
   }
-  this.path = p.join(this.dirname, this.stem + (extname2 || ""));
+  this.path = p.join(this.dirname, this.stem + (extname3 || ""));
 }
 function getStem() {
   return typeof this.path === "string" ? p.basename(this.path, this.extname) : void 0;
@@ -623,7 +623,7 @@ function assertNonEmpty(part, name2) {
     throw new Error("`" + name2 + "` cannot be empty");
   }
 }
-function assertPath(path, name2) {
+function assertPath$1(path, name2) {
   if (!path) {
     throw new Error("Setting `" + name2 + "` requires `path` to be set too");
   }
@@ -788,11 +788,11 @@ function unified() {
   processor.freeze = freeze;
   processor.attachers = attachers;
   processor.use = use;
-  processor.parse = parse2;
+  processor.parse = parse3;
   processor.stringify = stringify2;
   processor.run = run2;
   processor.runSync = runSync;
-  processor.process = process;
+  processor.process = process2;
   processor.processSync = processSync;
   return processor;
   function processor() {
@@ -926,7 +926,7 @@ function unified() {
       }
     }
   }
-  function parse2(doc) {
+  function parse3(doc) {
     var file = vfile(doc);
     var Parser2;
     freeze();
@@ -948,14 +948,14 @@ function unified() {
       return new Promise(executor);
     }
     executor(null, cb);
-    function executor(resolve, reject) {
+    function executor(resolve2, reject) {
       transformers.run(node, vfile(file), done);
       function done(err, tree, file2) {
         tree = tree || node;
         if (err) {
           reject(err);
-        } else if (resolve) {
-          resolve(tree);
+        } else if (resolve2) {
+          resolve2(tree);
         } else {
           cb(null, tree, file2);
         }
@@ -986,7 +986,7 @@ function unified() {
     }
     return Compiler(node, file);
   }
-  function process(doc, cb) {
+  function process2(doc, cb) {
     freeze();
     assertParser("process", processor.Parser);
     assertCompiler("process", processor.Compiler);
@@ -994,14 +994,14 @@ function unified() {
       return new Promise(executor);
     }
     executor(null, cb);
-    function executor(resolve, reject) {
+    function executor(resolve2, reject) {
       var file = vfile(doc);
       pipeline.run(processor, { file }, done);
       function done(err) {
         if (err) {
           reject(err);
-        } else if (resolve) {
-          resolve(file);
+        } else if (resolve2) {
+          resolve2(file);
         } else {
           cb(null, file);
         }
@@ -1015,7 +1015,7 @@ function unified() {
     assertParser("processSync", processor.Parser);
     assertCompiler("processSync", processor.Compiler);
     file = vfile(doc);
-    process(file, done);
+    process2(file, done);
     assertDone("processSync", "process", complete);
     return file;
     function done(err) {
@@ -1789,7 +1789,7 @@ var decode$3 = factory$1;
 function factory$1(ctx) {
   decoder.raw = decodeRaw;
   return decoder;
-  function normalize2(position2) {
+  function normalize3(position2) {
     var offsets = ctx.offset;
     var line = position2.line;
     var result = [];
@@ -1803,7 +1803,7 @@ function factory$1(ctx) {
   }
   function decoder(value, position2, handler) {
     entities(value, {
-      position: normalize2(position2),
+      position: normalize3(position2),
       warning: handleWarning,
       text: handler,
       reference: handler,
@@ -1812,7 +1812,7 @@ function factory$1(ctx) {
     });
   }
   function decodeRaw(value, position2, options) {
-    return entities(value, xtend$5(options, { position: normalize2(position2), warning: handleWarning }));
+    return entities(value, xtend$5(options, { position: normalize3(position2), warning: handleWarning }));
   }
   function handleWarning(reason, position2, code) {
     if (code !== 3) {
@@ -3064,7 +3064,7 @@ function list(eat, value, silent) {
   var content;
   var line;
   var prevEmpty;
-  var empty;
+  var empty2;
   var items;
   var allLines;
   var emptyLines;
@@ -3218,8 +3218,8 @@ function list(eat, value, silent) {
         break;
       }
     }
-    prevEmpty = empty;
-    empty = !prefixed && !trim$3(content).length;
+    prevEmpty = empty2;
+    empty2 = !prefixed && !trim$3(content).length;
     if (indented && item) {
       item.value = item.value.concat(emptyLines, line);
       allLines = allLines.concat(emptyLines, line);
@@ -3238,7 +3238,7 @@ function list(eat, value, silent) {
       items.push(item);
       allLines = allLines.concat(emptyLines, line);
       emptyLines = [];
-    } else if (empty) {
+    } else if (empty2) {
       if (prevEmpty && !commonmark2) {
         break;
       }
@@ -5348,20 +5348,20 @@ var format = { exports: {} };
   (function() {
     var namespace;
     {
-      namespace = module.exports = format2;
+      namespace = module.exports = format3;
     }
-    namespace.format = format2;
+    namespace.format = format3;
     namespace.vsprintf = vsprintf;
     if (typeof console !== "undefined" && typeof console.log === "function") {
       namespace.printf = printf;
     }
     function printf() {
-      console.log(format2.apply(null, arguments));
+      console.log(format3.apply(null, arguments));
     }
     function vsprintf(fmt, replacements) {
-      return format2.apply(null, [fmt].concat(replacements));
+      return format3.apply(null, [fmt].concat(replacements));
     }
-    function format2(fmt) {
+    function format3(fmt) {
       var argIndex = 1, args = [].slice.call(arguments), i = 0, n = fmt.length, result = "", c, escaped = false, arg, tmp, leadingZero = false, precision, nextArg = function() {
         return args[argIndex++];
       }, slurpNumber = function() {
@@ -5447,11 +5447,11 @@ fault$1.create = create$2;
 function create$2(EConstructor) {
   FormattedError.displayName = EConstructor.displayName || EConstructor.name;
   return FormattedError;
-  function FormattedError(format2) {
-    if (format2) {
-      format2 = formatter.apply(null, arguments);
+  function FormattedError(format3) {
+    if (format3) {
+      format3 = formatter.apply(null, arguments);
     }
-    return new EConstructor(format2);
+    return new EConstructor(format3);
   }
 }
 var fault = fault_1;
@@ -8802,6 +8802,43 @@ const normalizeOptions = (options) => {
   };
   return normoalizedOptions;
 };
+const normalizeConfig = (config, logger = env.defaultLogger) => {
+  const options = {
+    logger,
+    rules: {},
+    hyperParse: [],
+    ignoredCases: []
+  };
+  let hyperParse = [];
+  if (config.preset === "default") {
+    options.rules = __spreadValues({}, defaultConfig);
+    hyperParse = hyperParseInfo.map((item) => item.name);
+  }
+  if (config.rules) {
+    options.rules = __spreadValues(__spreadValues({}, options.rules), config.rules);
+  }
+  if (Array.isArray(config.hyperParsers)) {
+    hyperParse = config.hyperParsers;
+  }
+  hyperParse.forEach((x) => {
+    if (!hyperParseMap[x]) {
+      logger.log(`The hyper parser ${x} is invalid.`);
+      return;
+    }
+    options.hyperParse.push(hyperParseMap[x]);
+  });
+  if (config.ignores) {
+    config.ignores.forEach((x) => {
+      const ignoredCase = parseIngoredCase(x);
+      if (ignoredCase) {
+        options.ignoredCases.push(ignoredCase);
+      } else {
+        logger.log(`The format of ignore case: "${x}" is invalid.`);
+      }
+    });
+  }
+  return options;
+};
 const findIgnoredMarks = (str, ignoredCases = [], logger = env.defaultLogger) => {
   const marks = [];
   ignoredCases.forEach(({ prefix, textStart, textEnd, suffix }) => {
@@ -8817,7 +8854,6 @@ const findIgnoredMarks = (str, ignoredCases = [], logger = env.defaultLogger) =>
       const possibleStart = currentIndex + startIndex + startOffset;
       const nextPossibleCurrentIndex = possibleStart + textStart.length;
       if (!end) {
-        logger.log(`ignore: ${str.substring(possibleStart, nextPossibleCurrentIndex)}`);
         marks.push({
           start: possibleStart,
           end: nextPossibleCurrentIndex
@@ -8829,7 +8865,6 @@ const findIgnoredMarks = (str, ignoredCases = [], logger = env.defaultLogger) =>
         if (endIndex === -1) {
           return;
         } else {
-          logger.log(`ignore: ${str.substring(possibleStart, possibleEnd)}`);
           marks.push({
             start: possibleStart,
             end: possibleEnd
@@ -8846,7 +8881,14 @@ const isInRange = (start, end, mark) => {
   return start <= mark.end && end >= mark.start;
 };
 const isIgnored = (token, marks = []) => {
-  const result = {};
+  const result = {
+    ignored: false,
+    [ValidationTarget.CONTENT]: false,
+    [ValidationTarget.SPACE_AFTER]: false,
+    [ValidationTarget.START_CONTENT]: false,
+    [ValidationTarget.END_CONTENT]: false,
+    [ValidationTarget.INNER_SPACE_BEFORE]: false
+  };
   marks.forEach((mark) => {
     if (Array.isArray(token)) {
       const {
@@ -8858,51 +8900,95 @@ const isIgnored = (token, marks = []) => {
         spaceAfter
       } = token;
       if (isInRange(index2, index2 + (startContent || "").length, mark)) {
-        result.START = true;
+        result[ValidationTarget.SPACE_AFTER] = result.ignored = true;
       }
       if (isInRange(index2 + (startContent || "").length, index2 + (startContent || "").length + (innerSpaceBefore || "").length, mark)) {
-        result.INNER_SPACE = true;
+        result[ValidationTarget.INNER_SPACE_BEFORE] = result.ignored = true;
       }
       if (isInRange(endIndex, endIndex + (endContent || "").length, mark)) {
-        result.END = true;
+        result[ValidationTarget.END_CONTENT] = result.ignored = true;
       }
       if (isInRange(endIndex + (endContent || "").length, endIndex + (endContent || "").length + (spaceAfter || "").length, mark)) {
-        result.SPACE_AFTER = true;
+        result[ValidationTarget.SPACE_AFTER] = result.ignored = true;
       }
     } else {
       const { index: index2, content, spaceAfter } = token;
       if (isInRange(index2, index2 + (content || "").length, mark)) {
-        result.CONTENT = true;
+        result[ValidationTarget.CONTENT] = result.ignored = true;
       }
       if (isInRange(index2 + (content || "").length, index2 + (content || "").length + (spaceAfter || "").length, mark)) {
-        result.SPACE_AFTER = true;
+        result[ValidationTarget.SPACE_AFTER] = result.ignored = true;
       }
     }
   });
   return result;
 };
-const join = (tokens, ignoredMarks = [], validations = [], start = 0) => {
+const recordValidations = (token, offset = 0, ignoredFlags, validations = [], ignoredValidations = []) => {
+  token.validations.forEach((v) => {
+    const validationWithOffset = __spreadProps(__spreadValues({}, v), { index: v.index + offset });
+    if (!ignoredFlags[v.target]) {
+      validations.push(validationWithOffset);
+    } else {
+      ignoredValidations.push(validationWithOffset);
+    }
+  });
+};
+const join = (tokens, offset = 0, ignoredMarks = [], ignoredTokens = [], validations = [], ignoredValidations = [], isChild) => {
   const ignoredFlags = isIgnored(tokens, ignoredMarks);
+  if (!isChild && ignoredFlags.ignored) {
+    ignoredTokens.push(tokens);
+  }
+  if (!isChild) {
+    recordValidations(tokens, offset, ignoredFlags, validations, ignoredValidations);
+  }
+  if (ignoredFlags[ValidationTarget.START_CONTENT]) {
+    tokens.ignoredStartContent = tokens.modifiedStartContent;
+    tokens.modifiedStartContent = tokens.startContent;
+  }
+  if (ignoredFlags[ValidationTarget.INNER_SPACE_BEFORE]) {
+    tokens.ignoredInnerSpaceBefore = tokens.modifiedInnerSpaceBefore;
+    tokens.modifiedInnerSpaceBefore = tokens.innerSpaceBefore;
+  }
+  if (ignoredFlags[ValidationTarget.END_CONTENT]) {
+    tokens.ignoredEndContent = tokens.modifiedEndContent;
+    tokens.modifiedEndContent = tokens.endContent;
+  }
+  if (ignoredFlags[ValidationTarget.SPACE_AFTER]) {
+    tokens.ignoredSpaceAfter = tokens.modifiedSpaceAfter;
+    tokens.modifiedSpaceAfter = tokens.spaceAfter;
+  }
   return [
-    ignoredFlags.START ? tokens.startContent : tokens.modifiedStartContent,
-    ignoredFlags.INNER_SPACE ? tokens.innerSpaceBefore : tokens.modifiedInnerSpaceBefore,
+    tokens.modifiedStartContent,
+    tokens.modifiedInnerSpaceBefore,
     ...tokens.map((token) => {
-      const ignoredPieces = isIgnored(token, ignoredMarks);
-      if (Array.isArray(token.validations)) {
-        token.validations.forEach((v) => validations.push(__spreadProps(__spreadValues({}, v), { index: v.index + start })));
+      const subIgnoredFlags = isIgnored(token, ignoredMarks);
+      if (subIgnoredFlags.ignored) {
+        ignoredTokens.push(token);
       }
-      return Array.isArray(token) ? join(token, ignoredMarks, validations, start) : [
-        ignoredPieces.CONTENT ? token.content : token.modifiedContent,
-        ignoredPieces.SPACE_AFTER ? token.spaceAfter : token.modifiedSpaceAfter
-      ].filter(Boolean).join("");
+      recordValidations(token, offset, subIgnoredFlags, validations, ignoredValidations);
+      if (!Array.isArray(token)) {
+        if (subIgnoredFlags[ValidationTarget.CONTENT]) {
+          token.ignoredContent = token.modifiedContent;
+          token.modifiedContent = token.content;
+        }
+        if (subIgnoredFlags[ValidationTarget.SPACE_AFTER]) {
+          token.ignoredSpaceAfter = token.modifiedSpaceAfter;
+          token.modifiedSpaceAfter = token.spaceAfter;
+        }
+        return [
+          token.modifiedContent,
+          token.modifiedSpaceAfter
+        ].filter(Boolean).join("");
+      }
+      return join(token, offset, ignoredMarks, ignoredTokens, validations, ignoredValidations, true);
     }),
-    ignoredFlags.END ? tokens.endContent : tokens.modifiedEndContent,
-    ignoredFlags.SPACE_AFTER ? tokens.spaceAfter : tokens.modifiedSpaceAfter
+    tokens.modifiedEndContent,
+    tokens.modifiedSpaceAfter
   ].filter(Boolean).join("");
 };
 const replaceBlocks = (str, blocks) => {
   if (blocks.length === 0) {
-    return str;
+    return { value: str, pieces: [{ value: str, start: 0, end: str.length, nonBlock: true }] };
   }
   const pieces = blocks.reduce((pieces2, block, index2) => {
     const { start, end } = block;
@@ -8912,7 +8998,8 @@ const replaceBlocks = (str, blocks) => {
       const nonBlockPiece = {
         nonBlock: true,
         start: nextStart,
-        end: start
+        end: start,
+        value: ""
       };
       nonBlockPiece.value = str.substring(nonBlockPiece.start, nonBlockPiece.end);
       pieces2.push(nonBlockPiece);
@@ -8922,21 +9009,30 @@ const replaceBlocks = (str, blocks) => {
       const nonBlockPiece = {
         nonBlock: true,
         start: end,
-        end: str.length
+        end: str.length,
+        value: ""
       };
       nonBlockPiece.value = str.substring(nonBlockPiece.start, nonBlockPiece.end);
       pieces2.push(nonBlockPiece);
     }
     return pieces2;
   }, []);
-  return pieces.map(({ value }) => value).join("");
+  const value = pieces.map(({ value: value2 }) => value2).join("");
+  return { value, pieces };
 };
 const run = (str, options = {}) => {
+  const normalizedOptions = normalizeOptions(options);
+  return lint(str, normalizedOptions);
+};
+const runWithConfig = (str, config) => {
+  const normalizedOptions = normalizeConfig(config);
+  return lint(str, normalizedOptions);
+};
+const lint = (str, normalizedOptions) => {
   const disabledMatcher = /<!--\s*zhlint\s*disabled\s*-->/g;
   if (str.match(disabledMatcher)) {
     return { origin: str, result: str, validations: [], disabled: true };
   }
-  const normalizedOptions = normalizeOptions(options);
   const { logger, ignoredCases, rules, hyperParse } = normalizedOptions;
   const status = {
     content: str,
@@ -8952,32 +9048,539 @@ const run = (str, options = {}) => {
       }
     ]
   };
+  const ignoredTokens = [];
   const parserErrors = [];
   const ruleErrors = [];
-  const allIgnoredMarks = [];
-  const parsedStatus = hyperParse.reduce((current, parse2) => parse2(current), status);
+  const ignoredRuleErrors = [];
+  const parsedStatus = hyperParse.reduce((current, parse22) => parse22(current), status);
   const ruleHandlers = generateHandlers(rules);
   const modifiedBlocks = parsedStatus.blocks.map(({ value, marks, start, end }) => {
     let lastValue = value;
-    const result = toMutableResult(parse(value, marks), rules);
-    parserErrors.push(...result.errors);
+    const result2 = toMutableResult(parse(value, marks), rules);
+    parserErrors.push(...result2.errors);
     const ignoredMarks = findIgnoredMarks(value, status.ignoredByRules, logger);
     ruleHandlers.forEach((rule) => {
-      travel(result.tokens, rule);
+      travel(result2.tokens, rule);
     });
-    ignoredMarks.forEach((mark) => allIgnoredMarks.push(mark));
-    lastValue = join(result.tokens, ignoredMarks, ruleErrors, start);
-    return {
+    lastValue = join(result2.tokens, start, ignoredMarks, ignoredTokens, ruleErrors, ignoredRuleErrors);
+    return __spreadProps(__spreadValues({}, result2), {
       start,
       end,
-      value: lastValue
-    };
+      value: lastValue,
+      originValue: value
+    });
   });
+  const result = replaceBlocks(str, modifiedBlocks);
+  const debugInfo = {
+    pieces: result.pieces,
+    blocks: modifiedBlocks,
+    ignoredCases: parsedStatus.ignoredByRules,
+    ignoredByParsers: parsedStatus.ignoredByParsers,
+    ignoredTokens,
+    parserErrors,
+    ruleErrors,
+    ignoredRuleErrors
+  };
   return {
     origin: str,
-    result: replaceBlocks(str, modifiedBlocks),
-    validations: [...parserErrors, ...ruleErrors].filter(({ index: index2 }) => allIgnoredMarks.length ? allIgnoredMarks.some(({ start, end }) => index2 >= start && index2 <= end) : true)
+    result: result.value,
+    validations: [...parserErrors, ...ruleErrors],
+    __debug__: debugInfo
   };
 };
-export { report, run };
+function assertPath(path) {
+  if (typeof path !== "string") {
+    throw new TypeError("Path must be a string. Received " + JSON.stringify(path));
+  }
+}
+function normalizeStringPosix(path, allowAboveRoot) {
+  var res2 = "";
+  var lastSegmentLength = 0;
+  var lastSlash = -1;
+  var dots = 0;
+  var code;
+  for (var i = 0; i <= path.length; ++i) {
+    if (i < path.length)
+      code = path.charCodeAt(i);
+    else if (code === 47)
+      break;
+    else
+      code = 47;
+    if (code === 47) {
+      if (lastSlash === i - 1 || dots === 1)
+        ;
+      else if (lastSlash !== i - 1 && dots === 2) {
+        if (res2.length < 2 || lastSegmentLength !== 2 || res2.charCodeAt(res2.length - 1) !== 46 || res2.charCodeAt(res2.length - 2) !== 46) {
+          if (res2.length > 2) {
+            var lastSlashIndex = res2.lastIndexOf("/");
+            if (lastSlashIndex !== res2.length - 1) {
+              if (lastSlashIndex === -1) {
+                res2 = "";
+                lastSegmentLength = 0;
+              } else {
+                res2 = res2.slice(0, lastSlashIndex);
+                lastSegmentLength = res2.length - 1 - res2.lastIndexOf("/");
+              }
+              lastSlash = i;
+              dots = 0;
+              continue;
+            }
+          } else if (res2.length === 2 || res2.length === 1) {
+            res2 = "";
+            lastSegmentLength = 0;
+            lastSlash = i;
+            dots = 0;
+            continue;
+          }
+        }
+        if (allowAboveRoot) {
+          if (res2.length > 0)
+            res2 += "/..";
+          else
+            res2 = "..";
+          lastSegmentLength = 2;
+        }
+      } else {
+        if (res2.length > 0)
+          res2 += "/" + path.slice(lastSlash + 1, i);
+        else
+          res2 = path.slice(lastSlash + 1, i);
+        lastSegmentLength = i - lastSlash - 1;
+      }
+      lastSlash = i;
+      dots = 0;
+    } else if (code === 46 && dots !== -1) {
+      ++dots;
+    } else {
+      dots = -1;
+    }
+  }
+  return res2;
+}
+function _format(sep, pathObject) {
+  var dir = pathObject.dir || pathObject.root;
+  var base = pathObject.base || (pathObject.name || "") + (pathObject.ext || "");
+  if (!dir) {
+    return base;
+  }
+  if (dir === pathObject.root) {
+    return dir + base;
+  }
+  return dir + sep + base;
+}
+var posix = {
+  resolve: function resolve() {
+    var resolvedPath = "";
+    var resolvedAbsolute = false;
+    var cwd2;
+    for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+      var path;
+      if (i >= 0)
+        path = arguments[i];
+      else {
+        if (cwd2 === void 0)
+          cwd2 = process.cwd();
+        path = cwd2;
+      }
+      assertPath(path);
+      if (path.length === 0) {
+        continue;
+      }
+      resolvedPath = path + "/" + resolvedPath;
+      resolvedAbsolute = path.charCodeAt(0) === 47;
+    }
+    resolvedPath = normalizeStringPosix(resolvedPath, !resolvedAbsolute);
+    if (resolvedAbsolute) {
+      if (resolvedPath.length > 0)
+        return "/" + resolvedPath;
+      else
+        return "/";
+    } else if (resolvedPath.length > 0) {
+      return resolvedPath;
+    } else {
+      return ".";
+    }
+  },
+  normalize: function normalize2(path) {
+    assertPath(path);
+    if (path.length === 0)
+      return ".";
+    var isAbsolute2 = path.charCodeAt(0) === 47;
+    var trailingSeparator = path.charCodeAt(path.length - 1) === 47;
+    path = normalizeStringPosix(path, !isAbsolute2);
+    if (path.length === 0 && !isAbsolute2)
+      path = ".";
+    if (path.length > 0 && trailingSeparator)
+      path += "/";
+    if (isAbsolute2)
+      return "/" + path;
+    return path;
+  },
+  isAbsolute: function isAbsolute(path) {
+    assertPath(path);
+    return path.length > 0 && path.charCodeAt(0) === 47;
+  },
+  join: function join2() {
+    if (arguments.length === 0)
+      return ".";
+    var joined;
+    for (var i = 0; i < arguments.length; ++i) {
+      var arg = arguments[i];
+      assertPath(arg);
+      if (arg.length > 0) {
+        if (joined === void 0)
+          joined = arg;
+        else
+          joined += "/" + arg;
+      }
+    }
+    if (joined === void 0)
+      return ".";
+    return posix.normalize(joined);
+  },
+  relative: function relative(from, to) {
+    assertPath(from);
+    assertPath(to);
+    if (from === to)
+      return "";
+    from = posix.resolve(from);
+    to = posix.resolve(to);
+    if (from === to)
+      return "";
+    var fromStart = 1;
+    for (; fromStart < from.length; ++fromStart) {
+      if (from.charCodeAt(fromStart) !== 47)
+        break;
+    }
+    var fromEnd = from.length;
+    var fromLen = fromEnd - fromStart;
+    var toStart = 1;
+    for (; toStart < to.length; ++toStart) {
+      if (to.charCodeAt(toStart) !== 47)
+        break;
+    }
+    var toEnd = to.length;
+    var toLen = toEnd - toStart;
+    var length = fromLen < toLen ? fromLen : toLen;
+    var lastCommonSep = -1;
+    var i = 0;
+    for (; i <= length; ++i) {
+      if (i === length) {
+        if (toLen > length) {
+          if (to.charCodeAt(toStart + i) === 47) {
+            return to.slice(toStart + i + 1);
+          } else if (i === 0) {
+            return to.slice(toStart + i);
+          }
+        } else if (fromLen > length) {
+          if (from.charCodeAt(fromStart + i) === 47) {
+            lastCommonSep = i;
+          } else if (i === 0) {
+            lastCommonSep = 0;
+          }
+        }
+        break;
+      }
+      var fromCode2 = from.charCodeAt(fromStart + i);
+      var toCode = to.charCodeAt(toStart + i);
+      if (fromCode2 !== toCode)
+        break;
+      else if (fromCode2 === 47)
+        lastCommonSep = i;
+    }
+    var out = "";
+    for (i = fromStart + lastCommonSep + 1; i <= fromEnd; ++i) {
+      if (i === fromEnd || from.charCodeAt(i) === 47) {
+        if (out.length === 0)
+          out += "..";
+        else
+          out += "/..";
+      }
+    }
+    if (out.length > 0)
+      return out + to.slice(toStart + lastCommonSep);
+    else {
+      toStart += lastCommonSep;
+      if (to.charCodeAt(toStart) === 47)
+        ++toStart;
+      return to.slice(toStart);
+    }
+  },
+  _makeLong: function _makeLong(path) {
+    return path;
+  },
+  dirname: function dirname2(path) {
+    assertPath(path);
+    if (path.length === 0)
+      return ".";
+    var code = path.charCodeAt(0);
+    var hasRoot = code === 47;
+    var end = -1;
+    var matchedSlash = true;
+    for (var i = path.length - 1; i >= 1; --i) {
+      code = path.charCodeAt(i);
+      if (code === 47) {
+        if (!matchedSlash) {
+          end = i;
+          break;
+        }
+      } else {
+        matchedSlash = false;
+      }
+    }
+    if (end === -1)
+      return hasRoot ? "/" : ".";
+    if (hasRoot && end === 1)
+      return "//";
+    return path.slice(0, end);
+  },
+  basename: function basename2(path, ext) {
+    if (ext !== void 0 && typeof ext !== "string")
+      throw new TypeError('"ext" argument must be a string');
+    assertPath(path);
+    var start = 0;
+    var end = -1;
+    var matchedSlash = true;
+    var i;
+    if (ext !== void 0 && ext.length > 0 && ext.length <= path.length) {
+      if (ext.length === path.length && ext === path)
+        return "";
+      var extIdx = ext.length - 1;
+      var firstNonSlashEnd = -1;
+      for (i = path.length - 1; i >= 0; --i) {
+        var code = path.charCodeAt(i);
+        if (code === 47) {
+          if (!matchedSlash) {
+            start = i + 1;
+            break;
+          }
+        } else {
+          if (firstNonSlashEnd === -1) {
+            matchedSlash = false;
+            firstNonSlashEnd = i + 1;
+          }
+          if (extIdx >= 0) {
+            if (code === ext.charCodeAt(extIdx)) {
+              if (--extIdx === -1) {
+                end = i;
+              }
+            } else {
+              extIdx = -1;
+              end = firstNonSlashEnd;
+            }
+          }
+        }
+      }
+      if (start === end)
+        end = firstNonSlashEnd;
+      else if (end === -1)
+        end = path.length;
+      return path.slice(start, end);
+    } else {
+      for (i = path.length - 1; i >= 0; --i) {
+        if (path.charCodeAt(i) === 47) {
+          if (!matchedSlash) {
+            start = i + 1;
+            break;
+          }
+        } else if (end === -1) {
+          matchedSlash = false;
+          end = i + 1;
+        }
+      }
+      if (end === -1)
+        return "";
+      return path.slice(start, end);
+    }
+  },
+  extname: function extname2(path) {
+    assertPath(path);
+    var startDot = -1;
+    var startPart = 0;
+    var end = -1;
+    var matchedSlash = true;
+    var preDotState = 0;
+    for (var i = path.length - 1; i >= 0; --i) {
+      var code = path.charCodeAt(i);
+      if (code === 47) {
+        if (!matchedSlash) {
+          startPart = i + 1;
+          break;
+        }
+        continue;
+      }
+      if (end === -1) {
+        matchedSlash = false;
+        end = i + 1;
+      }
+      if (code === 46) {
+        if (startDot === -1)
+          startDot = i;
+        else if (preDotState !== 1)
+          preDotState = 1;
+      } else if (startDot !== -1) {
+        preDotState = -1;
+      }
+    }
+    if (startDot === -1 || end === -1 || preDotState === 0 || preDotState === 1 && startDot === end - 1 && startDot === startPart + 1) {
+      return "";
+    }
+    return path.slice(startDot, end);
+  },
+  format: function format2(pathObject) {
+    if (pathObject === null || typeof pathObject !== "object") {
+      throw new TypeError('The "pathObject" argument must be of type Object. Received type ' + typeof pathObject);
+    }
+    return _format("/", pathObject);
+  },
+  parse: function parse2(path) {
+    assertPath(path);
+    var ret = { root: "", dir: "", base: "", ext: "", name: "" };
+    if (path.length === 0)
+      return ret;
+    var code = path.charCodeAt(0);
+    var isAbsolute2 = code === 47;
+    var start;
+    if (isAbsolute2) {
+      ret.root = "/";
+      start = 1;
+    } else {
+      start = 0;
+    }
+    var startDot = -1;
+    var startPart = 0;
+    var end = -1;
+    var matchedSlash = true;
+    var i = path.length - 1;
+    var preDotState = 0;
+    for (; i >= start; --i) {
+      code = path.charCodeAt(i);
+      if (code === 47) {
+        if (!matchedSlash) {
+          startPart = i + 1;
+          break;
+        }
+        continue;
+      }
+      if (end === -1) {
+        matchedSlash = false;
+        end = i + 1;
+      }
+      if (code === 46) {
+        if (startDot === -1)
+          startDot = i;
+        else if (preDotState !== 1)
+          preDotState = 1;
+      } else if (startDot !== -1) {
+        preDotState = -1;
+      }
+    }
+    if (startDot === -1 || end === -1 || preDotState === 0 || preDotState === 1 && startDot === end - 1 && startDot === startPart + 1) {
+      if (end !== -1) {
+        if (startPart === 0 && isAbsolute2)
+          ret.base = ret.name = path.slice(1, end);
+        else
+          ret.base = ret.name = path.slice(startPart, end);
+      }
+    } else {
+      if (startPart === 0 && isAbsolute2) {
+        ret.name = path.slice(1, startDot);
+        ret.base = path.slice(1, end);
+      } else {
+        ret.name = path.slice(startPart, startDot);
+        ret.base = path.slice(startPart, end);
+      }
+      ret.ext = path.slice(startDot, end);
+    }
+    if (startPart > 0)
+      ret.dir = path.slice(0, startPart - 1);
+    else if (isAbsolute2)
+      ret.dir = "/";
+    return ret;
+  },
+  sep: "/",
+  delimiter: ":",
+  win32: null,
+  posix: null
+};
+posix.posix = posix;
+var pathBrowserify = posix;
+var empty = null;
+var empty_1 = empty;
+const resolvePath = (dir, config, ignore, logger = env.defaultLogger) => {
+  const result = {
+    config: void 0,
+    ignore: void 0
+  };
+  dir = pathBrowserify.resolve(dir != null ? dir : ".");
+  if (!empty_1.existsSync(dir)) {
+    logger.log(`"${dir}" does not exist.`);
+    return result;
+  }
+  config = pathBrowserify.resolve(dir, config != null ? config : ".zhlintrc");
+  if (empty_1.existsSync(config)) {
+    result.config = config;
+  } else {
+    logger.log(`Config file "${config}" does not exist. Will proceed as default.`);
+  }
+  ignore = pathBrowserify.resolve(dir, ignore != null ? ignore : ".zhlintignore");
+  if (empty_1.existsSync(ignore)) {
+    result.ignore = ignore;
+  } else {
+    logger.log(`Global ignored cases file "${ignore}" does not exist. Will proceed as none.`);
+  }
+  return result;
+};
+const readJSONSync = (filepath) => {
+  const output = empty_1.readFileSync(filepath, { encoding: "utf8" });
+  return JSON.parse(output);
+};
+const resolveConfig = (normalizedConfigPath, normalizedIgnorePath, logger = env.defaultLogger) => {
+  const result = {
+    preset: "default"
+  };
+  if (normalizedConfigPath) {
+    try {
+      const config = readJSONSync(normalizedConfigPath);
+      if (typeof config.preset === "string") {
+        result.preset = config.preset;
+      }
+      if (typeof config.rules === "object") {
+        result.rules = config.rules;
+      }
+      if (Array.isArray(config.hyperParsers)) {
+        result.hyperParsers = config.hyperParsers;
+      }
+      if (Array.isArray(config.ignores)) {
+        result.ignores = config.ignores;
+      }
+    } catch (error) {
+      logger.log(`Failed to read "${normalizedConfigPath}": ${error.message}`);
+    }
+  }
+  if (normalizedIgnorePath) {
+    try {
+      const ignores = empty_1.readFileSync(normalizedIgnorePath, { encoding: "utf8" });
+      ignores.split(/\n/).map((x) => x.trim()).forEach((x) => {
+        if (!x) {
+          return;
+        }
+        if (!result.ignores) {
+          result.ignores = [];
+        }
+        if (result.ignores.indexOf(x) === -1) {
+          result.ignores.push(x);
+        }
+      });
+    } catch (error) {
+      logger.log(`Failed to read "${normalizedIgnorePath}": ${error.message}`);
+    }
+  }
+  return result;
+};
+const readRc = (dir, config, ignore, logger = env.defaultLogger) => {
+  const { config: normalizedConfigPath, ignore: normalizedIgnorePath } = resolvePath(dir, config, ignore, logger);
+  return resolveConfig(normalizedConfigPath, normalizedIgnorePath, logger);
+};
+export { readRc, report, run, runWithConfig };
 //# sourceMappingURL=zhlint.es.js.map
