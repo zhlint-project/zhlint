@@ -38,10 +38,10 @@ const inputUpdate = () => {
   timer = setTimeout(lint, 1000)
 }
 
-const format = () => {
-  input.value = run(input.value, { rules: { preset: 'default' } }).result
-  lint()
-}
+// const format = () => {
+//   input.value = run(input.value, { rules: { preset: 'default' } }).result
+//   lint()
+// }
 
 onMounted(() => {
   lint()
@@ -51,7 +51,7 @@ onMounted(() => {
 <template>
   <div class="container">
     <textarea v-model="input" :rows="rows" @input="inputUpdate"></textarea>
-    <button @click="format">Format</button>
+    <!-- <button @click="format">Format</button> -->
     <pre>{{ output }}</pre>
     <!-- Experimental -->
     <Inspector v-if="data" :data="data" />

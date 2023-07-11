@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { inject } from 'vue'
+import { inject, toRef, computed } from 'vue'
 import SingleToken from './single.vue'
 
-const { data, start } = defineProps<{ data: any, modified: boolean, start: number }>()
-const startIndex = start + data.startIndex
-const endIndex = start + data.endIndex
+const props = defineProps<{ data: any, modified: boolean, start: number }>()
+const data = toRef(props, 'data')
+const start = toRef(props, 'start')
+const startIndex = computed(() => start.value + data.value.startIndex)
+const endIndex = computed(() => start.value + data.value.endIndex)
 
 const current = inject('current')
 const currentProp = inject('currentProp')
 const setCurrent = (prop) => {
   // console.log('setCurrent', data, prop)
   if (current) {
-    current.value = data
+    current.value = data.value
   }
   if (currentProp) {
     currentProp.value = prop

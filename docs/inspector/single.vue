@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { inject } from 'vue'
+import { inject, toRef, computed } from 'vue'
 import GroupToken from './group.vue'
 
-const { data, start } = defineProps<{ data: any, modified: boolean, start: number }>()
-const index = start + data.index
+const props = defineProps<{ data: any, modified: boolean, start: number }>()
+const data = toRef(props, 'data')
+const start = toRef(props, 'start')
+const index = computed(() => start.value + data.value.index)
 
 const current = inject('current')
 const currentProp = inject('currentProp')
 const setCurrent = (prop) => {
   // console.log('setCurrent', data, prop)
   if (current) {
-    current.value = data
+    current.value = data.value
   }
   if (currentProp) {
     currentProp.value = prop

@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { provide, ref } from 'vue';
+import { provide, ref, toRef, watch } from 'vue';
 
 import NonBlock from './non-block.vue'
 import Block from './block.vue'
 import Status from './status.vue'
 import Legends from './legends.vue';
 
-const { data } = defineProps<{ data: any }>()
+const props = defineProps<{ data: any }>()
+const data = toRef(props, 'data')
+
+watch(data, () => {
+  current.value = undefined
+  currentProp.value = ''
+})
 
 const current = ref()
 provide('current', current)
@@ -28,7 +34,7 @@ data.validations
       ></pre>
     </div>
     <div>
-      <h3>Modified</h3>
+      <h3>Formatted</h3>
       <pre><template v-for="piece in data.__debug__.pieces"
         ><NonBlock v-if="'nonBlock' in piece" :data="piece"
         /><Block v-else :data="piece" modified /></template

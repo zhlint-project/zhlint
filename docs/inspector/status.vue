@@ -70,6 +70,7 @@ const checkProp = (data, prop) => {
     return { desc: 'click the tokens in "Origin" or "Modified" to see more details' }
   }
   const { modified, ignored } = PROP_MAP[prop]
+  console.log(data, prop, modified, ignored, data[modified] === data[prop], ignored in data)
   if (data[modified] !== data[prop]) {
     if (checkSpace(prop)) {
       if (data[modified] && data[prop]) {
