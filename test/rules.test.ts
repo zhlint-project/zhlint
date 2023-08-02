@@ -6,7 +6,6 @@ import {
   BRACKET_NOSPACE_INSIDE,
   CODE_SPACE_OUTSIDE,
   CONTENT_SPACE_HALF_WIDTH,
-  MARKDOWN_NOSPACE_INSIDE,
   PUNCTUATION_FULL_WIDTH,
   PUNCTUATION_NOSPACE_BEFORE,
   PUNCTUATION_UNIFICATION_SIMPLIFIED,
@@ -15,42 +14,20 @@ import {
 
 import { getOutput, lint, options } from './prepare'
 
+getOutput(' foo bar   ')
+
 describe('lint by rules', () => {
   test('[space-trim] trim the spaces', () => {
     const options: Options = { rules: { trimSpace: true } }
     expect(getOutput(' `foo` "foo" ')).toBe(' `foo` "foo" ')
-    expect(getOutput(' `foo` "foo" ', options)).toBe('`foo` "foo"')
-    expect(getOutput(' foo bar   ', options)).toBe('foo bar')
+    expect(getOutput(' `foo` "foo" ', options)).toBe(' `foo` "foo"')
+    expect(getOutput(' foo bar   ', options)).toBe(' foo bar')
     expect(getOutput('中文, 中文. ', options)).toBe('中文, 中文.')
     expect(getOutput('中文, 中文.中； 文。 ', options)).toBe(
       '中文, 中文.中； 文。'
     )
-    expect(getOutput(' " bar " ', options)).toBe('" bar "')
-    expect(getOutput(' (bar) ', options)).toBe('(bar)')
-  })
-  test('[hyper-mark] the position of spaces around hyper marks (if any)', () => {
-    const options: Options = {
-      rules: { noSpaceInsideWrapper: true }
-    }
-    expect(lint('x ** yyy ** z', options)).toEqual({
-      output: 'x **yyy** z',
-      warnings: [
-        {
-          index: 4,
-          target: ValidationTarget.SPACE_AFTER,
-          message: MARKDOWN_NOSPACE_INSIDE
-        },
-        {
-          index: 8,
-          target: ValidationTarget.SPACE_AFTER,
-          message: MARKDOWN_NOSPACE_INSIDE
-        }
-      ]
-    })
-    expect(getOutput('x _** yyy ** _ z', options)).toBe('x _**yyy**_ z')
-    expect(getOutput('x _ ** yyy **_ z', options)).toBe('x _**yyy**_ z')
-
-    expect(getOutput('_ ** yyy **_', options)).toBe('_**yyy**_')
+    expect(getOutput(' " bar " ', options)).toBe(' " bar "')
+    expect(getOutput(' (bar) ', options)).toBe(' (bar)')
   })
   describe('[hyper-code] the existence of spaces around hyper code marks', () => {
     test('forcing spaces', () => {

@@ -1,4 +1,4 @@
-import unified from 'unified'
+import { unified } from 'unified'
 import markdown from 'remark-parse'
 import frontmatter from 'remark-frontmatter'
 import * as Ast from 'mdast'

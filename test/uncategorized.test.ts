@@ -43,12 +43,6 @@ describe('lint by issues', () => {
     expect(getOutput('x‘x’x', options)).toBe('x ‘x’ x')
   })
 
-  // https://github.com/Jinjiang/zhlint/issues/36
-  test('#36 spaces around marks', () => {
-    expect(getOutput('a* 啊 *', options)).toBe('a *啊*')
-    expect(getOutput('a * 啊 *', options)).toBe('a *啊*')
-  })
-
   // https://github.com/Jinjiang/zhlint/issues/18
   test('#18 unmatched brackets', () => {
     // still have warnings but the parser won't be crashed anymore

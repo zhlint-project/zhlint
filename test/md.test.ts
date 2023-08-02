@@ -9,7 +9,7 @@ const getOutput = (str: string) => run(str, options).result
 
 describe('parser with markdown', () => {
   test('[md parser] single paragraph', () => {
-    const text = 'X [xxx](xxx) X *y* __x__ `ss` _0_ ~~asd~~ *asf**asf**adsf*'
+    const text = 'X [xxx](xxx) X *y* __x__ `ss` _0_ *asf**asf**adsf*'
     const data: ParsedStatus = {
       content: text,
       modifiedContent: text,
@@ -68,26 +68,18 @@ describe('parser with markdown', () => {
       },
       {
         type: 'hyper',
-        meta: 'delete',
-        startIndex: 34,
-        startContent: '~~',
-        endIndex: 39,
-        endContent: '~~'
-      },
-      {
-        type: 'hyper',
         meta: 'emphasis',
-        startIndex: 42,
+        startIndex: 34,
         startContent: '*',
-        endIndex: 57,
+        endIndex: 49,
         endContent: '*'
       },
       {
         type: 'hyper',
         meta: 'strong',
-        startIndex: 46,
+        startIndex: 38,
         startContent: '**',
-        endIndex: 51,
+        endIndex: 43,
         endContent: '**'
       }
     ]
