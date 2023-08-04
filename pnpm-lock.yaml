@@ -13,7 +13,7 @@ dependencies:
     version: 7.2.0
   minimist:
     specifier: ^1.2.0
-    version: 1.2.5
+    version: 1.2.6
   node-stdlib-browser:
     specifier: ^1.2.0
     version: 1.2.0
@@ -2206,8 +2206,8 @@ packages:
     dependencies:
       brace-expansion: 1.1.11
 
-  /minimist@1.2.5:
-    resolution: {integrity: sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==}
+  /minimist@1.2.6:
+    resolution: {integrity: sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==}
     dev: false
 
   /mrmime@1.0.1:
