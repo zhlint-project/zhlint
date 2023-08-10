@@ -40,7 +40,7 @@ const setCurrent = (prop) => {
   }">{{
     modified ? data.modifiedInnerSpaceBefore : data.innerSpaceBefore
   }}</span
-  ><SingleToken v-for="token in data.map(x => x)" :data="token" :modified="modified" :start="start"
+  ><SingleToken v-for="(token, i) in data.map(x => x)" :key="i" :data="token" :modified="modified" :start="start"
   /><span @click="setCurrent('endContent')" :class="{
     'quote-end-content': true,
     changed: data.endContent !== data.modifiedEndContent,

@@ -20,7 +20,7 @@ const currentProp = ref('')
 provide('currentProp', currentProp)
 
 // TODO:
-data.validations
+// data.value.validations
 </script>
 
 <template>
