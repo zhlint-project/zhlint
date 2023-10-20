@@ -36,6 +36,8 @@ const generateHandler = (options: Options): Handler => {
     if (token.type === CharType.LETTERS_HALF && token.content.match(/^\d+$/)) {
       // make sure the content after is a Chinese unit
       const tokenAfter = findNonCodeVisibleTokenAfter(group, token)
+
+      if (Array.isArray(tokenAfter)) return
       if (tokenAfter && tokenAfter.content.match(unitMatcher)) {
         // make sure there is no space between originally
         const { spaceHost: spaceHostAfter, tokens: tokenSeqAfter } =
