@@ -447,6 +447,10 @@ describe('lint by cases', () => {
     expect(getOutput('2019年06月26号 2019-06-26 12:00', options)).toBe(
       '2019年06月26号 2019-06-26 12:00'
     )
+    expect(getOutput('1《测试》2【测试】3「测试」4（测试）', options)).toBe(
+      '1《测试》2【测试】3 “测试” 4 (测试)'
+    )
+    expect(getOutput('1？2！', options)).toBe('1？2！')
   })
   test('[case-abbrs]', () => {
     expect(getOutput('运行时 + 编译器 vs. 只包含运行时', options)).toBe(
