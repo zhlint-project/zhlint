@@ -1,5 +1,11 @@
 import chalk from 'chalk'
-import { CharType, checkCharType } from './parser'
+import {
+  CharType,
+  checkCharType,
+  isFullwidthType,
+  isHalfwidthType,
+  isPunctuationType
+} from './parser'
 
 export const env: {
   stdout: NodeJS.WritableStream
@@ -77,14 +83,14 @@ const generateMarker = (str: string, index: number): string => {
   for (let i = 0; i < prefix.length; i++) {
     const charType = checkCharType(prefix[i])
     if (
-      charType === CharType.LETTERS_FULL ||
-      (charType === CharType.PUNCTUATION_FULL &&
+      charType === CharType.CJK_CHAR ||
+      (isPunctuationType(charType) && isFullwidthType(charType) &&
         adjustedFullWidthPunctuations.indexOf(prefix[i]) === -1)
     ) {
       fullWidthCount++
     } else if (
-      charType === CharType.LETTERS_HALF ||
-      (charType === CharType.PUNCTUATION_HALF &&
+      charType === CharType.WESTERN_LETTER ||
+      (isPunctuationType(charType) && isHalfwidthType(charType) &&
         adjustedFullWidthPunctuations.indexOf(prefix[i]) !== -1) ||
       charType === CharType.SPACE
     ) {
