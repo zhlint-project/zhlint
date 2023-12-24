@@ -23,6 +23,46 @@ export enum CharType {
   UNKNOWN = 'unknown'
 }
 
+export enum NewCharType {
+  EMPTY = 'empty',
+
+  SPACE = 'space',
+
+  WESTERN_LETTER = 'western-letter',
+
+  CJK_CHAR = 'cjk-char',
+
+  // periods, commas, secondary commas, colons, semicolons, exclamation marks, question marks, etc.
+  HALFWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK = 'halfwidth-pause-or-stop-punctuation-mark',
+  FULLWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK = 'fullwidth-pause-or-stop-punctuation-mark',
+
+  // single, double, corner, white corner
+  // + book title marks
+  // left x right
+  HALFWIDTH_QUOTATION_OR_BOOK_TITLE_MARK = 'halfwidth-quotation-mark',
+  FULLWIDTH_QUOTATION_OR_BOOK_TITLE_MARK = 'fullwidth-quotation-mark',
+
+  // parentheses
+  HALF_WIDTH_BRACKET = 'halfwidth-bracket',
+  FULL_WIDTH_BRACKET = 'fullwidth-bracket',
+
+  // // parenthesis, black lenticular brackets, white lenticular brackets,
+  // // square brackets, tortoise shell brackets, curly brackets
+  // // left x right
+  // PARENTHESIS = 'parenthesis',
+  // // double angle brackets, angle brackets
+  // // left x right
+  // BOOK_TITLE_MARK = 'book-title-mark',
+
+  // dashes, ellipsis, connector marks, interpuncts, proper noun marks, solidi, etc.
+  OTHER_PUNCTUATION_MARK = 'other-punctuation-mark',
+
+  // ⁈, ⁇, ‼, ⁉
+  SPECIAL_PUNCTUATION_MARK = 'special-punctuation-mark',
+
+  UNKNOWN = 'unknown'
+}
+
 type CharSet = {
   [setName: string]: string
 }
