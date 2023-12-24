@@ -172,19 +172,25 @@ export type PunctuationType =
 
 export type ContentTokenType = LetterType | PunctuationType
 
-export type HalfwidthTokenType =
-  | CharType.WESTERN_LETTER
+export type HalfwidthPuntuationType =
   | CharType.HALFWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK
   | CharType.HALFWIDTH_QUOTATION_OR_BOOK_TITLE_MARK
   | CharType.HALFWIDTH_BRACKET
   | CharType.HALFWIDTH_OTHER_PUNCTUATION_MARK
 
-export type FullwidthTokenType =
-  | CharType.CJK_CHAR
+export type FullwidthPuntuationType =
   | CharType.FULLWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK
   | CharType.FULLWIDTH_QUOTATION_OR_BOOK_TITLE_MARK
   | CharType.FULLWIDTH_BRACKET
   | CharType.FULLWIDTH_OTHER_PUNCTUATION_MARK
+
+export type HalfwidthTokenType =
+  | CharType.WESTERN_LETTER
+  | FullwidthPuntuationType
+
+export type FullwidthTokenType =
+  | CharType.CJK_CHAR
+  | FullwidthPuntuationType
 
 /**
  * TODO: paired html tags should be hyper wrapper
@@ -286,15 +292,34 @@ export const isPunctuationType = (
   )
 }
 
+export const isHalfwidthPunctuationType = (
+  type: TokenType | CharType
+): type is HalfwidthPuntuationType => {
+  return (
+    type === CharType.HALFWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK ||
+    type === CharType.HALFWIDTH_QUOTATION_OR_BOOK_TITLE_MARK ||
+    type === CharType.HALFWIDTH_BRACKET ||
+    type === CharType.HALFWIDTH_OTHER_PUNCTUATION_MARK
+  )
+}
+
 export const isHalfwidthType = (
   type: TokenType | CharType
 ): type is HalfwidthTokenType => {
   return (
     type === CharType.WESTERN_LETTER ||
-    type === CharType.HALFWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK ||
-    type === CharType.HALFWIDTH_QUOTATION_OR_BOOK_TITLE_MARK ||
-    type === CharType.HALFWIDTH_BRACKET ||
-    type === CharType.HALFWIDTH_OTHER_PUNCTUATION_MARK
+    isHalfwidthPunctuationType(type)
+  )
+}
+
+export const isFullwidthPunctuationType = (
+  type: TokenType | CharType
+): type is FullwidthPuntuationType => {
+  return (
+    type === CharType.FULLWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK ||
+    type === CharType.FULLWIDTH_QUOTATION_OR_BOOK_TITLE_MARK ||
+    type === CharType.FULLWIDTH_BRACKET ||
+    type === CharType.FULLWIDTH_OTHER_PUNCTUATION_MARK
   )
 }
 
@@ -303,10 +328,7 @@ export const isFullwidthType = (
 ): type is FullwidthTokenType => {
   return (
     type === CharType.CJK_CHAR ||
-    type === CharType.FULLWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK ||
-    type === CharType.FULLWIDTH_QUOTATION_OR_BOOK_TITLE_MARK ||
-    type === CharType.FULLWIDTH_BRACKET ||
-    type === CharType.FULLWIDTH_OTHER_PUNCTUATION_MARK
+    isFullwidthPunctuationType(type)
   )
 }
 

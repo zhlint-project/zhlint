@@ -2,9 +2,8 @@ import chalk from 'chalk'
 import {
   CharType,
   checkCharType,
-  isFullwidthType,
-  isHalfwidthType,
-  isPunctuationType
+  isFullwidthPunctuationType,
+  isHalfwidthPunctuationType,
 } from './parser'
 
 export const env: {
@@ -84,13 +83,13 @@ const generateMarker = (str: string, index: number): string => {
     const charType = checkCharType(prefix[i])
     if (
       charType === CharType.CJK_CHAR ||
-      (isPunctuationType(charType) && isFullwidthType(charType) &&
+      (isFullwidthPunctuationType(charType) &&
         adjustedFullWidthPunctuations.indexOf(prefix[i]) === -1)
     ) {
       fullWidthCount++
     } else if (
       charType === CharType.WESTERN_LETTER ||
-      (isPunctuationType(charType) && isHalfwidthType(charType) &&
+      (isHalfwidthPunctuationType(charType) &&
         adjustedFullWidthPunctuations.indexOf(prefix[i]) !== -1) ||
       charType === CharType.SPACE
     ) {
