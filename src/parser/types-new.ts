@@ -9,17 +9,48 @@
  * - Tokens
  */
 
-// Char
-
 import { Validation } from '../report'
+
+// Char
 
 export enum CharType {
   EMPTY = 'empty',
+
   SPACE = 'space',
-  LETTERS_HALF = 'letters-half',
-  LETTERS_FULL = 'letters-full',
-  PUNCTUATION_HALF = 'punctuation-half',
-  PUNCTUATION_FULL = 'punctuation-full',
+
+  WESTERN_LETTER = 'western-letter',
+
+  CJK_CHAR = 'cjk-char',
+
+  // periods, commas, secondary commas, colons, semicolons, exclamation marks, question marks, etc.
+  HALFWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK = 'halfwidth-pause-or-stop-punctuation-mark',
+  FULLWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK = 'fullwidth-pause-or-stop-punctuation-mark',
+
+  // single, double, corner, white corner
+  // + book title marks
+  // left x right
+  HALFWIDTH_QUOTATION_OR_BOOK_TITLE_MARK = 'halfwidth-quotation-mark',
+  FULLWIDTH_QUOTATION_OR_BOOK_TITLE_MARK = 'fullwidth-quotation-mark',
+
+  // parentheses
+  HALFWIDTH_BRACKET = 'halfwidth-bracket',
+  FULLWIDTH_BRACKET = 'fullwidth-bracket',
+
+  // // parenthesis, black lenticular brackets, white lenticular brackets,
+  // // square brackets, tortoise shell brackets, curly brackets
+  // // left x right
+  // PARENTHESIS = 'parenthesis',
+  // // double angle brackets, angle brackets
+  // // left x right
+  // BOOK_TITLE_MARK = 'book-title-mark',
+
+  // dashes, ellipsis, connector marks, interpuncts, proper noun marks, solidi, etc.
+  HALFWIDTH_OTHER_PUNCTUATION_MARK = 'halfwidth-other-punctuation-mark',
+  FULLWIDTH_OTHER_PUNCTUATION_MARK = 'fullwidth-other-punctuation-mark',
+
+  // // ⁈, ⁇, ‼, ⁉
+  // SPECIAL_PUNCTUATION_MARK = 'special-punctuation-mark',
+
   UNKNOWN = 'unknown'
 }
 
@@ -28,12 +59,12 @@ type CharSet = {
 }
 
 export const BRACKET_CHAR_SET: CharSet = {
-  left: '(（',
-  right: ')）'
+  left: '([{（〔［｛',
+  right: ')]}）〕］｝'
 }
-export const QUOTE_CHAR_SET: CharSet = {
-  left: `“‘《〈『「【{`,
-  right: `”’》〉』」】}`,
+export const QUOTATION_CHAR_SET: CharSet = {
+  left: `“‘《〈『「【〖`,
+  right: `”’》〉』」】〗`,
   neutral: `'"`
 }
 export const SHORTHAND_CHARS = `'’`
@@ -42,10 +73,10 @@ export const SHORTHAND_PAIR_SET: CharSet = {
   [`’`]: `‘`
 }
 
-const FULL_WIDTH_PAIRS = `“”‘’（）「」『』《》〈〉【】`
+const FULLWIDTH_PAIRS = `“”‘’（）〔〕［］｛｝《》〈〉「」『』【】〖〗`
 
-export const isFullWidthPair = (str: string): boolean =>
-  FULL_WIDTH_PAIRS.indexOf(str) >= 0
+export const isFullwidthPair = (str: string): boolean =>
+  FULLWIDTH_PAIRS.indexOf(str) >= 0
 
 // Reusable
 
@@ -94,7 +125,7 @@ export enum MarkSideType {
 
 export type Mark = Pair & {
   type: MarkType
-  meta?: string // AST type enum
+  meta?: string // TODO: AST type enum
 }
 
 export type RawMark = Mark & {
@@ -116,13 +147,31 @@ export const isRawMark = (mark: Mark): mark is RawMark => {
 
 // Token type
 
-export type LettersType = CharType.LETTERS_FULL | CharType.LETTERS_HALF
+export type LetterType = CharType.WESTERN_LETTER | CharType.CJK_CHAR
+
+export type PauseOrStopPunctuationType =
+  | CharType.HALFWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK
+  | CharType.FULLWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK
+
+export type QuotationOrBookTitleMarkType =
+  | CharType.HALFWIDTH_QUOTATION_OR_BOOK_TITLE_MARK
+  | CharType.FULLWIDTH_QUOTATION_OR_BOOK_TITLE_MARK
+
+export type BracketType =
+  | CharType.HALFWIDTH_BRACKET
+  | CharType.FULLWIDTH_BRACKET
+
+export type OtherPunctuationType =
+  | CharType.HALFWIDTH_OTHER_PUNCTUATION_MARK
+  | CharType.FULLWIDTH_OTHER_PUNCTUATION_MARK
 
 export type PunctuationType =
-  | CharType.PUNCTUATION_FULL
-  | CharType.PUNCTUATION_HALF
+  | PauseOrStopPunctuationType
+  | QuotationOrBookTitleMarkType
+  | BracketType
+  | OtherPunctuationType
 
-export type ContentTokenType = LettersType | PunctuationType
+export type ContentTokenType = LetterType | PunctuationType
 
 /**
  * TODO: paired html tags should be hyper wrapper
@@ -175,25 +224,60 @@ export type VisibleTokenType =
 
 export type InvisibleTokenType = HyperTokenType.HYPER_WRAPPER
 
-export const isLettersType = (
+export const isLetterType = (
   type: TokenType | CharType
-): type is LettersType => {
-  return type === CharType.LETTERS_FULL || type === CharType.LETTERS_HALF
+): type is LetterType => {
+  return type === CharType.WESTERN_LETTER || type === CharType.CJK_CHAR
+}
+
+export const isPauseOrStopPunctuationType = (
+  type: TokenType | CharType
+): type is PunctuationType => {
+  return (
+    type === CharType.HALFWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK || type === CharType.FULLWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK
+  )
+}
+
+export const isQuotationOrBookTitleMarkType = (
+  type: TokenType | CharType
+): type is PunctuationType => {
+  return (
+    type === CharType.HALFWIDTH_QUOTATION_OR_BOOK_TITLE_MARK || type === CharType.FULLWIDTH_QUOTATION_OR_BOOK_TITLE_MARK
+  )
+}
+
+export const isBracketType = (
+  type: TokenType | CharType
+): type is PunctuationType => {
+  return (
+    type === CharType.HALFWIDTH_BRACKET || type === CharType.FULLWIDTH_BRACKET
+  )
+}
+
+export const isOtherPunctuationType = (
+  type: TokenType | CharType
+): type is PunctuationType => {
+  return (
+    type === CharType.HALFWIDTH_OTHER_PUNCTUATION_MARK || type === CharType.FULLWIDTH_OTHER_PUNCTUATION_MARK
+  )
 }
 
 export const isPunctuationType = (
   type: TokenType | CharType
 ): type is PunctuationType => {
   return (
-    type === CharType.PUNCTUATION_FULL || type === CharType.PUNCTUATION_HALF
+    isPauseOrStopPunctuationType(type) ||
+    isQuotationOrBookTitleMarkType(type) ||
+    isBracketType(type) ||
+    isOtherPunctuationType(type)
   )
 }
 
 export const isNonCodeVisibleType = (
   type: TokenType | CharType
-): type is LettersType => {
+): type is LetterType => {
   return (
-    isLettersType(type) ||
+    isLetterType(type) ||
     isPunctuationType(type) ||
     type === HyperTokenType.HYPER_WRAPPER_BRACKET ||
     type === GroupTokenType.GROUP

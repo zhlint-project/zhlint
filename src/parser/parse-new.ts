@@ -1,7 +1,9 @@
 import { Validation } from '../report'
-import { checkCharType } from './char'
+import { checkCharType } from './char-new'
 import {
   CharType,
+  isLetterType,
+  isPunctuationType,
   Mark,
   MutableMark,
   MarkMap,
@@ -11,11 +13,11 @@ import {
   MutableGroupToken,
   MutableToken,
   Token,
-  GroupToken,
-  isLettersType,
-  isPunctuationType
-} from './types'
+  GroupToken
+} from './types-new'
 import {
+  handleContent,
+  handlePunctuation,
   appendContent,
   addHyperContent,
   addHyperToken,
@@ -23,12 +25,10 @@ import {
   getConnectingSpaceLength,
   getHyperMarkMap,
   getPreviousToken,
-  handleContent,
-  handlePunctuation,
   initNewStatus,
   isShorthand,
   handleErrors
-} from './util'
+} from './util-new'
 import { Options as RuleOptions } from '../rules/util'
 
 export type ParseStatus = {
@@ -64,10 +64,11 @@ export type MutableParseResult = {
  * Parse a string into several tokens.
  * - half-width content x {1,n} (English words)
  * - full-width content x {1,n} (Chinese sentenses without punctuations in between)
- * - half-width punctuation
- * - width-width punctuation
- * - punctuation pair as special marks: brackets
- * - punctuation pair as a group: quotes
+ * - half-width punctuation -> halfwidth pause or stop punctuation mark
+ * - width-width punctuation -> fullwidth pause or stop punctuation mark
+ * - punctuation pair as special marks: brackets -> bracket
+ * - punctuation pair as a group: quotes -> quotation or book title mark
+ * - -> halfwidth/fullwidth other punctuation mark
  * Besides them there are some special tokens
  * - content-hyper from hyperMarks as input
  * For spaces they would be included as one or multiple successive spaces in
@@ -155,12 +156,12 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
       appendContent(status, char)
     } else if (isPunctuationType(type)) {
       handlePunctuation(i, char, type, status)
-    } else if (isLettersType(type)) {
+    } else if (isLetterType(type)) {
       handleContent(i, char, type, status)
     } else if (type === CharType.EMPTY) {
       // Nothing
     } else {
-      handleContent(i, char, CharType.LETTERS_HALF, status)
+      handleContent(i, char, CharType.WESTERN_LETTER, status)
     }
   }
   finalizeLastToken(status, str.length)
