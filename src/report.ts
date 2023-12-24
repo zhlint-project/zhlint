@@ -73,32 +73,32 @@ export type Validation = {
   target: ValidationTarget
 }
 
-const adjustedFullWidthPunctuations = `“”‘’`
+const adjustedFullwidthPunctuations = `“”‘’`
 
 const generateMarker = (str: string, index: number): string => {
   const prefix = str.substring(0, index)
-  let fullWidthCount = 0
-  let halfWidthCount = 0
+  let fullwidthCount = 0
+  let halfwidthCount = 0
   for (let i = 0; i < prefix.length; i++) {
     const charType = checkCharType(prefix[i])
     if (
       charType === CharType.CJK_CHAR ||
       (isFullwidthPunctuationType(charType) &&
-        adjustedFullWidthPunctuations.indexOf(prefix[i]) === -1)
+        adjustedFullwidthPunctuations.indexOf(prefix[i]) === -1)
     ) {
-      fullWidthCount++
+      fullwidthCount++
     } else if (
       charType === CharType.WESTERN_LETTER ||
       (isHalfwidthPunctuationType(charType) &&
-        adjustedFullWidthPunctuations.indexOf(prefix[i]) !== -1) ||
+        adjustedFullwidthPunctuations.indexOf(prefix[i]) !== -1) ||
       charType === CharType.SPACE
     ) {
-      halfWidthCount++
+      halfwidthCount++
     }
   }
   return (
-    ' '.repeat(halfWidthCount) +
-    '　'.repeat(fullWidthCount) +
+    ' '.repeat(halfwidthCount) +
+    '　'.repeat(fullwidthCount) +
     `${chalk.red('^')}`
   )
 }

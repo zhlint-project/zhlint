@@ -8,7 +8,8 @@ import {
   isInvisibleType,
   isVisibleType,
   TokenType,
-  CharType
+  CharType,
+isHalfwidthPunctuationType
 } from '../parser'
 
 // options
@@ -418,11 +419,11 @@ export const isHalfWidthPunctuationWithoutSpaceAround = (
   const tokenAfter = findTokenAfter(group, token)
 
   if (
-    token.type === CharType.PUNCTUATION_HALF &&
+    isHalfwidthPunctuationType(token.type) &&
     tokenBefore &&
-    tokenBefore.type === CharType.LETTERS_HALF &&
+    tokenBefore.type === CharType.WESTERN_LETTER &&
     tokenAfter &&
-    tokenAfter.type === CharType.LETTERS_HALF
+    tokenAfter.type === CharType.WESTERN_LETTER
   ) {
     return !tokenBefore.spaceAfter && !token.spaceAfter
   }
@@ -434,15 +435,15 @@ export const isSuccessiveHalfWidthPunctuation = (
   group: GroupToken,
   token: Token
 ): boolean => {
-  if (token.type === CharType.PUNCTUATION_HALF) {
+  if (isHalfwidthPunctuationType(token.type)) {
     const tokenBefore = findTokenBefore(group, token)
     const tokenAfter = findTokenAfter(group, token)
     if (
       (tokenBefore &&
-        tokenBefore.type === CharType.PUNCTUATION_HALF &&
+        isHalfwidthPunctuationType(tokenBefore.type) &&
         !tokenBefore.spaceAfter) ||
       (tokenAfter &&
-        tokenAfter.type === CharType.PUNCTUATION_HALF &&
+        isHalfwidthPunctuationType(tokenAfter.type) &&
         !token.spaceAfter)
     ) {
       return true

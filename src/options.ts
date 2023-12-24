@@ -60,6 +60,7 @@ const matchCallArray = <T>(calls: unknown[], map: { [name: string]: T }): T[] =>
     })
     .filter(Boolean) as T[]
 
+// TODO: halfWidth -> halfwidth, fullwidth -> fullWidth
 const DEPRECATED_OPTIONS = {
   noSpaceInsideMark: 'noSpaceInsideWrapper',
   spaceBetweenHalfWidthContent: 'spaceBetweenHalfWidthLetters',
