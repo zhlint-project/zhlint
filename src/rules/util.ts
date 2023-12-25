@@ -19,39 +19,41 @@ export type Options = {
   noSinglePair?: boolean
 
   // punctuation
-  halfWidthPunctuation?: string
-  fullWidthPunctuation?: string
-  adjustedFullWidthPunctuation?: string
+  halfwidthPunctuation?: string
+  fullwidthPunctuation?: string
+  adjustedFullwidthPunctuation?: string
   unifiedPunctuation?: 'traditional' | 'simplified'
 
   // case: abbrs
   skipAbbrs?: string[]
 
   // space around content
-  spaceBetweenHalfWidthLetters?: boolean
-  noSpaceBetweenFullWidthLetters?: boolean
-  spaceBetweenMixedWidthLetters?: boolean
+  spaceBetweenHalfwidthContent?: boolean
+  noSpaceBetweenFullwidthContent?: boolean
+  spaceBetweenMixedwidthContent?: boolean
 
-  // space around punctuation
-  noSpaceBeforePunctuation?: boolean
-  spaceAfterHalfWidthPunctuation?: boolean
-  noSpaceAfterFullWidthPunctuation?: boolean
+  // space around pause or stop punctuation
+  noSpaceBeforePauseOrStopPunctuation?: boolean
+  spaceAfterHalfwidthPauseOrStopPunctuation?: boolean
+  noSpaceAfterFullwidthPauseOrStopPunctuation?: boolean
 
-  // space around quote
-  spaceOutsideHalfQuote?: boolean
-  noSpaceOutsideFullQuote?: boolean
-  noSpaceInsideQuote?: boolean
+  // space around quotation
+  spaceOutsideHalfwidthQuotation?: boolean
+  noSpaceOutsideFullwidthQuotation?: boolean
+  noSpaceInsideQuotation?: boolean
 
-  // space around bracket
-  spaceOutsideHalfBracket?: boolean
-  noSpaceOutsideFullBracket?: boolean
+  // space around bracket or book title mark
+  spaceOutsideHalfwidthBracket?: boolean
+  noSpaceOutsideFullwidthBracket?: boolean
   noSpaceInsideBracket?: boolean
+  noSpaceOutsideBookTitleMark?: boolean
+  noSpaceInsideBookTitleMark?: boolean
 
   // space around code
   spaceOutsideCode?: boolean
 
   // space around mark
-  noSpaceInsideWrapper?: boolean
+  noSpaceInsideHyperBracket?: boolean
 
   // trim space
   trimSpace?: boolean
@@ -61,31 +63,134 @@ export type Options = {
 
   // custom preset
   preset?: string
+} & DeprecatedOptions
 
+export type DeprecatedOptions = {
+  // punctuation
   /**
    * @deprecated
    *
-   * Please use `noSpaceInsideWrapper` instead.
+   * Please use `halfwidthPunctuation` instead.
    */
-  noSpaceInsideMark?: boolean
+  halfWidthPunctuation?: string
   /**
    * @deprecated
    *
-   * Please use `spaceBetweenHalfWidthLetters` instead.
+   * Please use `fullwidthPunctuation` instead.
+   */
+  fullWidthPunctuation?: string
+  /**
+   * @deprecated
+   *
+   * Please use `adjustedFullwidthPunctuation` instead.
+   */
+  adjustedFullWidthPunctuation?: string
+
+  // space around content
+  /**
+   * @deprecated
+   *
+   * Please use `spaceBetweenHalfwidthContent` instead.
+   */
+  spaceBetweenHalfWidthLetters?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `spaceBetweenHalfwidthContent` instead.
    */
   spaceBetweenHalfWidthContent?: boolean
   /**
    * @deprecated
    *
-   * Please use `noSpaceBetweenFullWidthLetters` instead.
+   * Please use `noSpaceBetweenFullwidthContent` instead.
+   */
+  noSpaceBetweenFullWidthLetters?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceBetweenFullwidthContent` instead.
    */
   noSpaceBetweenFullWidthContent?: boolean
   /**
    * @deprecated
    *
-   * Please use `spaceBetweenMixedWidthLetters` instead.
+   * Please use `spaceBetweenMixedwidthContent` instead.
+   */
+  spaceBetweenMixedWidthLetters?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `spaceBetweenMixedwidthContent` instead.
    */
   spaceBetweenMixedWidthContent?: boolean
+
+  // space around punctuation
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceBeforePauseOrStopPunctuation` instead.
+   */
+  noSpaceBeforePunctuation?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `spaceAfterHalfwidthPauseOrStopPunctuation` instead.
+   */
+  spaceAfterHalfWidthPunctuation?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceAfterFullwidthPauseOrStopPunctuation` instead.
+   */
+  noSpaceAfterFullWidthPunctuation?: boolean
+
+  // space around quote
+  /**
+   * @deprecated
+   *
+   * Please use `spaceOutsideHalfwidthQuotation` instead.
+   */
+  spaceOutsideHalfQuote?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceOutsideFullwidthQuotation` instead.
+   */
+  noSpaceOutsideFullQuote?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceInsideQuotation` instead.
+   */
+  noSpaceInsideQuote?: boolean
+
+  // space around bracket
+  /**
+   * @deprecated
+   *
+   * Please use `spaceOutsideHalfwidthBracket` instead.
+   */
+  spaceOutsideHalfBracket?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceOutsideFullwidthBracket` instead.
+   */
+  noSpaceOutsideFullBracket?: boolean
+
+  // space around mark
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceInsideHyperBracket` instead.
+   */
+  noSpaceInsideWrapper?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceInsideHyperBracket` instead.
+   */
+  noSpaceInsideMark?: boolean
 }
 
 // find tokens
