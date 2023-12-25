@@ -10,9 +10,9 @@ import genAbbrsHandler from './case-abbrs'
 
 import genSpaceOfWrapperHandler from './space-wrapper'
 import genSpaceOfCodeHandler from './space-code'
-import genSpaceOfLettersHandler from './space-letters'
+import genSpaceOfLetterHandler from './space-letter'
 import genSpaceOfPunctuationHandler from './space-punctuation'
-import genSpaceOfQuoteHandler from './space-quote'
+import genSpaceOfQuoteHandler from './space-quotation'
 import genSpaceOfBracketHandler from './space-bracket'
 
 import genLinebreakHandler from './case-linebreak'
@@ -30,7 +30,7 @@ const generateHandlers = (options: Options): Handler[] => {
 
     genSpaceOfWrapperHandler(options),
     genSpaceOfCodeHandler(options),
-    genSpaceOfLettersHandler(options),
+    genSpaceOfLetterHandler(options),
     genSpaceOfPunctuationHandler(options),
     genSpaceOfQuoteHandler(options),
     genSpaceOfBracketHandler(options),
@@ -41,9 +41,11 @@ const generateHandlers = (options: Options): Handler[] => {
   ]
 }
 
+// TODO: new default options
+
 export const defaultConfig: Options = {
   noSinglePair: true,
-  halfWidthPunctuation: `()`,
+  halfWidthPunctuation: `()[]{}`,
   fullWidthPunctuation: `，。：；？！“”‘’`,
   adjustedFullWidthPunctuation: `“”‘’`,
   unifiedPunctuation: 'simplified',

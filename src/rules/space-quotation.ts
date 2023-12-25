@@ -26,8 +26,8 @@
 import {
   GroupTokenType,
   Handler,
-  isLettersType,
-  isFullWidthPair,
+  isLetterType,
+  isFullwidthPair,
   MarkSideType,
   MutableGroupToken,
   MutableToken,
@@ -48,7 +48,7 @@ import {
 } from './messages'
 
 const isFullWidth = (char: string, adjusted: string): boolean => {
-  return isFullWidthPair(char) && adjusted.indexOf(char) === -1
+  return isFullwidthPair(char) && adjusted.indexOf(char) === -1
 }
 
 const generateHandler = (options: Options): Handler => {
@@ -131,7 +131,7 @@ const generateHandler = (options: Options): Handler => {
       const contentTokenBefore = findNonCodeVisibleTokenBefore(group, token)
       if (
         contentTokenBefore &&
-        (isLettersType(contentTokenBefore.type) ||
+        (isLetterType(contentTokenBefore.type) ||
           contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
       ) {
         const { spaceHost } = findWrappersBetween(
@@ -166,7 +166,7 @@ const generateHandler = (options: Options): Handler => {
       // 2.3 right-quote x content/code
       if (
         contentTokenAfter &&
-        (isLettersType(contentTokenAfter.type) ||
+        (isLetterType(contentTokenAfter.type) ||
           contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
       ) {
         const { spaceHost } = findWrappersBetween(

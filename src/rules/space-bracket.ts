@@ -26,8 +26,8 @@ import {
   CharType,
   GroupTokenType,
   Handler,
-  isLettersType,
-  isFullWidthPair,
+  isLetterType,
+  isFullwidthPair,
   MarkSideType,
   MutableGroupToken,
   MutableSingleToken,
@@ -50,7 +50,7 @@ import {
 } from './messages'
 
 const isFullWidth = (char: string, adjusted: string): boolean => {
-  return isFullWidthPair(char) && adjusted.indexOf(char) === -1
+  return isFullwidthPair(char) && adjusted.indexOf(char) === -1
 }
 
 const shouldSkip = (
@@ -64,8 +64,8 @@ const shouldSkip = (
     return false
   }
   if (
-    isFullWidthPair(token.content) ||
-    isFullWidthPair(token.modifiedContent)
+    isFullwidthPair(token.content) ||
+    isFullwidthPair(token.modifiedContent)
   ) {
     return false
   }
@@ -78,13 +78,13 @@ const shouldSkip = (
   return (
     // x(x
     //  ^
-    (before.type === CharType.LETTERS_HALF ||
+    (before.type === CharType.WESTERN_LETTER ||
       // x()
       //  ^
       (before.content === '(' && token.content === ')')) &&
     // x)x
     //  ^
-    (after.type === CharType.LETTERS_HALF ||
+    (after.type === CharType.WESTERN_LETTER ||
       // ()x
       //  ^
       (token.content === '(' && after.content === ')'))
@@ -195,7 +195,7 @@ const generateHandler = (options: Options): Handler => {
       if (token.markSide === MarkSideType.LEFT) {
         if (
           contentTokenBefore &&
-          (isLettersType(contentTokenBefore.type) ||
+          (isLetterType(contentTokenBefore.type) ||
             contentTokenBefore.type === GroupTokenType.GROUP ||
             contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
         ) {
@@ -227,7 +227,7 @@ const generateHandler = (options: Options): Handler => {
       } else {
         if (
           contentTokenAfter &&
-          (isLettersType(contentTokenAfter.type) ||
+          (isLetterType(contentTokenAfter.type) ||
             contentTokenAfter.type === GroupTokenType.GROUP ||
             contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
         ) {

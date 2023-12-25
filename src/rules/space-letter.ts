@@ -32,7 +32,7 @@
 import {
   CharType,
   Handler,
-  isLettersType,
+  isLetterType,
   MutableGroupToken,
   MutableToken
 } from '../parser'
@@ -51,20 +51,20 @@ import {
 
 const generateHandler = (options: Options): Handler => {
   const onlyOneBetweenHalfWidthContentOption =
-    options?.spaceBetweenHalfWidthLetters
+    options?.spaceBetweenHalfwidthContent
   const noBetweenFullWidthContentOption =
-    options?.noSpaceBetweenFullWidthLetters
-  const betweenMixedWidthContentOption = options?.spaceBetweenMixedWidthLetters
+    options?.noSpaceBetweenFullwidthContent
+  const betweenMixedWidthContentOption = options?.spaceBetweenMixedwidthContent
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-content tokens
-    if (!isLettersType(token.type)) {
+    if (!isLetterType(token.type)) {
       return
     }
 
     // skip non-content after-tokens
     const contentTokenAfter = findVisibleTokenAfter(group, token)
-    if (!contentTokenAfter || !isLettersType(contentTokenAfter.type)) {
+    if (!contentTokenAfter || !isLetterType(contentTokenAfter.type)) {
       return
     }
 
@@ -84,7 +84,7 @@ const generateHandler = (options: Options): Handler => {
     // 2. half x full, full x half
     if (contentTokenAfter.type === token.type) {
       // skip without custom option
-      if (token.type === CharType.LETTERS_HALF) {
+      if (token.type === CharType.WESTERN_LETTER) {
         if (!onlyOneBetweenHalfWidthContentOption) {
           return
         }
@@ -101,9 +101,9 @@ const generateHandler = (options: Options): Handler => {
         }
       }
 
-      const spaceAfter = token.type === CharType.LETTERS_HALF ? ' ' : ''
+      const spaceAfter = token.type === CharType.WESTERN_LETTER ? ' ' : ''
       const message =
-        token.type === CharType.LETTERS_HALF
+        token.type === CharType.WESTERN_LETTER
           ? CONTENT_SPACE_HALF_WIDTH
           : CONTENT_NOSPACE_FULL_WIDTH
 

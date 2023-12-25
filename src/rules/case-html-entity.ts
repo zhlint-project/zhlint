@@ -30,7 +30,7 @@ const generateHandler = (options: Options): Handler => {
     const tokenAfter = findTokenAfter(group, token)
     if (
       !tokenAfter ||
-      tokenAfter.type !== CharType.LETTERS_HALF ||
+      tokenAfter.type !== CharType.WESTERN_LETTER ||
       token.spaceAfter
     ) {
       return

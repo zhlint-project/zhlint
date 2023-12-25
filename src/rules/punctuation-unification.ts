@@ -15,6 +15,8 @@ import {
 } from './messages'
 import { checkEndContent, checkStartContent, Options } from './util'
 
+// TODO: 【】〖〗, primary/secondary, quotes -> quotations
+
 type UnifiedOptions = 'traditional' | 'simplified'
 
 enum QuoteType {

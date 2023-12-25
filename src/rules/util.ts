@@ -516,7 +516,7 @@ export const findWrappersBetween = (
 
 // special cases
 
-export const isHalfWidthPunctuationWithoutSpaceAround = (
+export const isHalfwidthPunctuationWithoutSpaceAround = (
   group: GroupToken,
   token: Token
 ): boolean => {
@@ -536,7 +536,7 @@ export const isHalfWidthPunctuationWithoutSpaceAround = (
   return false
 }
 
-export const isSuccessiveHalfWidthPunctuation = (
+export const isSuccessiveHalfwidthPunctuation = (
   group: GroupToken,
   token: Token
 ): boolean => {

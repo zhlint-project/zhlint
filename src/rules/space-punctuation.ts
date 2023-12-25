@@ -29,23 +29,24 @@
  */
 
 import {
-  CharType,
   GroupTokenType,
   Handler,
-  isLettersType,
+  isLetterType,
   isPunctuationType,
   MarkSideType,
   MutableGroupToken,
   MutableToken,
-  HyperTokenType
+  HyperTokenType,
+  isFullwidthPunctuationType,
+  isHalfwidthPunctuationType,
 } from '../parser'
 import {
   checkSpaceAfter,
   findVisibleTokenAfter,
   findVisibleTokenBefore,
   findWrappersBetween,
-  isHalfWidthPunctuationWithoutSpaceAround,
-  isSuccessiveHalfWidthPunctuation,
+  isHalfwidthPunctuationWithoutSpaceAround,
+  isSuccessiveHalfwidthPunctuation,
   Options
 } from './util'
 import {
@@ -59,11 +60,11 @@ const isNormalPunctuation = (char: string): boolean =>
   normalPunctuationList.indexOf(char) >= 0
 
 const generateHandler = (options: Options): Handler => {
-  const noBeforePunctuationOption = options?.noSpaceBeforePunctuation
+  const noBeforePunctuationOption = options?.noSpaceBeforePauseOrStopPunctuation
   const oneAfterHalfWidthPunctuationOption =
-    options?.spaceAfterHalfWidthPunctuation
+    options?.spaceAfterHalfwidthPauseOrStopPunctuation
   const noAfterFullWidthPunctuationOption =
-    options?.noSpaceAfterFullWidthPunctuation
+    options?.noSpaceAfterFullwidthPauseOrStopPunctuation
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-punctuation tokens and non-normal punctuations
@@ -75,12 +76,12 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // skip half-width punctuations between half-width content without space
-    if (isHalfWidthPunctuationWithoutSpaceAround(group, token)) {
+    if (isHalfwidthPunctuationWithoutSpaceAround(group, token)) {
       return
     }
 
     // skip successive multiple half-width punctuations
-    if (isSuccessiveHalfWidthPunctuation(group, token)) {
+    if (isSuccessiveHalfwidthPunctuation(group, token)) {
       return
     }
 
@@ -90,7 +91,7 @@ const generateHandler = (options: Options): Handler => {
       if (
         contentTokenBefore &&
         // content
-        (isLettersType(contentTokenBefore.type) ||
+        (isLetterType(contentTokenBefore.type) ||
           // right-quote
           contentTokenBefore.type === GroupTokenType.GROUP ||
           // right-bracket
@@ -113,15 +114,15 @@ const generateHandler = (options: Options): Handler => {
 
     // 2. half/full x content/left-quote/left-bracket/code
     if (
-      (token.modifiedType === CharType.PUNCTUATION_FULL &&
+      (isFullwidthPunctuationType(token.modifiedType) &&
         noAfterFullWidthPunctuationOption) ||
-      (token.modifiedType === CharType.PUNCTUATION_HALF &&
+      (isHalfwidthPunctuationType(token.modifiedType) &&
         oneAfterHalfWidthPunctuationOption)
     ) {
       const spaceAfter =
-        token.modifiedType === CharType.PUNCTUATION_HALF ? ' ' : ''
+        isHalfwidthPunctuationType(token.modifiedType) ? ' ' : ''
       const message =
-        token.modifiedType === CharType.PUNCTUATION_HALF
+        isHalfwidthPunctuationType(token.modifiedType)
           ? PUNCTUATION_SPACE_AFTER
           : PUNCTUATION_NOSPACE_AFTER
 
@@ -129,7 +130,7 @@ const generateHandler = (options: Options): Handler => {
       if (
         contentTokenAfter &&
         // content
-        (isLettersType(contentTokenAfter.type) ||
+        (isLetterType(contentTokenAfter.type) ||
           // left-quote
           contentTokenAfter.type === GroupTokenType.GROUP ||
           // left-bracket
