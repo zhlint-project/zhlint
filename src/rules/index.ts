@@ -41,8 +41,6 @@ const generateHandlers = (options: Options): Handler[] => {
   ]
 }
 
-// TODO: options in each rule
-
 export const defaultConfig: Options = {
   noSinglePair: true,
   halfwidthPunctuation: `()[]{}`,

@@ -93,9 +93,9 @@ const shouldSkip = (
 
 const generateHandler = (options: Options): Handler => {
   const noInsideBracketOption = options.noSpaceInsideBracket
-  const spaceOutsideHalfBracketOption = options.spaceOutsideHalfBracket
-  const noSpaceOutsideFullBracketOption = options.noSpaceOutsideFullBracket
-  const adjustedFullWidthOption = options.adjustedFullWidthPunctuation || ''
+  const spaceOutsideHalfBracketOption = options.spaceOutsideHalfwidthBracket
+  const noSpaceOutsideFullBracketOption = options.noSpaceOutsideFullwidthBracket
+  const adjustedFullWidthOption = options.adjustedFullwidthPunctuation || ''
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-bracket tokens

@@ -52,10 +52,10 @@ const isFullWidth = (char: string, adjusted: string): boolean => {
 }
 
 const generateHandler = (options: Options): Handler => {
-  const noSpaceInsideQuoteOption = options.noSpaceInsideQuote
-  const spaceOutsideHalfQuoteOption = options.spaceOutsideHalfQuote
-  const noSpaceOutsideFullQuoteOption = options.noSpaceOutsideFullQuote
-  const adjustedFullWidthOption = options.adjustedFullWidthPunctuation || ''
+  const noSpaceInsideQuoteOption = options.noSpaceInsideQuotation
+  const spaceOutsideHalfQuoteOption = options.spaceOutsideHalfwidthQuotation
+  const noSpaceOutsideFullQuoteOption = options.noSpaceOutsideFullwidthQuotation
+  const adjustedFullWidthOption = options.adjustedFullwidthPunctuation || ''
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-group tokens
