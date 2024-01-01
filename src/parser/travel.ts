@@ -1,4 +1,4 @@
-import { MutableGroupToken, GroupToken, MutableToken, Token } from './types-new'
+import { MutableGroupToken, GroupToken, MutableToken, Token } from './types'
 
 export type Handler = (
   token: MutableToken | Token,

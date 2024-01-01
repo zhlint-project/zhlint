@@ -1,7 +1,7 @@
-export * from './types-new'
-export { ParseResult, MutableParseResult } from './parse-new'
+export * from './types'
+export { ParseResult, MutableParseResult } from './parse'
 export { Handler } from './travel'
 
-export { checkCharType } from './char-new'
-export { parse, toMutableResult } from './parse-new'
+export { checkCharType } from './char'
+export { parse, toMutableResult } from './parse'
 export { travel } from './travel'
