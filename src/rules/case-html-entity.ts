@@ -22,7 +22,7 @@ const generateHandler = (options: Options): Handler => {
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-& tokens
-    if (token.content !== '&') {
+    if (token.value !== '&') {
       return
     }
 
@@ -38,28 +38,28 @@ const generateHandler = (options: Options): Handler => {
 
     // skip non-semicolon tokens
     const thirdToken = findTokenAfter(group, tokenAfter)
-    if (!thirdToken || thirdToken.content !== ';' || tokenAfter.spaceAfter) {
+    if (!thirdToken || thirdToken.value !== ';' || tokenAfter.spaceAfter) {
       return
     }
 
     // revert &
-    token.modifiedContent = token.content
+    token.modifiedValue = token.value
     token.modifiedType = token.type
     token.modifiedSpaceAfter = token.spaceAfter
-    removeValidationOnTarget(token, ValidationTarget.CONTENT)
+    removeValidationOnTarget(token, ValidationTarget.VALUE)
     removeValidationOnTarget(token, ValidationTarget.SPACE_AFTER)
 
     // revert half-width content
-    tokenAfter.modifiedContent = tokenAfter.content
+    tokenAfter.modifiedValue = tokenAfter.value
     tokenAfter.modifiedType = tokenAfter.type
     tokenAfter.modifiedSpaceAfter = tokenAfter.spaceAfter
-    removeValidationOnTarget(tokenAfter, ValidationTarget.CONTENT)
+    removeValidationOnTarget(tokenAfter, ValidationTarget.VALUE)
     removeValidationOnTarget(tokenAfter, ValidationTarget.SPACE_AFTER)
 
     // revert ;
-    thirdToken.modifiedContent = thirdToken.content
+    thirdToken.modifiedValue = thirdToken.value
     thirdToken.modifiedType = thirdToken.type
-    removeValidationOnTarget(thirdToken, ValidationTarget.CONTENT)
+    removeValidationOnTarget(thirdToken, ValidationTarget.VALUE)
     removeValidationOnTarget(thirdToken, ValidationTarget.SPACE_AFTER)
 
     const nextToken = findNonCodeVisibleTokenAfter(group, thirdToken)

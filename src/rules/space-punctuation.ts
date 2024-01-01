@@ -55,6 +55,8 @@ import {
   PUNCTUATION_SPACE_AFTER
 } from './messages'
 
+// TODO: review
+
 const normalPunctuationList = `,.;:?!，、。；：？！`.split('')
 const isNormalPunctuation = (char: string): boolean =>
   normalPunctuationList.indexOf(char) >= 0
@@ -71,7 +73,7 @@ const generateHandler = (options: Options): Handler => {
     if (!isPunctuationType(token.type)) {
       return
     }
-    if (!isNormalPunctuation(token.content)) {
+    if (!isNormalPunctuation(token.value)) {
       return
     }
 
@@ -95,10 +97,10 @@ const generateHandler = (options: Options): Handler => {
           // right-quote
           contentTokenBefore.type === GroupTokenType.GROUP ||
           // right-bracket
-          (contentTokenBefore.type === HyperTokenType.HYPER_WRAPPER_BRACKET &&
+          (contentTokenBefore.type === HyperTokenType.BRACKET_MARK &&
             contentTokenBefore.markSide === MarkSideType.RIGHT) ||
           // code
-          contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
+          contentTokenBefore.type === HyperTokenType.CODE_CONTENT)
       ) {
         const { spaceHost } = findWrappersBetween(
           group,
@@ -134,10 +136,10 @@ const generateHandler = (options: Options): Handler => {
           // left-quote
           contentTokenAfter.type === GroupTokenType.GROUP ||
           // left-bracket
-          (contentTokenAfter.type === HyperTokenType.HYPER_WRAPPER_BRACKET &&
+          (contentTokenAfter.type === HyperTokenType.BRACKET_MARK &&
             contentTokenAfter.markSide === MarkSideType.LEFT) ||
           // code
-          contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
+          contentTokenAfter.type === HyperTokenType.CODE_CONTENT)
       ) {
         const { spaceHost } = findWrappersBetween(
           group,

@@ -13,55 +13,55 @@ import {
   PUNCTUATION_UNIFICATION_SIMPLIFIED,
   PUNCTUATION_UNIFICATION_TRADITIONAL
 } from './messages'
-import { checkEndContent, checkStartContent, Options } from './util'
-
-// TODO: 【】〖〗, primary/secondary, quotes -> quotations
+import { checkEndValue, checkStartValue, Options } from './util'
 
 type UnifiedOptions = 'traditional' | 'simplified'
 
-enum QuoteType {
+enum QuotationType {
   LEFT,
   LEFT_EMBEDDED,
   RIGHT_EMBEDDED,
   RIGHT
 }
 
-const replaceMap: Record<UnifiedOptions, Record<QuoteType, string>> = {
+// TODO: replaceRecord, group level?, options.unifiedPunctuation: char[4]
+
+const replaceMap: Record<UnifiedOptions, Record<QuotationType, string>> = {
   simplified: {
-    [QuoteType.LEFT]: `“`,
-    [QuoteType.LEFT_EMBEDDED]: `‘`,
-    [QuoteType.RIGHT_EMBEDDED]: `’`,
-    [QuoteType.RIGHT]: `”`
+    [QuotationType.LEFT]: `“`,
+    [QuotationType.LEFT_EMBEDDED]: `‘`,
+    [QuotationType.RIGHT_EMBEDDED]: `’`,
+    [QuotationType.RIGHT]: `”`
   },
   traditional: {
-    [QuoteType.LEFT]: `「`,
-    [QuoteType.LEFT_EMBEDDED]: `『`,
-    [QuoteType.RIGHT_EMBEDDED]: `』`,
-    [QuoteType.RIGHT]: `」`
+    [QuotationType.LEFT]: `「`,
+    [QuotationType.LEFT_EMBEDDED]: `『`,
+    [QuotationType.RIGHT_EMBEDDED]: `』`,
+    [QuotationType.RIGHT]: `」`
   }
 }
 
 const valueToKey = (
-  obj: Record<QuoteType, string>
-): Record<string, QuoteType> => {
-  const result: Record<string, QuoteType> = {}
+  obj: Record<QuotationType, string>
+): Record<string, QuotationType> => {
+  const result: Record<string, QuotationType> = {}
   for (const key in obj) {
     const value: string = obj[key]
-    result[value] = key as unknown as QuoteType
+    result[value] = key as unknown as QuotationType
   }
   return result
 }
 
 const checkChar = (
-  content: string,
-  objectMap: Record<string, QuoteType>,
-  unifiedMap: Record<QuoteType, string>
+  value: string,
+  objectMap: Record<string, QuotationType>,
+  unifiedMap: Record<QuotationType, string>
 ): string => {
-  const key = objectMap[content]
+  const key = objectMap[value]
   if (key) {
     return unifiedMap[key]
   }
-  return content
+  return value
 }
 
 const generateHandler = (options: Options): Handler => {
@@ -88,18 +88,18 @@ const generateHandler = (options: Options): Handler => {
     if (token.type !== GroupTokenType.GROUP) {
       return
     }
-    const modifiedStartContent = checkChar(
-      token.modifiedStartContent,
+    const modifiedStartValue = checkChar(
+      token.modifiedStartValue,
       objectMap,
       unifiedMap
     )
-    const modifiedEndContent = checkChar(
-      token.modifiedEndContent,
+    const modifiedEndValue = checkChar(
+      token.modifiedEndValue,
       objectMap,
       unifiedMap
     )
-    checkStartContent(token, modifiedStartContent, message)
-    checkEndContent(token, modifiedEndContent, message)
+    checkStartValue(token, modifiedStartValue, message)
+    checkEndValue(token, modifiedEndValue, message)
   }
 
   return handlerPunctuationUnified

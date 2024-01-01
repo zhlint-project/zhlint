@@ -7,7 +7,7 @@ import { ParsedStatus } from './types'
 const matcher = /\{% ([^ ]+?) [^%]*?%\}(?:\n|\{(?!%)|[^{])*?\{% end(?:\1) %\}/g
 
 const parser = (data: ParsedStatus): ParsedStatus => {
-  data.modifiedContent = data.modifiedContent.replace(
+  data.modifiedValue = data.modifiedValue.replace(
     matcher,
     (raw, name, index) => {
       const { length } = raw
@@ -16,7 +16,7 @@ const parser = (data: ParsedStatus): ParsedStatus => {
         meta: `hexo-${name}`,
         index,
         length,
-        originContent: raw
+        originValue: raw
       })
       return '@'.repeat(length)
     }

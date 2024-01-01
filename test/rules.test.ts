@@ -155,12 +155,12 @@ describe('lint by rules', () => {
       warnings: [
         {
           index: 3,
-          target: ValidationTarget.CONTENT,
+          target: ValidationTarget.VALUE,
           message: PUNCTUATION_FULL_WIDTH
         },
         {
           index: 6,
-          target: ValidationTarget.CONTENT,
+          target: ValidationTarget.VALUE,
           message: PUNCTUATION_FULL_WIDTH
         }
       ]
@@ -190,22 +190,22 @@ describe('lint by rules', () => {
         warnings: [
           {
             index: 4,
-            target: ValidationTarget.START_CONTENT,
+            target: ValidationTarget.START_VALUE,
             message: PUNCTUATION_UNIFICATION_SIMPLIFIED
           },
           {
             index: 34,
-            target: ValidationTarget.END_CONTENT,
+            target: ValidationTarget.END_VALUE,
             message: PUNCTUATION_UNIFICATION_SIMPLIFIED
           },
           {
             index: 14,
-            target: ValidationTarget.START_CONTENT,
+            target: ValidationTarget.START_VALUE,
             message: PUNCTUATION_UNIFICATION_SIMPLIFIED
           },
           {
             index: 29,
-            target: ValidationTarget.END_CONTENT,
+            target: ValidationTarget.END_VALUE,
             message: PUNCTUATION_UNIFICATION_SIMPLIFIED
           }
         ]

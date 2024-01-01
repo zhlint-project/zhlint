@@ -8,11 +8,11 @@ import genPunctuationUnificationHandler from './punctuation-unification'
 
 import genAbbrsHandler from './case-abbrs'
 
-import genSpaceOfWrapperHandler from './space-wrapper'
+import genSpaceOfHyperMarkHandler from './space-hyper-mark'
 import genSpaceOfCodeHandler from './space-code'
 import genSpaceOfLetterHandler from './space-letter'
 import genSpaceOfPunctuationHandler from './space-punctuation'
-import genSpaceOfQuoteHandler from './space-quotation'
+import genSpaceOfQuotationHandler from './space-quotation'
 import genSpaceOfBracketHandler from './space-bracket'
 
 import genLinebreakHandler from './case-linebreak'
@@ -28,11 +28,11 @@ const generateHandlers = (options: Options): Handler[] => {
 
     genAbbrsHandler(options),
 
-    genSpaceOfWrapperHandler(options),
+    genSpaceOfHyperMarkHandler(options),
     genSpaceOfCodeHandler(options),
     genSpaceOfLetterHandler(options),
     genSpaceOfPunctuationHandler(options),
-    genSpaceOfQuoteHandler(options),
+    genSpaceOfQuotationHandler(options),
     genSpaceOfBracketHandler(options),
     genLinebreakHandler(options),
 
@@ -41,7 +41,7 @@ const generateHandlers = (options: Options): Handler[] => {
   ]
 }
 
-// TODO: new default options
+// TODO: new default options, options in each rule
 
 export const defaultConfig: Options = {
   noSinglePair: true,
@@ -49,7 +49,7 @@ export const defaultConfig: Options = {
   fullWidthPunctuation: `，。：；？！“”‘’`,
   adjustedFullWidthPunctuation: `“”‘’`,
   unifiedPunctuation: 'simplified',
-  spaceBetweenHalfWidthLetters: true,
+  spaceBetweenHalfwidthContent: true,
   noSpaceBetweenFullWidthLetters: true,
   spaceBetweenMixedWidthLetters: true,
   noSpaceBeforePunctuation: true,

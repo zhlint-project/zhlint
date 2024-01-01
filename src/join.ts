@@ -14,58 +14,58 @@ type IgnoredFlags = Record<ValidationTarget, boolean> & { ignored: boolean }
 const isIgnored = (token: Token, marks: IgnoredMark[] = []): IgnoredFlags => {
   const result: IgnoredFlags = {
     ignored: false,
-    [ValidationTarget.CONTENT]: false,
+    [ValidationTarget.VALUE]: false,
     [ValidationTarget.SPACE_AFTER]: false,
-    [ValidationTarget.START_CONTENT]: false,
-    [ValidationTarget.END_CONTENT]: false,
+    [ValidationTarget.START_VALUE]: false,
+    [ValidationTarget.END_VALUE]: false,
     [ValidationTarget.INNER_SPACE_BEFORE]: false,
   }
 
-  // - group: startContent, innerSpaceBefore, endContent, spaceAfter
+  // - group: startValue, innerSpaceBefore, endValue, spaceAfter
   // - single: raw, spaceAfter
   marks.forEach((mark) => {
     if (Array.isArray(token)) {
       const {
         index,
-        startContent,
+        startValue,
         innerSpaceBefore,
         endIndex = 0,
-        endContent,
+        endValue,
         spaceAfter
       } = token
-      if (isInRange(index, index + (startContent || '').length, mark)) {
+      if (isInRange(index, index + (startValue || '').length, mark)) {
         result[ValidationTarget.SPACE_AFTER] = result.ignored = true
       }
       if (
         isInRange(
-          index + (startContent || '').length,
-          index + (startContent || '').length + (innerSpaceBefore || '').length,
+          index + (startValue || '').length,
+          index + (startValue || '').length + (innerSpaceBefore || '').length,
           mark
         )
       ) {
         result[ValidationTarget.INNER_SPACE_BEFORE] = result.ignored = true
       }
-      if (isInRange(endIndex, endIndex + (endContent || '').length, mark)) {
-        result[ValidationTarget.END_CONTENT] = result.ignored = true
+      if (isInRange(endIndex, endIndex + (endValue || '').length, mark)) {
+        result[ValidationTarget.END_VALUE] = result.ignored = true
       }
       if (
         isInRange(
-          endIndex + (endContent || '').length,
-          endIndex + (endContent || '').length + (spaceAfter || '').length,
+          endIndex + (endValue || '').length,
+          endIndex + (endValue || '').length + (spaceAfter || '').length,
           mark
         )
       ) {
         result[ValidationTarget.SPACE_AFTER] = result.ignored = true
       }
     } else {
-      const { index, content, spaceAfter } = token
-      if (isInRange(index, index + (content || '').length, mark)) {
-        result[ValidationTarget.CONTENT] = result.ignored = true
+      const { index, value: value, spaceAfter } = token
+      if (isInRange(index, index + (value || '').length, mark)) {
+        result[ValidationTarget.VALUE] = result.ignored = true
       }
       if (
         isInRange(
-          index + (content || '').length,
-          index + (content || '').length + (spaceAfter || '').length,
+          index + (value || '').length,
+          index + (value || '').length + (spaceAfter || '').length,
           mark
         )
       ) {
@@ -118,17 +118,17 @@ const join = (
     recordValidations(tokens, offset, ignoredFlags, validations, ignoredValidations)
   }
 
-  if (ignoredFlags[ValidationTarget.START_CONTENT]) {
-    tokens.ignoredStartContent = tokens.modifiedStartContent
-    tokens.modifiedStartContent = tokens.startContent
+  if (ignoredFlags[ValidationTarget.START_VALUE]) {
+    tokens.ignoredStartValue = tokens.modifiedStartValue
+    tokens.modifiedStartValue = tokens.startValue
   }
   if (ignoredFlags[ValidationTarget.INNER_SPACE_BEFORE]) {
     tokens.ignoredInnerSpaceBefore = tokens.modifiedInnerSpaceBefore
     tokens.modifiedInnerSpaceBefore = tokens.innerSpaceBefore
   }
-  if (ignoredFlags[ValidationTarget.END_CONTENT]) {
-    tokens.ignoredEndContent = tokens.modifiedEndContent
-    tokens.modifiedEndContent = tokens.endContent
+  if (ignoredFlags[ValidationTarget.END_VALUE]) {
+    tokens.ignoredEndValue = tokens.modifiedEndValue
+    tokens.modifiedEndValue = tokens.endValue
   }
   if (ignoredFlags[ValidationTarget.SPACE_AFTER]) {
     tokens.ignoredSpaceAfter = tokens.modifiedSpaceAfter
@@ -136,7 +136,7 @@ const join = (
   }
 
   return [
-    tokens.modifiedStartContent,
+    tokens.modifiedStartValue,
     tokens.modifiedInnerSpaceBefore,
     ...tokens.map((token) => {
       const subIgnoredFlags = isIgnored(token, ignoredMarks)
@@ -145,9 +145,9 @@ const join = (
       }
       recordValidations(token, offset, subIgnoredFlags, validations, ignoredValidations)
       if (!Array.isArray(token)) {
-        if (subIgnoredFlags[ValidationTarget.CONTENT]) {
-          token.ignoredContent = token.modifiedContent
-          token.modifiedContent = token.content
+        if (subIgnoredFlags[ValidationTarget.VALUE]) {
+          token.ignoredValue = token.modifiedValue
+          token.modifiedValue = token.value
         }
         if (subIgnoredFlags[ValidationTarget.SPACE_AFTER]) {
           token.ignoredSpaceAfter = token.modifiedSpaceAfter
@@ -155,13 +155,13 @@ const join = (
         }
 
         return [
-          token.modifiedContent,
+          token.modifiedValue,
           token.modifiedSpaceAfter
         ].filter(Boolean).join('')
       }
       return join(token, offset, ignoredMarks, ignoredTokens, validations, ignoredValidations, true)
     }),
-    tokens.modifiedEndContent,
+    tokens.modifiedEndValue,
     tokens.modifiedSpaceAfter
   ].filter(Boolean).join('')
 }

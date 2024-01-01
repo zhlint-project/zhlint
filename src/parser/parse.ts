@@ -16,7 +16,7 @@ import {
   isPunctuationType
 } from './types'
 import {
-  appendContent,
+  appendValue,
   addHyperContent,
   addHyperToken,
   finalizeLastToken,
@@ -93,7 +93,7 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
     if (hyperMark) {
       // end the last unfinished token
       finalizeLastToken(status, i)
-      // for hyper mark without startContent
+      // for hyper mark without startValue
       delete hyperMarkMap[i]
       // check the next token
       // - if the mark type is raw
@@ -114,19 +114,19 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
             status,
             i,
             hyperMark,
-            hyperMark.startContent,
+            hyperMark.startValue,
             MarkSideType.LEFT
           )
-          i += hyperMark.startContent.length - 1
+          i += hyperMark.startValue.length - 1
         } else if (i === hyperMark.endIndex) {
           addHyperToken(
             status,
             i,
             hyperMark,
-            hyperMark.endContent,
+            hyperMark.endValue,
             MarkSideType.RIGHT
           )
-          i += hyperMark.endContent.length - 1
+          i += hyperMark.endValue.length - 1
         }
       }
     } else if (type === CharType.SPACE) {
@@ -152,7 +152,7 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
         }
       }
     } else if (isShorthand(str, status, i, char)) {
-      appendContent(status, char)
+      appendValue(status, char)
     } else if (isPunctuationType(type)) {
       handlePunctuation(i, char, type, status)
     } else if (isLettersType(type)) {
@@ -180,10 +180,10 @@ const toMutableToken = (token: Token): MutableToken => {
   if (Array.isArray(token)) {
     const mutableToken: MutableGroupToken = token as MutableGroupToken
     mutableToken.modifiedType = token.type
-    mutableToken.modifiedContent = token.content
+    mutableToken.modifiedValue = token.content
     mutableToken.modifiedSpaceAfter = token.spaceAfter
-    mutableToken.modifiedStartContent = token.startContent
-    mutableToken.modifiedEndContent = token.endContent
+    mutableToken.modifiedStartValue = token.startValue
+    mutableToken.modifiedEndValue = token.endValue
     mutableToken.modifiedInnerSpaceBefore = token.innerSpaceBefore
     mutableToken.validations = []
     token.forEach(toMutableToken)
@@ -191,7 +191,7 @@ const toMutableToken = (token: Token): MutableToken => {
   } else {
     const mutableToken: MutableSingleToken = token as MutableSingleToken
     mutableToken.modifiedType = token.type
-    mutableToken.modifiedContent = token.content
+    mutableToken.modifiedValue = token.content
     mutableToken.modifiedSpaceAfter = token.spaceAfter
     mutableToken.validations = []
     return mutableToken
@@ -200,8 +200,8 @@ const toMutableToken = (token: Token): MutableToken => {
 
 const toMutableMark = (mark: Mark): MutableMark => {
   const mutableMark: MutableMark = mark as MutableMark
-  mutableMark.modifiedStartContent = mark.startContent
-  mutableMark.modifiedEndContent = mark.endContent
+  mutableMark.modifiedStartValue = mark.startValue
+  mutableMark.modifiedEndValue = mark.endValue
   return mutableMark
 }
 

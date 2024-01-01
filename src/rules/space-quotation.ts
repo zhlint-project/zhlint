@@ -104,9 +104,9 @@ const generateHandler = (options: Options): Handler => {
         )
         if (spaceHost) {
           const fullWidth =
-            isFullWidth(token.modifiedEndContent, adjustedFullWidthOption) ||
+            isFullWidth(token.modifiedEndValue, adjustedFullWidthOption) ||
             isFullWidth(
-              contentTokenAfter.modifiedStartContent,
+              contentTokenAfter.modifiedStartValue,
               adjustedFullWidthOption
             )
           // 2.1.1 right-full-quote x left-full-quote
@@ -132,7 +132,7 @@ const generateHandler = (options: Options): Handler => {
       if (
         contentTokenBefore &&
         (isLetterType(contentTokenBefore.type) ||
-          contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
+          contentTokenBefore.type === HyperTokenType.CODE_CONTENT)
       ) {
         const { spaceHost } = findWrappersBetween(
           group,
@@ -141,7 +141,7 @@ const generateHandler = (options: Options): Handler => {
         )
         if (spaceHost) {
           const fullWidth = isFullWidth(
-            token.modifiedStartContent,
+            token.modifiedStartValue,
             adjustedFullWidthOption
           )
 
@@ -167,7 +167,7 @@ const generateHandler = (options: Options): Handler => {
       if (
         contentTokenAfter &&
         (isLetterType(contentTokenAfter.type) ||
-          contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
+          contentTokenAfter.type === HyperTokenType.CODE_CONTENT)
       ) {
         const { spaceHost } = findWrappersBetween(
           group,
@@ -176,7 +176,7 @@ const generateHandler = (options: Options): Handler => {
         )
         if (spaceHost) {
           const fullWidth = isFullWidth(
-            token.modifiedEndContent,
+            token.modifiedEndValue,
             adjustedFullWidthOption
           )
 

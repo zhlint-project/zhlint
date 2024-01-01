@@ -81,16 +81,16 @@ export const isFullwidthPair = (str: string): boolean =>
 
 type Pair = {
   startIndex: number
-  startContent: string
+  startValue: string
   endIndex: number
-  endContent: string
+  endValue: string
 }
 
 type MutablePair = {
-  modifiedStartContent: string
-  ignoredStartContent?: string
-  modifiedEndContent: string
-  ignoredEndContent?: string
+  modifiedStartValue: string
+  ignoredStartValue?: string
+  modifiedEndValue: string
+  ignoredEndValue?: string
 }
 
 // Mark
@@ -245,6 +245,34 @@ export type NonTokenCharType =
 
 export type GeneralType = TokenType | NonTokenCharType
 
+export const getHalfwidthTokenType = (
+  type: TokenType
+): TokenType => {
+  switch (type) {
+    case CharType.CJK_CHAR:
+      return CharType.WESTERN_LETTER
+    case CharType.FULLWIDTH_PAUSE_OR_STOP:
+      return CharType.HALFWIDTH_PAUSE_OR_STOP
+    case CharType.FULLWIDTH_OTHER_PUNCTUATION:
+      return CharType.HALFWIDTH_OTHER_PUNCTUATION
+  }
+  return type
+}
+
+export const getFullwidthTokenType = (
+  type: TokenType
+): TokenType => {
+  switch (type) {
+    case CharType.WESTERN_LETTER:
+      return CharType.CJK_CHAR
+    case CharType.HALFWIDTH_PAUSE_OR_STOP:
+      return CharType.FULLWIDTH_PAUSE_OR_STOP
+    case CharType.HALFWIDTH_OTHER_PUNCTUATION:
+      return CharType.FULLWIDTH_OTHER_PUNCTUATION
+  }
+  return type
+}
+
 export type NonCodeVisibleTokenType =
   | NormalContentTokenType
   | HyperTokenType.BRACKET_MARK
@@ -394,7 +422,7 @@ type CommonToken = {
   index: number
   length: number
 
-  content: string
+  value: string
   spaceAfter: string
 
   mark?: Mark
@@ -402,8 +430,8 @@ type CommonToken = {
 }
 
 type MutableCommonToken = CommonToken & {
-  modifiedContent: string
-  ignoredContent?: string
+  modifiedValue: string
+  ignoredValue?: string
   modifiedSpaceAfter: string
   ignoredSpaceAfter?: string
   validations: Validation[]

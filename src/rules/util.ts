@@ -351,33 +351,33 @@ const isHtmlTag = (token: Token): boolean => {
   if (token.type !== HyperTokenType.HYPER_CONTENT) {
     return false
   }
-  return !!token.content.match(/^<.+>$/)
+  return !!token.value.match(/^<.+>$/)
 }
 
 const getHtmlTagSide = (token: Token): MarkSideType | undefined => {
   if (!isHtmlTag(token)) {
     return
   }
-  if (token.content.match(/^<code.*>.*<\/code.*>$/)) {
+  if (token.value.match(/^<code.*>.*<\/code.*>$/)) {
     return
   }
-  if (token.content.match(/^<[^/].+\/\s*>$/)) {
+  if (token.value.match(/^<[^/].+\/\s*>$/)) {
     return
   }
-  if (token.content.match(/^<[^/].+>$/)) {
+  if (token.value.match(/^<[^/].+>$/)) {
     return MarkSideType.LEFT
   }
-  if (token.content.match(/^<\/.+>$/)) {
+  if (token.value.match(/^<\/.+>$/)) {
     return MarkSideType.RIGHT
   }
 }
 
 export const isWrapper = (token: Token): boolean => {
-  return token.type === HyperTokenType.HYPER_WRAPPER || !!getHtmlTagSide(token)
+  return token.type === HyperTokenType.HYPER_MARK || !!getHtmlTagSide(token)
 }
 
 export const getWrapperSide = (token: Token): MarkSideType | undefined => {
-  if (token.type === HyperTokenType.HYPER_WRAPPER) {
+  if (token.type === HyperTokenType.HYPER_MARK) {
     return token.markSide
   }
   return getHtmlTagSide(token)
@@ -572,15 +572,15 @@ const createValidation = (
     name,
     message
   }
-  if (target === ValidationTarget.START_CONTENT) {
+  if (target === ValidationTarget.START_VALUE) {
     validation.index = (token as GroupToken).startIndex
     validation.length = 0
-  } else if (target === ValidationTarget.END_CONTENT) {
+  } else if (target === ValidationTarget.END_VALUE) {
     validation.index = (token as GroupToken).endIndex
     validation.length = 0
   } else if (target === ValidationTarget.INNER_SPACE_BEFORE) {
     validation.index = (token as GroupToken).startIndex
-    validation.length = (token as GroupToken).startContent.length
+    validation.length = (token as GroupToken).startValue.length
   }
   return validation
 }
@@ -633,14 +633,14 @@ export const checkSpaceAfter: Checker = genChecker(
   ValidationTarget.SPACE_AFTER
 )
 
-export const checkStartContent: Checker = genChecker(
-  'modifiedStartContent',
-  ValidationTarget.START_CONTENT
+export const checkStartValue: Checker = genChecker(
+  'modifiedStartValue',
+  ValidationTarget.START_VALUE
 )
 
-export const checkEndContent: Checker = genChecker(
-  'modifiedEndContent',
-  ValidationTarget.END_CONTENT
+export const checkEndValue: Checker = genChecker(
+  'modifiedEndValue',
+  ValidationTarget.END_VALUE
 )
 
 export const checkInnerSpaceBefore: Checker = genChecker(
@@ -648,16 +648,16 @@ export const checkInnerSpaceBefore: Checker = genChecker(
   ValidationTarget.INNER_SPACE_BEFORE
 )
 
-export const checkContent = (
+export const checkValue = (
   token: Token,
   value: string,
   type: TokenType,
   message: string
 ): void => {
-  if (token.modifiedContent === value) {
+  if (token.modifiedValue === value) {
     return
   }
-  token.modifiedContent = value
+  token.modifiedValue = value
   token.modifiedType = type
-  setValidationOnTarget(token, ValidationTarget.CONTENT, message, '')
+  setValidationOnTarget(token, ValidationTarget.VALUE, message, '')
 }

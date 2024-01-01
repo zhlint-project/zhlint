@@ -53,15 +53,15 @@ const getPositionByOffset = (str: string, offset: number): Position => {
 }
 
 export enum ValidationTarget {
-  CONTENT = 'content',
-  START_CONTENT = 'startContent',
-  END_CONTENT = 'endContent',
+  VALUE = 'value',
+  START_VALUE = 'startValue',
+  END_VALUE = 'endValue',
   SPACE_AFTER = 'spaceAfter',
   INNER_SPACE_BEFORE = 'innerSpaceBefore'
 }
 
 export type Validation = {
-  // the type and content of message
+  // the type and value of message
   name: string
   message: string
 
@@ -112,7 +112,7 @@ export const reportItem = (
   validations.forEach(({ index, length, target, message }) => {
     // 0. final index and position
     const finalIndex =
-      target === 'spaceAfter' || target === 'endContent'
+      target === 'spaceAfter' || target === 'endValue'
         ? index + length
         : index
     const { row, column, line } = getPositionByOffset(str, finalIndex)

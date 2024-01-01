@@ -50,7 +50,7 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // skip non-code tokens
-    if (token.type !== HyperTokenType.HYPER_CONTENT_CODE) {
+    if (token.type !== HyperTokenType.CODE_CONTENT) {
       return
     }
 
@@ -76,7 +76,7 @@ const generateHandler = (options: Options): Handler => {
     if (
       contentTokenAfter &&
       (isLetterType(contentTokenAfter.type) ||
-        contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
+        contentTokenAfter.type === HyperTokenType.CODE_CONTENT)
     ) {
       afterSpaceHost && checkSpaceAfter(afterSpaceHost, spaceAfter, message)
     }

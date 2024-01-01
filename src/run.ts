@@ -57,8 +57,8 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
   // str -> ignoredByRules, ignoredByParsers
   // blocks -> marks, ignoredMarks
   const status: ParsedStatus = {
-    content: str,
-    modifiedContent: str,
+    value: str,
+    modifiedValue: str,
     ignoredByRules: ignoredCases,
     ignoredByParsers: [],
     blocks: [

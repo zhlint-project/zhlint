@@ -4,7 +4,7 @@
  * This rule will format each punctuation into the right width options.
  *
  * Options:
- * - halfwidthPunctuation: string = `()`
+ * - halfwidthPunctuation: string = `()[]{}`
  * - fullwidthPunctuation: string = `，。：；？！“”‘’`
  * - adjustedFullwidthPunctuation: string = `“”‘’`
  *
@@ -14,19 +14,20 @@
  */
 
 import {
-  CharType,
   GroupTokenType,
   Handler,
-  isPunctuationType,
   MutableGroupToken,
   MutableToken,
-  HyperTokenType
+  HyperTokenType,
+  isSinglePunctuationType,
+  getFullwidthTokenType,
+  getHalfwidthTokenType
 } from '../parser'
 import { PUNCTUATION_FULL_WIDTH, PUNCTUATION_HALF_WIDTH } from './messages'
 import {
-  checkContent,
-  checkEndContent,
-  checkStartContent,
+  checkValue,
+  checkEndValue,
+  checkStartValue,
   isHalfwidthPunctuationWithoutSpaceAround,
   isSuccessiveHalfwidthPunctuation,
   Options
@@ -63,8 +64,8 @@ const defaultFullwidthOption = `，。：；？！“”‘’`
 const defaultAdjustedFullwidthOption = `“”‘’`
 
 const checkAdjusted = (token: MutableToken, adjusted: string): void => {
-  if (adjusted.indexOf(token.modifiedContent) >= 0) {
-    token.modifiedType = CharType.PUNCTUATION_HALF
+  if (adjusted.indexOf(token.modifiedValue) >= 0) {
+    token.modifiedType = getHalfwidthTokenType(token.type)
   }
 }
 
@@ -104,6 +105,7 @@ const parseOptions = (
       fullwidthPairMap[half] = [left, right]
     }
   })
+
   return {
     halfwidthMap,
     fullwidthMap,
@@ -123,8 +125,8 @@ const generateHandler = (options: Options): Handler => {
   ) => {
     // skip non-punctuation/quotation/bracket situations
     if (
-      !isPunctuationType(token.type) &&
-      token.type !== HyperTokenType.HYPER_WRAPPER_BRACKET &&
+      !isSinglePunctuationType(token.type) &&
+      token.type !== HyperTokenType.BRACKET_MARK &&
       token.type !== GroupTokenType.GROUP
     ) {
       return
@@ -143,23 +145,23 @@ const generateHandler = (options: Options): Handler => {
     // 1. normal punctuations in the alter width map
     // 2. brackets in the alter width map
     if (
-      isPunctuationType(token.type) ||
-      token.type === HyperTokenType.HYPER_WRAPPER_BRACKET
+      isSinglePunctuationType(token.type) ||
+      token.type === HyperTokenType.BRACKET_MARK
     ) {
-      const content = token.modifiedContent
-      if (fullwidthMap[content]) {
-        checkContent(
+      const value = token.modifiedValue
+      if (fullwidthMap[value]) {
+        checkValue(
           token,
-          fullwidthMap[content],
-          CharType.PUNCTUATION_FULL,
+          fullwidthMap[value],
+          getFullwidthTokenType(token.type),
           PUNCTUATION_FULL_WIDTH
         )
         checkAdjusted(token, adjusted)
-      } else if (halfwidthMap[content]) {
-        checkContent(
+      } else if (halfwidthMap[value]) {
+        checkValue(
           token,
-          halfwidthMap[content],
-          CharType.PUNCTUATION_HALF,
+          halfwidthMap[value],
+          getHalfwidthTokenType(token.type),
           PUNCTUATION_HALF_WIDTH
         )
       }
@@ -167,31 +169,31 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // 3. quotes in the alter pair map
-    const startContent = (token as MutableGroupToken).modifiedStartContent
-    const endContent = (token as MutableGroupToken).modifiedEndContent
-    if (fullwidthPairMap[startContent]) {
-      checkStartContent(
+    const startValue = (token as MutableGroupToken).modifiedStartValue
+    const endValue = (token as MutableGroupToken).modifiedEndValue
+    if (fullwidthPairMap[startValue]) {
+      checkStartValue(
         token,
-        fullwidthPairMap[startContent][0],
+        fullwidthPairMap[startValue][0],
         PUNCTUATION_FULL_WIDTH
       )
-    } else if (halfwidthMap[startContent]) {
-      checkStartContent(
+    } else if (halfwidthMap[startValue]) {
+      checkStartValue(
         token,
-        halfwidthMap[startContent][0],
+        halfwidthMap[startValue][0],
         PUNCTUATION_HALF_WIDTH
       )
     }
-    if (fullwidthPairMap[endContent]) {
-      checkEndContent(
+    if (fullwidthPairMap[endValue]) {
+      checkEndValue(
         token,
-        fullwidthPairMap[endContent][1],
+        fullwidthPairMap[endValue][1],
         PUNCTUATION_FULL_WIDTH
       )
-    } else if (halfwidthMap[endContent]) {
-      checkEndContent(
+    } else if (halfwidthMap[endValue]) {
+      checkEndValue(
         token,
-        halfwidthMap[endContent][1],
+        halfwidthMap[endValue][1],
         PUNCTUATION_HALF_WIDTH
       )
     }

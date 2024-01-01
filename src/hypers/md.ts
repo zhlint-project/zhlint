@@ -144,16 +144,16 @@ const processBlockMark = (blockMark: BlockMark, str: string): void => {
         meta: inline.type,
         startIndex: startOffset - offset,
         endIndex: endOffset - offset,
-        startContent: str.substring(startOffset, endOffset),
-        endContent: ''
+        startValue: str.substring(startOffset, endOffset),
+        endValue: ''
       }
       // TODO: Ast.InlineCode?
-      if (mark.startContent.match(/<code.*>/)) {
+      if (mark.startValue.match(/<code.*>/)) {
         const rawMark: RawMark = { ...mark, code: MarkSideType.LEFT }
         unresolvedCodeMarks.push(rawMark)
         marks.push(rawMark)
         return
-      } else if (mark.startContent.match(/<\/code.*>/)) {
+      } else if (mark.startValue.match(/<\/code.*>/)) {
         const rawMark: RawMark = { ...mark, code: MarkSideType.RIGHT }
         const leftCode = unresolvedCodeMarks.pop()
         if (leftCode) {
@@ -176,9 +176,9 @@ const processBlockMark = (blockMark: BlockMark, str: string): void => {
         // TODO: typeof RawMark.meta
         meta: inline.type,
         startIndex: startOffset - offset,
-        startContent: str.substring(startOffset, innerStartOffset),
+        startValue: str.substring(startOffset, innerStartOffset),
         endIndex: innerEndOffset - offset,
-        endContent: str.substring(innerEndOffset, endOffset)
+        endValue: str.substring(innerEndOffset, endOffset)
       }
       marks.push(mark)
     }
@@ -197,12 +197,12 @@ const processBlockMark = (blockMark: BlockMark, str: string): void => {
         }
         if (mark.code === MarkSideType.LEFT) {
           const { rightPair } = mark
-          mark.startContent = str.substring(
+          mark.startValue = str.substring(
             mark.startIndex + offset,
             mark.endIndex + offset
           )
           mark.endIndex = rightPair?.endIndex || 0
-          mark.endContent = ''
+          mark.endValue = ''
           delete mark.rightPair
         }
       }
@@ -220,8 +220,8 @@ const processBlockMark = (blockMark: BlockMark, str: string): void => {
     - marks: emphasis/strong/delete/footnote/link/link ref
  */
 const parser = (data: ParsedStatus): ParsedStatus => {
-  const content = data.content
-  const modifiedContent = data.modifiedContent
+  const value = data.value
+  const modifiedValue = data.modifiedValue
   const ignoredByParsers = data.ignoredByParsers
 
   const blockMarks: BlockMark[] = []
@@ -229,7 +229,7 @@ const parser = (data: ParsedStatus): ParsedStatus => {
   const tree: Ast.Root = unified()
     .use(markdown)
     .use(frontmatter)
-    .parse(modifiedContent) as Ast.Root
+    .parse(modifiedValue) as Ast.Root
 
   // - travel and record all paragraphs/headings/table-cells into blocks
   // - for each block, travel and record all
@@ -241,22 +241,22 @@ const parser = (data: ParsedStatus): ParsedStatus => {
   // - get block.start.offset
   // - for each marks
   // - - startIndex: mark.start.offset - offset
-  // - - startContent: [mark.start.offset - offset, mark.firstChild.start.offset - offset]
+  // - - startValue: [mark.start.offset - offset, mark.firstChild.start.offset - offset]
   // - - endIndex: mark.lastChild.end.offset - offset
-  // - - endContent: [mark.lastChild.end.offset - offset, mark.end.offset]
-  blockMarks.forEach((blockMark) => processBlockMark(blockMark, content))
+  // - - endValue: [mark.lastChild.end.offset - offset, mark.end.offset]
+  blockMarks.forEach((blockMark) => processBlockMark(blockMark, value))
   data.blocks = blockMarks.map((b): Block => {
     const position = parsePosition(b.block.position)
-    ignoredByParsers.forEach(({ index, length, originContent: raw, meta }) => {
+    ignoredByParsers.forEach(({ index, length, originValue: raw, meta }) => {
       if (position.start <= index && position.end >= index + length) {
         if (b.hyperMarks) {
           b.hyperMarks.push({
             type: MarkType.RAW,
             meta,
             startIndex: index - position.start,
-            startContent: raw,
+            startValue: raw,
             endIndex: index - position.start + length,
-            endContent: ''
+            endValue: ''
           })
         }
       }

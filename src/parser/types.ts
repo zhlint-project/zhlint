@@ -51,16 +51,16 @@ export const isFullWidthPair = (str: string): boolean =>
 
 type Pair = {
   startIndex: number
-  startContent: string
+  startValue: string
   endIndex: number
-  endContent: string
+  endValue: string
 }
 
 type MutablePair = {
-  modifiedStartContent: string
-  ignoredStartContent?: string
-  modifiedEndContent: string
-  ignoredEndContent?: string
+  modifiedStartValue: string
+  ignoredStartValue?: string
+  modifiedEndValue: string
+  ignoredEndValue?: string
 }
 
 // Mark
@@ -228,8 +228,8 @@ type CommonToken = {
 }
 
 type MutableCommonToken = CommonToken & {
-  modifiedContent: string
-  ignoredContent?: string
+  modifiedValue: string
+  ignoredValue?: string
   modifiedSpaceAfter: string
   ignoredSpaceAfter?: string
   validations: Validation[]

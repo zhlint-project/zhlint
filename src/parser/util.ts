@@ -48,7 +48,7 @@ export const handlePunctuation = (
     // and finish the token
     addBracketToken(status, i, char, MarkSideType.LEFT)
   } else if (BRACKET_CHAR_SET.right.indexOf(char) >= 0) {
-    if (!status.lastMark || !status.lastMark.startContent) {
+    if (!status.lastMark || !status.lastMark.startValue) {
       addUnmatchedToken(status, i, char)
       addError(status, i, BRACKET_NOT_OPEN)
     } else {
@@ -61,7 +61,7 @@ export const handlePunctuation = (
   } else if (QUOTE_CHAR_SET.neutral.indexOf(char) >= 0) {
     // - end the last unfinished group
     // - start a new group
-    if (status.lastGroup && char === status.lastGroup.startContent) {
+    if (status.lastGroup && char === status.lastGroup.startValue) {
       finalizeCurrentGroup(status, i, char)
     } else {
       initNewGroup(status, i, char)
@@ -69,7 +69,7 @@ export const handlePunctuation = (
   } else if (QUOTE_CHAR_SET.left.indexOf(char) >= 0) {
     initNewGroup(status, i, char)
   } else if (QUOTE_CHAR_SET.right.indexOf(char) >= 0) {
-    if (!status.lastGroup || !status.lastGroup.startContent) {
+    if (!status.lastGroup || !status.lastGroup.startValue) {
       addUnmatchedToken(status, i, char)
       addError(status, i, QUOTE_NOT_OPEN)
     } else {
@@ -94,7 +94,7 @@ export const handleContent = (
       finalizeLastToken(status, i)
       initNewContent(status, i, char, type)
     } else {
-      appendContent(status, char)
+      appendValue(status, char)
     }
   } else {
     initNewContent(status, i, char, type)
@@ -111,8 +111,8 @@ export const initNewStatus = (str: string, hyperMarks: Mark[]): ParseStatus => {
     spaceAfter: '',
     startIndex: 0,
     endIndex: str.length - 1,
-    startContent: '',
-    endContent: '',
+    startValue: '',
+    endValue: '',
     innerSpaceBefore: ''
   })
   const status: ParseStatus = {
@@ -213,9 +213,9 @@ export const initNewMark = (
   const mark: Mark = {
     type,
     startIndex: index,
-    startContent: char,
+    startValue: char,
     endIndex: -1, // to be finalized
-    endContent: '' // to be finalized
+    endValue: '' // to be finalized
   }
   status.marks.push(mark)
   status.lastMark = mark
@@ -248,7 +248,7 @@ export const finalizeCurrentMark = (
     return
   }
   status.lastMark.endIndex = index
-  status.lastMark.endContent = char
+  status.lastMark.endValue = char
   if (status.markStack.length > 0) {
     status.lastMark = status.markStack.pop()
   } else {
@@ -304,9 +304,9 @@ export const initNewGroup = (
     index,
     spaceAfter: '', // to be finalized
     startIndex: index,
-    startContent: char,
+    startValue: char,
     endIndex: -1, // to be finalized
-    endContent: '', // to be finalized
+    endValue: '', // to be finalized
     innerSpaceBefore: '' // to be finalized
   })
 
@@ -324,7 +324,7 @@ export const finalizeCurrentGroup = (
   if (status.lastGroup) {
     // index, length, content
     status.lastGroup.endIndex = index
-    status.lastGroup.endContent = char
+    status.lastGroup.endValue = char
   }
   if (status.groupStack.length > 0) {
     status.lastGroup = status.groupStack.pop()
@@ -350,7 +350,7 @@ export const initNewContent = (
   }
 }
 
-export const appendContent = (status: ParseStatus, char: string) => {
+export const appendValue = (status: ParseStatus, char: string) => {
   if (status.lastToken) {
     status.lastToken.content += char
     status.lastToken.length++
@@ -419,7 +419,7 @@ export const isShorthand = (
     if (!status.lastGroup) {
       return true
     }
-    if (status.lastGroup.startContent !== SHORTHAND_PAIR_SET[char]) {
+    if (status.lastGroup.startValue !== SHORTHAND_PAIR_SET[char]) {
       return true
     }
   }
@@ -455,14 +455,14 @@ const addError = (
     index,
     length: 0,
     message,
-    target: ValidationTarget.CONTENT
+    target: ValidationTarget.VALUE
   })
 }
 
 export const handleErrors = (status: ParseStatus): void => {
   // record an error if the last mark not fully resolved
   const lastMark = status.lastMark
-  if (lastMark && lastMark.type === MarkType.BRACKETS && !lastMark.endContent) {
+  if (lastMark && lastMark.type === MarkType.BRACKETS && !lastMark.endValue) {
     addError(status, lastMark.startIndex, BRACKET_NOT_CLOSED)
   }
 
@@ -477,14 +477,14 @@ export const handleErrors = (status: ParseStatus): void => {
 
   // record an error if the last group not fully resolved
   const lastGroup = status.lastGroup
-  if (lastGroup && lastGroup.startContent && !lastGroup.endContent) {
+  if (lastGroup && lastGroup.startValue && !lastGroup.endValue) {
     addError(status, lastGroup.startIndex, QUOTE_NOT_CLOSED)
   }
 
   // record an error if `groupStack` not fully resolved
   if (status.groupStack.length > 0) {
     status.groupStack.forEach((group) => {
-      if (group !== lastGroup && group.startContent && !group.endContent) {
+      if (group !== lastGroup && group.startValue && !group.endValue) {
         addError(status, group.startIndex, QUOTE_NOT_CLOSED)
       }
     })

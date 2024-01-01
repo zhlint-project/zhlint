@@ -6,7 +6,7 @@ export type ParserIgnoredCase = {
   meta: string
   index: number
   length: number
-  originContent: string
+  originValue: string
 }
 
 export type Block = {
@@ -17,8 +17,8 @@ export type Block = {
 }
 
 export type ParsedStatus = {
-  content: string
-  modifiedContent: string
+  value: string
+  modifiedValue: string
   ignoredByRules: IgnoredCase[]
   ignoredByParsers: ParserIgnoredCase[]
   blocks: Block[]

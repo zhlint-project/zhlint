@@ -44,7 +44,7 @@ const matchAbbr = (
     // get the next matching abbr chars by removing the last char and filtering
     const matchedAbbrChars = reversedAbbrChars
       .filter(
-        (abbr) => abbr[0].toLowerCase() === tokenBefore.content.toLowerCase()
+        (abbr) => abbr[0].toLowerCase() === tokenBefore.value.toLowerCase()
       )
       .map((abbr) => abbr.slice(1))
 
@@ -57,7 +57,7 @@ const matchAbbr = (
         if (
           tokenBeforeBefore &&
           !tokenBeforeBefore.spaceAfter &&
-          tokenBeforeBefore.content === '.'
+          tokenBeforeBefore.value === '.'
         ) {
           const result = matchAbbr(tokenBeforeBefore, group, matchedAbbrChars)
           if (result) {
@@ -76,9 +76,9 @@ const matchAbbr = (
 const generateHandler = (options: Options): Handler => {
   const reversedAbbrChars = reverseAbbrsIntoChars(options.skipAbbrs || [])
 
-  return (token: MutableToken, index: number, group: MutableGroupToken) => {
+  return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-dot tokens
-    if (token.content !== '.') {
+    if (token.value !== '.') {
       return
     }
 
@@ -94,9 +94,9 @@ const generateHandler = (options: Options): Handler => {
 
     // keep the dot if the previous tokens match any abbr
     if (matchAbbr(token, group, reversedAbbrChars)) {
-      token.modifiedContent = '.'
+      token.modifiedValue = '.'
       token.modifiedType = token.type
-      removeValidationOnTarget(token, ValidationTarget.CONTENT)
+      removeValidationOnTarget(token, ValidationTarget.VALUE)
     }
   }
 }

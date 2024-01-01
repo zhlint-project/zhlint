@@ -5,13 +5,13 @@
  * content.
  *
  * Options:
- * - spaceBetweenHalfWidthContent: boolean | undefined
+ * - spaceBetweenHalfwidthContent: boolean | undefined
  *   - `true`: ensure one space between half-width content (default)
  *   - `false` or `undefined`: do nothing, just keep the original format
- * - noSpaceBetweenFullWidthContent: boolean | undefined
+ * - noSpaceBetweenFullwidthContent: boolean | undefined
  *   - `true`: remove the space between full-width content (default)
  *   - `false` or `undefined`: do nothing, just keep the original format
- * - spaceBetweenMixedWidthContent: boolean | undefined
+ * - spaceBetweenMixedwidthContent: boolean | undefined
  *   - `true`: keep one space between width-mixed content (default)
  *   - `false`: no space between width-mixed content
  *   - `undefined`: do nothing, just keep the original format
@@ -50,11 +50,11 @@ import {
 } from './messages'
 
 const generateHandler = (options: Options): Handler => {
-  const onlyOneBetweenHalfWidthContentOption =
+  const onlyOneBetweenHalfwidthContentOption =
     options?.spaceBetweenHalfwidthContent
-  const noBetweenFullWidthContentOption =
+  const noBetweenFullwidthContentOption =
     options?.noSpaceBetweenFullwidthContent
-  const betweenMixedWidthContentOption = options?.spaceBetweenMixedwidthContent
+  const betweenMixedwidthContentOption = options?.spaceBetweenMixedwidthContent
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-content tokens
@@ -85,7 +85,7 @@ const generateHandler = (options: Options): Handler => {
     if (contentTokenAfter.type === token.type) {
       // skip without custom option
       if (token.type === CharType.WESTERN_LETTER) {
-        if (!onlyOneBetweenHalfWidthContentOption) {
+        if (!onlyOneBetweenHalfwidthContentOption) {
           return
         }
         // skip if half-content x marks x half-content
@@ -96,7 +96,7 @@ const generateHandler = (options: Options): Handler => {
           return
         }
       } else {
-        if (!noBetweenFullWidthContentOption) {
+        if (!noBetweenFullwidthContentOption) {
           return
         }
       }
@@ -110,12 +110,12 @@ const generateHandler = (options: Options): Handler => {
       checkSpaceAfter(spaceHost, spaceAfter, message)
     } else {
       // skip without custom option
-      if (typeof betweenMixedWidthContentOption === 'undefined') {
+      if (typeof betweenMixedwidthContentOption === 'undefined') {
         return
       }
 
-      const spaceAfter = betweenMixedWidthContentOption ? ' ' : ''
-      const message = betweenMixedWidthContentOption
+      const spaceAfter = betweenMixedwidthContentOption ? ' ' : ''
+      const message = betweenMixedwidthContentOption
         ? CONTENT_SPACE_MIXED_WIDTH
         : CONTENT_NOSPACE_MIXED_WIDTH
 
