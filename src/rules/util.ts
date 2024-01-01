@@ -22,8 +22,7 @@ export type Options = {
   halfwidthPunctuation?: string
   fullwidthPunctuation?: string
   adjustedFullwidthPunctuation?: string
-  unifiedPunctuation?: 'traditional' | 'simplified'
-
+  unifiedPunctuation?: 'traditional' | 'simplified' | Record<string, boolean | string[]> & { default: boolean }
 
   // case: abbrs
   skipAbbrs?: string[]
@@ -652,13 +651,15 @@ export const checkInnerSpaceBefore: Checker = genChecker(
 export const checkValue = (
   token: Token,
   value: string,
-  type: TokenType,
+  type: TokenType | undefined,
   message: string
 ): void => {
   if (token.modifiedValue === value) {
     return
   }
   token.modifiedValue = value
-  token.modifiedType = type
+  if (type) {
+    token.modifiedType = type
+  }
   setValidationOnTarget(token, ValidationTarget.VALUE, message, '')
 }

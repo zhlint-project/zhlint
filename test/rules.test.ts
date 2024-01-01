@@ -9,7 +9,7 @@ import {
   MARKDOWN_NOSPACE_INSIDE,
   PUNCTUATION_FULL_WIDTH,
   PUNCTUATION_NOSPACE_BEFORE,
-  PUNCTUATION_UNIFICATION_SIMPLIFIED,
+  PUNCTUATION_UNIFICATION,
   QUOTE_NOSPACE_INSIDE
 } from '../src/rules/messages'
 
@@ -30,7 +30,7 @@ describe('lint by rules', () => {
   })
   test('[hyper-mark] the position of spaces around hyper marks (if any)', () => {
     const options: Options = {
-      rules: { noSpaceInsideWrapper: true }
+      rules: { noSpaceInsideHyperBracket: true }
     }
     expect(lint('x ** yyy ** z', options)).toEqual({
       output: 'x **yyy** z',
@@ -146,8 +146,8 @@ describe('lint by rules', () => {
   test('[punctuation-width] format each punctuation into the right width options', () => {
     const options = {
       rules: {
-        halfWidthPunctuation: `()`,
-        fullWidthPunctuation: `，。：；？！“”‘’`
+        halfwidthPunctuation: `()`,
+        fullwidthPunctuation: `，。：；？！“”‘’`
       }
     }
     expect(lint('你好,再见.', options)).toEqual({
@@ -191,22 +191,22 @@ describe('lint by rules', () => {
           {
             index: 4,
             target: ValidationTarget.START_VALUE,
-            message: PUNCTUATION_UNIFICATION_SIMPLIFIED
+            message: PUNCTUATION_UNIFICATION
           },
           {
             index: 34,
             target: ValidationTarget.END_VALUE,
-            message: PUNCTUATION_UNIFICATION_SIMPLIFIED
+            message: PUNCTUATION_UNIFICATION
           },
           {
             index: 14,
             target: ValidationTarget.START_VALUE,
-            message: PUNCTUATION_UNIFICATION_SIMPLIFIED
+            message: PUNCTUATION_UNIFICATION
           },
           {
             index: 29,
             target: ValidationTarget.END_VALUE,
-            message: PUNCTUATION_UNIFICATION_SIMPLIFIED
+            message: PUNCTUATION_UNIFICATION
           }
         ]
       })
