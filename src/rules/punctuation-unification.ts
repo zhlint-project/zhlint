@@ -12,7 +12,27 @@ import { GroupTokenType, Handler, MutableToken } from '../parser'
 import { PUNCTUATION_UNIFICATION } from './messages'
 import { checkEndValue, checkStartValue, checkValue, Options } from './util'
 
-const defaultUnifiedMap: Record<string, string[]> = {}
+const defaultUnifiedMap: Record<string, string[]> = {
+  // U+2047 DOUBLE QUESTION MARK, U+203C DOUBLE EXCLAMATION MARK
+  // U+2048 QUESTION EXCLAMATION MARK, U+2049 EXCLAMATION QUESTION MARK
+  '？？': ['⁇'],
+  '！！': ['‼'],
+  '？！': ['⁈'],
+  '！？': ['⁉'],
+
+  // U+002F SOLIDUS, U+FF0F FULLWIDTH SOLIDUS
+  '/': ['/', '／'],
+
+  // U+FF5E FULLWIDTH TILDE
+  '~': ['~', '～'],
+
+  // U+2026 HORIZONTAL ELLIPSIS, U+22EF MIDLINE HORIZONTAL ELLIPSIS
+  '…': ['…', '⋯'],
+
+  // U+25CF BLACK CIRCLE, U+2022 BULLET, U+00B7 MIDDLE DOT,
+  // U+2027 HYPHENATION POINT, U+30FB KATAKANA MIDDLE DOT
+  '·': ['●', '•', '·', '‧', '・'],
+}
 
 const simplifiedUnifiedMap: Record<string, string[]> = {
   '“': ['「'],
