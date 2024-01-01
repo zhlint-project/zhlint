@@ -24,6 +24,7 @@ export type Options = {
   adjustedFullwidthPunctuation?: string
   unifiedPunctuation?: 'traditional' | 'simplified'
 
+
   // case: abbrs
   skipAbbrs?: string[]
 
@@ -33,9 +34,9 @@ export type Options = {
   spaceBetweenMixedwidthContent?: boolean
 
   // space around pause or stop punctuation
-  noSpaceBeforePauseOrStopPunctuation?: boolean
-  spaceAfterHalfwidthPauseOrStopPunctuation?: boolean
-  noSpaceAfterFullwidthPauseOrStopPunctuation?: boolean
+  noSpaceBeforePauseOrStop?: boolean
+  spaceAfterHalfwidthPauseOrStop?: boolean
+  noSpaceAfterFullwidthPauseOrStop?: boolean
 
   // space around quotation
   spaceOutsideHalfwidthQuotation?: boolean
@@ -128,19 +129,19 @@ export type DeprecatedOptions = {
   /**
    * @deprecated
    *
-   * Please use `noSpaceBeforePauseOrStopPunctuation` instead.
+   * Please use `noSpaceBeforePauseOrStop` instead.
    */
   noSpaceBeforePunctuation?: boolean
   /**
    * @deprecated
    *
-   * Please use `spaceAfterHalfwidthPauseOrStopPunctuation` instead.
+   * Please use `spaceAfterHalfwidthPauseOrStop` instead.
    */
   spaceAfterHalfWidthPunctuation?: boolean
   /**
    * @deprecated
    *
-   * Please use `noSpaceAfterFullwidthPauseOrStopPunctuation` instead.
+   * Please use `noSpaceAfterFullwidthPauseOrStop` instead.
    */
   noSpaceAfterFullWidthPunctuation?: boolean
 

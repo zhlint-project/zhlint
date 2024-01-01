@@ -62,11 +62,11 @@ const isNormalPunctuation = (char: string): boolean =>
   normalPunctuationList.indexOf(char) >= 0
 
 const generateHandler = (options: Options): Handler => {
-  const noBeforePunctuationOption = options?.noSpaceBeforePauseOrStopPunctuation
+  const noBeforePunctuationOption = options?.noSpaceBeforePauseOrStop
   const oneAfterHalfWidthPunctuationOption =
-    options?.spaceAfterHalfwidthPauseOrStopPunctuation
+    options?.spaceAfterHalfwidthPauseOrStop
   const noAfterFullWidthPunctuationOption =
-    options?.noSpaceAfterFullwidthPauseOrStopPunctuation
+    options?.noSpaceAfterFullwidthPauseOrStop
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-punctuation tokens and non-normal punctuations

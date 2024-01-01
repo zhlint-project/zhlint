@@ -24,8 +24,6 @@ enum QuotationType {
   RIGHT
 }
 
-// TODO: replaceRecord, group level?, options.unifiedPunctuation: char[4]
-
 const replaceMap: Record<UnifiedOptions, Record<QuotationType, string>> = {
   simplified: {
     [QuotationType.LEFT]: `“`,

@@ -267,7 +267,7 @@ describe('lint by rules', () => {
   describe('[space-punctuation] the space between content and punctuation', () => {
     test('no space before punctuation', () => {
       const options: Options = {
-        rules: { noSpaceBeforePauseOrStopPunctuation: true }
+        rules: { noSpaceBeforePauseOrStop: true }
       }
       expect(lint('中文 , 一. 二 ；三。四', options)).toEqual({
         output: '中文, 一. 二；三。四',
@@ -295,7 +295,7 @@ describe('lint by rules', () => {
     })
     test('one space after half-width punctuation', () => {
       const options: Options = {
-        rules: { spaceAfterHalfwidthPauseOrStopPunctuation: true }
+        rules: { spaceAfterHalfwidthPauseOrStop: true }
       }
       expect(getOutput('中文, 中文.中； 文。中文', options)).toBe(
         '中文, 中文. 中； 文。中文'
@@ -305,7 +305,7 @@ describe('lint by rules', () => {
     })
     test('no space after full-width punctuation', () => {
       const options: Options = {
-        rules: { noSpaceAfterFullwidthPauseOrStopPunctuation: true }
+        rules: { noSpaceAfterFullwidthPauseOrStop: true }
       }
       expect(getOutput('中文, 中文.中； 文。中文', options)).toBe(
         '中文, 中文.中；文。中文'
