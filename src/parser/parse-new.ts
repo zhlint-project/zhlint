@@ -16,10 +16,10 @@ import {
   GroupToken
 } from './types-new'
 import {
-  handleContent,
+  handleLetter,
   handlePunctuation,
   appendContent,
-  addHyperContent,
+  addRawContent,
   addHyperToken,
   finalizeLastToken,
   getConnectingSpaceLength,
@@ -99,11 +99,11 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
       // check the next token
       // - if the mark type is raw
       //   - append next token
-      // - else
-      //   - start mark: append token
-      //   - end mark: append token, append mark
+      // - else (the mark type is hyper)
+      //   - start: append token
+      //   - end hyper mark: append token, append mark
       if (hyperMark.type === MarkType.RAW) {
-        addHyperContent(
+        addRawContent(
           status,
           i,
           str.substring(hyperMark.startIndex, hyperMark.endIndex)
@@ -157,11 +157,11 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
     } else if (isPunctuationType(type)) {
       handlePunctuation(i, char, type, status)
     } else if (isLetterType(type)) {
-      handleContent(i, char, type, status)
+      handleLetter(i, char, type, status)
     } else if (type === CharType.EMPTY) {
       // Nothing
     } else {
-      handleContent(i, char, CharType.WESTERN_LETTER, status)
+      handleLetter(i, char, CharType.WESTERN_LETTER, status)
     }
   }
   finalizeLastToken(status, str.length)

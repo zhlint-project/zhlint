@@ -22,7 +22,10 @@ import {
   GroupToken,
   GroupTokenType,
   Token,
-  PunctuationType
+  PunctuationType,
+  SinglePunctuationType,
+  isBracketType,
+  isQuotationType
 } from './types-new'
 import { ParseStatus } from './parse-new'
 
@@ -34,6 +37,7 @@ export const handlePunctuation = (
 ): void => {
   // end the last unfinished token
   finalizeLastToken(status, i)
+
   // check the current token type
   // - start of a mark: start an unfinished mark
   // - end of a mark: end the current unfinished mark
@@ -41,46 +45,52 @@ export const handlePunctuation = (
   // - left quote: start a new unfinished group
   // - right quote: end the current unfinished group
   // - other punctuation: add and end the current token
-  if (BRACKET_CHAR_SET.left.indexOf(char) >= 0) {
-    // push (save) the current unfinished mark if have
-    initNewMark(status, i, char)
-    // generate a new token and mark it as a mark punctuation by left
-    // and finish the token
-    addBracketToken(status, i, char, MarkSideType.LEFT)
-  } else if (BRACKET_CHAR_SET.right.indexOf(char) >= 0) {
-    if (!status.lastMark || !status.lastMark.startContent) {
-      addUnmatchedToken(status, i, char)
-      addError(status, i, BRACKET_NOT_OPEN)
-    } else {
-      // generate token as a punctuation
-      addBracketToken(status, i, char, MarkSideType.RIGHT)
-      // end the last unfinished mark
-      // and pop the previous one if exists
-      finalizeCurrentMark(status, i, char)
+  if (isBracketType(type)) {
+    if (BRACKET_CHAR_SET.left.indexOf(char) >= 0) {
+      // push (save) the current unfinished mark if have
+      initNewMark(status, i, char)
+      // generate a new token and mark it as a mark punctuation by left
+      // and finish the token
+      addBracketToken(status, i, char, MarkSideType.LEFT)
+    } else if (BRACKET_CHAR_SET.right.indexOf(char) >= 0) {
+      if (!status.lastMark || !status.lastMark.startContent) {
+        addUnmatchedToken(status, i, char)
+        addError(status, i, BRACKET_NOT_OPEN)
+      } else {
+        // generate token as a punctuation
+        addBracketToken(status, i, char, MarkSideType.RIGHT)
+        // end the last unfinished mark
+        // and pop the previous one if exists
+        finalizeCurrentMark(status, i, char)
+      }
     }
-  } else if (QUOTATION_CHAR_SET.neutral.indexOf(char) >= 0) {
-    // - end the last unfinished group
-    // - start a new group
-    if (status.lastGroup && char === status.lastGroup.startContent) {
-      finalizeCurrentGroup(status, i, char)
-    } else {
-      initNewGroup(status, i, char)
-    }
-  } else if (QUOTATION_CHAR_SET.left.indexOf(char) >= 0) {
-    initNewGroup(status, i, char)
-  } else if (QUOTATION_CHAR_SET.right.indexOf(char) >= 0) {
-    if (!status.lastGroup || !status.lastGroup.startContent) {
-      addUnmatchedToken(status, i, char)
-      addError(status, i, QUOTE_NOT_OPEN)
-    } else {
-      finalizeCurrentGroup(status, i, char)
-    }
-  } else {
-    addNormalPunctuationToken(status, i, char, type)
+    return
   }
+  if (isQuotationType(type)) {
+    if (QUOTATION_CHAR_SET.neutral.indexOf(char) >= 0) {
+      // - end the last unfinished group
+      // - start a new group
+      if (status.lastGroup && char === status.lastGroup.startContent) {
+        finalizeCurrentGroup(status, i, char)
+      } else {
+        initNewGroup(status, i, char)
+      }
+    } else if (QUOTATION_CHAR_SET.left.indexOf(char) >= 0) {
+      initNewGroup(status, i, char)
+    } else if (QUOTATION_CHAR_SET.right.indexOf(char) >= 0) {
+      if (!status.lastGroup || !status.lastGroup.startContent) {
+        addUnmatchedToken(status, i, char)
+        addError(status, i, QUOTE_NOT_OPEN)
+      } else {
+        finalizeCurrentGroup(status, i, char)
+      }
+    }
+    return
+  }
+  addSinglePunctuationToken(status, i, char, type)
 }
 
-export const handleContent = (
+export const handleLetter = (
   i: number,
   char: string,
   type: LetterType,
@@ -156,10 +166,11 @@ export const finalizeCurrentToken = (
 const markTypeToTokenType = (type: MarkType): HyperTokenType => {
   switch (type) {
     case MarkType.HYPER:
-      return HyperTokenType.HYPER_WRAPPER
+      return HyperTokenType.HYPER_MARK
     case MarkType.BRACKETS:
-      return HyperTokenType.HYPER_WRAPPER_BRACKET
+      return HyperTokenType.BRACKET_MARK
     case MarkType.RAW:
+      // technically never since MarkType.RAW should go to addRawContent()
       return HyperTokenType.INDETERMINATED
   }
 }
@@ -183,7 +194,7 @@ export const addHyperToken = (
   finalizeCurrentToken(status, token)
 }
 
-export const addHyperContent = (
+export const addRawContent = (
   status: ParseStatus,
   index: number,
   content: string
@@ -228,7 +239,7 @@ export const addBracketToken = (
   markSide: MarkSideType
 ) => {
   const token: SingleToken = {
-    type: HyperTokenType.HYPER_WRAPPER_BRACKET,
+    type: HyperTokenType.BRACKET_MARK,
     index,
     length: 1,
     content: char,
@@ -258,11 +269,11 @@ export const finalizeCurrentMark = (
 
 // normal punctuation
 
-const addNormalPunctuationToken = (
+const addSinglePunctuationToken = (
   status: ParseStatus,
   index: number,
   char: string,
-  type: PunctuationType
+  type: SinglePunctuationType
 ) => {
   const token: SingleToken = {
     type,
@@ -333,7 +344,7 @@ export const finalizeCurrentGroup = (
   }
 }
 
-// content
+// general content
 
 export const initNewContent = (
   status: ParseStatus,
@@ -433,14 +444,14 @@ export const getHyperContentType = (content: string): HyperTokenType => {
   }
   if (content.match(/^<code.*>.*<\/code.*>$/)) {
     // Usually it's <code>...</code>.
-    return HyperTokenType.HYPER_CONTENT_CODE
+    return HyperTokenType.CODE_CONTENT
   }
   if (content.match(/^<.+>$/)) {
     // Usually it's other HTML tags.
     return HyperTokenType.HYPER_CONTENT
   }
   // Usually it's `...`.
-  return HyperTokenType.HYPER_CONTENT_CODE
+  return HyperTokenType.CODE_CONTENT
 }
 
 // error handling

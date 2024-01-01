@@ -14,24 +14,24 @@ import { CharType } from './types-new'
  * - proper noun marks: U+FF3F FULLWIDTH LOW LINE
  */
 const newCharTypeSet: { [key in CharType]?: string } = {
-  [CharType.HALFWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK]: ',.;:?!',
-  [CharType.FULLWIDTH_PAUSE_OR_STOP_PUNCTUATION_MARK]: [
+  [CharType.HALFWIDTH_PAUSE_OR_STOP]: ',.;:?!',
+  [CharType.FULLWIDTH_PAUSE_OR_STOP]: [
     // normal punctuation marks
     '，。、；：？！',
     // special punctuation marks
     '⁈⁇‼⁉',
   ].join(''),
-  [CharType.HALFWIDTH_QUOTATION_OR_BOOK_TITLE_MARK]: '\'"',
-  [CharType.FULLWIDTH_QUOTATION_OR_BOOK_TITLE_MARK]: '‘’“”《》〈〉『』「」【】〖〗',
+  [CharType.HALFWIDTH_QUOTATION]: '\'"',
+  [CharType.FULLWIDTH_QUOTATION]: '‘’“”《》〈〉『』「」【】〖〗',
   [CharType.HALFWIDTH_BRACKET]: '()[]{}',
   [CharType.FULLWIDTH_BRACKET]: '（）〔〕［］｛｝',
-  [CharType.HALFWIDTH_OTHER_PUNCTUATION_MARK]: [
+  [CharType.HALFWIDTH_OTHER_PUNCTUATION]: [
     // on-keyboard symbols
     '~-+*/\\%=&|"`<>@#$^',
     // symbol of death
     '†‡'
   ].join(''),
-  [CharType.FULLWIDTH_OTHER_PUNCTUATION_MARK]: [
+  [CharType.FULLWIDTH_OTHER_PUNCTUATION]: [
     // U+2E3A TWO-EM DASH, U+2014 EM DASH
     '—⸺',
     // U+2026 HORIZONTAL ELLIPSIS, U+22EF MIDLINE HORIZONTAL ELLIPSIS
@@ -150,7 +150,7 @@ export const checkCharType = (char: string): CharType => {
 
   // CJK Symbols and Punctuation
   if (char.match(/[\u3000-\u303F]/) != null) {
-    return CharType.FULLWIDTH_OTHER_PUNCTUATION_MARK
+    return CharType.FULLWIDTH_OTHER_PUNCTUATION
   }
 
   return CharType.UNKNOWN
