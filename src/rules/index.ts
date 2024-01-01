@@ -41,28 +41,28 @@ const generateHandlers = (options: Options): Handler[] => {
   ]
 }
 
-// TODO: new default options, options in each rule
+// TODO: options in each rule
 
 export const defaultConfig: Options = {
   noSinglePair: true,
-  halfWidthPunctuation: `()[]{}`,
-  fullWidthPunctuation: `，。：；？！“”‘’`,
-  adjustedFullWidthPunctuation: `“”‘’`,
+  halfwidthPunctuation: `()[]{}`,
+  fullwidthPunctuation: `，。：；？！“”‘’`,
+  adjustedFullwidthPunctuation: `“”‘’`,
   unifiedPunctuation: 'simplified',
   spaceBetweenHalfwidthContent: true,
-  noSpaceBetweenFullWidthLetters: true,
-  spaceBetweenMixedWidthLetters: true,
-  noSpaceBeforePunctuation: true,
-  spaceAfterHalfWidthPunctuation: true,
-  noSpaceAfterFullWidthPunctuation: true,
-  spaceOutsideHalfQuote: true,
-  noSpaceOutsideFullQuote: true,
-  noSpaceInsideQuote: true,
-  spaceOutsideHalfBracket: true,
-  noSpaceOutsideFullBracket: true,
+  noSpaceBetweenFullwidthContent: true,
+  spaceBetweenMixedwidthContent: true,
+  noSpaceBeforePauseOrStopPunctuation: true,
+  spaceAfterHalfwidthPauseOrStopPunctuation: true,
+  noSpaceAfterFullwidthPauseOrStopPunctuation: true,
+  spaceOutsideHalfwidthQuotation: true,
+  noSpaceOutsideFullwidthQuotation: true,
+  noSpaceInsideQuotation: true,
+  spaceOutsideHalfwidthBracket: true,
+  noSpaceOutsideFullwidthBracket: true,
   noSpaceInsideBracket: true,
   spaceOutsideCode: true,
-  noSpaceInsideWrapper: true,
+  noSpaceInsideHyperBracket: true,
   trimSpace: true,
   skipZhUnits: `年月日天号时分秒`,
   skipAbbrs: [
