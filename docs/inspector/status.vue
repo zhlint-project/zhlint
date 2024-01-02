@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue';
+import { Ref, computed, inject } from 'vue';
 
 const TOKEN_TYPE_MAP = {
   '': '',
@@ -8,9 +8,9 @@ const TOKEN_TYPE_MAP = {
   'punctuation-half': 'Half-width punctuation',
   'punctuation-full': 'Full-width punctuation',
   'hyper-content': 'Non-content',
-  'hyper-content-code': 'Code',
+  'code-content': 'Code',
   'wrapper-bracket': 'Bracket',
-  'group': 'Quote',
+  'group': 'Qutation',
   'non-block': 'Non-content',
 }
 const PROP_MAP = {
@@ -19,35 +19,35 @@ const PROP_MAP = {
   //   ignored: 'ignoredType',
   //   label: 'Type',
   // },
-  content: {
-    modified: 'modifiedContent',
-    ignored: 'ignoredContent',
-    label: 'Content',
+  value: {
+    modified: 'modifiedValue',
+    ignored: 'ignoredValue',
+    label: 'Value',
   },
   spaceAfter: {
     modified: 'modifiedSpaceAfter',
     ignored: 'ignoredSpaceAfter',
     label: 'Space After',
   },
-  startContent: {
-    modified: 'modifiedStartContent',
-    ignored: 'ignoredStartContent',
-    label: 'Left Quote',
+  startValue: {
+    modified: 'modifiedStartValue',
+    ignored: 'ignoredStartValue',
+    label: 'Left Qutation',
   },
   innerSpaceBefore: {
     modified: 'modifiedInnerSpaceBefore',
     ignored: 'ignoredInnerSpaceBefore',
-    label: 'Inner Left Space in Quotes',
+    label: 'Inner Left Space in Qutations',
   },
-  endContent: {
-    modified: 'modifiedEndContent',
-    ignored: 'ignoredEndContent',
-    label: 'Right Quote',
+  endValue: {
+    modified: 'modifiedEndValue',
+    ignored: 'ignoredEndValue',
+    label: 'Right Qutation',
   },
 }
 
-const current = inject('current')
-const currentProp = inject('currentProp')
+const current = inject<Ref<any>>('current')
+const currentProp = inject<Ref<string>>('currentProp')
 
 const checkSpace = prop => prop === 'spaceAfter' || prop === 'innerSpaceBefore'
 

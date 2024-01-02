@@ -8,15 +8,15 @@
 
 .punctuation-half,
 .punctuation-full,
-.quote-start-content,
-.quote-end-content,
+.qutation-start-value,
+.qutation-end-value,
 .wrapper-brackets {
   color: #660066;
 }
 
 .non-block,
-.hyper-content,
-.hyper-content-code {
+.hyper-value,
+.hyper-value-code {
   color: #666666;
 }
 
