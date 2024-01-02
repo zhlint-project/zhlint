@@ -27,18 +27,18 @@ const generateHandler = (options: Options): Handler => {
   const skippedZhUnits = options?.skipZhUnits || ''
   const matcherStr = skippedZhUnits
     .split('')
-    .filter((x) => checkCharType(x) === CharType.LETTERS_FULL)
+    .filter((x) => checkCharType(x) === CharType.CJK_CHAR)
     .join('')
   const unitMatcher = new RegExp(`^[${matcherStr}]`)
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
-    // make sure the content is a number
-    if (token.type === CharType.LETTERS_HALF && token.content.match(/^\d+$/)) {
-      // make sure the content after is a Chinese unit
+    // make sure the value is a number
+    if (token.type === CharType.WESTERN_LETTER && token.value.match(/^\d+$/)) {
+      // make sure the value after is a Chinese unit
       const tokenAfter = findNonCodeVisibleTokenAfter(group, token)
 
       if (Array.isArray(tokenAfter)) return
-      if (tokenAfter && tokenAfter.content.match(unitMatcher)) {
+      if (tokenAfter && tokenAfter.value.match(unitMatcher)) {
         // make sure there is no space between originally
         const { spaceHost: spaceHostAfter, tokens: tokenSeqAfter } =
           findWrappersBetween(group, token, tokenAfter)

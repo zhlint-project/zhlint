@@ -28,7 +28,7 @@ import {
 } from './util'
 import {
   Handler,
-  isLettersType,
+  isLetterType,
   MutableGroupToken,
   MutableToken,
   HyperTokenType
@@ -50,7 +50,7 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // skip non-code tokens
-    if (token.type !== HyperTokenType.HYPER_CONTENT_CODE) {
+    if (token.type !== HyperTokenType.CODE_CONTENT) {
       return
     }
 
@@ -69,14 +69,14 @@ const generateHandler = (options: Options): Handler => {
     )
 
     // content x code
-    if (contentTokenBefore && isLettersType(contentTokenBefore.type)) {
+    if (contentTokenBefore && isLetterType(contentTokenBefore.type)) {
       beforeSpaceHost && checkSpaceAfter(beforeSpaceHost, spaceAfter, message)
     }
     // code x content or code x code
     if (
       contentTokenAfter &&
-      (isLettersType(contentTokenAfter.type) ||
-        contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
+      (isLetterType(contentTokenAfter.type) ||
+        contentTokenAfter.type === HyperTokenType.CODE_CONTENT)
     ) {
       afterSpaceHost && checkSpaceAfter(afterSpaceHost, spaceAfter, message)
     }

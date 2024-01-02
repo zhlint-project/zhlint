@@ -29,23 +29,24 @@
  */
 
 import {
-  CharType,
   GroupTokenType,
   Handler,
-  isLettersType,
-  isPunctuationType,
+  isLetterType,
+  isPauseOrStopType,
   MarkSideType,
   MutableGroupToken,
   MutableToken,
-  HyperTokenType
+  HyperTokenType,
+  isFullwidthPunctuationType,
+  isHalfwidthPunctuationType,
 } from '../parser'
 import {
   checkSpaceAfter,
   findVisibleTokenAfter,
   findVisibleTokenBefore,
   findWrappersBetween,
-  isHalfWidthPunctuationWithoutSpaceAround,
-  isSuccessiveHalfWidthPunctuation,
+  isHalfwidthPunctuationWithoutSpaceAround,
+  isSuccessiveHalfwidthPunctuation,
   Options
 } from './util'
 import {
@@ -54,50 +55,43 @@ import {
   PUNCTUATION_SPACE_AFTER
 } from './messages'
 
-const normalPunctuationList = `,.;:?!，、。；：？！`.split('')
-const isNormalPunctuation = (char: string): boolean =>
-  normalPunctuationList.indexOf(char) >= 0
-
 const generateHandler = (options: Options): Handler => {
-  const noBeforePunctuationOption = options?.noSpaceBeforePunctuation
+  const noBeforePunctuationOption = options?.noSpaceBeforePauseOrStop
   const oneAfterHalfWidthPunctuationOption =
-    options?.spaceAfterHalfWidthPunctuation
+    options?.spaceAfterHalfwidthPauseOrStop
   const noAfterFullWidthPunctuationOption =
-    options?.noSpaceAfterFullWidthPunctuation
+    options?.noSpaceAfterFullwidthPauseOrStop
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-punctuation tokens and non-normal punctuations
-    if (!isPunctuationType(token.type)) {
-      return
-    }
-    if (!isNormalPunctuation(token.content)) {
+    if (!isPauseOrStopType(token.type)) {
       return
     }
 
     // skip half-width punctuations between half-width content without space
-    if (isHalfWidthPunctuationWithoutSpaceAround(group, token)) {
+    if (isHalfwidthPunctuationWithoutSpaceAround(group, token)) {
       return
     }
 
     // skip successive multiple half-width punctuations
-    if (isSuccessiveHalfWidthPunctuation(group, token)) {
+    if (isSuccessiveHalfwidthPunctuation(group, token)) {
       return
     }
 
-    // 1. content/right-quote/right-bracket/code x punctuation
+    // 1. content/right-quotation/right-bracket/code x punctuation
     if (noBeforePunctuationOption) {
       const contentTokenBefore = findVisibleTokenBefore(group, token)
       if (
         contentTokenBefore &&
         // content
-        (isLettersType(contentTokenBefore.type) ||
-          // right-quote
+        (isLetterType(contentTokenBefore.type) ||
+          // right-quotation
           contentTokenBefore.type === GroupTokenType.GROUP ||
           // right-bracket
-          (contentTokenBefore.type === HyperTokenType.HYPER_WRAPPER_BRACKET &&
+          (contentTokenBefore.type === HyperTokenType.BRACKET_MARK &&
             contentTokenBefore.markSide === MarkSideType.RIGHT) ||
           // code
-          contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
+          contentTokenBefore.type === HyperTokenType.CODE_CONTENT)
       ) {
         const { spaceHost } = findWrappersBetween(
           group,
@@ -111,17 +105,17 @@ const generateHandler = (options: Options): Handler => {
       }
     }
 
-    // 2. half/full x content/left-quote/left-bracket/code
+    // 2. half/full x content/left-quotation/left-bracket/code
     if (
-      (token.modifiedType === CharType.PUNCTUATION_FULL &&
+      (isFullwidthPunctuationType(token.modifiedType) &&
         noAfterFullWidthPunctuationOption) ||
-      (token.modifiedType === CharType.PUNCTUATION_HALF &&
+      (isHalfwidthPunctuationType(token.modifiedType) &&
         oneAfterHalfWidthPunctuationOption)
     ) {
       const spaceAfter =
-        token.modifiedType === CharType.PUNCTUATION_HALF ? ' ' : ''
+        isHalfwidthPunctuationType(token.modifiedType) ? ' ' : ''
       const message =
-        token.modifiedType === CharType.PUNCTUATION_HALF
+        isHalfwidthPunctuationType(token.modifiedType)
           ? PUNCTUATION_SPACE_AFTER
           : PUNCTUATION_NOSPACE_AFTER
 
@@ -129,14 +123,14 @@ const generateHandler = (options: Options): Handler => {
       if (
         contentTokenAfter &&
         // content
-        (isLettersType(contentTokenAfter.type) ||
-          // left-quote
+        (isLetterType(contentTokenAfter.type) ||
+          // left-quotation
           contentTokenAfter.type === GroupTokenType.GROUP ||
           // left-bracket
-          (contentTokenAfter.type === HyperTokenType.HYPER_WRAPPER_BRACKET &&
+          (contentTokenAfter.type === HyperTokenType.BRACKET_MARK &&
             contentTokenAfter.markSide === MarkSideType.LEFT) ||
           // code
-          contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
+          contentTokenAfter.type === HyperTokenType.CODE_CONTENT)
       ) {
         const { spaceHost } = findWrappersBetween(
           group,

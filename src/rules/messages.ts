@@ -4,6 +4,7 @@ export const CODE_NOSPACE_OUTSIDE = '此处内联代码的外部不需要空格'
 export const MARKDOWN_SPACE_OUTSIDE = '此处 Markdown 标记的空格需要在外部'
 export const MARKDOWN_NOSPACE_INSIDE = '此处 Markdown 标记的内部不需要空格'
 
+export const PUNCTUATION_UNIFICATION = '此处字符需要统一'
 export const PUNCTUATION_UNIFICATION_TRADITIONAL = '此处标点符号需要统一到繁体'
 export const PUNCTUATION_UNIFICATION_SIMPLIFIED = '此处标点符号需要统一到简体'
 

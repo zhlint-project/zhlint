@@ -11,8 +11,8 @@ describe('parser with markdown', () => {
   test('[md parser] single paragraph', () => {
     const text = 'X [xxx](xxx) X *y* __x__ `ss` _0_ ~~asd~~ *asf**asf**adsf*'
     const data: ParsedStatus = {
-      content: text,
-      modifiedContent: text,
+      value: text,
+      modifiedValue: text,
       ignoredByRules: [],
       ignoredByParsers: [],
       blocks: [
@@ -30,65 +30,65 @@ describe('parser with markdown', () => {
         type: 'hyper',
         meta: 'link',
         startIndex: 2,
-        startContent: '[',
+        startValue: '[',
         endIndex: 6,
-        endContent: '](xxx)'
+        endValue: '](xxx)'
       },
       {
         type: 'hyper',
         meta: 'emphasis',
         startIndex: 15,
-        startContent: '*',
+        startValue: '*',
         endIndex: 17,
-        endContent: '*'
+        endValue: '*'
       },
       {
         type: 'hyper',
         meta: 'strong',
         startIndex: 19,
-        startContent: '__',
+        startValue: '__',
         endIndex: 22,
-        endContent: '__'
+        endValue: '__'
       },
       {
         type: 'raw',
         meta: 'inlineCode',
         startIndex: 25,
         endIndex: 29,
-        startContent: '`ss`',
-        endContent: ''
+        startValue: '`ss`',
+        endValue: ''
       },
       {
         type: 'hyper',
         meta: 'emphasis',
         startIndex: 30,
-        startContent: '_',
+        startValue: '_',
         endIndex: 32,
-        endContent: '_'
+        endValue: '_'
       },
       {
         type: 'hyper',
         meta: 'delete',
         startIndex: 34,
-        startContent: '~~',
+        startValue: '~~',
         endIndex: 39,
-        endContent: '~~'
+        endValue: '~~'
       },
       {
         type: 'hyper',
         meta: 'emphasis',
         startIndex: 42,
-        startContent: '*',
+        startValue: '*',
         endIndex: 57,
-        endContent: '*'
+        endValue: '*'
       },
       {
         type: 'hyper',
         meta: 'strong',
         startIndex: 46,
-        startContent: '**',
+        startValue: '**',
         endIndex: 51,
-        endContent: '**'
+        endValue: '**'
       }
     ]
     expect(result.length).toBe(1)
@@ -260,7 +260,7 @@ describe('markdown lint', () => {
       '引入一个<a href="https://zh.wikipedia.org/wiki/工厂方法#工厂">工厂函数 (factory function)</a> 使得我们的测试更简洁更易读'
     )
   })
-  test('[md] special quotes group inside md mark', () => {
+  test('[md] special quotations group inside md mark', () => {
     expect(
       getOutput(
         '更多测试 Vue 组件的知识可翻阅核心团员 [Edd Yerburgh](https://eddyerburgh.me/) 的书[《测试 Vue.js 应用》](https://www.manning.com/books/testing-vuejs-applications)。'

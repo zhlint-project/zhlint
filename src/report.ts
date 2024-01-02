@@ -1,5 +1,10 @@
 import chalk from 'chalk'
-import { CharType, checkCharType } from './parser'
+import {
+  CharType,
+  checkCharType,
+  isFullwidthPunctuationType,
+  isHalfwidthPunctuationType,
+} from './parser'
 
 export const env: {
   stdout: NodeJS.WritableStream
@@ -48,15 +53,15 @@ const getPositionByOffset = (str: string, offset: number): Position => {
 }
 
 export enum ValidationTarget {
-  CONTENT = 'content',
-  START_CONTENT = 'startContent',
-  END_CONTENT = 'endContent',
+  VALUE = 'value',
+  START_VALUE = 'startValue',
+  END_VALUE = 'endValue',
   SPACE_AFTER = 'spaceAfter',
   INNER_SPACE_BEFORE = 'innerSpaceBefore'
 }
 
 export type Validation = {
-  // the type and content of message
+  // the type and value of message
   name: string
   message: string
 
@@ -68,32 +73,32 @@ export type Validation = {
   target: ValidationTarget
 }
 
-const adjustedFullWidthPunctuations = `“”‘’`
+const adjustedFullwidthPunctuations = `“”‘’`
 
 const generateMarker = (str: string, index: number): string => {
   const prefix = str.substring(0, index)
-  let fullWidthCount = 0
-  let halfWidthCount = 0
+  let fullwidthCount = 0
+  let halfwidthCount = 0
   for (let i = 0; i < prefix.length; i++) {
     const charType = checkCharType(prefix[i])
     if (
-      charType === CharType.LETTERS_FULL ||
-      (charType === CharType.PUNCTUATION_FULL &&
-        adjustedFullWidthPunctuations.indexOf(prefix[i]) === -1)
+      charType === CharType.CJK_CHAR ||
+      (isFullwidthPunctuationType(charType) &&
+        adjustedFullwidthPunctuations.indexOf(prefix[i]) === -1)
     ) {
-      fullWidthCount++
+      fullwidthCount++
     } else if (
-      charType === CharType.LETTERS_HALF ||
-      (charType === CharType.PUNCTUATION_HALF &&
-        adjustedFullWidthPunctuations.indexOf(prefix[i]) !== -1) ||
+      charType === CharType.WESTERN_LETTER ||
+      (isHalfwidthPunctuationType(charType) &&
+        adjustedFullwidthPunctuations.indexOf(prefix[i]) !== -1) ||
       charType === CharType.SPACE
     ) {
-      halfWidthCount++
+      halfwidthCount++
     }
   }
   return (
-    ' '.repeat(halfWidthCount) +
-    '　'.repeat(fullWidthCount) +
+    ' '.repeat(halfwidthCount) +
+    '　'.repeat(fullwidthCount) +
     `${chalk.red('^')}`
   )
 }
@@ -107,7 +112,7 @@ export const reportItem = (
   validations.forEach(({ index, length, target, message }) => {
     // 0. final index and position
     const finalIndex =
-      target === 'spaceAfter' || target === 'endContent'
+      target === 'spaceAfter' || target === 'endValue'
         ? index + length
         : index
     const { row, column, line } = getPositionByOffset(str, finalIndex)

@@ -1,7 +1,7 @@
 /**
  * @fileoverview
  *
- * This rule is checking spaces besides quotes.
+ * This rule is checking spaces besides quotations.
  *
  * Options
  * - noSpaceInsideQuote: boolean | undefined
@@ -26,8 +26,8 @@
 import {
   GroupTokenType,
   Handler,
-  isLettersType,
-  isFullWidthPair,
+  isLetterType,
+  isFullwidthPair,
   MarkSideType,
   MutableGroupToken,
   MutableToken,
@@ -48,14 +48,14 @@ import {
 } from './messages'
 
 const isFullWidth = (char: string, adjusted: string): boolean => {
-  return isFullWidthPair(char) && adjusted.indexOf(char) === -1
+  return isFullwidthPair(char) && adjusted.indexOf(char) === -1
 }
 
 const generateHandler = (options: Options): Handler => {
-  const noSpaceInsideQuoteOption = options.noSpaceInsideQuote
-  const spaceOutsideHalfQuoteOption = options.spaceOutsideHalfQuote
-  const noSpaceOutsideFullQuoteOption = options.noSpaceOutsideFullQuote
-  const adjustedFullWidthOption = options.adjustedFullWidthPunctuation || ''
+  const noSpaceInsideQuoteOption = options.noSpaceInsideQuotation
+  const spaceOutsideHalfQuoteOption = options.spaceOutsideHalfwidthQuotation
+  const noSpaceOutsideFullQuoteOption = options.noSpaceOutsideFullwidthQuotation
+  const adjustedFullWidthOption = options.adjustedFullwidthPunctuation || ''
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-group tokens
@@ -63,7 +63,7 @@ const generateHandler = (options: Options): Handler => {
       return
     }
 
-    // 1. no space inside quote
+    // 1. no space inside quotation
     if (noSpaceInsideQuoteOption) {
       // 1.1 left-quote x content/punctuation/left-quote/left-bracket/code/unknown/container
       const firstInsdieToken = token[0]
@@ -86,7 +86,7 @@ const generateHandler = (options: Options): Handler => {
       }
     }
 
-    // 2. space outside half/full quote
+    // 2. space outside half/full quotation
     if (
       typeof spaceOutsideHalfQuoteOption !== 'undefined' ||
       noSpaceOutsideFullQuoteOption
@@ -104,9 +104,9 @@ const generateHandler = (options: Options): Handler => {
         )
         if (spaceHost) {
           const fullWidth =
-            isFullWidth(token.modifiedEndContent, adjustedFullWidthOption) ||
+            isFullWidth(token.modifiedEndValue, adjustedFullWidthOption) ||
             isFullWidth(
-              contentTokenAfter.modifiedStartContent,
+              contentTokenAfter.modifiedStartValue,
               adjustedFullWidthOption
             )
           // 2.1.1 right-full-quote x left-full-quote
@@ -131,8 +131,8 @@ const generateHandler = (options: Options): Handler => {
       const contentTokenBefore = findNonCodeVisibleTokenBefore(group, token)
       if (
         contentTokenBefore &&
-        (isLettersType(contentTokenBefore.type) ||
-          contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
+        (isLetterType(contentTokenBefore.type) ||
+          contentTokenBefore.type === HyperTokenType.CODE_CONTENT)
       ) {
         const { spaceHost } = findWrappersBetween(
           group,
@@ -141,7 +141,7 @@ const generateHandler = (options: Options): Handler => {
         )
         if (spaceHost) {
           const fullWidth = isFullWidth(
-            token.modifiedStartContent,
+            token.modifiedStartValue,
             adjustedFullWidthOption
           )
 
@@ -166,8 +166,8 @@ const generateHandler = (options: Options): Handler => {
       // 2.3 right-quote x content/code
       if (
         contentTokenAfter &&
-        (isLettersType(contentTokenAfter.type) ||
-          contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
+        (isLetterType(contentTokenAfter.type) ||
+          contentTokenAfter.type === HyperTokenType.CODE_CONTENT)
       ) {
         const { spaceHost } = findWrappersBetween(
           group,
@@ -176,7 +176,7 @@ const generateHandler = (options: Options): Handler => {
         )
         if (spaceHost) {
           const fullWidth = isFullWidth(
-            token.modifiedEndContent,
+            token.modifiedEndValue,
             adjustedFullWidthOption
           )
 

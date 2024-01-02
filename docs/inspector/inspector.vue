@@ -9,18 +9,19 @@ import Legends from './legends.vue';
 const props = defineProps<{ data: any }>()
 const data = toRef(props, 'data')
 
-watch(data, () => {
-  current.value = undefined
-  currentProp.value = ''
-})
-
 const current = ref()
 provide('current', current)
 const currentProp = ref('')
 provide('currentProp', currentProp)
 
+watch(data, () => {
+  current.value = undefined
+  currentProp.value = ''
+})
+
 // TODO:
 // data.value.validations
+console.log(data.value.__debug__.pieces)
 </script>
 
 <template>

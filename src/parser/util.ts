@@ -11,18 +11,21 @@ import {
   SHORTHAND_CHARS,
   SHORTHAND_PAIR_SET,
   BRACKET_CHAR_SET,
-  QUOTE_CHAR_SET,
+  QUOTATION_CHAR_SET,
   Mark,
   MarkMap,
   MarkSideType,
   MarkType,
-  LettersType,
+  LetterType,
   SingleToken,
   HyperTokenType,
   GroupToken,
   GroupTokenType,
   Token,
-  PunctuationType
+  PunctuationType,
+  SinglePunctuationType,
+  isBracketType,
+  isQuotationType
 } from './types'
 import { ParseStatus } from './parse'
 
@@ -34,56 +37,63 @@ export const handlePunctuation = (
 ): void => {
   // end the last unfinished token
   finalizeLastToken(status, i)
+
   // check the current token type
   // - start of a mark: start an unfinished mark
   // - end of a mark: end the current unfinished mark
-  // - neutral quote: start/end a group by pairing the last unfinished group
-  // - left quote: start a new unfinished group
-  // - right quote: end the current unfinished group
+  // - neutral quotation: start/end a group by pairing the last unfinished group
+  // - left quotation: start a new unfinished group
+  // - right quotation: end the current unfinished group
   // - other punctuation: add and end the current token
-  if (BRACKET_CHAR_SET.left.indexOf(char) >= 0) {
-    // push (save) the current unfinished mark if have
-    initNewMark(status, i, char)
-    // generate a new token and mark it as a mark punctuation by left
-    // and finish the token
-    addBracketToken(status, i, char, MarkSideType.LEFT)
-  } else if (BRACKET_CHAR_SET.right.indexOf(char) >= 0) {
-    if (!status.lastMark || !status.lastMark.startContent) {
-      addUnmatchedToken(status, i, char)
-      addError(status, i, BRACKET_NOT_OPEN)
-    } else {
-      // generate token as a punctuation
-      addBracketToken(status, i, char, MarkSideType.RIGHT)
-      // end the last unfinished mark
-      // and pop the previous one if exists
-      finalizeCurrentMark(status, i, char)
+  if (isBracketType(type)) {
+    if (BRACKET_CHAR_SET.left.indexOf(char) >= 0) {
+      // push (save) the current unfinished mark if have
+      initNewMark(status, i, char)
+      // generate a new token and mark it as a mark punctuation by left
+      // and finish the token
+      addBracketToken(status, i, char, MarkSideType.LEFT)
+    } else if (BRACKET_CHAR_SET.right.indexOf(char) >= 0) {
+      if (!status.lastMark || !status.lastMark.startValue) {
+        addUnmatchedToken(status, i, char)
+        addError(status, i, BRACKET_NOT_OPEN)
+      } else {
+        // generate token as a punctuation
+        addBracketToken(status, i, char, MarkSideType.RIGHT)
+        // end the last unfinished mark
+        // and pop the previous one if exists
+        finalizeCurrentMark(status, i, char)
+      }
     }
-  } else if (QUOTE_CHAR_SET.neutral.indexOf(char) >= 0) {
-    // - end the last unfinished group
-    // - start a new group
-    if (status.lastGroup && char === status.lastGroup.startContent) {
-      finalizeCurrentGroup(status, i, char)
-    } else {
-      initNewGroup(status, i, char)
-    }
-  } else if (QUOTE_CHAR_SET.left.indexOf(char) >= 0) {
-    initNewGroup(status, i, char)
-  } else if (QUOTE_CHAR_SET.right.indexOf(char) >= 0) {
-    if (!status.lastGroup || !status.lastGroup.startContent) {
-      addUnmatchedToken(status, i, char)
-      addError(status, i, QUOTE_NOT_OPEN)
-    } else {
-      finalizeCurrentGroup(status, i, char)
-    }
-  } else {
-    addNormalPunctuationToken(status, i, char, type)
+    return
   }
+  if (isQuotationType(type)) {
+    if (QUOTATION_CHAR_SET.neutral.indexOf(char) >= 0) {
+      // - end the last unfinished group
+      // - start a new group
+      if (status.lastGroup && char === status.lastGroup.startValue) {
+        finalizeCurrentGroup(status, i, char)
+      } else {
+        initNewGroup(status, i, char)
+      }
+    } else if (QUOTATION_CHAR_SET.left.indexOf(char) >= 0) {
+      initNewGroup(status, i, char)
+    } else if (QUOTATION_CHAR_SET.right.indexOf(char) >= 0) {
+      if (!status.lastGroup || !status.lastGroup.startValue) {
+        addUnmatchedToken(status, i, char)
+        addError(status, i, QUOTE_NOT_OPEN)
+      } else {
+        finalizeCurrentGroup(status, i, char)
+      }
+    }
+    return
+  }
+  addSinglePunctuationToken(status, i, char, type)
 }
 
-export const handleContent = (
+export const handleLetter = (
   i: number,
   char: string,
-  type: LettersType,
+  type: LetterType,
   status: ParseStatus
 ): void => {
   // check if type changed and last token unfinished
@@ -94,7 +104,7 @@ export const handleContent = (
       finalizeLastToken(status, i)
       initNewContent(status, i, char, type)
     } else {
-      appendContent(status, char)
+      appendValue(status, char)
     }
   } else {
     initNewContent(status, i, char, type)
@@ -111,8 +121,8 @@ export const initNewStatus = (str: string, hyperMarks: Mark[]): ParseStatus => {
     spaceAfter: '',
     startIndex: 0,
     endIndex: str.length - 1,
-    startContent: '',
-    endContent: '',
+    startValue: '',
+    endValue: '',
     innerSpaceBefore: ''
   })
   const status: ParseStatus = {
@@ -156,10 +166,11 @@ export const finalizeCurrentToken = (
 const markTypeToTokenType = (type: MarkType): HyperTokenType => {
   switch (type) {
     case MarkType.HYPER:
-      return HyperTokenType.HYPER_WRAPPER
+      return HyperTokenType.HYPER_MARK
     case MarkType.BRACKETS:
-      return HyperTokenType.HYPER_WRAPPER_BRACKET
+      return HyperTokenType.BRACKET_MARK
     case MarkType.RAW:
+      // technically never since MarkType.RAW should go to addRawContent()
       return HyperTokenType.INDETERMINATED
   }
 }
@@ -168,14 +179,14 @@ export const addHyperToken = (
   status: ParseStatus,
   index: number,
   mark: Mark,
-  content: string,
+  value: string,
   markSide: MarkSideType
 ) => {
   const token: SingleToken = {
     type: markTypeToTokenType(mark.type),
     index,
-    length: content.length,
-    content: content,
+    length: value.length,
+    value: value,
     spaceAfter: '', // to be finalized
     mark: mark,
     markSide
@@ -183,16 +194,16 @@ export const addHyperToken = (
   finalizeCurrentToken(status, token)
 }
 
-export const addHyperContent = (
+export const addRawContent = (
   status: ParseStatus,
   index: number,
-  content: string
+  value: string
 ) => {
   const token: SingleToken = {
-    type: getHyperContentType(content),
+    type: getHyperContentType(value),
     index,
-    length: content.length,
-    content: content,
+    length: value.length,
+    value: value,
     spaceAfter: '' // to be finalized
   }
   finalizeCurrentToken(status, token)
@@ -213,9 +224,9 @@ export const initNewMark = (
   const mark: Mark = {
     type,
     startIndex: index,
-    startContent: char,
+    startValue: char,
     endIndex: -1, // to be finalized
-    endContent: '' // to be finalized
+    endValue: '' // to be finalized
   }
   status.marks.push(mark)
   status.lastMark = mark
@@ -228,10 +239,10 @@ export const addBracketToken = (
   markSide: MarkSideType
 ) => {
   const token: SingleToken = {
-    type: HyperTokenType.HYPER_WRAPPER_BRACKET,
+    type: HyperTokenType.BRACKET_MARK,
     index,
     length: 1,
-    content: char,
+    value: char,
     spaceAfter: '', // to be finalized
     mark: status.lastMark,
     markSide
@@ -248,7 +259,7 @@ export const finalizeCurrentMark = (
     return
   }
   status.lastMark.endIndex = index
-  status.lastMark.endContent = char
+  status.lastMark.endValue = char
   if (status.markStack.length > 0) {
     status.lastMark = status.markStack.pop()
   } else {
@@ -258,17 +269,17 @@ export const finalizeCurrentMark = (
 
 // normal punctuation
 
-const addNormalPunctuationToken = (
+const addSinglePunctuationToken = (
   status: ParseStatus,
   index: number,
   char: string,
-  type: PunctuationType
+  type: SinglePunctuationType
 ) => {
   const token: SingleToken = {
     type,
     index,
     length: 1,
-    content: char,
+    value: char,
     spaceAfter: '' // to be finalized
   }
   finalizeCurrentToken(status, token)
@@ -283,7 +294,7 @@ const addUnmatchedToken = (
     type: HyperTokenType.UNMATCHED,
     index: i,
     length: 1,
-    content: char,
+    value: char,
     spaceAfter: ''
   }
   finalizeCurrentToken(status, token)
@@ -304,9 +315,9 @@ export const initNewGroup = (
     index,
     spaceAfter: '', // to be finalized
     startIndex: index,
-    startContent: char,
+    startValue: char,
     endIndex: -1, // to be finalized
-    endContent: '', // to be finalized
+    endValue: '', // to be finalized
     innerSpaceBefore: '' // to be finalized
   })
 
@@ -322,9 +333,9 @@ export const finalizeCurrentGroup = (
   char: string
 ) => {
   if (status.lastGroup) {
-    // index, length, content
+    // index, length, value
     status.lastGroup.endIndex = index
-    status.lastGroup.endContent = char
+    status.lastGroup.endValue = char
   }
   if (status.groupStack.length > 0) {
     status.lastGroup = status.groupStack.pop()
@@ -333,26 +344,26 @@ export const finalizeCurrentGroup = (
   }
 }
 
-// content
+// general content
 
 export const initNewContent = (
   status: ParseStatus,
   index: number,
   char: string,
-  type: LettersType
+  type: LetterType
 ) => {
   status.lastToken = {
     type,
     index,
     length: 1, // to be finalized
-    content: char, // to be finalized
+    value: char, // to be finalized
     spaceAfter: '' // to be finalized
   }
 }
 
-export const appendContent = (status: ParseStatus, char: string) => {
+export const appendValue = (status: ParseStatus, char: string) => {
   if (status.lastToken) {
-    status.lastToken.content += char
+    status.lastToken.value += char
     status.lastToken.length++
   }
 }
@@ -410,16 +421,16 @@ export const isShorthand = (
   if (SHORTHAND_CHARS.indexOf(char) < 0) {
     return false
   }
-  if (!status.lastToken || status.lastToken.type !== CharType.LETTERS_HALF) {
+  if (!status.lastToken || status.lastToken.type !== CharType.WESTERN_LETTER) {
     return false
   }
   const nextChar = str[index + 1]
   const nextType = checkCharType(nextChar)
-  if (nextType === CharType.LETTERS_HALF || nextType === CharType.SPACE) {
+  if (nextType === CharType.WESTERN_LETTER || nextType === CharType.SPACE) {
     if (!status.lastGroup) {
       return true
     }
-    if (status.lastGroup.startContent !== SHORTHAND_PAIR_SET[char]) {
+    if (status.lastGroup.startValue !== SHORTHAND_PAIR_SET[char]) {
       return true
     }
   }
@@ -433,14 +444,14 @@ export const getHyperContentType = (content: string): HyperTokenType => {
   }
   if (content.match(/^<code.*>.*<\/code.*>$/)) {
     // Usually it's <code>...</code>.
-    return HyperTokenType.HYPER_CONTENT_CODE
+    return HyperTokenType.CODE_CONTENT
   }
   if (content.match(/^<.+>$/)) {
     // Usually it's other HTML tags.
     return HyperTokenType.HYPER_CONTENT
   }
   // Usually it's `...`.
-  return HyperTokenType.HYPER_CONTENT_CODE
+  return HyperTokenType.CODE_CONTENT
 }
 
 // error handling
@@ -455,14 +466,14 @@ const addError = (
     index,
     length: 0,
     message,
-    target: ValidationTarget.CONTENT
+    target: ValidationTarget.VALUE
   })
 }
 
 export const handleErrors = (status: ParseStatus): void => {
   // record an error if the last mark not fully resolved
   const lastMark = status.lastMark
-  if (lastMark && lastMark.type === MarkType.BRACKETS && !lastMark.endContent) {
+  if (lastMark && lastMark.type === MarkType.BRACKETS && !lastMark.endValue) {
     addError(status, lastMark.startIndex, BRACKET_NOT_CLOSED)
   }
 
@@ -477,14 +488,14 @@ export const handleErrors = (status: ParseStatus): void => {
 
   // record an error if the last group not fully resolved
   const lastGroup = status.lastGroup
-  if (lastGroup && lastGroup.startContent && !lastGroup.endContent) {
+  if (lastGroup && lastGroup.startValue && !lastGroup.endValue) {
     addError(status, lastGroup.startIndex, QUOTE_NOT_CLOSED)
   }
 
   // record an error if `groupStack` not fully resolved
   if (status.groupStack.length > 0) {
     status.groupStack.forEach((group) => {
-      if (group !== lastGroup && group.startContent && !group.endContent) {
+      if (group !== lastGroup && group.startValue && !group.endValue) {
         addError(status, group.startIndex, QUOTE_NOT_CLOSED)
       }
     })

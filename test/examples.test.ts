@@ -59,7 +59,7 @@ describe('combo lint', () => {
     validations.forEach((v) => {
       const { index, length, target } = v
       const finalIndex =
-        target === 'spaceAfter' || target === 'endContent'
+        target === 'spaceAfter' || target === 'endValue'
           ? index + length
           : index
       const { row, column } = parsePosition(input, finalIndex)

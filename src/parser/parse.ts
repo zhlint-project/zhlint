@@ -1,8 +1,9 @@
-import { isLettersType, isPunctuationType } from '.'
 import { Validation } from '../report'
 import { checkCharType } from './char'
 import {
   CharType,
+  isLetterType,
+  isPunctuationType,
   Mark,
   MutableMark,
   MarkMap,
@@ -15,15 +16,15 @@ import {
   GroupToken
 } from './types'
 import {
-  appendContent,
-  addHyperContent,
+  handleLetter,
+  handlePunctuation,
+  appendValue,
+  addRawContent,
   addHyperToken,
   finalizeLastToken,
   getConnectingSpaceLength,
   getHyperMarkMap,
   getPreviousToken,
-  handleContent,
-  handlePunctuation,
   initNewStatus,
   isShorthand,
   handleErrors
@@ -63,15 +64,16 @@ export type MutableParseResult = {
  * Parse a string into several tokens.
  * - half-width content x {1,n} (English words)
  * - full-width content x {1,n} (Chinese sentenses without punctuations in between)
- * - half-width punctuation
- * - width-width punctuation
- * - punctuation pair as special marks: brackets
- * - punctuation pair as a group: quotes
+ * - half-width punctuation -> halfwidth pause or stop punctuation mark
+ * - width-width punctuation -> fullwidth pause or stop punctuation mark
+ * - punctuation pair as special marks: brackets -> bracket
+ * - punctuation pair as a group: quotations -> quotation or book title mark
+ * - -> halfwidth/fullwidth other punctuation mark
  * Besides them there are some special tokens
  * - content-hyper from hyperMarks as input
  * For spaces they would be included as one or multiple successive spaces in
  * - afterSpace after a token or
- * - innerSpaceBefore after the left quote of a group
+ * - innerSpaceBefore after the left quotation of a group
  */
 export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
   // init status and hyper marks
@@ -92,16 +94,16 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
     if (hyperMark) {
       // end the last unfinished token
       finalizeLastToken(status, i)
-      // for hyper mark without startContent
+      // for hyper mark without startValue
       delete hyperMarkMap[i]
       // check the next token
       // - if the mark type is raw
       //   - append next token
-      // - else
-      //   - start mark: append token
-      //   - end mark: append token, append mark
+      // - else (the mark type is hyper)
+      //   - start: append token
+      //   - end hyper mark: append token, append mark
       if (hyperMark.type === MarkType.RAW) {
-        addHyperContent(
+        addRawContent(
           status,
           i,
           str.substring(hyperMark.startIndex, hyperMark.endIndex)
@@ -113,19 +115,19 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
             status,
             i,
             hyperMark,
-            hyperMark.startContent,
+            hyperMark.startValue,
             MarkSideType.LEFT
           )
-          i += hyperMark.startContent.length - 1
+          i += hyperMark.startValue.length - 1
         } else if (i === hyperMark.endIndex) {
           addHyperToken(
             status,
             i,
             hyperMark,
-            hyperMark.endContent,
+            hyperMark.endValue,
             MarkSideType.RIGHT
           )
-          i += hyperMark.endContent.length - 1
+          i += hyperMark.endValue.length - 1
         }
       }
     } else if (type === CharType.SPACE) {
@@ -151,15 +153,15 @@ export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
         }
       }
     } else if (isShorthand(str, status, i, char)) {
-      appendContent(status, char)
+      appendValue(status, char)
     } else if (isPunctuationType(type)) {
       handlePunctuation(i, char, type, status)
-    } else if (isLettersType(type)) {
-      handleContent(i, char, type, status)
+    } else if (isLetterType(type)) {
+      handleLetter(i, char, type, status)
     } else if (type === CharType.EMPTY) {
       // Nothing
     } else {
-      handleContent(i, char, CharType.LETTERS_HALF, status)
+      handleLetter(i, char, CharType.WESTERN_LETTER, status)
     }
   }
   finalizeLastToken(status, str.length)
@@ -179,10 +181,10 @@ const toMutableToken = (token: Token): MutableToken => {
   if (Array.isArray(token)) {
     const mutableToken: MutableGroupToken = token as MutableGroupToken
     mutableToken.modifiedType = token.type
-    mutableToken.modifiedContent = token.content
+    mutableToken.modifiedValue = token.value
     mutableToken.modifiedSpaceAfter = token.spaceAfter
-    mutableToken.modifiedStartContent = token.startContent
-    mutableToken.modifiedEndContent = token.endContent
+    mutableToken.modifiedStartValue = token.startValue
+    mutableToken.modifiedEndValue = token.endValue
     mutableToken.modifiedInnerSpaceBefore = token.innerSpaceBefore
     mutableToken.validations = []
     token.forEach(toMutableToken)
@@ -190,7 +192,7 @@ const toMutableToken = (token: Token): MutableToken => {
   } else {
     const mutableToken: MutableSingleToken = token as MutableSingleToken
     mutableToken.modifiedType = token.type
-    mutableToken.modifiedContent = token.content
+    mutableToken.modifiedValue = token.value
     mutableToken.modifiedSpaceAfter = token.spaceAfter
     mutableToken.validations = []
     return mutableToken
@@ -199,8 +201,8 @@ const toMutableToken = (token: Token): MutableToken => {
 
 const toMutableMark = (mark: Mark): MutableMark => {
   const mutableMark: MutableMark = mark as MutableMark
-  mutableMark.modifiedStartContent = mark.startContent
-  mutableMark.modifiedEndContent = mark.endContent
+  mutableMark.modifiedStartValue = mark.startValue
+  mutableMark.modifiedEndValue = mark.endValue
   return mutableMark
 }
 

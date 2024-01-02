@@ -8,11 +8,11 @@ import genPunctuationUnificationHandler from './punctuation-unification'
 
 import genAbbrsHandler from './case-abbrs'
 
-import genSpaceOfWrapperHandler from './space-wrapper'
+import genSpaceOfHyperMarkHandler from './space-hyper-mark'
 import genSpaceOfCodeHandler from './space-code'
-import genSpaceOfLettersHandler from './space-letters'
+import genSpaceOfLetterHandler from './space-letter'
 import genSpaceOfPunctuationHandler from './space-punctuation'
-import genSpaceOfQuoteHandler from './space-quote'
+import genSpaceOfQuotationHandler from './space-quotation'
 import genSpaceOfBracketHandler from './space-bracket'
 
 import genLinebreakHandler from './case-linebreak'
@@ -28,11 +28,11 @@ const generateHandlers = (options: Options): Handler[] => {
 
     genAbbrsHandler(options),
 
-    genSpaceOfWrapperHandler(options),
+    genSpaceOfHyperMarkHandler(options),
     genSpaceOfCodeHandler(options),
-    genSpaceOfLettersHandler(options),
+    genSpaceOfLetterHandler(options),
     genSpaceOfPunctuationHandler(options),
-    genSpaceOfQuoteHandler(options),
+    genSpaceOfQuotationHandler(options),
     genSpaceOfBracketHandler(options),
     genLinebreakHandler(options),
 
@@ -43,24 +43,24 @@ const generateHandlers = (options: Options): Handler[] => {
 
 export const defaultConfig: Options = {
   noSinglePair: true,
-  halfWidthPunctuation: `()`,
-  fullWidthPunctuation: `，。：；？！“”‘’`,
-  adjustedFullWidthPunctuation: `“”‘’`,
+  halfwidthPunctuation: `()[]{}`,
+  fullwidthPunctuation: `，。：；？！“”‘’`,
+  adjustedFullwidthPunctuation: `“”‘’`,
   unifiedPunctuation: 'simplified',
-  spaceBetweenHalfWidthLetters: true,
-  noSpaceBetweenFullWidthLetters: true,
-  spaceBetweenMixedWidthLetters: true,
-  noSpaceBeforePunctuation: true,
-  spaceAfterHalfWidthPunctuation: true,
-  noSpaceAfterFullWidthPunctuation: true,
-  spaceOutsideHalfQuote: true,
-  noSpaceOutsideFullQuote: true,
-  noSpaceInsideQuote: true,
-  spaceOutsideHalfBracket: true,
-  noSpaceOutsideFullBracket: true,
+  spaceBetweenHalfwidthContent: true,
+  noSpaceBetweenFullwidthContent: true,
+  spaceBetweenMixedwidthContent: true,
+  noSpaceBeforePauseOrStop: true,
+  spaceAfterHalfwidthPauseOrStop: true,
+  noSpaceAfterFullwidthPauseOrStop: true,
+  spaceOutsideHalfwidthQuotation: true,
+  noSpaceOutsideFullwidthQuotation: true,
+  noSpaceInsideQuotation: true,
+  spaceOutsideHalfwidthBracket: true,
+  noSpaceOutsideFullwidthBracket: true,
   noSpaceInsideBracket: true,
   spaceOutsideCode: true,
-  noSpaceInsideWrapper: true,
+  noSpaceInsideHyperMark: true,
   trimSpace: true,
   skipZhUnits: `年月日天号时分秒`,
   skipAbbrs: [

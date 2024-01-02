@@ -185,7 +185,7 @@ run(str, { ignoredCases: { textStart: '( ', textEnd: ' )' } })
 
 ## 支持的规则
 
-_大多数规则都提炼自过往 [W3C HTML 中文兴趣组](https://www.w3.org/html/ig/zh/wiki/Main_Page)和 [Vue.js 中文文档](https://github.com/vuejs/cn.vuejs.org/wiki)的翻译经验。_
+_大多数规则都提炼自过往 [W3C 中文排版需求](https://www.w3.org/International/clreq/)、[W3C HTML 中文兴趣组](https://www.w3.org/html/ig/zh/wiki/Main_Page)和 [Vue.js 中文文档](https://github.com/vuejs/cn.vuejs.org/wiki)的翻译经验。_
 
 _……这些规则也许存在争议。所以如果你对某些规则不够满意，我们非常希望得到大家的反馈和改进建议。我们也一直欢迎大家来创建 [issue](https://github.com/jinjiang/zhlint/issues)，以讨论出可能更好的规则。_
 
@@ -209,6 +209,13 @@ type RuleOptions = {
   // e.g. `文字,文字.` -> `文字，文字。`
   fullWidthPunctuation?: string
 
+  // Treat these full-width punctuations as half-fullWidthPunctuation
+  // when processing the spaces issues around them.
+  // Since something like quotations in morder Chinese fonts are
+  // only rendered in half-width.
+  // default preset: `“”‘’`
+  adjustedFullWidthPunctuation?: string
+
   // Convert traditional Chinese punctuations into simplified ones or vice versa.
   // default preset: `simplified`
   // e.g. `「文字」` -> `“文字”`
@@ -219,19 +226,19 @@ type RuleOptions = {
   // `['Mr.','Mrs.','Dr.','Jr.','Sr.','vs.','etc.','i.e.','e.g.','a.k.a']`
   skipAbbrs?: string[]
 
-  /* SPACES AROUND CONTENT */
+  /* SPACES AROUND LETTERS */
 
   // default preset: `true`
   // - `true`: one space
   // - `undefined`: do nothing
   // e.g. `foo  bar` -> `foo bar`
-  spaceBetweenHalfWidthContent?: boolean
+  spaceBetweenHalfWidthLetters?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文 字` -> `文字`
-  noSpaceBetweenFullWidthContent?: boolean
+  noSpaceBetweenFullWidthLetters?: boolean
 
   // default preset: `true`
   // - `true`: one space
@@ -239,7 +246,7 @@ type RuleOptions = {
   // - `undefined`: do nothing
   // e.g. `文字 foo文字` -> `文字 foo 文字` (`true`)
   // e.g. `文字foo 文字` -> `文字foo文字` (`false`)
-  spaceBetweenMixedWidthContent?: boolean
+  spaceBetweenMixedWidthLetters?: boolean
 
   // Special case: skip `spaceBetweenMixedWidthContent`
   // for numbers x Chinese units.
@@ -318,13 +325,13 @@ type RuleOptions = {
   // e.g. '文字`code` 文字' -> '文字`code`文字' ('false')
   spaceOutsideCode?: boolean
 
-  /* SPACES AROUND MARKDOWN/HTML TAGS */
+  /* SPACES AROUND MARKDOWN/HTML WRAPPERS */
 
   // default `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字** foo **文字` -> `文字 **foo** 文字`
-  noSpaceInsideMark?: boolean
+  noSpaceInsideWrapper?: boolean
 
   /* SPACES AT THE BEGINNING/END */
 
@@ -333,3 +340,4 @@ type RuleOptions = {
   trimSpace?: boolean
 }
 ```
+

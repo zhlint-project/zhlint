@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue';
+import { Ref, computed, inject } from 'vue';
 
 const TOKEN_TYPE_MAP = {
   '': '',
-  'letters-half': 'English letters',
-  'letters-full': 'Chinese characters',
-  'punctuation-half': 'Half-width punctuation',
-  'punctuation-full': 'Full-width punctuation',
+  'western-letter': 'Wester letters and numbers',
+  'cjk-char': 'CJK characters',
+  'halfwidth-pause-or-stop': 'Half-width punctuation',
+  'fullwidth-pause-or-stop': 'Full-width punctuation',
+  'halfwidth-other-punctuation': 'Half-width punctuation',
+  'fullwidth-other-punctuation': 'Full-width punctuation',
+  'hyper-mark': 'Non-content',
   'hyper-content': 'Non-content',
-  'hyper-content-code': 'Code',
-  'wrapper-bracket': 'Bracket',
-  'group': 'Quote',
+  'code-content': 'Code',
+  'bracket-mark': 'Bracket',
+  'group': 'Quotation',
+  'unmatched': 'Unpaired bracket/quotation',
   'non-block': 'Non-content',
 }
 const PROP_MAP = {
@@ -19,35 +23,35 @@ const PROP_MAP = {
   //   ignored: 'ignoredType',
   //   label: 'Type',
   // },
-  content: {
-    modified: 'modifiedContent',
-    ignored: 'ignoredContent',
-    label: 'Content',
+  value: {
+    modified: 'modifiedValue',
+    ignored: 'ignoredValue',
+    label: 'Value',
   },
   spaceAfter: {
     modified: 'modifiedSpaceAfter',
     ignored: 'ignoredSpaceAfter',
     label: 'Space After',
   },
-  startContent: {
-    modified: 'modifiedStartContent',
-    ignored: 'ignoredStartContent',
-    label: 'Left Quote',
+  startValue: {
+    modified: 'modifiedStartValue',
+    ignored: 'ignoredStartValue',
+    label: 'Left Quotation',
   },
   innerSpaceBefore: {
     modified: 'modifiedInnerSpaceBefore',
     ignored: 'ignoredInnerSpaceBefore',
-    label: 'Inner Left Space in Quotes',
+    label: 'Inner Left Space in Quotations',
   },
-  endContent: {
-    modified: 'modifiedEndContent',
-    ignored: 'ignoredEndContent',
-    label: 'Right Quote',
+  endValue: {
+    modified: 'modifiedEndValue',
+    ignored: 'ignoredEndValue',
+    label: 'Right Quotation',
   },
 }
 
-const current = inject('current')
-const currentProp = inject('currentProp')
+const current = inject<Ref<any>>('current')
+const currentProp = inject<Ref<string>>('currentProp')
 
 const checkSpace = prop => prop === 'spaceAfter' || prop === 'innerSpaceBefore'
 
@@ -67,7 +71,7 @@ const checkType = (data, prop) => {
 
 const checkProp = (data, prop) => {
   if (!data || !prop) {
-    return { desc: 'click the tokens in "Origin" or "Modified" to see more details' }
+    return { desc: 'click the tokens in "Origin" or "Formatted" to see more details' }
   }
   const { modified, ignored } = PROP_MAP[prop]
   console.log(data, prop, modified, ignored, data[modified] === data[prop], ignored in data)

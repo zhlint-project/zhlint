@@ -84,6 +84,7 @@
     "remark-frontmatter": "^1.3.2",
     "remark-parse": "^7.0.2",
     "unified": "^8.4.2",
-    "vitest": "^0.21.1"
+    "vitest": "^0.21.1",
+    "vue": "^3.4.3"
   }
 }

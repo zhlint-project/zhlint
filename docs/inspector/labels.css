@@ -1,22 +1,25 @@
-.letters-half {
+.western-letter {
   color: #ff0000;
 }
 
-.letters-full {
+.cjk-char {
   color: #0000ff;
 }
 
-.punctuation-half,
-.punctuation-full,
-.quote-start-content,
-.quote-end-content,
-.wrapper-brackets {
+.halfwidth-pause-or-stop,
+.fullwidth-pause-or-stop,
+.halfwidth-other-punctuation,
+.fullwidth-other-punctuation,
+.quotation-start-value,
+.quotation-end-value,
+.bracket-mark {
   color: #660066;
 }
 
 .non-block,
+.hyper-mark,
 .hyper-content,
-.hyper-content-code {
+.code-content {
   color: #666666;
 }
 

@@ -17,12 +17,12 @@ try {
 }
 
 const parser = (data: ParsedStatus): ParsedStatus => {
-  data.modifiedContent = data.modifiedContent.replace(
+  data.modifiedValue = data.modifiedValue.replace(
     matcher,
     (
       raw: string,
       start: string,
-      content: string,
+      value: string,
       end: string,
       index: number
     ) => {
@@ -32,17 +32,17 @@ const parser = (data: ParsedStatus): ParsedStatus => {
         name,
         index,
         length: start.length,
-        originContent: start,
+        originValue: start,
         meta: `vuepress-${name}-start`
       })
       data.ignoredByParsers.push({
         name,
         index: index + length - 3,
         length: 3,
-        originContent: end,
+        originValue: end,
         meta: `vuepress-${name}-end`
       })
-      return '@'.repeat(start.length) + '\n' + content + '\n' + '@'.repeat(3)
+      return '@'.repeat(start.length) + '\n' + value + '\n' + '@'.repeat(3)
     }
   )
   return data

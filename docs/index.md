@@ -285,7 +285,7 @@ If you want to ignore the whole file, you can also add this HTML comment:
 
 ## Supported rules
 
-_Almost the rules come from the past translation experiences in [W3C HTML Chinese interest group](https://www.w3.org/html/ig/zh/wiki/Main_Page) and [Vue.js Chinese docsite](https://github.com/vuejs/cn.vuejs.org/wiki)._
+_Almost the rules come from the past translation experiences in [W3C Requirements for Chinese Text Layout](https://www.w3.org/International/clreq/), [W3C HTML Chinese interest group](https://www.w3.org/html/ig/zh/wiki/Main_Page) and [Vue.js Chinese docsite](https://github.com/vuejs/cn.vuejs.org/wiki)._
 
 _... and this part might be controversial. So if you don't feel well at some point, we definitely would love to know and improve. Opening an [issue](https://github.com/jinjiang/zhlint/issues) is always welcome. Then we could discuss about the possible better option or decision._
 
@@ -311,7 +311,7 @@ type RuleOptions = {
 
   // Treat these full-width punctuations as half-fullWidthPunctuation
   // when processing the spaces issues around them.
-  // Since something like quotes in morder Chinese fonts are
+  // Since something like quotations in morder Chinese fonts are
   // only rendered in half-width.
   // default preset: `“”‘’`
   adjustedFullWidthPunctuation?: string
