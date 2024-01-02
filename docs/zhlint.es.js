@@ -8368,11 +8368,7 @@ const generateHandler$b = (options) => {
         PUNCTUATION_FULL_WIDTH
       );
     } else if (halfwidthMap[endValue]) {
-      checkEndValue(
-        token,
-        halfwidthMap[endValue][1],
-        PUNCTUATION_HALF_WIDTH
-      );
+      checkEndValue(token, halfwidthMap[endValue][1], PUNCTUATION_HALF_WIDTH);
     }
   };
   return handleHyperSpaceOption;
@@ -8441,15 +8437,28 @@ const generateHandler$a = (options) => {
   const handlerPunctuationUnified = (token) => {
     if (token.type === GroupTokenType.GROUP) {
       if (charMap[token.modifiedStartValue]) {
-        checkStartValue(token, charMap[token.modifiedStartValue], PUNCTUATION_UNIFICATION);
+        checkStartValue(
+          token,
+          charMap[token.modifiedStartValue],
+          PUNCTUATION_UNIFICATION
+        );
       }
       if (charMap[token.modifiedEndValue]) {
-        checkEndValue(token, charMap[token.modifiedEndValue], PUNCTUATION_UNIFICATION);
+        checkEndValue(
+          token,
+          charMap[token.modifiedEndValue],
+          PUNCTUATION_UNIFICATION
+        );
       }
       return;
     } else {
       if (charMap[token.modifiedValue]) {
-        checkValue(token, charMap[token.modifiedValue], void 0, PUNCTUATION_UNIFICATION);
+        checkValue(
+          token,
+          charMap[token.modifiedValue],
+          void 0,
+          PUNCTUATION_UNIFICATION
+        );
       }
     }
   };
@@ -9229,7 +9238,13 @@ const join = (tokens, offset = 0, ignoredMarks = [], ignoredTokens = [], validat
     ignoredTokens.push(tokens);
   }
   if (!isChild) {
-    recordValidations(tokens, offset, ignoredFlags, validations, ignoredValidations);
+    recordValidations(
+      tokens,
+      offset,
+      ignoredFlags,
+      validations,
+      ignoredValidations
+    );
   }
   if (ignoredFlags[ValidationTarget.START_VALUE]) {
     tokens.ignoredStartValue = tokens.modifiedStartValue;
@@ -9255,7 +9270,13 @@ const join = (tokens, offset = 0, ignoredMarks = [], ignoredTokens = [], validat
       if (subIgnoredFlags.ignored) {
         ignoredTokens.push(token);
       }
-      recordValidations(token, offset, subIgnoredFlags, validations, ignoredValidations);
+      recordValidations(
+        token,
+        offset,
+        subIgnoredFlags,
+        validations,
+        ignoredValidations
+      );
       if (!Array.isArray(token)) {
         if (subIgnoredFlags[ValidationTarget.VALUE]) {
           token.ignoredValue = token.modifiedValue;
@@ -9265,12 +9286,17 @@ const join = (tokens, offset = 0, ignoredMarks = [], ignoredTokens = [], validat
           token.ignoredSpaceAfter = token.modifiedSpaceAfter;
           token.modifiedSpaceAfter = token.spaceAfter;
         }
-        return [
-          token.modifiedValue,
-          token.modifiedSpaceAfter
-        ].filter(Boolean).join("");
+        return [token.modifiedValue, token.modifiedSpaceAfter].filter(Boolean).join("");
       }
-      return join(token, offset, ignoredMarks, ignoredTokens, validations, ignoredValidations, true);
+      return join(
+        token,
+        offset,
+        ignoredMarks,
+        ignoredTokens,
+        validations,
+        ignoredValidations,
+        true
+      );
     }),
     tokens.modifiedEndValue,
     tokens.modifiedSpaceAfter
@@ -9278,7 +9304,10 @@ const join = (tokens, offset = 0, ignoredMarks = [], ignoredTokens = [], validat
 };
 const replaceBlocks = (str, blocks) => {
   if (blocks.length === 0) {
-    return { value: str, pieces: [{ value: str, start: 0, end: str.length, nonBlock: true }] };
+    return {
+      value: str,
+      pieces: [{ value: str, start: 0, end: str.length, nonBlock: true }]
+    };
   }
   const pieces = blocks.reduce((pieces2, block, index2) => {
     const { start, end } = block;
@@ -9366,7 +9395,14 @@ const lint = (str, normalizedOptions) => {
       ruleHandlers.forEach((rule) => {
         travel(result2.tokens, rule);
       });
-      lastValue = join(result2.tokens, start, ignoredMarks, ignoredTokens, ruleErrors, ignoredRuleErrors);
+      lastValue = join(
+        result2.tokens,
+        start,
+        ignoredMarks,
+        ignoredTokens,
+        ruleErrors,
+        ignoredRuleErrors
+      );
       return {
         ...result2,
         start,
