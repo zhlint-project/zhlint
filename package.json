@@ -1,6 +1,6 @@
 {
   "name": "zhlint",
-  "version": "0.7.0",
+  "version": "0.7.2",
   "description": "A linting tool for Chinese language.",
   "bin": {
     "zhlint": "./bin/index.js"
@@ -30,7 +30,9 @@
     "lint:fix": "prettier --write .",
     "lint:eslint": "eslint {src,test,types}/**.ts",
     "lint:eslint:fix": "eslint {src,test,types}/**.ts --fix",
-    "test": "vitest run",
+    "test": "pnpm run test:tsc && pnpm run test:vitest",
+    "test:tsc": "tsc --noEmit",
+    "test:vitest": "vitest run",
     "coverage": "vitest run --coverage",
     "docs": "vitepress dev docs",
     "docs:readme": "node scripts/gen-readme.mjs",
@@ -82,6 +84,7 @@
     "remark-frontmatter": "^1.3.2",
     "remark-parse": "^7.0.2",
     "unified": "^8.4.2",
-    "vitest": "^0.21.1"
+    "vitest": "^0.21.1",
+    "vue": "^3.4.3"
   }
 }

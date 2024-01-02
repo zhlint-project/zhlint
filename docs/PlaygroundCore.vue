@@ -5,8 +5,12 @@ let timer
 </script>
 
 <script setup>
+// Experimental
+import Inspector from './inspector/inspector.vue'
+
 const input = ref('自动在中文和English之间加入空格')
 const output = ref('Report:')
+const data = ref()
 
 const rows = ref(10)
 
@@ -18,6 +22,7 @@ const lint = () => {
     error: (x) => outputValues.push(x)
   })
   output.value = 'Report:\n\n' + outputValues.join('\n')
+  data.value = result
 }
 
 const resize = () => {
@@ -33,10 +38,10 @@ const inputUpdate = () => {
   timer = setTimeout(lint, 1000)
 }
 
-const format = () => {
-  input.value = run(input.value, { rules: { preset: 'default' } }).result
-  lint()
-}
+// const format = () => {
+//   input.value = run(input.value, { rules: { preset: 'default' } }).result
+//   lint()
+// }
 
 onMounted(() => {
   lint()
@@ -46,8 +51,10 @@ onMounted(() => {
 <template>
   <div class="container">
     <textarea v-model="input" :rows="rows" @input="inputUpdate"></textarea>
-    <button @click="format">Format</button>
+    <!-- <button @click="format">Format</button> -->
     <pre>{{ output }}</pre>
+    <!-- Experimental -->
+    <Inspector v-if="data" :data="data" />
   </div>
 </template>
 

@@ -9,7 +9,7 @@ import {
   MARKDOWN_NOSPACE_INSIDE,
   PUNCTUATION_FULL_WIDTH,
   PUNCTUATION_NOSPACE_BEFORE,
-  PUNCTUATION_UNIFICATION_SIMPLIFIED,
+  PUNCTUATION_UNIFICATION,
   QUOTE_NOSPACE_INSIDE
 } from '../src/rules/messages'
 
@@ -30,7 +30,7 @@ describe('lint by rules', () => {
   })
   test('[hyper-mark] the position of spaces around hyper marks (if any)', () => {
     const options: Options = {
-      rules: { noSpaceInsideWrapper: true }
+      rules: { noSpaceInsideHyperMark: true }
     }
     expect(lint('x ** yyy ** z', options)).toEqual({
       output: 'x **yyy** z',
@@ -146,8 +146,8 @@ describe('lint by rules', () => {
   test('[punctuation-width] format each punctuation into the right width options', () => {
     const options = {
       rules: {
-        halfWidthPunctuation: `()`,
-        fullWidthPunctuation: `，。：；？！“”‘’`
+        halfwidthPunctuation: `()`,
+        fullwidthPunctuation: `，。：；？！“”‘’`
       }
     }
     expect(lint('你好,再见.', options)).toEqual({
@@ -155,12 +155,12 @@ describe('lint by rules', () => {
       warnings: [
         {
           index: 3,
-          target: ValidationTarget.CONTENT,
+          target: ValidationTarget.VALUE,
           message: PUNCTUATION_FULL_WIDTH
         },
         {
           index: 6,
-          target: ValidationTarget.CONTENT,
+          target: ValidationTarget.VALUE,
           message: PUNCTUATION_FULL_WIDTH
         }
       ]
@@ -170,7 +170,7 @@ describe('lint by rules', () => {
     expect(getOutput('你"好",再见.', options)).toBe('你“好”，再见。')
     expect(getOutput('"你\'好\'",再见.', options)).toBe('“你‘好’”，再见。')
 
-    // keep the single quote between half-width content without spaces
+    // keep the single quotation between half-width content without spaces
     expect(getOutput("what's up", options)).toBe("what's up")
   })
   describe('[punctuation-unification] unify the punctuation choices', () => {
@@ -190,23 +190,23 @@ describe('lint by rules', () => {
         warnings: [
           {
             index: 4,
-            target: ValidationTarget.START_CONTENT,
-            message: PUNCTUATION_UNIFICATION_SIMPLIFIED
+            target: ValidationTarget.START_VALUE,
+            message: PUNCTUATION_UNIFICATION
           },
           {
             index: 34,
-            target: ValidationTarget.END_CONTENT,
-            message: PUNCTUATION_UNIFICATION_SIMPLIFIED
+            target: ValidationTarget.END_VALUE,
+            message: PUNCTUATION_UNIFICATION
           },
           {
             index: 14,
-            target: ValidationTarget.START_CONTENT,
-            message: PUNCTUATION_UNIFICATION_SIMPLIFIED
+            target: ValidationTarget.START_VALUE,
+            message: PUNCTUATION_UNIFICATION
           },
           {
             index: 29,
-            target: ValidationTarget.END_CONTENT,
-            message: PUNCTUATION_UNIFICATION_SIMPLIFIED
+            target: ValidationTarget.END_VALUE,
+            message: PUNCTUATION_UNIFICATION
           }
         ]
       })
@@ -228,7 +228,7 @@ describe('lint by rules', () => {
   describe('[space-content] the space between content', () => {
     test('one and only one space between half-width content', () => {
       const options: Options = {
-        rules: { spaceBetweenHalfWidthLetters: true }
+        rules: { spaceBetweenHalfwidthContent: true }
       }
       expect(lint('foo bar   baz', options)).toEqual({
         output: 'foo bar baz',
@@ -243,13 +243,13 @@ describe('lint by rules', () => {
     })
     test('no space between full-width content', () => {
       const options: Options = {
-        rules: { noSpaceBetweenFullWidthLetters: true }
+        rules: { noSpaceBetweenFullwidthContent: true }
       }
       expect(getOutput('中文 中文 中 文', options)).toBe('中文中文中文')
     })
     test('one space between mixed-width content', () => {
       const options: Options = {
-        rules: { spaceBetweenMixedWidthLetters: true }
+        rules: { spaceBetweenMixedwidthContent: true }
       }
       expect(getOutput('中文foo 中文 foo中foo文', options)).toBe(
         '中文 foo 中文 foo 中 foo 文'
@@ -257,7 +257,7 @@ describe('lint by rules', () => {
     })
     test('no space between mixed-width content', () => {
       const options: Options = {
-        rules: { spaceBetweenMixedWidthLetters: false }
+        rules: { spaceBetweenMixedwidthContent: false }
       }
       expect(getOutput('中文foo 中文 foo中foo文', options)).toBe(
         '中文foo中文foo中foo文'
@@ -267,7 +267,7 @@ describe('lint by rules', () => {
   describe('[space-punctuation] the space between content and punctuation', () => {
     test('no space before punctuation', () => {
       const options: Options = {
-        rules: { noSpaceBeforePunctuation: true }
+        rules: { noSpaceBeforePauseOrStop: true }
       }
       expect(lint('中文 , 一. 二 ；三。四', options)).toEqual({
         output: '中文, 一. 二；三。四',
@@ -295,7 +295,7 @@ describe('lint by rules', () => {
     })
     test('one space after half-width punctuation', () => {
       const options: Options = {
-        rules: { spaceAfterHalfWidthPunctuation: true }
+        rules: { spaceAfterHalfwidthPauseOrStop: true }
       }
       expect(getOutput('中文, 中文.中； 文。中文', options)).toBe(
         '中文, 中文. 中； 文。中文'
@@ -305,7 +305,7 @@ describe('lint by rules', () => {
     })
     test('no space after full-width punctuation', () => {
       const options: Options = {
-        rules: { noSpaceAfterFullWidthPunctuation: true }
+        rules: { noSpaceAfterFullwidthPauseOrStop: true }
       }
       expect(getOutput('中文, 中文.中； 文。中文', options)).toBe(
         '中文, 中文.中；文。中文'
@@ -314,11 +314,11 @@ describe('lint by rules', () => {
       expect(getOutput('一。 “ 二 ” 。 三', options)).toBe('一。“ 二 ” 。三')
     })
   })
-  describe('[space-quote] the space around quotes', () => {
+  describe('[space-quote] the space around quotations', () => {
     test('no space inside', () => {
       const options: Options = {
         rules: {
-          noSpaceInsideQuote: true
+          noSpaceInsideQuotation: true
         }
       }
       expect(lint('foo " bar " baz', options)).toEqual({
@@ -338,10 +338,10 @@ describe('lint by rules', () => {
       })
       expect(getOutput('foo “ bar ” baz', options)).toBe('foo “bar” baz')
     })
-    test('one space outside half quote', () => {
+    test('one space outside half quotation', () => {
       const options: Options = {
         rules: {
-          spaceOutsideHalfQuote: true
+          spaceOutsideHalfwidthQuotation: true
         }
       }
       expect(getOutput('foo " bar " baz', options)).toBe('foo " bar " baz')
@@ -350,20 +350,20 @@ describe('lint by rules', () => {
       // TODO: no space besides content?
       expect(getOutput('一 " 二 " 三', options)).toBe('一 " 二 " 三')
     })
-    test('no space outside half quote', () => {
+    test('no space outside half quotation', () => {
       const options: Options = {
         rules: {
-          spaceOutsideHalfQuote: false
+          spaceOutsideHalfwidthQuotation: false
         }
       }
       expect(getOutput('foo " bar " baz', options)).toBe('foo" bar "baz')
       expect(getOutput('一 " 二 " 三', options)).toBe('一" 二 "三')
       expect(getOutput('一 “ 二 ” 三', options)).toBe('一 “ 二 ” 三')
     })
-    test('no space outside full quote', () => {
+    test('no space outside full quotation', () => {
       const options: Options = {
         rules: {
-          noSpaceOutsideFullQuote: true
+          noSpaceOutsideFullwidthQuotation: true
         }
       }
       expect(getOutput('一 “ 二 ” 三', options)).toBe('一“ 二 ”三')
@@ -400,7 +400,7 @@ describe('lint by rules', () => {
     })
     test('one space outside', () => {
       const options: Options = {
-        rules: { spaceOutsideHalfBracket: true }
+        rules: { spaceOutsideHalfwidthBracket: true }
       }
       expect(getOutput('foo ( bar ) baz', options)).toBe('foo ( bar ) baz')
 
@@ -409,14 +409,14 @@ describe('lint by rules', () => {
     })
     test('one space outside', () => {
       const options: Options = {
-        rules: { noSpaceOutsideFullBracket: true }
+        rules: { noSpaceOutsideFullwidthBracket: true }
       }
       // expect(getOutput('foo（bar）baz', options)).toBe('foo（bar）baz')
       expect(getOutput('foo （ bar ） baz', options)).toBe('foo（ bar ）baz')
     })
     test('no space outside', () => {
       const options: Options = {
-        rules: { spaceOutsideHalfBracket: false }
+        rules: { spaceOutsideHalfwidthBracket: false }
       }
       expect(getOutput('foo(bar)baz', options)).toBe('foo(bar)baz')
       expect(getOutput('foo ( bar ) baz', options)).toBe('foo( bar )baz')
@@ -447,6 +447,10 @@ describe('lint by cases', () => {
     expect(getOutput('2019年06月26号 2019-06-26 12:00', options)).toBe(
       '2019年06月26号 2019-06-26 12:00'
     )
+    expect(getOutput('1《测试》2【测试】3「测试」4（测试）', options)).toBe(
+      '1《测试》2【测试】3 “测试” 4 (测试)'
+    )
+    expect(getOutput('1？2！', options)).toBe('1？2！')
   })
   test('[case-abbrs]', () => {
     expect(getOutput('运行时 + 编译器 vs. 只包含运行时', options)).toBe(
@@ -488,7 +492,7 @@ describe('lint by cases', () => {
   test('[case] plural brackets', () => {
     expect(getOutput('3 minite(s) left', options)).toBe('3 minite(s) left')
   })
-  test('[case] single quote for shorthand', () => {
+  test('[case] single quotation for shorthand', () => {
     expect(getOutput(`how many user's here`, options)).toBe(
       `how many user's here`
     )

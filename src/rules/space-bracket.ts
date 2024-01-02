@@ -26,8 +26,8 @@ import {
   CharType,
   GroupTokenType,
   Handler,
-  isLettersType,
-  isFullWidthPair,
+  isLetterType,
+  isFullwidthPair,
   MarkSideType,
   MutableGroupToken,
   MutableSingleToken,
@@ -50,7 +50,7 @@ import {
 } from './messages'
 
 const isFullWidth = (char: string, adjusted: string): boolean => {
-  return isFullWidthPair(char) && adjusted.indexOf(char) === -1
+  return isFullwidthPair(char) && adjusted.indexOf(char) === -1
 }
 
 const shouldSkip = (
@@ -63,10 +63,7 @@ const shouldSkip = (
   if (!before || !after) {
     return false
   }
-  if (
-    isFullWidthPair(token.content) ||
-    isFullWidthPair(token.modifiedContent)
-  ) {
+  if (isFullwidthPair(token.value) || isFullwidthPair(token.modifiedValue)) {
     return false
   }
   if (
@@ -78,28 +75,28 @@ const shouldSkip = (
   return (
     // x(x
     //  ^
-    (before.type === CharType.LETTERS_HALF ||
+    (before.type === CharType.WESTERN_LETTER ||
       // x()
       //  ^
-      (before.content === '(' && token.content === ')')) &&
+      (before.value === '(' && token.value === ')')) &&
     // x)x
     //  ^
-    (after.type === CharType.LETTERS_HALF ||
+    (after.type === CharType.WESTERN_LETTER ||
       // ()x
       //  ^
-      (token.content === '(' && after.content === ')'))
+      (token.value === '(' && after.value === ')'))
   )
 }
 
 const generateHandler = (options: Options): Handler => {
   const noInsideBracketOption = options.noSpaceInsideBracket
-  const spaceOutsideHalfBracketOption = options.spaceOutsideHalfBracket
-  const noSpaceOutsideFullBracketOption = options.noSpaceOutsideFullBracket
-  const adjustedFullWidthOption = options.adjustedFullWidthPunctuation || ''
+  const spaceOutsideHalfBracketOption = options.spaceOutsideHalfwidthBracket
+  const noSpaceOutsideFullBracketOption = options.noSpaceOutsideFullwidthBracket
+  const adjustedFullWidthOption = options.adjustedFullwidthPunctuation || ''
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-bracket tokens
-    if (token.type !== HyperTokenType.HYPER_WRAPPER_BRACKET) {
+    if (token.type !== HyperTokenType.BRACKET_MARK) {
       return
     }
 
@@ -150,7 +147,7 @@ const generateHandler = (options: Options): Handler => {
       noSpaceOutsideFullBracketOption
     ) {
       const fullWidth = isFullWidth(
-        token.modifiedContent,
+        token.modifiedValue,
         adjustedFullWidthOption
       )
 
@@ -164,7 +161,7 @@ const generateHandler = (options: Options): Handler => {
             const hasFullWidth =
               fullWidth ||
               isFullWidth(
-                contentTokenAfter.modifiedContent,
+                contentTokenAfter.modifiedValue,
                 adjustedFullWidthOption
               )
 
@@ -195,9 +192,9 @@ const generateHandler = (options: Options): Handler => {
       if (token.markSide === MarkSideType.LEFT) {
         if (
           contentTokenBefore &&
-          (isLettersType(contentTokenBefore.type) ||
+          (isLetterType(contentTokenBefore.type) ||
             contentTokenBefore.type === GroupTokenType.GROUP ||
-            contentTokenBefore.type === HyperTokenType.HYPER_CONTENT_CODE)
+            contentTokenBefore.type === HyperTokenType.CODE_CONTENT)
         ) {
           if (beforeSpaceHost) {
             // 2.2.1 content/right-quote/code x left-full-bracket
@@ -206,7 +203,7 @@ const generateHandler = (options: Options): Handler => {
               fullWidth ||
               (contentTokenBefore.type === GroupTokenType.GROUP &&
                 isFullWidth(
-                  contentTokenBefore.modifiedEndContent,
+                  contentTokenBefore.modifiedEndValue,
                   adjustedFullWidthOption
                 ))
             ) {
@@ -227,9 +224,9 @@ const generateHandler = (options: Options): Handler => {
       } else {
         if (
           contentTokenAfter &&
-          (isLettersType(contentTokenAfter.type) ||
+          (isLetterType(contentTokenAfter.type) ||
             contentTokenAfter.type === GroupTokenType.GROUP ||
-            contentTokenAfter.type === HyperTokenType.HYPER_CONTENT_CODE)
+            contentTokenAfter.type === HyperTokenType.CODE_CONTENT)
         ) {
           if (afterSpaceHost) {
             // 2.3.1 right-full-bracket x content/left-quote/code
@@ -238,7 +235,7 @@ const generateHandler = (options: Options): Handler => {
               fullWidth ||
               (contentTokenAfter.type === GroupTokenType.GROUP &&
                 isFullWidth(
-                  contentTokenAfter.modifiedStartContent,
+                  contentTokenAfter.modifiedStartValue,
                   adjustedFullWidthOption
                 ))
             ) {

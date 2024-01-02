@@ -27,7 +27,7 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // make sure it's the whole string
-    if (!group.startContent && index === 0) {
+    if (!group.startValue && index === 0) {
       // remove inner space before
       if (group.modifiedInnerSpaceBefore) {
         checkInnerSpaceBefore(group, '', TRIM_SPACE)

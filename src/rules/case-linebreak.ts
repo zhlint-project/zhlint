@@ -3,9 +3,9 @@
  *
  * This rule is used to revert changes of spaceAfter with linebreaks.
  * And it's compulsory.
- *
- * TODO: better blockquote and indentation handling in markdown
  */
+
+// TODO: better blockquote and indentation handling in markdown
 
 import { Handler, MutableToken } from '../parser'
 import { ValidationTarget } from '../report'

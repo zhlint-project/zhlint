@@ -1,17 +1,33 @@
-import { Block, ParsedStatus } from './hypers/types'
-import { Validation } from './report'
-import { IgnoredMark } from './ignore'
-import { NormalizedOptions, Options } from './options'
-import { Config } from './rc'
+import type {
+  ParsedBlock,
+  ParsedStatus,
+  ParserIgnoredCase
+} from './hypers/types'
+import type { Validation } from './report'
+import type { NormalizedOptions, Options } from './options'
+import type { Config } from './rc'
+import type { IgnoredCase } from './ignore'
+import type { Piece } from './replace-block'
 
 import { normalizeOptions, normalizeConfig } from './options'
-import { parse, toMutableResult, travel } from './parser'
+import { MutableToken, parse, toMutableResult, travel } from './parser'
 import generateHandlers from './rules'
 import findIgnoredMarks from './ignore'
 import join from './join'
 import replaceBlocks from './replace-block'
 
-export { Options } from './options'
+export type { Options } from './options'
+
+export type DebugInfo = {
+  pieces: Piece[]
+  blocks: ParsedBlock[]
+  ignoredCases: IgnoredCase[]
+  ignoredByParsers: ParserIgnoredCase[]
+  ignoredTokens: MutableToken[]
+  parserErrors: Validation[]
+  ruleErrors: Validation[]
+  ignoredRuleErrors: Validation[]
+}
 
 export type Result = {
   file?: string
@@ -19,6 +35,7 @@ export type Result = {
   origin: string
   result: string
   validations: Validation[]
+  __debug__?: DebugInfo
 }
 
 export const run = (str: string, options: Options = {}): Result => {
@@ -44,8 +61,8 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
   // str -> ignoredByRules, ignoredByParsers
   // blocks -> marks, ignoredMarks
   const status: ParsedStatus = {
-    content: str,
-    modifiedContent: str,
+    value: str,
+    modifiedValue: str,
     ignoredByRules: ignoredCases,
     ignoredByParsers: [],
     blocks: [
@@ -58,9 +75,10 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
     ]
   }
 
+  const ignoredTokens: MutableToken[] = []
   const parserErrors: Validation[] = []
   const ruleErrors: Validation[] = []
-  const allIgnoredMarks: IgnoredMark[] = []
+  const ignoredRuleErrors: Validation[] = []
 
   // Run all the hyper parsers
   const parsedStatus = hyperParse.reduce(
@@ -71,19 +89,21 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
   // 1. Parse each block without ignoredByParsers
   // 2. Parse all ignoredByRules into marks for each block
   // 3. Run all rule processes for each block
-  // 4. Push all ignored marks into allIgnoredMarks for each block
-  // 5. Join all tokens with ignoredMarks and all errors for each block
-  // 6. Replace each block back to the string
+  // 4. Join all tokens with ignoredMarks and all errors for each block
+  // 5. Replace each block back to the string
   const ruleHandlers = generateHandlers(rules)
-  const modifiedBlocks: Block[] = parsedStatus.blocks.map(
+  const modifiedBlocks: ParsedBlock[] = parsedStatus.blocks.map(
     ({ value, marks, start, end }) => {
       let lastValue = value
+
       if (globalThis.__DEV__) {
         logger.log('[Original block value]')
         logger.log(lastValue)
       }
+
       const result = toMutableResult(parse(value, marks), rules)
       parserErrors.push(...result.errors)
+
       const ignoredMarks = findIgnoredMarks(
         value,
         status.ignoredByRules,
@@ -93,7 +113,14 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
       ruleHandlers.forEach((rule) => {
         travel(result.tokens, rule)
         if (globalThis.__DEV__) {
-          const currentValue = join(result.tokens, ignoredMarks, [], start)
+          const currentValue = join(
+            result.tokens,
+            start,
+            ignoredMarks,
+            [],
+            [],
+            []
+          )
           if (lastValue !== currentValue) {
             logger.log(`[After process by ${rule.name}]`)
             logger.log(currentValue)
@@ -102,30 +129,48 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
         }
       })
 
-      ignoredMarks.forEach((mark) => allIgnoredMarks.push(mark))
-      lastValue = join(result.tokens, ignoredMarks, ruleErrors, start)
+      lastValue = join(
+        result.tokens,
+        start,
+        ignoredMarks,
+        ignoredTokens,
+        ruleErrors,
+        ignoredRuleErrors
+      )
+
       if (globalThis.__DEV__) {
         logger.log('[Eventual block value]')
         logger.log(lastValue + '\n')
       }
+
       return {
+        ...result,
         start,
         end,
-        value: lastValue
-      } as Block
+        value: lastValue,
+        originValue: value
+      }
     }
   )
 
+  const result = replaceBlocks(str, modifiedBlocks)
+
+  const debugInfo: DebugInfo = {
+    pieces: result.pieces,
+    blocks: modifiedBlocks,
+    ignoredCases: parsedStatus.ignoredByRules,
+    ignoredByParsers: parsedStatus.ignoredByParsers,
+    ignoredTokens,
+    parserErrors,
+    ruleErrors,
+    ignoredRuleErrors
+  }
+
   return {
     origin: str,
-    result: replaceBlocks(str, modifiedBlocks),
-    validations: [...parserErrors, ...ruleErrors].filter(({ index }) =>
-      allIgnoredMarks.length
-        ? allIgnoredMarks.some(
-            ({ start, end }) => index >= start && index <= end
-          )
-        : true
-    )
+    result: result.value,
+    validations: [...parserErrors, ...ruleErrors],
+    __debug__: debugInfo
   }
 }
 

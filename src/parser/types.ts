@@ -9,17 +9,47 @@
  * - Tokens
  */
 
-// Char
-
 import { Validation } from '../report'
+
+// Char
 
 export enum CharType {
   EMPTY = 'empty',
+
   SPACE = 'space',
-  LETTERS_HALF = 'letters-half',
-  LETTERS_FULL = 'letters-full',
-  PUNCTUATION_HALF = 'punctuation-half',
-  PUNCTUATION_FULL = 'punctuation-full',
+
+  WESTERN_LETTER = 'western-letter',
+  CJK_CHAR = 'cjk-char',
+
+  // periods, commas, secondary commas, colons, semicolons, exclamation marks, question marks, etc.
+  HALFWIDTH_PAUSE_OR_STOP = 'halfwidth-pause-or-stop',
+  FULLWIDTH_PAUSE_OR_STOP = 'fullwidth-pause-or-stop',
+
+  // single, double, corner, white corner
+  // + book title marks
+  // left x right
+  HALFWIDTH_QUOTATION = 'halfwidth-quotation',
+  FULLWIDTH_QUOTATION = 'fullwidth-quotation',
+
+  // parentheses
+  HALFWIDTH_BRACKET = 'halfwidth-bracket',
+  FULLWIDTH_BRACKET = 'fullwidth-bracket',
+
+  // // parenthesis, black lenticular brackets, white lenticular brackets,
+  // // square brackets, tortoise shell brackets, curly brackets
+  // // left x right
+  // PARENTHESIS = 'parenthesis',
+  // // double angle brackets, angle brackets
+  // // left x right
+  // BOOK_TITLE_MARK = 'book-title',
+
+  // dashes, ellipsis, connector marks, interpuncts, proper noun marks, solidi, etc.
+  HALFWIDTH_OTHER_PUNCTUATION = 'halfwidth-other-punctuation',
+  FULLWIDTH_OTHER_PUNCTUATION = 'fullwidth-other-punctuation',
+
+  // // ⁈, ⁇, ‼, ⁉
+  // SPECIAL_PUNCTUATION_MARK = 'special-punctuation',
+
   UNKNOWN = 'unknown'
 }
 
@@ -28,12 +58,12 @@ type CharSet = {
 }
 
 export const BRACKET_CHAR_SET: CharSet = {
-  left: '(（',
-  right: ')）'
+  left: '([{（〔［｛',
+  right: ')]}）〕］｝'
 }
-export const QUOTE_CHAR_SET: CharSet = {
-  left: `“‘《〈『「【{`,
-  right: `”’》〉』」】}`,
+export const QUOTATION_CHAR_SET: CharSet = {
+  left: `“‘《〈『「【〖`,
+  right: `”’》〉』」】〗`,
   neutral: `'"`
 }
 export const SHORTHAND_CHARS = `'’`
@@ -42,23 +72,25 @@ export const SHORTHAND_PAIR_SET: CharSet = {
   [`’`]: `‘`
 }
 
-const FULL_WIDTH_PAIRS = `“”‘’（）「」『』《》〈〉【】`
+const FULLWIDTH_PAIRS = `“”‘’（）〔〕［］｛｝《》〈〉「」『』【】〖〗`
 
-export const isFullWidthPair = (str: string): boolean =>
-  FULL_WIDTH_PAIRS.indexOf(str) >= 0
+export const isFullwidthPair = (str: string): boolean =>
+  FULLWIDTH_PAIRS.indexOf(str) >= 0
 
 // Reusable
 
 type Pair = {
   startIndex: number
-  startContent: string
+  startValue: string
   endIndex: number
-  endContent: string
+  endValue: string
 }
 
 type MutablePair = {
-  modifiedStartContent: string
-  modifiedEndContent: string
+  modifiedStartValue: string
+  ignoredStartValue?: string
+  modifiedEndValue: string
+  ignoredEndValue?: string
 }
 
 // Mark
@@ -92,7 +124,7 @@ export enum MarkSideType {
 
 export type Mark = Pair & {
   type: MarkType
-  meta?: string // AST type enum
+  meta?: string // TODO: AST type enum
 }
 
 export type RawMark = Mark & {
@@ -114,38 +146,74 @@ export const isRawMark = (mark: Mark): mark is RawMark => {
 
 // Token type
 
-export type LettersType = CharType.LETTERS_FULL | CharType.LETTERS_HALF
+export type LetterType = CharType.WESTERN_LETTER | CharType.CJK_CHAR
 
-export type PunctuationType =
-  | CharType.PUNCTUATION_FULL
-  | CharType.PUNCTUATION_HALF
+export type PauseOrStopType =
+  | CharType.HALFWIDTH_PAUSE_OR_STOP
+  | CharType.FULLWIDTH_PAUSE_OR_STOP
 
-export type ContentTokenType = LettersType | PunctuationType
+export type QuotationType =
+  | CharType.HALFWIDTH_QUOTATION
+  | CharType.FULLWIDTH_QUOTATION
+
+export type BracketType =
+  | CharType.HALFWIDTH_BRACKET
+  | CharType.FULLWIDTH_BRACKET
+
+export type OtherPunctuationType =
+  | CharType.HALFWIDTH_OTHER_PUNCTUATION
+  | CharType.FULLWIDTH_OTHER_PUNCTUATION
+
+export type SinglePunctuationType = PauseOrStopType | OtherPunctuationType
+
+export type PunctuationType = SinglePunctuationType | BracketType
+
+export type NormalContentTokenType = LetterType | SinglePunctuationType
+
+export type HalfwidthPuntuationType =
+  | CharType.HALFWIDTH_PAUSE_OR_STOP
+  | CharType.HALFWIDTH_QUOTATION
+  | CharType.HALFWIDTH_BRACKET
+  | CharType.HALFWIDTH_OTHER_PUNCTUATION
+
+export type FullwidthPuntuationType =
+  | CharType.FULLWIDTH_PAUSE_OR_STOP
+  | CharType.FULLWIDTH_QUOTATION
+  | CharType.FULLWIDTH_BRACKET
+  | CharType.FULLWIDTH_OTHER_PUNCTUATION
+
+export type HalfwidthTokenType =
+  | CharType.WESTERN_LETTER
+  | FullwidthPuntuationType
+
+export type FullwidthTokenType = CharType.CJK_CHAR | FullwidthPuntuationType
 
 /**
- * TODO: paired html tags should be hyper wrapper
+ * TODO: paired html tags should be hyper mark
  */
 export enum HyperTokenType {
   /**
    * Brackets
    */
-  HYPER_WRAPPER_BRACKET = 'wrapper-bracket',
+  BRACKET_MARK = 'bracket-mark',
   /**
    * Inline Markdown marks
    */
-  HYPER_WRAPPER = 'wrapper',
+  HYPER_MARK = 'hyper-mark',
+
   /**
    * - \`xxx\`
    * - &lt;code&gt;xxx&lt;/code&gt;
    */
-  HYPER_CONTENT_CODE = 'hyper-content-code',
+  CODE_CONTENT = 'code-content',
   /**
    * - Hexo/VuePress container
    * - Other html code
    */
   HYPER_CONTENT = 'hyper-content',
+
   /**
-   * Unpaired brackets/quotes
+   * Unpaired brackets/quotations
    */
   UNMATCHED = 'unmatched',
   /**
@@ -158,58 +226,166 @@ export enum GroupTokenType {
   GROUP = 'group'
 }
 
-export type SingleTokenType = ContentTokenType | HyperTokenType
+export type SingleTokenType = NormalContentTokenType | HyperTokenType
 
 export type TokenType = SingleTokenType | GroupTokenType
 
+export type NonTokenCharType =
+  | BracketType
+  | QuotationType
+  | CharType.EMPTY
+  | CharType.SPACE
+  | CharType.UNKNOWN
+
+export type GeneralType = TokenType | NonTokenCharType
+
+export const getHalfwidthTokenType = (type: TokenType): TokenType => {
+  switch (type) {
+    case CharType.CJK_CHAR:
+      return CharType.WESTERN_LETTER
+    case CharType.FULLWIDTH_PAUSE_OR_STOP:
+      return CharType.HALFWIDTH_PAUSE_OR_STOP
+    case CharType.FULLWIDTH_OTHER_PUNCTUATION:
+      return CharType.HALFWIDTH_OTHER_PUNCTUATION
+  }
+  return type
+}
+
+export const getFullwidthTokenType = (type: TokenType): TokenType => {
+  switch (type) {
+    case CharType.WESTERN_LETTER:
+      return CharType.CJK_CHAR
+    case CharType.HALFWIDTH_PAUSE_OR_STOP:
+      return CharType.FULLWIDTH_PAUSE_OR_STOP
+    case CharType.HALFWIDTH_OTHER_PUNCTUATION:
+      return CharType.FULLWIDTH_OTHER_PUNCTUATION
+  }
+  return type
+}
+
 export type NonCodeVisibleTokenType =
-  | ContentTokenType
-  | HyperTokenType.HYPER_WRAPPER_BRACKET
+  | NormalContentTokenType
+  | HyperTokenType.BRACKET_MARK
   | GroupTokenType.GROUP
 
 export type VisibleTokenType =
   | NonCodeVisibleTokenType
-  | HyperTokenType.HYPER_CONTENT_CODE
+  | HyperTokenType.CODE_CONTENT
 
-export type InvisibleTokenType = HyperTokenType.HYPER_WRAPPER
+export type InvisibleTokenType = HyperTokenType.HYPER_MARK
 
-export const isLettersType = (
-  type: TokenType | CharType
-): type is LettersType => {
-  return type === CharType.LETTERS_FULL || type === CharType.LETTERS_HALF
+export type VisibilityUnknownTokenType = HyperTokenType.HYPER_CONTENT
+
+export const isLetterType = (type: GeneralType): type is LetterType => {
+  return type === CharType.WESTERN_LETTER || type === CharType.CJK_CHAR
 }
 
-export const isPunctuationType = (
-  type: TokenType | CharType
-): type is PunctuationType => {
+export const isPauseOrStopType = (
+  type: GeneralType
+): type is PauseOrStopType => {
   return (
-    type === CharType.PUNCTUATION_FULL || type === CharType.PUNCTUATION_HALF
+    type === CharType.HALFWIDTH_PAUSE_OR_STOP ||
+    type === CharType.FULLWIDTH_PAUSE_OR_STOP
   )
 }
 
-export const isNonCodeVisibleType = (
-  type: TokenType | CharType
-): type is LettersType => {
+export const isQuotationType = (type: GeneralType): type is QuotationType => {
   return (
-    isLettersType(type) ||
-    isPunctuationType(type) ||
-    type === HyperTokenType.HYPER_WRAPPER_BRACKET ||
+    type === CharType.HALFWIDTH_QUOTATION ||
+    type === CharType.FULLWIDTH_QUOTATION
+  )
+}
+
+export const isBracketType = (type: GeneralType): type is BracketType => {
+  return (
+    type === CharType.HALFWIDTH_BRACKET || type === CharType.FULLWIDTH_BRACKET
+  )
+}
+
+export const isOtherPunctuationType = (
+  type: GeneralType
+): type is OtherPunctuationType => {
+  return (
+    type === CharType.HALFWIDTH_OTHER_PUNCTUATION ||
+    type === CharType.FULLWIDTH_OTHER_PUNCTUATION
+  )
+}
+
+export const isSinglePunctuationType = (
+  type: GeneralType
+): type is SinglePunctuationType => {
+  return isPauseOrStopType(type) || isOtherPunctuationType(type)
+}
+
+export const isPunctuationType = (
+  type: GeneralType
+): type is PunctuationType => {
+  return (
+    isPauseOrStopType(type) ||
+    isQuotationType(type) ||
+    isBracketType(type) ||
+    isOtherPunctuationType(type)
+  )
+}
+
+export const isHalfwidthPunctuationType = (
+  type: GeneralType
+): type is HalfwidthPuntuationType => {
+  return (
+    type === CharType.HALFWIDTH_PAUSE_OR_STOP ||
+    type === CharType.HALFWIDTH_QUOTATION ||
+    type === CharType.HALFWIDTH_BRACKET ||
+    type === CharType.HALFWIDTH_OTHER_PUNCTUATION
+  )
+}
+
+export const isHalfwidthType = (
+  type: GeneralType
+): type is HalfwidthTokenType => {
+  return type === CharType.WESTERN_LETTER || isHalfwidthPunctuationType(type)
+}
+
+export const isFullwidthPunctuationType = (
+  type: GeneralType
+): type is FullwidthPuntuationType => {
+  return (
+    type === CharType.FULLWIDTH_PAUSE_OR_STOP ||
+    type === CharType.FULLWIDTH_QUOTATION ||
+    type === CharType.FULLWIDTH_BRACKET ||
+    type === CharType.FULLWIDTH_OTHER_PUNCTUATION
+  )
+}
+
+export const isFullwidthType = (
+  type: GeneralType
+): type is FullwidthTokenType => {
+  return type === CharType.CJK_CHAR || isFullwidthPunctuationType(type)
+}
+
+export const isNonCodeVisibleType = (type: GeneralType): type is LetterType => {
+  return (
+    isLetterType(type) ||
+    isSinglePunctuationType(type) ||
+    type === HyperTokenType.BRACKET_MARK ||
     type === GroupTokenType.GROUP
   )
 }
 
-export const isVisibleType = (
-  type: TokenType | CharType
-): type is VisibleTokenType => {
-  return (
-    isNonCodeVisibleType(type) || type === HyperTokenType.HYPER_CONTENT_CODE
-  )
+export const isVisibleType = (type: GeneralType): type is VisibleTokenType => {
+  return isNonCodeVisibleType(type) || type === HyperTokenType.CODE_CONTENT
 }
 
 export const isInvisibleType = (
-  type: TokenType | CharType
+  type: GeneralType
 ): type is InvisibleTokenType => {
-  return type === HyperTokenType.HYPER_WRAPPER
+  // OTHERS?
+  return type === HyperTokenType.HYPER_MARK
+}
+
+export const isVisibilityUnknownType = (
+  type: GeneralType
+): type is VisibilityUnknownTokenType => {
+  return type === HyperTokenType.HYPER_CONTENT
 }
 
 // Token
@@ -218,7 +394,7 @@ type CommonToken = {
   index: number
   length: number
 
-  content: string
+  value: string
   spaceAfter: string
 
   mark?: Mark
@@ -226,8 +402,10 @@ type CommonToken = {
 }
 
 type MutableCommonToken = CommonToken & {
-  modifiedContent: string
+  modifiedValue: string
+  ignoredValue?: string
   modifiedSpaceAfter: string
+  ignoredSpaceAfter?: string
   validations: Validation[]
 }
 
@@ -238,6 +416,7 @@ export type SingleToken = CommonToken & {
 export type MutableSingleToken = MutableCommonToken & {
   type: SingleTokenType
   modifiedType: SingleTokenType
+  ignoredType?: SingleTokenType
 }
 
 export type GroupToken = Array<Token> &
@@ -253,8 +432,10 @@ export type MutableGroupToken = Array<MutableToken> &
   MutablePair & {
     type: GroupTokenType
     modifiedType: GroupTokenType
+    ignoredType?: GroupTokenType
     innerSpaceBefore: string
     modifiedInnerSpaceBefore: string
+    ignoredInnerSpaceBefore?: string
   }
 
 export type Token = SingleToken | GroupToken

@@ -2,102 +2,125 @@
  * @fileoverview
  *
  * This rule will unify similar punctuations into the same one.
- * Usually, it's just about Chinese quotes.
+ * Usually, it's just about Chinese quotations.
  *
  * Options:
- * - unifiedPunctuation: "simplified" (default) | "traditional" | undefined
+ * - unifiedPunctuation: "traditional" | "simplified" | Record<string, boolean | string[]> & { default: boolean }
  */
 
 import { GroupTokenType, Handler, MutableToken } from '../parser'
-import {
-  PUNCTUATION_UNIFICATION_SIMPLIFIED,
-  PUNCTUATION_UNIFICATION_TRADITIONAL
-} from './messages'
-import { checkEndContent, checkStartContent, Options } from './util'
+import { PUNCTUATION_UNIFICATION } from './messages'
+import { checkEndValue, checkStartValue, checkValue, Options } from './util'
 
-type UnifiedOptions = 'traditional' | 'simplified'
+const defaultUnifiedMap: Record<string, string[]> = {
+  // U+2047 DOUBLE QUESTION MARK, U+203C DOUBLE EXCLAMATION MARK
+  // U+2048 QUESTION EXCLAMATION MARK, U+2049 EXCLAMATION QUESTION MARK
+  '？？': ['⁇'],
+  '！！': ['‼'],
+  '？！': ['⁈'],
+  '！？': ['⁉'],
 
-enum QuoteType {
-  LEFT,
-  LEFT_EMBEDDED,
-  RIGHT_EMBEDDED,
-  RIGHT
+  // U+002F SOLIDUS, U+FF0F FULLWIDTH SOLIDUS
+  '/': ['/', '／'],
+
+  // U+FF5E FULLWIDTH TILDE
+  '~': ['~', '～'],
+
+  // U+2026 HORIZONTAL ELLIPSIS, U+22EF MIDLINE HORIZONTAL ELLIPSIS
+  '…': ['…', '⋯'],
+
+  // U+25CF BLACK CIRCLE, U+2022 BULLET, U+00B7 MIDDLE DOT,
+  // U+2027 HYPHENATION POINT, U+30FB KATAKANA MIDDLE DOT
+  '·': ['●', '•', '·', '‧', '・']
 }
 
-const replaceMap: Record<UnifiedOptions, Record<QuoteType, string>> = {
-  simplified: {
-    [QuoteType.LEFT]: `“`,
-    [QuoteType.LEFT_EMBEDDED]: `‘`,
-    [QuoteType.RIGHT_EMBEDDED]: `’`,
-    [QuoteType.RIGHT]: `”`
-  },
-  traditional: {
-    [QuoteType.LEFT]: `「`,
-    [QuoteType.LEFT_EMBEDDED]: `『`,
-    [QuoteType.RIGHT_EMBEDDED]: `』`,
-    [QuoteType.RIGHT]: `」`
-  }
+const simplifiedUnifiedMap: Record<string, string[]> = {
+  '“': ['「'],
+  '”': ['」'],
+  '‘': ['『'],
+  '’': ['』']
 }
 
-const valueToKey = (
-  obj: Record<QuoteType, string>
-): Record<string, QuoteType> => {
-  const result: Record<string, QuoteType> = {}
-  for (const key in obj) {
-    const value: string = obj[key]
-    result[value] = key as unknown as QuoteType
+const traditionalUnifiedMap: Record<string, string[]> = {
+  '「': ['“'],
+  '」': ['”'],
+  '『': ['‘'],
+  '』': ['’']
+}
+
+const revertUnifiedMap = (
+  unifiedMap: Record<string, string[]>
+): Record<string, string> => {
+  const result: Record<string, string> = {}
+  for (const key in unifiedMap) {
+    const value = unifiedMap[key]
+    value.forEach((v) => {
+      result[v] = key
+    })
   }
   return result
 }
 
-const checkChar = (
-  content: string,
-  objectMap: Record<string, QuoteType>,
-  unifiedMap: Record<QuoteType, string>
-): string => {
-  const key = objectMap[content]
-  if (key) {
-    return unifiedMap[key]
+const getRevertedUnifiedMap = (options: Options): Record<string, string> => {
+  const unifiedOption = options?.unifiedPunctuation
+  const langType = typeof unifiedOption === 'string' ? unifiedOption : undefined
+  const unifiedMap: Record<string, string[]> = {}
+
+  if (langType) {
+    Object.assign(unifiedMap, defaultUnifiedMap)
+    if (langType === 'simplified') {
+      Object.assign(unifiedMap, simplifiedUnifiedMap)
+    } else if (langType === 'traditional') {
+      Object.assign(unifiedMap, traditionalUnifiedMap)
+    }
+  } else if (typeof unifiedOption === 'object') {
+    if (unifiedOption.default) {
+      Object.assign(unifiedMap, defaultUnifiedMap)
+    }
+    Object.entries(unifiedOption).forEach(([key, value]) => {
+      if (value === true) {
+        unifiedMap[key] = defaultUnifiedMap[key]
+      } else if (value === false) {
+        delete unifiedMap[key]
+      } else {
+        unifiedMap[key] = value
+      }
+    })
   }
-  return content
+
+  return revertUnifiedMap(unifiedMap)
 }
 
 const generateHandler = (options: Options): Handler => {
-  const unifiedOption = options?.unifiedPunctuation
-
-  if (!unifiedOption) {
-    return () => {
-      // do nothing
-    }
-  }
-
-  const message =
-    unifiedOption === 'simplified'
-      ? PUNCTUATION_UNIFICATION_SIMPLIFIED
-      : PUNCTUATION_UNIFICATION_TRADITIONAL
-  const unifiedMap = replaceMap[unifiedOption]
-  const objectMap = valueToKey(
-    unifiedOption === 'simplified'
-      ? replaceMap.traditional
-      : replaceMap.simplified
-  )
+  const charMap = getRevertedUnifiedMap(options)
 
   const handlerPunctuationUnified = (token: MutableToken) => {
-    if (token.type !== GroupTokenType.GROUP) {
+    if (token.type === GroupTokenType.GROUP) {
+      if (charMap[token.modifiedStartValue]) {
+        checkStartValue(
+          token,
+          charMap[token.modifiedStartValue],
+          PUNCTUATION_UNIFICATION
+        )
+      }
+      if (charMap[token.modifiedEndValue]) {
+        checkEndValue(
+          token,
+          charMap[token.modifiedEndValue],
+          PUNCTUATION_UNIFICATION
+        )
+      }
       return
+    } else {
+      if (charMap[token.modifiedValue]) {
+        checkValue(
+          token,
+          charMap[token.modifiedValue],
+          undefined,
+          PUNCTUATION_UNIFICATION
+        )
+      }
     }
-    const modifiedStartContent = checkChar(
-      token.modifiedStartContent,
-      objectMap,
-      unifiedMap
-    )
-    const modifiedEndContent = checkChar(
-      token.modifiedEndContent,
-      objectMap,
-      unifiedMap
-    )
-    checkStartContent(token, modifiedStartContent, message)
-    checkEndContent(token, modifiedEndContent, message)
   }
 
   return handlerPunctuationUnified

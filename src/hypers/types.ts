@@ -1,12 +1,12 @@
-import { IgnoredCase } from '../ignore'
-import { Mark } from '../parser'
+import type { IgnoredCase } from '../ignore'
+import type { Mark, MutableParseResult } from '../parser'
 
 export type ParserIgnoredCase = {
   name: string
   meta: string
   index: number
   length: number
-  originContent: string
+  originValue: string
 }
 
 export type Block = {
@@ -17,9 +17,14 @@ export type Block = {
 }
 
 export type ParsedStatus = {
-  content: string
-  modifiedContent: string
+  value: string
+  modifiedValue: string
   ignoredByRules: IgnoredCase[]
   ignoredByParsers: ParserIgnoredCase[]
   blocks: Block[]
 }
+
+export type ParsedBlock = Block &
+  MutableParseResult & {
+    originValue: string
+  }

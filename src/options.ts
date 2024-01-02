@@ -61,10 +61,25 @@ const matchCallArray = <T>(calls: unknown[], map: { [name: string]: T }): T[] =>
     .filter(Boolean) as T[]
 
 const DEPRECATED_OPTIONS = {
-  noSpaceInsideMark: 'noSpaceInsideWrapper',
-  spaceBetweenHalfWidthContent: 'spaceBetweenHalfWidthLetters',
-  noSpaceBetweenFullWidthContent: 'noSpaceBetweenFullWidthLetters',
-  spaceBetweenMixedWidthContent: 'spaceBetweenMixedWidthLetters'
+  halfWidthPunctuation: 'halfwidthPunctuation',
+  fullWidthPunctuation: 'fullwidthPunctuation',
+  adjustedFullWidthPunctuation: 'adjustedFullwidthPunctuation',
+  spaceBetweenHalfWidthLetters: 'spaceBetweenHalfwidthContent',
+  spaceBetweenHalfWidthContent: 'spaceBetweenHalfwidthContent',
+  noSpaceBetweenFullWidthLetters: 'noSpaceBetweenFullwidthContent',
+  noSpaceBetweenFullWidthContent: 'noSpaceBetweenFullwidthContent',
+  spaceBetweenMixedWidthLetters: 'spaceBetweenMixedwidthContent',
+  spaceBetweenMixedWidthContent: 'spaceBetweenMixedwidthContent',
+  noSpaceBeforePunctuation: 'noSpaceBeforePauseOrStop',
+  spaceAfterHalfWidthPunctuation: 'spaceAfterHalfwidthPauseOrStop',
+  noSpaceAfterFullWidthPunctuation: 'noSpaceAfterFullwidthPauseOrStop',
+  spaceOutsideHalfQuote: 'spaceOutsideHalfwidthQuotation',
+  noSpaceOutsideFullQuote: 'noSpaceOutsideFullwidthQuotation',
+  noSpaceInsideQuote: 'noSpaceInsideQuotation',
+  spaceOutsideHalfBracket: 'spaceOutsideHalfwidthBracket',
+  noSpaceOutsideFullBracket: 'noSpaceOutsideFullwidthBracket',
+  noSpaceInsideWrapper: 'noSpaceInsideHyperMark',
+  noSpaceInsideMark: 'noSpaceInsideHyperMark'
 }
 
 const deprecateOptions = (ruleOption: RuleOptions, logger: Console): void => {

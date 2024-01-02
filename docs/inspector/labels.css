@@ -1,0 +1,36 @@
+.western-letter {
+  color: #ff0000;
+}
+
+.cjk-char {
+  color: #0000ff;
+}
+
+.halfwidth-pause-or-stop,
+.fullwidth-pause-or-stop,
+.halfwidth-other-punctuation,
+.fullwidth-other-punctuation,
+.quotation-start-value,
+.quotation-end-value,
+.bracket-mark {
+  color: #660066;
+}
+
+.non-block,
+.hyper-mark,
+.hyper-content,
+.code-content {
+  color: #666666;
+}
+
+.changed {
+  background-color: #ffff00;
+}
+
+.ignored {
+  background-color: #f0f0f0;
+}
+
+.current {
+  background-color: #f0f0ff;
+}

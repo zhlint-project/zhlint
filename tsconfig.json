@@ -4,7 +4,8 @@
     "target": "es2017",
     "module": "commonjs",
     "esModuleInterop": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "skipLibCheck": true
   },
   "include": ["./src", "./test", "./types"]
 }

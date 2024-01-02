@@ -8,7 +8,8 @@ import {
   isInvisibleType,
   isVisibleType,
   TokenType,
-  CharType
+  CharType,
+  isHalfwidthPunctuationType
 } from '../parser'
 
 // options
@@ -18,39 +19,42 @@ export type Options = {
   noSinglePair?: boolean
 
   // punctuation
-  halfWidthPunctuation?: string
-  fullWidthPunctuation?: string
-  adjustedFullWidthPunctuation?: string
-  unifiedPunctuation?: 'traditional' | 'simplified'
+  halfwidthPunctuation?: string
+  fullwidthPunctuation?: string
+  adjustedFullwidthPunctuation?: string
+  unifiedPunctuation?:
+    | 'traditional'
+    | 'simplified'
+    | (Record<string, boolean | string[]> & { default: boolean })
 
   // case: abbrs
   skipAbbrs?: string[]
 
   // space around content
-  spaceBetweenHalfWidthLetters?: boolean
-  noSpaceBetweenFullWidthLetters?: boolean
-  spaceBetweenMixedWidthLetters?: boolean
+  spaceBetweenHalfwidthContent?: boolean
+  noSpaceBetweenFullwidthContent?: boolean
+  spaceBetweenMixedwidthContent?: boolean
 
-  // space around punctuation
-  noSpaceBeforePunctuation?: boolean
-  spaceAfterHalfWidthPunctuation?: boolean
-  noSpaceAfterFullWidthPunctuation?: boolean
+  // space around pause or stop punctuation
+  noSpaceBeforePauseOrStop?: boolean
+  spaceAfterHalfwidthPauseOrStop?: boolean
+  noSpaceAfterFullwidthPauseOrStop?: boolean
 
-  // space around quote
-  spaceOutsideHalfQuote?: boolean
-  noSpaceOutsideFullQuote?: boolean
-  noSpaceInsideQuote?: boolean
+  // space around quotation
+  spaceOutsideHalfwidthQuotation?: boolean
+  noSpaceOutsideFullwidthQuotation?: boolean
+  noSpaceInsideQuotation?: boolean
 
-  // space around bracket
-  spaceOutsideHalfBracket?: boolean
-  noSpaceOutsideFullBracket?: boolean
+  // space around bracket or book title mark
+  spaceOutsideHalfwidthBracket?: boolean
+  noSpaceOutsideFullwidthBracket?: boolean
   noSpaceInsideBracket?: boolean
 
   // space around code
   spaceOutsideCode?: boolean
 
   // space around mark
-  noSpaceInsideWrapper?: boolean
+  noSpaceInsideHyperMark?: boolean
 
   // trim space
   trimSpace?: boolean
@@ -60,31 +64,134 @@ export type Options = {
 
   // custom preset
   preset?: string
+} & DeprecatedOptions
 
+export type DeprecatedOptions = {
+  // punctuation
   /**
    * @deprecated
    *
-   * Please use `noSpaceInsideWrapper` instead.
+   * Please use `halfwidthPunctuation` instead.
    */
-  noSpaceInsideMark?: boolean
+  halfWidthPunctuation?: string
   /**
    * @deprecated
    *
-   * Please use `spaceBetweenHalfWidthLetters` instead.
+   * Please use `fullwidthPunctuation` instead.
+   */
+  fullWidthPunctuation?: string
+  /**
+   * @deprecated
+   *
+   * Please use `adjustedFullwidthPunctuation` instead.
+   */
+  adjustedFullWidthPunctuation?: string
+
+  // space around content
+  /**
+   * @deprecated
+   *
+   * Please use `spaceBetweenHalfwidthContent` instead.
+   */
+  spaceBetweenHalfWidthLetters?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `spaceBetweenHalfwidthContent` instead.
    */
   spaceBetweenHalfWidthContent?: boolean
   /**
    * @deprecated
    *
-   * Please use `noSpaceBetweenFullWidthLetters` instead.
+   * Please use `noSpaceBetweenFullwidthContent` instead.
+   */
+  noSpaceBetweenFullWidthLetters?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceBetweenFullwidthContent` instead.
    */
   noSpaceBetweenFullWidthContent?: boolean
   /**
    * @deprecated
    *
-   * Please use `spaceBetweenMixedWidthLetters` instead.
+   * Please use `spaceBetweenMixedwidthContent` instead.
+   */
+  spaceBetweenMixedWidthLetters?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `spaceBetweenMixedwidthContent` instead.
    */
   spaceBetweenMixedWidthContent?: boolean
+
+  // space around punctuation
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceBeforePauseOrStop` instead.
+   */
+  noSpaceBeforePunctuation?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `spaceAfterHalfwidthPauseOrStop` instead.
+   */
+  spaceAfterHalfWidthPunctuation?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceAfterFullwidthPauseOrStop` instead.
+   */
+  noSpaceAfterFullWidthPunctuation?: boolean
+
+  // space around quotation
+  /**
+   * @deprecated
+   *
+   * Please use `spaceOutsideHalfwidthQuotation` instead.
+   */
+  spaceOutsideHalfQuote?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceOutsideFullwidthQuotation` instead.
+   */
+  noSpaceOutsideFullQuote?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceInsideQuotation` instead.
+   */
+  noSpaceInsideQuote?: boolean
+
+  // space around bracket
+  /**
+   * @deprecated
+   *
+   * Please use `spaceOutsideHalfwidthBracket` instead.
+   */
+  spaceOutsideHalfBracket?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceOutsideFullwidthBracket` instead.
+   */
+  noSpaceOutsideFullBracket?: boolean
+
+  // space around mark
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceInsideHyperMark` instead.
+   */
+  noSpaceInsideWrapper?: boolean
+  /**
+   * @deprecated
+   *
+   * Please use `noSpaceInsideHyperMark` instead.
+   */
+  noSpaceInsideMark?: boolean
 }
 
 // find tokens
@@ -245,33 +352,33 @@ const isHtmlTag = (token: Token): boolean => {
   if (token.type !== HyperTokenType.HYPER_CONTENT) {
     return false
   }
-  return !!token.content.match(/^<.+>$/)
+  return !!token.value.match(/^<.+>$/)
 }
 
 const getHtmlTagSide = (token: Token): MarkSideType | undefined => {
   if (!isHtmlTag(token)) {
     return
   }
-  if (token.content.match(/^<code.*>.*<\/code.*>$/)) {
+  if (token.value.match(/^<code.*>.*<\/code.*>$/)) {
     return
   }
-  if (token.content.match(/^<[^/].+\/\s*>$/)) {
+  if (token.value.match(/^<[^/].+\/\s*>$/)) {
     return
   }
-  if (token.content.match(/^<[^/].+>$/)) {
+  if (token.value.match(/^<[^/].+>$/)) {
     return MarkSideType.LEFT
   }
-  if (token.content.match(/^<\/.+>$/)) {
+  if (token.value.match(/^<\/.+>$/)) {
     return MarkSideType.RIGHT
   }
 }
 
 export const isWrapper = (token: Token): boolean => {
-  return token.type === HyperTokenType.HYPER_WRAPPER || !!getHtmlTagSide(token)
+  return token.type === HyperTokenType.HYPER_MARK || !!getHtmlTagSide(token)
 }
 
 export const getWrapperSide = (token: Token): MarkSideType | undefined => {
-  if (token.type === HyperTokenType.HYPER_WRAPPER) {
+  if (token.type === HyperTokenType.HYPER_MARK) {
     return token.markSide
   }
   return getHtmlTagSide(token)
@@ -410,7 +517,7 @@ export const findWrappersBetween = (
 
 // special cases
 
-export const isHalfWidthPunctuationWithoutSpaceAround = (
+export const isHalfwidthPunctuationWithoutSpaceAround = (
   group: GroupToken,
   token: Token
 ): boolean => {
@@ -418,11 +525,11 @@ export const isHalfWidthPunctuationWithoutSpaceAround = (
   const tokenAfter = findTokenAfter(group, token)
 
   if (
-    token.type === CharType.PUNCTUATION_HALF &&
+    isHalfwidthPunctuationType(token.type) &&
     tokenBefore &&
-    tokenBefore.type === CharType.LETTERS_HALF &&
+    tokenBefore.type === CharType.WESTERN_LETTER &&
     tokenAfter &&
-    tokenAfter.type === CharType.LETTERS_HALF
+    tokenAfter.type === CharType.WESTERN_LETTER
   ) {
     return !tokenBefore.spaceAfter && !token.spaceAfter
   }
@@ -430,19 +537,19 @@ export const isHalfWidthPunctuationWithoutSpaceAround = (
   return false
 }
 
-export const isSuccessiveHalfWidthPunctuation = (
+export const isSuccessiveHalfwidthPunctuation = (
   group: GroupToken,
   token: Token
 ): boolean => {
-  if (token.type === CharType.PUNCTUATION_HALF) {
+  if (isHalfwidthPunctuationType(token.type)) {
     const tokenBefore = findTokenBefore(group, token)
     const tokenAfter = findTokenAfter(group, token)
     if (
       (tokenBefore &&
-        tokenBefore.type === CharType.PUNCTUATION_HALF &&
+        isHalfwidthPunctuationType(tokenBefore.type) &&
         !tokenBefore.spaceAfter) ||
       (tokenAfter &&
-        tokenAfter.type === CharType.PUNCTUATION_HALF &&
+        isHalfwidthPunctuationType(tokenAfter.type) &&
         !token.spaceAfter)
     ) {
       return true
@@ -466,15 +573,15 @@ const createValidation = (
     name,
     message
   }
-  if (target === ValidationTarget.START_CONTENT) {
+  if (target === ValidationTarget.START_VALUE) {
     validation.index = (token as GroupToken).startIndex
     validation.length = 0
-  } else if (target === ValidationTarget.END_CONTENT) {
+  } else if (target === ValidationTarget.END_VALUE) {
     validation.index = (token as GroupToken).endIndex
     validation.length = 0
   } else if (target === ValidationTarget.INNER_SPACE_BEFORE) {
     validation.index = (token as GroupToken).startIndex
-    validation.length = (token as GroupToken).startContent.length
+    validation.length = (token as GroupToken).startValue.length
   }
   return validation
 }
@@ -527,14 +634,14 @@ export const checkSpaceAfter: Checker = genChecker(
   ValidationTarget.SPACE_AFTER
 )
 
-export const checkStartContent: Checker = genChecker(
-  'modifiedStartContent',
-  ValidationTarget.START_CONTENT
+export const checkStartValue: Checker = genChecker(
+  'modifiedStartValue',
+  ValidationTarget.START_VALUE
 )
 
-export const checkEndContent: Checker = genChecker(
-  'modifiedEndContent',
-  ValidationTarget.END_CONTENT
+export const checkEndValue: Checker = genChecker(
+  'modifiedEndValue',
+  ValidationTarget.END_VALUE
 )
 
 export const checkInnerSpaceBefore: Checker = genChecker(
@@ -542,16 +649,18 @@ export const checkInnerSpaceBefore: Checker = genChecker(
   ValidationTarget.INNER_SPACE_BEFORE
 )
 
-export const checkContent = (
+export const checkValue = (
   token: Token,
   value: string,
-  type: TokenType,
+  type: TokenType | undefined,
   message: string
 ): void => {
-  if (token.modifiedContent === value) {
+  if (token.modifiedValue === value) {
     return
   }
-  token.modifiedContent = value
-  token.modifiedType = type
-  setValidationOnTarget(token, ValidationTarget.CONTENT, message, '')
+  token.modifiedValue = value
+  if (type) {
+    token.modifiedType = type
+  }
+  setValidationOnTarget(token, ValidationTarget.VALUE, message, '')
 }
