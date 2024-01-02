@@ -31,24 +31,26 @@ const defaultUnifiedMap: Record<string, string[]> = {
 
   // U+25CF BLACK CIRCLE, U+2022 BULLET, U+00B7 MIDDLE DOT,
   // U+2027 HYPHENATION POINT, U+30FB KATAKANA MIDDLE DOT
-  '·': ['●', '•', '·', '‧', '・'],
+  '·': ['●', '•', '·', '‧', '・']
 }
 
 const simplifiedUnifiedMap: Record<string, string[]> = {
   '“': ['「'],
   '”': ['」'],
   '‘': ['『'],
-  '’': ['』'],
+  '’': ['』']
 }
 
 const traditionalUnifiedMap: Record<string, string[]> = {
   '「': ['“'],
   '」': ['”'],
   '『': ['‘'],
-  '』': ['’'],
+  '』': ['’']
 }
 
-const revertUnifiedMap = (unifiedMap: Record<string, string[]>): Record<string, string> => {
+const revertUnifiedMap = (
+  unifiedMap: Record<string, string[]>
+): Record<string, string> => {
   const result: Record<string, string> = {}
   for (const key in unifiedMap) {
     const value = unifiedMap[key]
@@ -95,15 +97,28 @@ const generateHandler = (options: Options): Handler => {
   const handlerPunctuationUnified = (token: MutableToken) => {
     if (token.type === GroupTokenType.GROUP) {
       if (charMap[token.modifiedStartValue]) {
-        checkStartValue(token, charMap[token.modifiedStartValue], PUNCTUATION_UNIFICATION)
+        checkStartValue(
+          token,
+          charMap[token.modifiedStartValue],
+          PUNCTUATION_UNIFICATION
+        )
       }
       if (charMap[token.modifiedEndValue]) {
-        checkEndValue(token, charMap[token.modifiedEndValue], PUNCTUATION_UNIFICATION)
+        checkEndValue(
+          token,
+          charMap[token.modifiedEndValue],
+          PUNCTUATION_UNIFICATION
+        )
       }
       return
     } else {
       if (charMap[token.modifiedValue]) {
-        checkValue(token, charMap[token.modifiedValue], undefined, PUNCTUATION_UNIFICATION)
+        checkValue(
+          token,
+          charMap[token.modifiedValue],
+          undefined,
+          PUNCTUATION_UNIFICATION
+        )
       }
     }
   }

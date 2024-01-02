@@ -79,7 +79,7 @@ const DEPRECATED_OPTIONS = {
   spaceOutsideHalfBracket: 'spaceOutsideHalfwidthBracket',
   noSpaceOutsideFullBracket: 'noSpaceOutsideFullwidthBracket',
   noSpaceInsideWrapper: 'noSpaceInsideHyperMark',
-  noSpaceInsideMark: 'noSpaceInsideHyperMark',
+  noSpaceInsideMark: 'noSpaceInsideHyperMark'
 }
 
 const deprecateOptions = (ruleOption: RuleOptions, logger: Console): void => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Ref, computed, inject } from 'vue';
+import { Ref, computed, inject } from 'vue'
 
 const TOKEN_TYPE_MAP = {
   '': '',
@@ -13,9 +13,9 @@ const TOKEN_TYPE_MAP = {
   'hyper-content': 'Non-content',
   'code-content': 'Code',
   'bracket-mark': 'Bracket',
-  'group': 'Quotation',
-  'unmatched': 'Unpaired bracket/quotation',
-  'non-block': 'Non-content',
+  group: 'Quotation',
+  unmatched: 'Unpaired bracket/quotation',
+  'non-block': 'Non-content'
 }
 const PROP_MAP = {
   // type: {
@@ -26,34 +26,35 @@ const PROP_MAP = {
   value: {
     modified: 'modifiedValue',
     ignored: 'ignoredValue',
-    label: 'Value',
+    label: 'Value'
   },
   spaceAfter: {
     modified: 'modifiedSpaceAfter',
     ignored: 'ignoredSpaceAfter',
-    label: 'Space After',
+    label: 'Space After'
   },
   startValue: {
     modified: 'modifiedStartValue',
     ignored: 'ignoredStartValue',
-    label: 'Left Quotation',
+    label: 'Left Quotation'
   },
   innerSpaceBefore: {
     modified: 'modifiedInnerSpaceBefore',
     ignored: 'ignoredInnerSpaceBefore',
-    label: 'Inner Left Space in Quotations',
+    label: 'Inner Left Space in Quotations'
   },
   endValue: {
     modified: 'modifiedEndValue',
     ignored: 'ignoredEndValue',
-    label: 'Right Quotation',
-  },
+    label: 'Right Quotation'
+  }
 }
 
 const current = inject<Ref<any>>('current')
 const currentProp = inject<Ref<string>>('currentProp')
 
-const checkSpace = prop => prop === 'spaceAfter' || prop === 'innerSpaceBefore'
+const checkSpace = (prop) =>
+  prop === 'spaceAfter' || prop === 'innerSpaceBefore'
 
 const checkType = (data, prop) => {
   if (!data || !prop) {
@@ -65,16 +66,29 @@ const checkType = (data, prop) => {
   if (data?.type === data?.modifiedType) {
     return TOKEN_TYPE_MAP[data?.type]
   } else {
-    return TOKEN_TYPE_MAP[data?.type] + ' is modified into ' + TOKEN_TYPE_MAP[data?.modifiedType]
+    return (
+      TOKEN_TYPE_MAP[data?.type] +
+      ' is modified into ' +
+      TOKEN_TYPE_MAP[data?.modifiedType]
+    )
   }
 }
 
 const checkProp = (data, prop) => {
   if (!data || !prop) {
-    return { desc: 'click the tokens in "Origin" or "Formatted" to see more details' }
+    return {
+      desc: 'click the tokens in "Origin" or "Formatted" to see more details'
+    }
   }
   const { modified, ignored } = PROP_MAP[prop]
-  console.log(data, prop, modified, ignored, data[modified] === data[prop], ignored in data)
+  console.log(
+    data,
+    prop,
+    modified,
+    ignored,
+    data[modified] === data[prop],
+    ignored in data
+  )
   if (data[modified] !== data[prop]) {
     if (checkSpace(prop)) {
       if (data[modified] && data[prop]) {
@@ -82,7 +96,11 @@ const checkProp = (data, prop) => {
       }
       return { desc: !data[prop] ? 'added' : 'removed' }
     }
-    return { desc: ' is modified into ', original: data[prop], modified: data[modified] }
+    return {
+      desc: ' is modified into ',
+      original: data[prop],
+      modified: data[modified]
+    }
   } else if (ignored in data) {
     return { desc: 'modification ignored' }
   } else {

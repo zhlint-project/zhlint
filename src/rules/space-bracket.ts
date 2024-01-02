@@ -63,10 +63,7 @@ const shouldSkip = (
   if (!before || !after) {
     return false
   }
-  if (
-    isFullwidthPair(token.value) ||
-    isFullwidthPair(token.modifiedValue)
-  ) {
+  if (isFullwidthPair(token.value) || isFullwidthPair(token.modifiedValue)) {
     return false
   }
   if (

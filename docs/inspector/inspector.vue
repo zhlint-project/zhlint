@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { provide, ref, toRef, watch } from 'vue';
+import { provide, ref, toRef, watch } from 'vue'
 
 import NonBlock from './non-block.vue'
 import Block from './block.vue'
 import Status from './status.vue'
-import Legends from './legends.vue';
+import Legends from './legends.vue'
 
 const props = defineProps<{ data: any }>()
 const data = toRef(props, 'data')

@@ -1,4 +1,8 @@
-import type { ParsedBlock, ParsedStatus, ParserIgnoredCase } from './hypers/types'
+import type {
+  ParsedBlock,
+  ParsedStatus,
+  ParserIgnoredCase
+} from './hypers/types'
 import type { Validation } from './report'
 import type { NormalizedOptions, Options } from './options'
 import type { Config } from './rc'
@@ -15,14 +19,14 @@ import replaceBlocks from './replace-block'
 export type { Options } from './options'
 
 export type DebugInfo = {
-  pieces: Piece[];
-  blocks: ParsedBlock[];
-  ignoredCases: IgnoredCase[];
-  ignoredByParsers: ParserIgnoredCase[];
-  ignoredTokens: MutableToken[];
-  parserErrors: Validation[];
-  ruleErrors: Validation[];
-  ignoredRuleErrors: Validation[];
+  pieces: Piece[]
+  blocks: ParsedBlock[]
+  ignoredCases: IgnoredCase[]
+  ignoredByParsers: ParserIgnoredCase[]
+  ignoredTokens: MutableToken[]
+  parserErrors: Validation[]
+  ruleErrors: Validation[]
+  ignoredRuleErrors: Validation[]
 }
 
 export type Result = {
@@ -109,7 +113,14 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
       ruleHandlers.forEach((rule) => {
         travel(result.tokens, rule)
         if (globalThis.__DEV__) {
-          const currentValue = join(result.tokens, start, ignoredMarks, [], [], [])
+          const currentValue = join(
+            result.tokens,
+            start,
+            ignoredMarks,
+            [],
+            [],
+            []
+          )
           if (lastValue !== currentValue) {
             logger.log(`[After process by ${rule.name}]`)
             logger.log(currentValue)
@@ -118,7 +129,14 @@ const lint = (str: string, normalizedOptions: NormalizedOptions): Result => {
         }
       })
 
-      lastValue = join(result.tokens, start, ignoredMarks, ignoredTokens, ruleErrors, ignoredRuleErrors)
+      lastValue = join(
+        result.tokens,
+        start,
+        ignoredMarks,
+        ignoredTokens,
+        ruleErrors,
+        ignoredRuleErrors
+      )
 
       if (globalThis.__DEV__) {
         logger.log('[Eventual block value]')

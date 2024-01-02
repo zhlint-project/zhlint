@@ -164,13 +164,9 @@ export type OtherPunctuationType =
   | CharType.HALFWIDTH_OTHER_PUNCTUATION
   | CharType.FULLWIDTH_OTHER_PUNCTUATION
 
-export type SinglePunctuationType =
-  | PauseOrStopType
-  | OtherPunctuationType
+export type SinglePunctuationType = PauseOrStopType | OtherPunctuationType
 
-export type PunctuationType =
-  | SinglePunctuationType
-  | BracketType
+export type PunctuationType = SinglePunctuationType | BracketType
 
 export type NormalContentTokenType = LetterType | SinglePunctuationType
 
@@ -190,9 +186,7 @@ export type HalfwidthTokenType =
   | CharType.WESTERN_LETTER
   | FullwidthPuntuationType
 
-export type FullwidthTokenType =
-  | CharType.CJK_CHAR
-  | FullwidthPuntuationType
+export type FullwidthTokenType = CharType.CJK_CHAR | FullwidthPuntuationType
 
 /**
  * TODO: paired html tags should be hyper mark
@@ -245,9 +239,7 @@ export type NonTokenCharType =
 
 export type GeneralType = TokenType | NonTokenCharType
 
-export const getHalfwidthTokenType = (
-  type: TokenType
-): TokenType => {
+export const getHalfwidthTokenType = (type: TokenType): TokenType => {
   switch (type) {
     case CharType.CJK_CHAR:
       return CharType.WESTERN_LETTER
@@ -259,9 +251,7 @@ export const getHalfwidthTokenType = (
   return type
 }
 
-export const getFullwidthTokenType = (
-  type: TokenType
-): TokenType => {
+export const getFullwidthTokenType = (type: TokenType): TokenType => {
   switch (type) {
     case CharType.WESTERN_LETTER:
       return CharType.CJK_CHAR
@@ -286,9 +276,7 @@ export type InvisibleTokenType = HyperTokenType.HYPER_MARK
 
 export type VisibilityUnknownTokenType = HyperTokenType.HYPER_CONTENT
 
-export const isLetterType = (
-  type: GeneralType
-): type is LetterType => {
+export const isLetterType = (type: GeneralType): type is LetterType => {
   return type === CharType.WESTERN_LETTER || type === CharType.CJK_CHAR
 }
 
@@ -296,21 +284,19 @@ export const isPauseOrStopType = (
   type: GeneralType
 ): type is PauseOrStopType => {
   return (
-    type === CharType.HALFWIDTH_PAUSE_OR_STOP || type === CharType.FULLWIDTH_PAUSE_OR_STOP
+    type === CharType.HALFWIDTH_PAUSE_OR_STOP ||
+    type === CharType.FULLWIDTH_PAUSE_OR_STOP
   )
 }
 
-export const isQuotationType = (
-  type: GeneralType
-): type is QuotationType => {
+export const isQuotationType = (type: GeneralType): type is QuotationType => {
   return (
-    type === CharType.HALFWIDTH_QUOTATION || type === CharType.FULLWIDTH_QUOTATION
+    type === CharType.HALFWIDTH_QUOTATION ||
+    type === CharType.FULLWIDTH_QUOTATION
   )
 }
 
-export const isBracketType = (
-  type: GeneralType
-): type is BracketType => {
+export const isBracketType = (type: GeneralType): type is BracketType => {
   return (
     type === CharType.HALFWIDTH_BRACKET || type === CharType.FULLWIDTH_BRACKET
   )
@@ -320,17 +306,15 @@ export const isOtherPunctuationType = (
   type: GeneralType
 ): type is OtherPunctuationType => {
   return (
-    type === CharType.HALFWIDTH_OTHER_PUNCTUATION || type === CharType.FULLWIDTH_OTHER_PUNCTUATION
+    type === CharType.HALFWIDTH_OTHER_PUNCTUATION ||
+    type === CharType.FULLWIDTH_OTHER_PUNCTUATION
   )
 }
 
 export const isSinglePunctuationType = (
   type: GeneralType
 ): type is SinglePunctuationType => {
-  return (
-    isPauseOrStopType(type) ||
-    isOtherPunctuationType(type)
-  )
+  return isPauseOrStopType(type) || isOtherPunctuationType(type)
 }
 
 export const isPunctuationType = (
@@ -358,10 +342,7 @@ export const isHalfwidthPunctuationType = (
 export const isHalfwidthType = (
   type: GeneralType
 ): type is HalfwidthTokenType => {
-  return (
-    type === CharType.WESTERN_LETTER ||
-    isHalfwidthPunctuationType(type)
-  )
+  return type === CharType.WESTERN_LETTER || isHalfwidthPunctuationType(type)
 }
 
 export const isFullwidthPunctuationType = (
@@ -378,15 +359,10 @@ export const isFullwidthPunctuationType = (
 export const isFullwidthType = (
   type: GeneralType
 ): type is FullwidthTokenType => {
-  return (
-    type === CharType.CJK_CHAR ||
-    isFullwidthPunctuationType(type)
-  )
+  return type === CharType.CJK_CHAR || isFullwidthPunctuationType(type)
 }
 
-export const isNonCodeVisibleType = (
-  type: GeneralType
-): type is LetterType => {
+export const isNonCodeVisibleType = (type: GeneralType): type is LetterType => {
   return (
     isLetterType(type) ||
     isSinglePunctuationType(type) ||
@@ -395,12 +371,8 @@ export const isNonCodeVisibleType = (
   )
 }
 
-export const isVisibleType = (
-  type: GeneralType
-): type is VisibleTokenType => {
-  return (
-    isNonCodeVisibleType(type) || type === HyperTokenType.CODE_CONTENT
-  )
+export const isVisibleType = (type: GeneralType): type is VisibleTokenType => {
+  return isNonCodeVisibleType(type) || type === HyperTokenType.CODE_CONTENT
 }
 
 export const isInvisibleType = (

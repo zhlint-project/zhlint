@@ -38,7 +38,7 @@ import {
   MutableToken,
   HyperTokenType,
   isFullwidthPunctuationType,
-  isHalfwidthPunctuationType,
+  isHalfwidthPunctuationType
 } from '../parser'
 import {
   checkSpaceAfter,
@@ -112,12 +112,12 @@ const generateHandler = (options: Options): Handler => {
       (isHalfwidthPunctuationType(token.modifiedType) &&
         oneAfterHalfWidthPunctuationOption)
     ) {
-      const spaceAfter =
-        isHalfwidthPunctuationType(token.modifiedType) ? ' ' : ''
-      const message =
-        isHalfwidthPunctuationType(token.modifiedType)
-          ? PUNCTUATION_SPACE_AFTER
-          : PUNCTUATION_NOSPACE_AFTER
+      const spaceAfter = isHalfwidthPunctuationType(token.modifiedType)
+        ? ' '
+        : ''
+      const message = isHalfwidthPunctuationType(token.modifiedType)
+        ? PUNCTUATION_SPACE_AFTER
+        : PUNCTUATION_NOSPACE_AFTER
 
       const contentTokenAfter = findVisibleTokenAfter(group, token)
       if (

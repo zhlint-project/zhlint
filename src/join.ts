@@ -18,7 +18,7 @@ const isIgnored = (token: Token, marks: IgnoredMark[] = []): IgnoredFlags => {
     [ValidationTarget.SPACE_AFTER]: false,
     [ValidationTarget.START_VALUE]: false,
     [ValidationTarget.END_VALUE]: false,
-    [ValidationTarget.INNER_SPACE_BEFORE]: false,
+    [ValidationTarget.INNER_SPACE_BEFORE]: false
   }
 
   // - group: startValue, innerSpaceBefore, endValue, spaceAfter
@@ -115,7 +115,13 @@ const join = (
     ignoredTokens.push(tokens)
   }
   if (!isChild) {
-    recordValidations(tokens, offset, ignoredFlags, validations, ignoredValidations)
+    recordValidations(
+      tokens,
+      offset,
+      ignoredFlags,
+      validations,
+      ignoredValidations
+    )
   }
 
   if (ignoredFlags[ValidationTarget.START_VALUE]) {
@@ -143,7 +149,13 @@ const join = (
       if (subIgnoredFlags.ignored) {
         ignoredTokens.push(token)
       }
-      recordValidations(token, offset, subIgnoredFlags, validations, ignoredValidations)
+      recordValidations(
+        token,
+        offset,
+        subIgnoredFlags,
+        validations,
+        ignoredValidations
+      )
       if (!Array.isArray(token)) {
         if (subIgnoredFlags[ValidationTarget.VALUE]) {
           token.ignoredValue = token.modifiedValue
@@ -154,16 +166,25 @@ const join = (
           token.modifiedSpaceAfter = token.spaceAfter
         }
 
-        return [
-          token.modifiedValue,
-          token.modifiedSpaceAfter
-        ].filter(Boolean).join('')
+        return [token.modifiedValue, token.modifiedSpaceAfter]
+          .filter(Boolean)
+          .join('')
       }
-      return join(token, offset, ignoredMarks, ignoredTokens, validations, ignoredValidations, true)
+      return join(
+        token,
+        offset,
+        ignoredMarks,
+        ignoredTokens,
+        validations,
+        ignoredValidations,
+        true
+      )
     }),
     tokens.modifiedEndValue,
     tokens.modifiedSpaceAfter
-  ].filter(Boolean).join('')
+  ]
+    .filter(Boolean)
+    .join('')
 }
 
 export default join

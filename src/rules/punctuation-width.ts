@@ -52,7 +52,7 @@ const widthPairList: WidthPairList = [
   [`[`, `［`],
   [`]`, `］`],
   [`{`, `｛`],
-  [`}`, `｝`],
+  [`}`, `｝`]
 ]
 const widthSidePairList: WidthSidePairList = [
   [`"`, `“`, `”`],
@@ -191,11 +191,7 @@ const generateHandler = (options: Options): Handler => {
         PUNCTUATION_FULL_WIDTH
       )
     } else if (halfwidthMap[endValue]) {
-      checkEndValue(
-        token,
-        halfwidthMap[endValue][1],
-        PUNCTUATION_HALF_WIDTH
-      )
+      checkEndValue(token, halfwidthMap[endValue][1], PUNCTUATION_HALF_WIDTH)
     }
   }
   return handleHyperSpaceOption

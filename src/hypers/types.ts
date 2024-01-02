@@ -24,6 +24,7 @@ export type ParsedStatus = {
   blocks: Block[]
 }
 
-export type ParsedBlock = Block & MutableParseResult & {
-  originValue: string
-}
+export type ParsedBlock = Block &
+  MutableParseResult & {
+    originValue: string
+  }

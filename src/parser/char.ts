@@ -7,7 +7,7 @@ import { CharType } from './types'
  * - U+2026 HORIZONTAL ELLIPSIS, U+22EF MIDLINE HORIZONTAL ELLIPSIS
  * - U+25CF BLACK CIRCLE (emphasis dots), U+2022 BULLET (emphasis dots), U+00B7 MIDDLE DOT (interpuncts),
  *   U+2027 HYPHENATION POINT, U+2022 BULLET, U+30FB KATAKANA MIDDLE DOT
- * 
+ *
  * Decoration marks:
  * - emphasis dots: U+25CF BLACK CIRCLE, U+2022 BULLET
  * - book title marks: U+FE4F WAVY LOW LINE
@@ -19,7 +19,7 @@ const newCharTypeSet: { [key in CharType]?: string } = {
     // normal punctuation marks
     '，。、；：？！',
     // special punctuation marks
-    '⁈⁇‼⁉',
+    '⁈⁇‼⁉'
   ].join(''),
   [CharType.HALFWIDTH_QUOTATION]: '\'"',
   [CharType.FULLWIDTH_QUOTATION]: '‘’“”《》〈〉『』「」【】〖〗',
@@ -40,8 +40,8 @@ const newCharTypeSet: { [key in CharType]?: string } = {
     '～',
     // U+25CF BLACK CIRCLE, U+2022 BULLET, U+00B7 MIDDLE DOT,
     // U+2027 HYPHENATION POINT, U+30FB KATAKANA MIDDLE DOT
-    '●•·‧・',
-  ].join(''),
+    '●•·‧・'
+  ].join('')
 }
 
 /**

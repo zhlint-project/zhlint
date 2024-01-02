@@ -13,12 +13,18 @@ export const isBlock = (piece: Piece): piece is ParsedBlock => {
   return !('nonBlock' in piece)
 }
 
-const replaceBlocks = (str: string, blocks: ParsedBlock[]): {
+const replaceBlocks = (
+  str: string,
+  blocks: ParsedBlock[]
+): {
   value: string
   pieces: Piece[]
 } => {
   if (blocks.length === 0) {
-    return { value: str, pieces: [{ value: str, start: 0, end: str.length, nonBlock: true }] }
+    return {
+      value: str,
+      pieces: [{ value: str, start: 0, end: str.length, nonBlock: true }]
+    }
   }
 
   const pieces = blocks.reduce((pieces: Piece[], block, index) => {

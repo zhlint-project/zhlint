@@ -19,13 +19,7 @@ try {
 const parser = (data: ParsedStatus): ParsedStatus => {
   data.modifiedValue = data.modifiedValue.replace(
     matcher,
-    (
-      raw: string,
-      start: string,
-      value: string,
-      end: string,
-      index: number
-    ) => {
+    (raw: string, start: string, value: string, end: string, index: number) => {
       const { length } = raw
       const name = start.substring(3).trim().split(' ')[0] || 'default'
       data.ignoredByParsers.push({

@@ -9,7 +9,7 @@ import {
   isVisibleType,
   TokenType,
   CharType,
-isHalfwidthPunctuationType
+  isHalfwidthPunctuationType
 } from '../parser'
 
 // options
@@ -22,7 +22,10 @@ export type Options = {
   halfwidthPunctuation?: string
   fullwidthPunctuation?: string
   adjustedFullwidthPunctuation?: string
-  unifiedPunctuation?: 'traditional' | 'simplified' | Record<string, boolean | string[]> & { default: boolean }
+  unifiedPunctuation?:
+    | 'traditional'
+    | 'simplified'
+    | (Record<string, boolean | string[]> & { default: boolean })
 
   // case: abbrs
   skipAbbrs?: string[]

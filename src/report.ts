@@ -3,7 +3,7 @@ import {
   CharType,
   checkCharType,
   isFullwidthPunctuationType,
-  isHalfwidthPunctuationType,
+  isHalfwidthPunctuationType
 } from './parser'
 
 export const env: {
@@ -112,9 +112,7 @@ export const reportItem = (
   validations.forEach(({ index, length, target, message }) => {
     // 0. final index and position
     const finalIndex =
-      target === 'spaceAfter' || target === 'endValue'
-        ? index + length
-        : index
+      target === 'spaceAfter' || target === 'endValue' ? index + length : index
     const { row, column, line } = getPositionByOffset(str, finalIndex)
 
     // 1. headline
