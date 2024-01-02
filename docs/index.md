@@ -319,6 +319,40 @@ type RuleOptions = {
   // Convert traditional Chinese punctuations into simplified ones or vice versa.
   // default preset: `simplified`
   // e.g. `「文字」` -> `“文字”`
+  //
+  // besides the above, we also unify some common punctuations below:
+  //
+  // // U+2047 DOUBLE QUESTION MARK, U+203C DOUBLE EXCLAMATION MARK
+  // // U+2048 QUESTION EXCLAMATION MARK, U+2049 EXCLAMATION QUESTION MARK
+  // '？？': ['⁇'],
+  // '！！': ['‼'],
+  // '？！': ['⁈'],
+  // '！？': ['⁉'],
+  //
+  // // U+002F SOLIDUS, U+FF0F FULLWIDTH SOLIDUS
+  // '/': ['/', '／'],
+  //
+  // // U+FF5E FULLWIDTH TILDE
+  // '~': ['~', '～'],
+  //
+  // // U+2026 HORIZONTAL ELLIPSIS, U+22EF MIDLINE HORIZONTAL ELLIPSIS
+  // '…': ['…', '⋯'],
+  //
+  // // U+25CF BLACK CIRCLE, U+2022 BULLET, U+00B7 MIDDLE DOT,
+  // // U+2027 HYPHENATION POINT, U+30FB KATAKANA MIDDLE DOT
+  // '·': ['●', '•', '·', '‧', '・'],
+  //
+  // advanced usage: you can also specify a more detailed map like:
+  //
+  // ```
+  // {
+  //   default: true, // follow all the default preset
+  //   '「': ['“', '【'], // convert `“` or `【` into `「`
+  //   '」': ['”', '】'], // convert `”` or `】` into `」`
+  //  '…': true, // follow the default preset for this character
+  //  '·': false, // not unify any of these characters
+  // }
+  // ```
   unifiedPunctuation?: 'traditional' | 'simplified' | Record<string, boolean | string[]> & { default: boolean }
 
   // Special case: skip `fullWidthPunctuation` for abbreviations.

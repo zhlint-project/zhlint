@@ -176,9 +176,7 @@ We are figuring out all the requirements by several options below:
 
 These options can format and determine punctuations to be used.
 
-The option `adjustedFullWidthPunctuation` defines which fullwidth punctuations zhlint will treat them as halfwidth punctuations when processing the further spaces issues around them. Usually it's just about quotations since the fullwidth quotations in morder Chinese fonts actually are only rendered in halfwidth.
-
-<!-- TODO: more details about `adjustedFullWidthPunctuation` -->
+The option `adjustedFullWidthPunctuation` defines which fullwidth punctuations zhlint will treat them as halfwidth punctuations when processing the further spaces issues around them. Usually it's just about quotations since the fullwidth quotations in morder Chinese fonts actually are only rendered in halfwidth. For more details, including advanced usage, see README.
 
 **For spaces**
 
