@@ -199,27 +199,61 @@ type RuleOptions = {
 
   /* PUNCTUATIONS */
 
-  // Convert these punctuations into half-width.
+  // Convert these punctuations into halfwidth.
   // default preset: `()`
   // e.g. `（文字）` -> `(文字)`
-  halfWidthPunctuation?: string
+  halfwidthPunctuation?: string
 
-  // Convert these punctuations into full-width.
+  // Convert these punctuations into fullwidth.
   // default preset: `，。：；？！“”‘’`
   // e.g. `文字,文字.` -> `文字，文字。`
-  fullWidthPunctuation?: string
+  fullwidthPunctuation?: string
 
-  // Treat these full-width punctuations as half-fullWidthPunctuation
+  // Treat these fullwidth punctuations as half-fullWidthPunctuation
   // when processing the spaces issues around them.
   // Since something like quotations in morder Chinese fonts are
-  // only rendered in half-width.
+  // only rendered in halfwidth.
   // default preset: `“”‘’`
-  adjustedFullWidthPunctuation?: string
+  adjustedFullwidthPunctuation?: string
 
   // Convert traditional Chinese punctuations into simplified ones or vice versa.
   // default preset: `simplified`
   // e.g. `「文字」` -> `“文字”`
-  unifiedPunctuation?: 'traditional' | 'simplified'
+  //
+  // besides the above, we also unify some common punctuations below:
+  //
+  // // U+2047 DOUBLE QUESTION MARK, U+203C DOUBLE EXCLAMATION MARK
+  // // U+2048 QUESTION EXCLAMATION MARK, U+2049 EXCLAMATION QUESTION MARK
+  // '？？': ['⁇'],
+  // '！！': ['‼'],
+  // '？！': ['⁈'],
+  // '！？': ['⁉'],
+  //
+  // // U+002F SOLIDUS, U+FF0F FULLWIDTH SOLIDUS
+  // '/': ['/', '／'],
+  //
+  // // U+FF5E FULLWIDTH TILDE
+  // '~': ['~', '～'],
+  //
+  // // U+2026 HORIZONTAL ELLIPSIS, U+22EF MIDLINE HORIZONTAL ELLIPSIS
+  // '…': ['…', '⋯'],
+  //
+  // // U+25CF BLACK CIRCLE, U+2022 BULLET, U+00B7 MIDDLE DOT,
+  // // U+2027 HYPHENATION POINT, U+30FB KATAKANA MIDDLE DOT
+  // '·': ['●', '•', '·', '‧', '・'],
+  //
+  // advanced usage: you can also specify a more detailed map like:
+  //
+  // ```
+  // {
+  //   default: true, // follow all the default preset
+  //   '「': ['“', '【'], // convert `“` or `【` into `「`
+  //   '」': ['”', '】'], // convert `”` or `】` into `」`
+  //  '…': true, // follow the default preset for this character
+  //  '·': false, // not unify any of these characters
+  // }
+  // ```
+  unifiedPunctuation?: 'traditional' | 'simplified' | Record<string, boolean | string[]> & { default: boolean }
 
   // Special case: skip `fullWidthPunctuation` for abbreviations.
   // default preset:
@@ -232,13 +266,13 @@ type RuleOptions = {
   // - `true`: one space
   // - `undefined`: do nothing
   // e.g. `foo  bar` -> `foo bar`
-  spaceBetweenHalfWidthLetters?: boolean
+  spaceBetweenHalfwidthContent?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文 字` -> `文字`
-  noSpaceBetweenFullWidthLetters?: boolean
+  noSpaceBetweenFullwidthContent?: boolean
 
   // default preset: `true`
   // - `true`: one space
@@ -246,7 +280,7 @@ type RuleOptions = {
   // - `undefined`: do nothing
   // e.g. `文字 foo文字` -> `文字 foo 文字` (`true`)
   // e.g. `文字foo 文字` -> `文字foo文字` (`false`)
-  spaceBetweenMixedWidthLetters?: boolean
+  spaceBetweenMixedwidthContent?: boolean
 
   // Special case: skip `spaceBetweenMixedWidthContent`
   // for numbers x Chinese units.
@@ -259,7 +293,7 @@ type RuleOptions = {
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字 ，文字` -> `文字，文字`
-  noSpaceBeforePunctuation?: boolean
+  noSpaceBeforePauseOrStop?: boolean
 
   // default preset: `true`
   // - `true`: one space
@@ -267,13 +301,13 @@ type RuleOptions = {
   // - `undefined`: do nothing
   // e.g. `文字,文字` -> `文字, 文字` (`true`)
   // e.g. `文字, 文字` -> `文字,文字` (`false`)
-  spaceAfterHalfWidthPunctuation?: boolean
+  spaceAfterHalfwidthPauseOrStop?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字， 文字` -> `文字，文字`
-  noSpaceAfterFullWidthPunctuation?: boolean
+  noSpaceAfterFullwidthPauseOrStop?: boolean
 
   /* SPACES AROUND QUOTES */
 
@@ -283,19 +317,19 @@ type RuleOptions = {
   // - `undefined`: do nothing
   // e.g. `文字 "文字"文字` -> `文字 "文字" 文字` (`true`)
   // e.g. `文字"文字" 文字` -> `文字"文字"文字` (`false`)
-  spaceOutsideHalfQuote?: boolean
+  spaceOutsideHalfwidthQuotation?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字 “文字” 文字` -> `文字“文字”文字`
-  noSpaceOutsideFullQuote?: boolean
+  noSpaceOutsideFullwidthQuotation?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字“ 文字 ”文字` -> `文字“文字”文字`
-  noSpaceInsideQuote?: boolean
+  noSpaceInsideQuotation?: boolean
 
   /* SPACES AROUND BRACKETS */
 
@@ -303,12 +337,12 @@ type RuleOptions = {
   // - `true`: one space
   // - `false`: zero space
   // - `undefined`: do nothing
-  spaceOutsideHalfBracket?: boolean
+  spaceOutsideHalfwidthBracket?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
-  noSpaceOutsideFullBracket?: boolean
+  noSpaceOutsideFullwidthBracket?: boolean
 
   // default preset: `true`
   // - `true`: zero space
@@ -331,7 +365,7 @@ type RuleOptions = {
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字** foo **文字` -> `文字 **foo** 文字`
-  noSpaceInsideWrapper?: boolean
+  noSpaceInsideHyperMark?: boolean
 
   /* SPACES AT THE BEGINNING/END */
 
@@ -340,4 +374,3 @@ type RuleOptions = {
   trimSpace?: boolean
 }
 ```
-
