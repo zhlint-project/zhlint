@@ -32,7 +32,7 @@ import {
   GroupTokenType,
   Handler,
   isLetterType,
-  isPunctuationType,
+  isPauseOrStopType,
   MarkSideType,
   MutableGroupToken,
   MutableToken,
@@ -55,12 +55,6 @@ import {
   PUNCTUATION_SPACE_AFTER
 } from './messages'
 
-// TODO: review
-
-const normalPunctuationList = `,.;:?!，、。；：？！`.split('')
-const isNormalPunctuation = (char: string): boolean =>
-  normalPunctuationList.indexOf(char) >= 0
-
 const generateHandler = (options: Options): Handler => {
   const noBeforePunctuationOption = options?.noSpaceBeforePauseOrStop
   const oneAfterHalfWidthPunctuationOption =
@@ -70,10 +64,7 @@ const generateHandler = (options: Options): Handler => {
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
     // skip non-punctuation tokens and non-normal punctuations
-    if (!isPunctuationType(token.type)) {
-      return
-    }
-    if (!isNormalPunctuation(token.value)) {
+    if (!isPauseOrStopType(token.type)) {
       return
     }
 
@@ -87,14 +78,14 @@ const generateHandler = (options: Options): Handler => {
       return
     }
 
-    // 1. content/right-quote/right-bracket/code x punctuation
+    // 1. content/right-quotation/right-bracket/code x punctuation
     if (noBeforePunctuationOption) {
       const contentTokenBefore = findVisibleTokenBefore(group, token)
       if (
         contentTokenBefore &&
         // content
         (isLetterType(contentTokenBefore.type) ||
-          // right-quote
+          // right-quotation
           contentTokenBefore.type === GroupTokenType.GROUP ||
           // right-bracket
           (contentTokenBefore.type === HyperTokenType.BRACKET_MARK &&
@@ -114,7 +105,7 @@ const generateHandler = (options: Options): Handler => {
       }
     }
 
-    // 2. half/full x content/left-quote/left-bracket/code
+    // 2. half/full x content/left-quotation/left-bracket/code
     if (
       (isFullwidthPunctuationType(token.modifiedType) &&
         noAfterFullWidthPunctuationOption) ||
@@ -133,7 +124,7 @@ const generateHandler = (options: Options): Handler => {
         contentTokenAfter &&
         // content
         (isLetterType(contentTokenAfter.type) ||
-          // left-quote
+          // left-quotation
           contentTokenAfter.type === GroupTokenType.GROUP ||
           // left-bracket
           (contentTokenAfter.type === HyperTokenType.BRACKET_MARK &&
