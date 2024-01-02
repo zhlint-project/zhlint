@@ -142,7 +142,7 @@ export type DeprecatedOptions = {
    */
   noSpaceAfterFullWidthPunctuation?: boolean
 
-  // space around quote
+  // space around quotation
   /**
    * @deprecated
    *

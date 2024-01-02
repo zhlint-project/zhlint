@@ -67,13 +67,13 @@ export type MutableParseResult = {
  * - half-width punctuation -> halfwidth pause or stop punctuation mark
  * - width-width punctuation -> fullwidth pause or stop punctuation mark
  * - punctuation pair as special marks: brackets -> bracket
- * - punctuation pair as a group: quotes -> quotation or book title mark
+ * - punctuation pair as a group: quotations -> quotation or book title mark
  * - -> halfwidth/fullwidth other punctuation mark
  * Besides them there are some special tokens
  * - content-hyper from hyperMarks as input
  * For spaces they would be included as one or multiple successive spaces in
  * - afterSpace after a token or
- * - innerSpaceBefore after the left quote of a group
+ * - innerSpaceBefore after the left quotation of a group
  */
 export const parse = (str: string, hyperMarks: Mark[] = []): ParseResult => {
   // init status and hyper marks

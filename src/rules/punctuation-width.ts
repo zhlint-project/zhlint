@@ -168,7 +168,7 @@ const generateHandler = (options: Options): Handler => {
       return
     }
 
-    // 3. quotes in the alter pair map
+    // 3. quotations in the alter pair map
     const startValue = (token as MutableGroupToken).modifiedStartValue
     const endValue = (token as MutableGroupToken).modifiedEndValue
     if (fullwidthPairMap[startValue]) {

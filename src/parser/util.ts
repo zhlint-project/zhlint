@@ -41,9 +41,9 @@ export const handlePunctuation = (
   // check the current token type
   // - start of a mark: start an unfinished mark
   // - end of a mark: end the current unfinished mark
-  // - neutral quote: start/end a group by pairing the last unfinished group
-  // - left quote: start a new unfinished group
-  // - right quote: end the current unfinished group
+  // - neutral quotation: start/end a group by pairing the last unfinished group
+  // - left quotation: start a new unfinished group
+  // - right quotation: end the current unfinished group
   // - other punctuation: add and end the current token
   if (isBracketType(type)) {
     if (BRACKET_CHAR_SET.left.indexOf(char) >= 0) {

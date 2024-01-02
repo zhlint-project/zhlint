@@ -219,7 +219,7 @@ export enum HyperTokenType {
   HYPER_CONTENT = 'hyper-content',
 
   /**
-   * Unpaired brackets/quotes
+   * Unpaired brackets/quotations
    */
   UNMATCHED = 'unmatched',
   /**

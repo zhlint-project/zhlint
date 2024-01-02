@@ -1,7 +1,7 @@
 /**
  * @fileoverview
  *
- * This rule is checking spaces besides quotes.
+ * This rule is checking spaces besides quotations.
  *
  * Options
  * - noSpaceInsideQuote: boolean | undefined
@@ -63,7 +63,7 @@ const generateHandler = (options: Options): Handler => {
       return
     }
 
-    // 1. no space inside quote
+    // 1. no space inside quotation
     if (noSpaceInsideQuoteOption) {
       // 1.1 left-quote x content/punctuation/left-quote/left-bracket/code/unknown/container
       const firstInsdieToken = token[0]
@@ -86,7 +86,7 @@ const generateHandler = (options: Options): Handler => {
       }
     }
 
-    // 2. space outside half/full quote
+    // 2. space outside half/full quotation
     if (
       typeof spaceOutsideHalfQuoteOption !== 'undefined' ||
       noSpaceOutsideFullQuoteOption

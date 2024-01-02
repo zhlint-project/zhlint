@@ -170,7 +170,7 @@ describe('lint by rules', () => {
     expect(getOutput('你"好",再见.', options)).toBe('你“好”，再见。')
     expect(getOutput('"你\'好\'",再见.', options)).toBe('“你‘好’”，再见。')
 
-    // keep the single quote between half-width content without spaces
+    // keep the single quotation between half-width content without spaces
     expect(getOutput("what's up", options)).toBe("what's up")
   })
   describe('[punctuation-unification] unify the punctuation choices', () => {
@@ -314,7 +314,7 @@ describe('lint by rules', () => {
       expect(getOutput('一。 “ 二 ” 。 三', options)).toBe('一。“ 二 ” 。三')
     })
   })
-  describe('[space-quote] the space around quotes', () => {
+  describe('[space-quote] the space around quotations', () => {
     test('no space inside', () => {
       const options: Options = {
         rules: {
@@ -338,7 +338,7 @@ describe('lint by rules', () => {
       })
       expect(getOutput('foo “ bar ” baz', options)).toBe('foo “bar” baz')
     })
-    test('one space outside half quote', () => {
+    test('one space outside half quotation', () => {
       const options: Options = {
         rules: {
           spaceOutsideHalfwidthQuotation: true
@@ -350,7 +350,7 @@ describe('lint by rules', () => {
       // TODO: no space besides content?
       expect(getOutput('一 " 二 " 三', options)).toBe('一 " 二 " 三')
     })
-    test('no space outside half quote', () => {
+    test('no space outside half quotation', () => {
       const options: Options = {
         rules: {
           spaceOutsideHalfwidthQuotation: false
@@ -360,7 +360,7 @@ describe('lint by rules', () => {
       expect(getOutput('一 " 二 " 三', options)).toBe('一" 二 "三')
       expect(getOutput('一 “ 二 ” 三', options)).toBe('一 “ 二 ” 三')
     })
-    test('no space outside full quote', () => {
+    test('no space outside full quotation', () => {
       const options: Options = {
         rules: {
           noSpaceOutsideFullwidthQuotation: true
@@ -492,7 +492,7 @@ describe('lint by cases', () => {
   test('[case] plural brackets', () => {
     expect(getOutput('3 minite(s) left', options)).toBe('3 minite(s) left')
   })
-  test('[case] single quote for shorthand', () => {
+  test('[case] single quotation for shorthand', () => {
     expect(getOutput(`how many user's here`, options)).toBe(
       `how many user's here`
     )

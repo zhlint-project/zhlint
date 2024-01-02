@@ -3,14 +3,18 @@ import { Ref, computed, inject } from 'vue';
 
 const TOKEN_TYPE_MAP = {
   '': '',
-  'letters-half': 'English letters',
-  'letters-full': 'Chinese characters',
-  'punctuation-half': 'Half-width punctuation',
-  'punctuation-full': 'Full-width punctuation',
+  'western-letter': 'Wester letters and numbers',
+  'cjk-char': 'CJK characters',
+  'halfwidth-pause-or-stop': 'Half-width punctuation',
+  'fullwidth-pause-or-stop': 'Full-width punctuation',
+  'halfwidth-other-punctuation': 'Half-width punctuation',
+  'fullwidth-other-punctuation': 'Full-width punctuation',
+  'hyper-mark': 'Non-content',
   'hyper-content': 'Non-content',
   'code-content': 'Code',
-  'wrapper-bracket': 'Bracket',
-  'group': 'Qutation',
+  'bracket-mark': 'Bracket',
+  'group': 'Quotation',
+  'unmatched': 'Unpaired bracket/quotation',
   'non-block': 'Non-content',
 }
 const PROP_MAP = {
@@ -32,17 +36,17 @@ const PROP_MAP = {
   startValue: {
     modified: 'modifiedStartValue',
     ignored: 'ignoredStartValue',
-    label: 'Left Qutation',
+    label: 'Left Quotation',
   },
   innerSpaceBefore: {
     modified: 'modifiedInnerSpaceBefore',
     ignored: 'ignoredInnerSpaceBefore',
-    label: 'Inner Left Space in Qutations',
+    label: 'Inner Left Space in Quotations',
   },
   endValue: {
     modified: 'modifiedEndValue',
     ignored: 'ignoredEndValue',
-    label: 'Right Qutation',
+    label: 'Right Quotation',
   },
 }
 
@@ -67,7 +71,7 @@ const checkType = (data, prop) => {
 
 const checkProp = (data, prop) => {
   if (!data || !prop) {
-    return { desc: 'click the tokens in "Origin" or "Modified" to see more details' }
+    return { desc: 'click the tokens in "Origin" or "Formatted" to see more details' }
   }
   const { modified, ignored } = PROP_MAP[prop]
   console.log(data, prop, modified, ignored, data[modified] === data[prop], ignored in data)

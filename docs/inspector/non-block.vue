@@ -23,6 +23,8 @@ const setCurrent = () => {
     currentProp.value = 'value'
   }
 }
+
+console.log('data', data)
 </script>
 
 <template

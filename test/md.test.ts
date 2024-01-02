@@ -260,7 +260,7 @@ describe('markdown lint', () => {
       '引入一个<a href="https://zh.wikipedia.org/wiki/工厂方法#工厂">工厂函数 (factory function)</a> 使得我们的测试更简洁更易读'
     )
   })
-  test('[md] special quotes group inside md mark', () => {
+  test('[md] special quotations group inside md mark', () => {
     expect(
       getOutput(
         '更多测试 Vue 组件的知识可翻阅核心团员 [Edd Yerburgh](https://eddyerburgh.me/) 的书[《测试 Vue.js 应用》](https://www.manning.com/books/testing-vuejs-applications)。'
