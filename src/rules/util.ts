@@ -46,14 +46,12 @@ export type Options = {
   spaceOutsideHalfwidthBracket?: boolean
   noSpaceOutsideFullwidthBracket?: boolean
   noSpaceInsideBracket?: boolean
-  noSpaceOutsideBookTitleMark?: boolean
-  noSpaceInsideBookTitleMark?: boolean
 
   // space around code
   spaceOutsideCode?: boolean
 
   // space around mark
-  noSpaceInsideHyperBracket?: boolean
+  noSpaceInsideHyperMark?: boolean
 
   // trim space
   trimSpace?: boolean
@@ -182,13 +180,13 @@ export type DeprecatedOptions = {
   /**
    * @deprecated
    *
-   * Please use `noSpaceInsideHyperBracket` instead.
+   * Please use `noSpaceInsideHyperMark` instead.
    */
   noSpaceInsideWrapper?: boolean
   /**
    * @deprecated
    *
-   * Please use `noSpaceInsideHyperBracket` instead.
+   * Please use `noSpaceInsideHyperMark` instead.
    */
   noSpaceInsideMark?: boolean
 }

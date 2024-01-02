@@ -37,7 +37,7 @@ import {
 import { MARKDOWN_NOSPACE_INSIDE } from './messages'
 
 const generateHandler = (options: Options): Handler => {
-  const noSpaceInsideMarkOption = options?.noSpaceInsideHyperBracket
+  const noSpaceInsideMarkOption = options?.noSpaceInsideHyperMark
 
   return (token: MutableToken, _, group: MutableGroupToken) => {
     // skip if there is no options

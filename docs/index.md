@@ -299,27 +299,27 @@ type RuleOptions = {
 
   /* PUNCTUATIONS */
 
-  // Convert these punctuations into half-width.
+  // Convert these punctuations into halfwidth.
   // default preset: `()`
   // e.g. `（文字）` -> `(文字)`
-  halfWidthPunctuation?: string
+  halfwidthPunctuation?: string
 
-  // Convert these punctuations into full-width.
+  // Convert these punctuations into fullwidth.
   // default preset: `，。：；？！“”‘’`
   // e.g. `文字,文字.` -> `文字，文字。`
-  fullWidthPunctuation?: string
+  fullwidthPunctuation?: string
 
-  // Treat these full-width punctuations as half-fullWidthPunctuation
+  // Treat these fullwidth punctuations as half-fullWidthPunctuation
   // when processing the spaces issues around them.
-  // Since something like quotes in morder Chinese fonts are
-  // only rendered in half-width.
+  // Since something like quotations in morder Chinese fonts are
+  // only rendered in halfwidth.
   // default preset: `“”‘’`
-  adjustedFullWidthPunctuation?: string
+  adjustedFullwidthPunctuation?: string
 
   // Convert traditional Chinese punctuations into simplified ones or vice versa.
   // default preset: `simplified`
   // e.g. `「文字」` -> `“文字”`
-  unifiedPunctuation?: 'traditional' | 'simplified'
+  unifiedPunctuation?: 'traditional' | 'simplified' | Record<string, boolean | string[]> & { default: boolean }
 
   // Special case: skip `fullWidthPunctuation` for abbreviations.
   // default preset:
@@ -332,13 +332,13 @@ type RuleOptions = {
   // - `true`: one space
   // - `undefined`: do nothing
   // e.g. `foo  bar` -> `foo bar`
-  spaceBetweenHalfWidthLetters?: boolean
+  spaceBetweenHalfwidthContent?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文 字` -> `文字`
-  noSpaceBetweenFullWidthLetters?: boolean
+  noSpaceBetweenFullwidthContent?: boolean
 
   // default preset: `true`
   // - `true`: one space
@@ -346,7 +346,7 @@ type RuleOptions = {
   // - `undefined`: do nothing
   // e.g. `文字 foo文字` -> `文字 foo 文字` (`true`)
   // e.g. `文字foo 文字` -> `文字foo文字` (`false`)
-  spaceBetweenMixedWidthLetters?: boolean
+  spaceBetweenMixedwidthContent?: boolean
 
   // Special case: skip `spaceBetweenMixedWidthContent`
   // for numbers x Chinese units.
@@ -359,7 +359,7 @@ type RuleOptions = {
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字 ，文字` -> `文字，文字`
-  noSpaceBeforePunctuation?: boolean
+  noSpaceBeforePauseOrStop?: boolean
 
   // default preset: `true`
   // - `true`: one space
@@ -367,13 +367,13 @@ type RuleOptions = {
   // - `undefined`: do nothing
   // e.g. `文字,文字` -> `文字, 文字` (`true`)
   // e.g. `文字, 文字` -> `文字,文字` (`false`)
-  spaceAfterHalfWidthPunctuation?: boolean
+  spaceAfterHalfwidthPauseOrStop?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字， 文字` -> `文字，文字`
-  noSpaceAfterFullWidthPunctuation?: boolean
+  noSpaceAfterFullwidthPauseOrStop?: boolean
 
   /* SPACES AROUND QUOTES */
 
@@ -383,19 +383,19 @@ type RuleOptions = {
   // - `undefined`: do nothing
   // e.g. `文字 "文字"文字` -> `文字 "文字" 文字` (`true`)
   // e.g. `文字"文字" 文字` -> `文字"文字"文字` (`false`)
-  spaceOutsideHalfQuote?: boolean
+  spaceOutsideHalfwidthQuotation?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字 “文字” 文字` -> `文字“文字”文字`
-  noSpaceOutsideFullQuote?: boolean
+  noSpaceOutsideFullwidthQuotation?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字“ 文字 ”文字` -> `文字“文字”文字`
-  noSpaceInsideQuote?: boolean
+  noSpaceInsideQuotation?: boolean
 
   /* SPACES AROUND BRACKETS */
 
@@ -403,12 +403,12 @@ type RuleOptions = {
   // - `true`: one space
   // - `false`: zero space
   // - `undefined`: do nothing
-  spaceOutsideHalfBracket?: boolean
+  spaceOutsideHalfwidthBracket?: boolean
 
   // default preset: `true`
   // - `true`: zero space
   // - `undefined`: do nothing
-  noSpaceOutsideFullBracket?: boolean
+  noSpaceOutsideFullwidthBracket?: boolean
 
   // default preset: `true`
   // - `true`: zero space
@@ -431,7 +431,7 @@ type RuleOptions = {
   // - `true`: zero space
   // - `undefined`: do nothing
   // e.g. `文字** foo **文字` -> `文字 **foo** 文字`
-  noSpaceInsideWrapper?: boolean
+  noSpaceInsideHyperMark?: boolean
 
   /* SPACES AT THE BEGINNING/END */
 

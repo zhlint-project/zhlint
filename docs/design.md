@@ -32,20 +32,25 @@ After that, an input string would be parsed into a string with several _slots_. 
 
 We can parse a piece of _plain text content_ into structured tokens:
 
-- **Groups**: Usually the content wrapped by a pair of quotes. The quotes should always be paired, which means every left quote should technically have a paired right quote accordingly. A piece of _plain text content_ actually composes several nested groups. So the groups determine the whole structure of the _plain text content_.
+- **Groups**: Usually the content wrapped by a pair of quotations. The quotations should always be paired, which means every left quotation mark should technically have a paired right quotation mark accordingly. A piece of _plain text content_ is considered composing several nested groups. So the groups determine the whole structure of the _plain text content_.
 - **Marks**: Usually a pair of brackets, not the content they wrap. The brackets should always be paired, which means every left bracket should technically have a paired right bracket accordingly. We don't track the nested structure of brackets since in real world the usage of brackets are very flexible, like a hyper format. So we just track their positions without structures.
-- **Letters**: Have 2 types: half-width (English) and full-width (Chinese). Concequtive half-width letters or concequtive full-width letters can be considered as one token.
-- **Punctuations**: Except quotes and brackets, have 2 types: half-width and full-width.
-- **Hyper wrappers**: e.g. inline wrappers like bolds, italics, links, etc. including pairs of HTML tags.
-- **Hyper content**: e.g. inline content like images, code, etc. including self-closed HTML tags.
+- **Letters**: Have 2 types: halfwidth (Western) and fullwidth (CJK). Concequtive halfwidth letters or concequtive fullwidth letters can be considered as one token.
+- **Punctuations**: We break down punctuations into 4 types:
+  - _pause or stop_ (e.g. comma, period, colon, semicolon, question mark, exclamation mark)
+  - _brackets_ as marks
+  - _quotations_ as groups
+  - _others_ (e.g. dashes, ellipsis, interpuncts, proper noun marks, solidi, etc.)
+  - for each type, they also have both halfwidth and fullwidth ones.
+- **Hyper marks**: e.g. inline wrappers like bolds, italics, links, etc. including pairs of HTML tags.
+- **Raw content**: e.g. inline content like images, code, etc. including self-closed HTML tags. The code is named as _code content_ in the following. The others are named as _hyper content_.
 - **Spaces**.
 
 <!-- TODO: an example -->
 
 **Parsing options**
 
-- `noSinglePair: true | undefined = true`: with this option on, the parser will report if there is any unpaired quotes or brackets.
-- Additionally, there is no option for that, however, for a better analysis further, the parser will treat single quotes as a letter when it's between English letters without spaces (_as a shorthand_) e.g. `what's up`.
+- `noSinglePair: true | undefined = true`: with this option on, the parser will report if there is any unpaired quotations or brackets.
+- Additionally, there is no option for that, however, for a better analysis further, the parser will treat single quotations as a letter when it's between English letters without spaces (_as a shorthand_) e.g. `what's up`.
 
 **Simplified token types**
 
@@ -54,19 +59,36 @@ To simplify the structure, _we remove spaces from token types_ as a property to 
 - For each group token, we add `innerSpaceBefore` and `spaceAfter` properties. Any of them could be an empty string or spaces.
 - For other tokens, we only add `spaceAfter`. It could be an empty string or spaces.
 
-So eventually, token have these types:
+So eventually, tokens have these types:
 
-- `LETTERS_HALF`
-- `LETTERS_FULL`
-- `PUNCTUATION_HALF`
-- `PUNCTUATION_FULL`
-- `HYPER_WRAPPER`
-- `HYPER_WRAPPER_BRACKET`
-- `HYPER_CONTENT`
-- `HYPER_CONTENT_CODE`
-- `GROUP`
-- `UNMATCHED`
-- `UNKNOWN`
+- SingleTokenType
+  - NormalContentTokenType
+    - LetterType
+      - `WESTERN_LETTER`
+      - `CJK_CHAR`
+    - SinglePunctuationType
+      - `HALFWIDTH_PAUSE_OR_STOP`
+      - `FULLWIDTH_PAUSE_OR_STOP`
+      - `HALFWIDTH_OTHER_PUNCTUATION`
+      - `FULLWIDTH_OTHER_PUNCTUATION`
+- HyperTokenType
+  - `BRACKET_MARK`
+  - `HYPER_MARK`
+  - `CODE_CONTENT`
+  - `HYPER_CONTENT`
+  - `UNMATCHED` (for exceptional brackets)
+- GroupTokenType
+  - `GROUP`
+
+and other char types are non-token:
+
+- `HALFWIDTH_BRACKET` (will be treated as `BRACKET_MARK`)
+- `FULLWIDTH_BRACKET` (will be treated as `BRACKET_MARK`)
+- `HALFWIDTH_QUOTATION` (will be treated as `GROUP`)
+- `FULLWIDTH_QUOTATION` (will be treated as `GROUP`)
+- `SPACE` (will be treated as a property to other tokens)
+- `EMPTY` (technically never happens)
+- `UNKNOWN` (will be treated as `WESTERN_LETTER`)
 
 ### Properties and the whole structure
 
@@ -74,35 +96,35 @@ Each token has these properties:
 
 - `index`
 - `length`
-- `content`
+- `value`
 - `spaceAfter`
 - For groups only:
   - `startIndex`
-  - `startContent`
+  - `startValue`
   - `endIndex`
-  - `endContent`
+  - `endValue`
   - `innerSpaceBefore`
 
 <!-- TODO: an example x2 -->
 
 The whole structure of a piece of _plain text content_ could be parsed as:
 
-- `tokens`: all the content as a group without quotes
+- `tokens`: all the content as a group without quotations
 - `groups`: all groups collected
 - `marks`: all brackets and wrappers collected
 
 Additionally, for further better analysis and modifications, we add these into properties:
 
 - `modifiedType`
-- `modifiedContent`
+- `modifiedValue`
 - `modifiedSpaceAfter`
-- `modifiedStartContent` (groups only)
-- `modifiedEndContent` (groups only)
+- `modifiedStartValue` (groups only)
+- `modifiedEndValue` (groups only)
 - `modifiedInnerSpaceBeore` (groups only)
 - `mark` and `markSide` (brackets and wrappers only)
 - `validations`
 
-and `errors` into the whole structure (during this phrase, we only detect unmatched quotes and brackets).
+and `errors` into the whole structure (during this phrase, we only detect unmatched quotations and brackets).
 
 <!-- TODO: type defs -->
 
@@ -110,7 +132,7 @@ and `errors` into the whole structure (during this phrase, we only detect unmatc
 
 The main jobs we are supposed to do through these rules are:
 
-- Tweaking the width/choices of punctuations/brackets/quotes.
+- Tweaking the width/choices of punctuations/brackets/quotations.
 - Tweaking spaces around tokens.
 
 What we do is separating the job into separated rules, and for each rule, we traverse all the tokens one-by-one and run a function:
@@ -136,25 +158,27 @@ We are figuring out all the requirements by several options below:
   - Default: `true`
   - This rule is triming spaces of the whole string.
 
-**For hyper wrappers**
+**For hyper marks**
 
-- `noSpaceInsideWrapper`
+- `noSpaceInsideHyperMark`
   - Type: `true | undefined`
   - Default: `true`
-  - This rule is to ensure all the existing spaces should be outside hyper wrappers like `*`, `_`, `[`, `]`, etc.
+  - This rule is to ensure all the existing spaces should be outside hyper marks like `*`, `_`, `[`, `]`, etc.
   - Examples:
     - `x _ ** yyy ** _ z` should be `x _**yyy**_ z`
 
-**For the width/choices of punctuations/brackets/quotes**
+**For the width/choices of punctuations/brackets/quotations**
 
-- `` halfWidthPunctuation: string? = `()`  ``
-- `` fullWidthPunctuation: string? = `，。：；？！“”‘’`  ``
-- `` adjustedFullWidthPunctuation: string? = `“”‘’` ``
-- `unifiedPunctuation: "simplified" (default) | "traditional" | undefined`
+- `` halfwidthPunctuation: string? = `()[]{}`  ``
+- `` fullwidthPunctuation: string? = `，。：；？！“”‘’`  ``
+- `` adjustedFullwidthPunctuation: string? = `“”‘’` ``
+- `unifiedPunctuation: "simplified" (default) | "traditional" | Record<string, boolean | string[]> & { default: boolean } | undefined`
 
 These options can format and determine punctuations to be used.
 
-The option `adjustedFullWidthPunctuation` defines which full-width punctuations zhlint will treat them as half-width punctuations when processing the further spaces issues around them. Usually it's just about quotes since the full-width quotes in morder Chinese fonts actually are only rendered in half-width.
+The option `adjustedFullWidthPunctuation` defines which fullwidth punctuations zhlint will treat them as halfwidth punctuations when processing the further spaces issues around them. Usually it's just about quotations since the fullwidth quotations in morder Chinese fonts actually are only rendered in halfwidth.
+
+<!-- TODO: more details about `adjustedFullWidthPunctuation` -->
 
 **For spaces**
 
@@ -171,26 +195,26 @@ The option `adjustedFullWidthPunctuation` defines which full-width punctuations 
 
 Determine whether to keep a space outside code x content.
 
-- `spaceBetweenHalfWidthLetters: true | undefined = true`
-- `noSpaceBetweenFullWidthLetters: true | undefined = true`
-- `spaceBetweenMixedWidthLetters: true | false | undefined = true`
+- `spaceBetweenHalfwidthContent: true | undefined = true`
+- `noSpaceBetweenFullwidthContent: true | undefined = true`
+- `spaceBetweenMixedwidthContent: true | false | undefined = true`
 
-Determine spaces between letters (half-width x half-width, full-width x full-width, half-width x full-width).
+Determine spaces between letters (halfwidth x halfwidth, fullwidth x fullwidth, halfwidth x fullwidth).
 
-- `noSpaceBeforePunctuation: true | undefined = true`
-- `spaceAfterHalfWidthPunctuation: true | undefined = true`
-- `noSpaceAfterFullWidthPunctuation: true | undefined = true`
+- `noSpaceBeforePauseOrStop: true | undefined = true`
+- `spaceAfterHalfwidthPauseOrStop: true | undefined = true`
+- `noSpaceAfterFullwidthPauseOrStop: true | undefined = true`
 
 Determine spaces between letters and punctuations.
 
-- `noSpaceInsideQuote: true | undefined = true`
-- `spaceOutsideHalfQuote: true | false | undefined = true`
-- `noSpaceOutsideFullQuote: true | undefined = true`
+- `noSpaceInsideQuotation: true | undefined = true`
+- `spaceOutsideHalfwidthQuotation: true | false | undefined = true`
+- `noSpaceOutsideFullwidthQuotation: true | undefined = true`
 - `noSpaceInsideBracket: true | undefined = true`
-- `spaceOutsideHalfBracket: true | false | undefined = true`
-- `nospaceOutsideFullBracket: true | undefined = true`
+- `spaceOutsideHalfwidthBracket: true | false | undefined = true`
+- `noSpaceOutsideFullwidthBracket: true | undefined = true`
 
-Determine spaces besides quotes and brackets.
+Determine spaces besides quotations and brackets.
 
 **For special cases**
 
@@ -207,13 +231,15 @@ Determine spaces besides quotes and brackets.
 
 - Skip linebreaks as spaces.
 - Skip HTML entities like `&xxx;` as punctuation x letters x punctuation.
-- Skip half-width punctuations between half-width letters without spaces like `1,000,000`, `what's up`, etc.
-- Skip successive multiple half-width punctuations like ellipsis.
+- Skip halfwidth punctuations between halfwidth letters without spaces like `1,000,000`, `what's up`, etc.
+- Skip successive multiple halfwidth punctuations like ellipsis.
 - Skip letters x wrappers x letters without spaces like `letter*s*`.
 - Skip successive right-half-bracket x left-half-bracket without spaces like `(a)(b)(c)`.
-- Skip bracket between half-width letters without spaces like `minute(s)`, `computed()`, etc.
+- Skip bracket between halfwidth letters without spaces like `minute(s)`, `computed()`, etc.
 
 ### Implementation
+
+_This part might vary frequently. And keep in mind that it's probably outdated._
 
 First of all, there are several types of rules:
 
@@ -225,7 +251,7 @@ First of all, there are several types of rules:
 
 We achieve this via 2 rules:
 
-- `punctuation-width` for options `halfWidthPunctuation` and `fullWidthPunctuation`
+- `punctuation-width` for options `halfwidthPunctuation` and `fullwidthPunctuation`
 - `punctuation-unification` for option `unifiedPunctuation`
 
 **For space tweakings**
@@ -233,7 +259,7 @@ We achieve this via 2 rules:
 First of all, there are some independent rules we can do ahead.
 
 - `space-trim` for option `trimSpace`
-- `space-wrapper` for option `noSpaceInsideWrapper`
+- `space-hyper-mark` for option `noSpaceInsideHyperMark`
 
 For the else part, we can draw a table of token combinations to rules to guide the implementation:
 
@@ -252,8 +278,8 @@ Abbreviations for tokens
 
 - L = letters
 - P = punctuations
-- Qo = quotes (outer)
-- Qi = quotes (inner)
+- Qo = quotations (outer)
+- Qi = quotations (inner)
 - Bo = brackets (outer)
 - Bi = brackets (inner)
 - D = code
@@ -273,12 +299,12 @@ Abbreviations for token properties
 
 Abbreviations for rules
 
-1. `space-letters`
-2. `space-punctuations`
-3. `space-quotes-inner`
-4. `space-quotes-outer`
-5. `space-brackets-inner`
-6. `space-brackets-outer`
+1. `space-letter`
+2. `space-punctuation`
+3. `space-quotation` (inner)
+4. `space-quotation` (outer)
+5. `space-bracket` (inner)
+6. `space-bracket` (outer)
 7. `space-code`
 
 **For special cases**
@@ -294,17 +320,17 @@ Then for special cases, we put them into:
 - entities
   - `case-html-entity` (new)
 - `what's up`
-  - both `punctuations-width` and `space-punctuations`
+  - both `punctuations-width` and `space-punctuation`
 - `ellipsis...`
-  - both `punctuations-width` and `space-punctuations`
+  - both `punctuations-width` and `space-punctuation`
 - `letter*s*`
-  - `space-letters`
+  - `space-letter`
 - `(a)(b)(c)`
-  - `space-brackets-*`
+  - `space-bracket`
 - `minute(s)`
-  - `space-brackets-*`
+  - `space-bracket`
 
-<!-- TODO: - `“)xxx(”`: `space-quotes-*` -->
+<!-- TODO: - `“)xxx(”`: `space-quotations-*` -->
 
 ## Joining and returning
 
@@ -349,14 +375,14 @@ type Validation = {
 
 enum ValidationTarget {
   // the main content
-  CONTENT
+  VALUE
   // the space after the content
   SPACE_AFTER
 
-  // for quotes, the left/right quote
-  START_CONTENT
-  END_CONTENT
-  // for quotes, space after the left quote
+  // for quotations, the left/right quotation
+  START_VALUE
+  END_VALUE
+  // for quotations, space after the left quotation
   INNER_SPACE_BEFORE
 }
 ```

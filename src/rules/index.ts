@@ -60,7 +60,7 @@ export const defaultConfig: Options = {
   noSpaceOutsideFullwidthBracket: true,
   noSpaceInsideBracket: true,
   spaceOutsideCode: true,
-  noSpaceInsideHyperBracket: true,
+  noSpaceInsideHyperMark: true,
   trimSpace: true,
   skipZhUnits: `年月日天号时分秒`,
   skipAbbrs: [

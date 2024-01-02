@@ -30,7 +30,7 @@ describe('lint by rules', () => {
   })
   test('[hyper-mark] the position of spaces around hyper marks (if any)', () => {
     const options: Options = {
-      rules: { noSpaceInsideHyperBracket: true }
+      rules: { noSpaceInsideHyperMark: true }
     }
     expect(lint('x ** yyy ** z', options)).toEqual({
       output: 'x **yyy** z',
