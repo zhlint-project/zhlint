@@ -14,11 +14,11 @@ export default defineConfig({
     socialLinks: [
       {
         icon: 'github',
-        link: 'https://github.com/Jinjiang/zhlint'
+        link: 'https://github.com/zhlint-project/zhlint'
       }
     ],
     editLink: {
-      pattern: 'https://github.com/Jinjiang/zhlint/edit/master/docs/:path',
+      pattern: 'https://github.com/zhlint-project/zhlint/edit/master/docs/:path',
       text: 'Help us improve this page!'
     }
   }

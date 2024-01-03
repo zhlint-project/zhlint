@@ -9,13 +9,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: pnpm/action-setup@v2.0.1
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
         with:
-          version: 6.20.3
-      - uses: actions/setup-node@v2
+          version: 8
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
           cache: 'pnpm'
       - run: |
           pnpm install
@@ -27,5 +27,5 @@ jobs:
           git add -A
           git status
           git commit -m 'deploy'
-          git push -f https://jinjiang:${{secrets.ACCESS_TOKEN}}@github.com/Jinjiang/zhlint.git master:gh-pages
+          git push -f https://jinjiang:${{secrets.ACCESS_TOKEN}}@github.com/zhlint-project/zhlint.git master:gh-pages
           cd -
