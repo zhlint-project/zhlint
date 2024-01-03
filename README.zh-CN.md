@@ -107,7 +107,7 @@ type Options = {
 ```
 
 - `rules`：自定义格式化规则，可以是 `undefined` 意味着不做任何格式化，也可以是 `{ preset: 'default' }` 以使用默认配置。关于 `RuleOptions` 的更多细节参见[支持的规则](#支持的规则)。
-- `hyperParse`：根据解析器名自定义超文本解析器列表。可以是 `undefined` 以使用默认的[忽略特例的解析器](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/ignore.js)、[Markdown 解析器](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/md.js)以及[Hexo tag 解析器](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/hexo.js)。
+- `hyperParse`：根据解析器名自定义超文本解析器列表。可以是 `undefined` 以使用默认的[忽略特例的解析器](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/ignore.js)、[Markdown 解析器](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/md.js)以及[Hexo tag 解析器](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/hexo.js)。
 - `ignoredCases`：提供想要忽略的特例。
   - `IgnoredCase`：`{ prefix?, textStart, textEnd?, suffix? }`
     - 遵循该特定的格式，灵感来自 [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment)。
@@ -187,7 +187,7 @@ run(str, { ignoredCases: { textStart: '( ', textEnd: ' )' } })
 
 _大多数规则都提炼自过往 [W3C 中文排版需求](https://www.w3.org/International/clreq/)、[W3C HTML 中文兴趣组](https://www.w3.org/html/ig/zh/wiki/Main_Page)和 [Vue.js 中文文档](https://github.com/vuejs/cn.vuejs.org/wiki)的翻译经验。_
 
-_……这些规则也许存在争议。所以如果你对某些规则不够满意，我们非常希望得到大家的反馈和改进建议。我们也一直欢迎大家来创建 [issue](https://github.com/jinjiang/zhlint/issues)，以讨论出可能更好的规则。_
+_……这些规则也许存在争议。所以如果你对某些规则不够满意，我们非常希望得到大家的反馈和改进建议。我们也一直欢迎大家来创建 [issue](https://github.com/zhlint-project/zhlint/issues)，以讨论出可能更好的规则。_
 
 ```ts
 type RuleOptions = {

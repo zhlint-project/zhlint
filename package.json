@@ -42,7 +42,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Jinjiang/zhlint.git"
+    "url": "git+https://github.com/zhlint-project/zhlint.git"
   },
   "keywords": [
     "lint",
@@ -52,9 +52,9 @@
   "author": "Jinjiang <zhaojinjiang@me.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Jinjiang/zhlint/issues"
+    "url": "https://github.com/zhlint-project/zhlint/issues"
   },
-  "homepage": "https://github.com/Jinjiang/zhlint#readme",
+  "homepage": "https://github.com/zhlint-project/zhlint#readme",
   "devDependencies": {
     "@algolia/client-search": "^4.12.0",
     "@microsoft/api-extractor": "^7.19.4",

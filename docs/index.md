@@ -176,7 +176,7 @@ type Options = {
 ```
 
 - `rules`: customize the linting config. It could be `undefined` which means linting nothing. It could be `{ preset: 'default' }` which just uses the default config. For more details of `RuleOptions`, please see [supported rules](#supported-rules)
-- `hyperParse`: customize the hyper parser by their names. It could be `undefined` which means just use default [ignored cases parser](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/ignore.js), [Markdown parser](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/md.js) and the [Hexo tags parser](https://github.com/Jinjiang/zhlint/tree/master/src/hypers/hexo.js).
+- `hyperParse`: customize the hyper parser by their names. It could be `undefined` which means just use default [ignored cases parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/ignore.js), [Markdown parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/md.js) and the [Hexo tags parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/hexo.js).
 - `ignoredCases`: provide exception cases which you would like to skip.
   - `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
     - Just follows a certain format inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
@@ -287,7 +287,7 @@ If you want to ignore the whole file, you can also add this HTML comment:
 
 _Almost the rules come from the past translation experiences in [W3C Requirements for Chinese Text Layout](https://www.w3.org/International/clreq/), [W3C HTML Chinese interest group](https://www.w3.org/html/ig/zh/wiki/Main_Page) and [Vue.js Chinese docsite](https://github.com/vuejs/cn.vuejs.org/wiki)._
 
-_... and this part might be controversial. So if you don't feel well at some point, we definitely would love to know and improve. Opening an [issue](https://github.com/jinjiang/zhlint/issues) is always welcome. Then we could discuss about the possible better option or decision._
+_... and this part might be controversial. So if you don't feel well at some point, we definitely would love to know and improve. Opening an [issue](https://github.com/zhling-project/zhlint/issues) is always welcome. Then we could discuss about the possible better option or decision._
 
 ```ts
 type RuleOptions = {
@@ -477,7 +477,7 @@ type RuleOptions = {
 
 ## More information
 
-zhlint is now open sourced on [GitHub](https://github.com/zhlint) and [issues](https://github.com/jinjiang/zhlint/issues) welcome.
+zhlint is now open sourced on [GitHub](https://github.com/zhlint-project/zhlint) and [issues](https://github.com/zhlint-project/zhlint/issues) welcome.
 
 <style>
 .vp-doc img { border-radius: 8px; }
