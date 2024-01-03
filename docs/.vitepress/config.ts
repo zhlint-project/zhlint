@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  base: '/zhlint/',
+  base: '/',
   title: 'zhlint',
   titleTemplate: false,
   description: 'A linting tool for Chinese text content.',
