@@ -56,6 +56,10 @@ zhlint --config <filepath>
 
 # .zhlintignore by default
 zhlint --ignore <filepath>
+zhlint --file-ignore <filepath>
+
+# .zhlintcaseignore by default
+zhlint --case-ignore <filepath>
 
 # current directory by default
 zhlint --dir <path>
@@ -74,7 +78,9 @@ In the config file, you can write a JSON like:
 
 For more details, see [supported rules](#supported-rules).
 
-In the ignore file, you can write some lines of ignored cases like:
+In the file-ignore file, you can write some lines to ignore files in [.gitignore syntax](https://git-scm.com/docs/gitignore#_pattern_format):
+
+In the case-ignore file, you can write some lines of ignored cases like:
 
 ```txt
 ( , )
@@ -131,9 +137,10 @@ const value = '自动在中文和English之间加入空格'
 
 const dir = '...' // the target directory path
 const configPath = '...' // the config file path
-const ignorePath = '...' // the ignore file path
+const fileIgnorePath = '...' // the file-ignore file path
+const caseIgnorePath = '...' // the case-ignore file path
 
-const config = readRc(dir, configPath, ignorePath)
+const config = readRc(dir, configPath, fileIgnorePath, caseIgnorePath)
 const output = runWithConfig(value, config)
 
 // ... further actions
@@ -179,7 +186,7 @@ type Options = {
 - `hyperParse`: customize the hyper parser by their names. It could be `undefined` which means just use default [ignored cases parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/ignore.js), [Markdown parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/md.js) and the [Hexo tags parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/hexo.js).
 - `ignoredCases`: provide exception cases which you would like to skip.
   - `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
-    - Just follows a certain format inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
+    - Just follows a certain format `[prefix-,]textStart[,textEnd][,-suffix]` inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
 - `logger`: same to the parameter in `report(...)`.
 
 ### RC Config
@@ -187,7 +194,7 @@ type Options = {
 - `preset`: `string` (optional)
 - `rules`: `RuleOptions` without the `preset` field. (optional)
 - `hyperParsers`: `string[]` (optional)
-- `ignores`: `string[]` and the priority is lower than `.zhlintignore`. (optional)
+- `caseIgnores`: `string[]` and the priority is lower than `.zhlintcaseignore`. (optional)
 
 ### Output
 
