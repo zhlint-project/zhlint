@@ -3,7 +3,7 @@
 const fs = require('fs')
 const minimist = require('minimist')
 const glob = require('glob')
-const gitignore = require('./ignore')
+const gitignore = require('ignore')
 const { readRc, runWithConfig, report } = require('../')
 
 const helpMessage = `

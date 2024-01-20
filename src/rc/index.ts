@@ -13,7 +13,7 @@ type PathResult = {
 
 const DEFAULT_CONFIG_PATH = '.zhlintrc'
 const DEFAULT_FILE_IGNORE_PATH = '.zhlintignore'
-const DEFAULT_CASE_IGNORE_PATH = '.zhlintignore'
+const DEFAULT_CASE_IGNORE_PATH = '.zhlintcaseignore'
 
 const resolvePath = (
   dir: string,

@@ -174,7 +174,7 @@ type Options = {
 -   `hyperParse`: customize the hyper parser by their names. It could be `undefined` which means just use default [ignored cases parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/ignore.js), [Markdown parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/md.js) and the [Hexo tags parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/hexo.js).
 -   `ignoredCases`: provide exception cases which you would like to skip.
     -   `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
-        -   Just follows a certain format inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
+        -   Just follows a certain format `[prefix-,]textStart[,textEnd][,-suffix]` inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
 -   `logger`: same to the parameter in `report(...)`.
 
 ### RC Config
