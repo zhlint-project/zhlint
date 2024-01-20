@@ -1,6 +1,4 @@
-import { defineConfig } from 'vitepress'
-
-export default defineConfig({
+export default {
   base: '/',
   title: 'zhlint',
   titleTemplate: false,
@@ -22,4 +20,4 @@ export default defineConfig({
       text: 'Help us improve this page!'
     }
   }
-})
+}

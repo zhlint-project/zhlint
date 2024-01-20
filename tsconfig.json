@@ -7,5 +7,5 @@
     "strictNullChecks": true,
     "skipLibCheck": true
   },
-  "include": ["./src", "./test", "./types"]
+  "include": ["./src", "./test", "./types", "./vite.config.ts"]
 }
