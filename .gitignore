@@ -71,3 +71,6 @@ temp
 # generated files
 dist
 lib
+
+# vitepress cache
+docs/.vitepress/cache/
