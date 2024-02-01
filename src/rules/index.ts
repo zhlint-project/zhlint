@@ -19,6 +19,8 @@ import genLinebreakHandler from './case-linebreak'
 import genZhUnitsHandler from './case-zh-units'
 import genHtmlEntityHandler from './case-html-entity'
 
+import genSkipPureWesternHandler from './case-pure-western'
+
 const generateHandlers = (options: Options): Handler[] => {
   return [
     genSpaceTrimGenerateHandler(options),
@@ -37,7 +39,9 @@ const generateHandlers = (options: Options): Handler[] => {
     genLinebreakHandler(options),
 
     genZhUnitsHandler(options),
-    genHtmlEntityHandler(options)
+    genHtmlEntityHandler(options),
+
+    genSkipPureWesternHandler(options),
   ]
 }
 
@@ -74,7 +78,8 @@ export const defaultConfig: Options = {
     'i.e.',
     'e.g.',
     'a.k.a.'
-  ]
+  ],
+  skipPureWestern: true,
 }
 
 export default generateHandlers

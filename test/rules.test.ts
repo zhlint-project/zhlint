@@ -422,6 +422,49 @@ describe('lint by rules', () => {
       expect(getOutput('foo ( bar ) baz', options)).toBe('foo( bar )baz')
     })
   })
+  describe('[skip-pure-western] skip the content with full of western letters and punctuations', () => {
+    test('skip pure western', () => {
+      const options: Options = {
+        rules: {
+          skipPureWestern: true,
+          halfwidthPunctuation: `()[]{}`,
+          fullwidthPunctuation: `，。：；？！“”‘’`,
+          adjustedFullwidthPunctuation: `“”‘’`,
+          unifiedPunctuation: 'simplified',
+        }
+      }
+      expect(lint('foo,bar,baz', options)).toEqual({
+        output: 'foo,bar,baz',
+        warnings: []
+      })
+    })
+    test('handle mixed content', () => {
+      const options: Options = {
+        rules: {
+          skipPureWestern: true,
+          halfwidthPunctuation: `()[]{}`,
+          fullwidthPunctuation: `，。：；？！“”‘’`,
+          adjustedFullwidthPunctuation: `“”‘’`,
+          unifiedPunctuation: 'simplified',
+        }
+      }
+      expect(lint('中文,bar,中文', options)).toEqual({
+        output: '中文，bar，中文',
+        warnings: [
+          {
+            index: 3,
+            target: ValidationTarget.VALUE,
+            message: PUNCTUATION_FULL_WIDTH
+          },
+          {
+            index: 7,
+            target: ValidationTarget.VALUE,
+            message: PUNCTUATION_FULL_WIDTH
+          }
+        ]
+      })
+    })
+  })
 })
 
 describe('lint by cases', () => {

@@ -62,6 +62,9 @@ export type Options = {
   // case: number x Chinese unit
   skipZhUnits?: string
 
+  // skip sentences which are full of western letters
+  skipPureWestern?: boolean
+
   // custom preset
   preset?: string
 } & DeprecatedOptions
