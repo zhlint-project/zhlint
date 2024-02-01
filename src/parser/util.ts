@@ -424,6 +424,9 @@ export const isShorthand = (
   if (!status.lastToken || status.lastToken.type !== CharType.WESTERN_LETTER) {
     return false
   }
+  if (str.length <= index + 1) {
+    return false
+  }
   const nextChar = str[index + 1]
   const nextType = checkCharType(nextChar)
   if (nextType === CharType.WESTERN_LETTER || nextType === CharType.SPACE) {

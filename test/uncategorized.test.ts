@@ -40,7 +40,7 @@ describe('lint by issues', () => {
 
   // https://github.com/zhlint-project/zhlint/issues/35
   test('#35 parse error', () => {
-    expect(getOutput('x‘x’x', options)).toBe('x ‘x’ x')
+    expect(getOutput('中文 x‘x’x', options)).toBe('中文 x ‘x’ x')
   })
 
   // https://github.com/zhlint-project/zhlint/issues/36
@@ -56,6 +56,52 @@ describe('lint by issues', () => {
     // console.log(run('1) 项目符号', options))
     expect(getOutput('中文 ;-)', options)).toBe('中文 ;-)')
     expect(getOutput('1) 项目符号', options)).toBe('1) 项目符号')
+  })
+
+  // https://github.com/zhlint-project/zhlint/issues/126
+  test('#126 (1)', () => {
+    expect(getOutput(
+      `使用 \`||\` 时，title 会先转化为布尔值判断，为 true 时返回 title，false 返回 'title'`,
+      options
+    )).toBe(
+      `使用 \`||\` 时，title 会先转化为布尔值判断，为 true 时返回 title，false 返回 ‘title’`
+    )
+  })
+
+  // https://github.com/zhlint-project/zhlint/issues/126
+  test('#126 (1) extended', () => {
+    expect(getOutput(
+      `中文‘中文’中文‘English’中文'中文'中文'English'中文`,
+      options
+    )).toBe(
+      `中文 ‘中文’ 中文 ‘English’ 中文 ‘中文’ 中文 ‘English’ 中文`
+    )
+    expect(getOutput(
+      `中文‘中文’中文‘English’中文'中文'中文'English'`,
+      options
+    )).toBe(
+      `中文 ‘中文’ 中文 ‘English’ 中文 ‘中文’ 中文 ‘English’`
+    )
+  })
+
+  // https://github.com/zhlint-project/zhlint/issues/126
+  test('#126 (2)', () => {
+    expect(getOutput(
+      `### 5.1 “Attention Is All You Need”`,
+      options
+    )).toBe(
+      `### 5.1 “Attention Is All You Need”`
+    )
+  })
+
+  // https://github.com/zhlint-project/zhlint/issues/126
+  test('#126 (3)', () => {
+    expect(getOutput(
+      `How it works: The novel HTTP/2 ‘Rapid Reset’ DDoS attack`,
+      options
+    )).toBe(
+      `How it works: The novel HTTP/2 ‘Rapid Reset’ DDoS attack`
+    )
   })
 })
 
