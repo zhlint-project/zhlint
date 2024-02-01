@@ -26,6 +26,9 @@ const findNonWestern = (group: MutableGroupToken): boolean => {
       return findNonWestern(token)
     }
     if (isFullwidthType(token.type)) {
+      if (token.value.match(/[‘’“”]/)) {
+        return false
+      }
       return true
     }
   })
@@ -36,7 +39,11 @@ const resetValidation = (group: MutableGroupToken): void => {
     for (const target in ValidationTarget) {
       removeValidationOnTarget(token, target as ValidationTarget)
     }
+    token.modifiedSpaceAfter = token.spaceAfter
+    token.modifiedType = token.type
+    token.modifiedValue = token.value
     if (token.type === GroupTokenType.GROUP) {
+      token.modifiedInnerSpaceBefore = token.innerSpaceBefore
       resetValidation(token)
     }
   })
