@@ -3,8 +3,8 @@ import { checkCharType } from './char'
 import {
   BRACKET_NOT_CLOSED,
   BRACKET_NOT_OPEN,
-  QUOTE_NOT_CLOSED,
-  QUOTE_NOT_OPEN
+  QUOTATION_NOT_CLOSED,
+  QUOTATION_NOT_OPEN
 } from './messages'
 import {
   CharType,
@@ -80,7 +80,7 @@ export const handlePunctuation = (
     } else if (QUOTATION_CHAR_SET.right.indexOf(char) >= 0) {
       if (!status.lastGroup || !status.lastGroup.startValue) {
         addUnmatchedToken(status, i, char)
-        addError(status, i, QUOTE_NOT_OPEN)
+        addError(status, i, QUOTATION_NOT_OPEN)
       } else {
         finalizeCurrentGroup(status, i, char)
       }
@@ -492,14 +492,14 @@ export const handleErrors = (status: ParseStatus): void => {
   // record an error if the last group not fully resolved
   const lastGroup = status.lastGroup
   if (lastGroup && lastGroup.startValue && !lastGroup.endValue) {
-    addError(status, lastGroup.startIndex, QUOTE_NOT_CLOSED)
+    addError(status, lastGroup.startIndex, QUOTATION_NOT_CLOSED)
   }
 
   // record an error if `groupStack` not fully resolved
   if (status.groupStack.length > 0) {
     status.groupStack.forEach((group) => {
       if (group !== lastGroup && group.startValue && !group.endValue) {
-        addError(status, group.startIndex, QUOTE_NOT_CLOSED)
+        addError(status, group.startIndex, QUOTATION_NOT_CLOSED)
       }
     })
   }

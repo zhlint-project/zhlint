@@ -4,23 +4,23 @@
  * This rule is checking spaces besides quotations.
  *
  * Options
- * - noSpaceInsideQuote: boolean | undefined
- * - spaceOutsideHalfQuote: boolean | undefined
- * - noSpaceOutsideFullQuote: boolean | undefined
+ * - noSpaceInsideQuotation: boolean | undefined
+ * - spaceOutsideHalfwidthQuotation: boolean | undefined
+ * - noSpaceOutsideFullwidthQuotation: boolean | undefined
  *
  * Details:
- * - noSpaceInsideQuote:
- *   - left-quote x right-quote
- *   - content/punctuation/right-quote/right-bracket/code/unknown/container x right-quote
- *   - left-quote x content/punctuation/left-quote/left-bracket/code/unknown/container
- * - spaceOutsideHalfQuote:
- *   - right-half-quote x left-half-quote
- *   - content/code x left-half-quote
- *   - right-half-quote x content/code
- * - noSpaceOutsideFullQuote:
- *   - right-full-quote x left-full-quote
- *   - content/code x left-full-quote
- *   - right-full-quote x content/code
+ * - noSpaceInsideQuotation:
+ *   - left-quotation x right-quotation
+ *   - content/punctuation/right-quotation/right-bracket/code/unknown/container x right-quotation
+ *   - left-quotation x content/punctuation/left-quotation/left-bracket/code/unknown/container
+ * - spaceOutsideHalfwidthQuotation:
+ *   - right-half-quotation x left-half-quotation
+ *   - content/code x left-half-quotation
+ *   - right-half-quotation x content/code
+ * - noSpaceOutsideFullwidthQuotation:
+ *   - right-full-quotation x left-full-quotation
+ *   - content/code x left-full-quotation
+ *   - right-full-quotation x content/code
  */
 
 import {
@@ -42,9 +42,9 @@ import {
   Options
 } from './util'
 import {
-  QUOTE_NOSPACE_INSIDE,
-  QUOTE_NOSPACE_OUTSIDE,
-  QUOTE_SPACE_OUTSIDE
+  QUOTATION_NOSPACE_INSIDE,
+  QUOTATION_NOSPACE_OUTSIDE,
+  QUOTATION_SPACE_OUTSIDE
 } from './messages'
 
 const isFullWidth = (char: string, adjusted: string): boolean => {
@@ -52,9 +52,9 @@ const isFullWidth = (char: string, adjusted: string): boolean => {
 }
 
 const generateHandler = (options: Options): Handler => {
-  const noSpaceInsideQuoteOption = options.noSpaceInsideQuotation
-  const spaceOutsideHalfQuoteOption = options.spaceOutsideHalfwidthQuotation
-  const noSpaceOutsideFullQuoteOption = options.noSpaceOutsideFullwidthQuotation
+  const noSpaceInsideQuotationOption = options.noSpaceInsideQuotation
+  const spaceOutsideHalfQuotationOption = options.spaceOutsideHalfwidthQuotation
+  const noSpaceOutsideFullQuotationOption = options.noSpaceOutsideFullwidthQuotation
   const adjustedFullWidthOption = options.adjustedFullwidthPunctuation || ''
 
   return (token: MutableToken, _: number, group: MutableGroupToken) => {
@@ -64,34 +64,34 @@ const generateHandler = (options: Options): Handler => {
     }
 
     // 1. no space inside quotation
-    if (noSpaceInsideQuoteOption) {
-      // 1.1 left-quote x content/punctuation/left-quote/left-bracket/code/unknown/container
+    if (noSpaceInsideQuotationOption) {
+      // 1.1 left-quotation x content/punctuation/left-quotation/left-bracket/code/unknown/container
       const firstInsdieToken = token[0]
       if (
         firstInsdieToken &&
         firstInsdieToken.markSide !== MarkSideType.RIGHT
       ) {
-        checkInnerSpaceBefore(token, '', QUOTE_NOSPACE_INSIDE)
+        checkInnerSpaceBefore(token, '', QUOTATION_NOSPACE_INSIDE)
       }
 
-      // 1.2 content/punctuation/right-quote/right-bracket/code/unknown/container x right-quote
+      // 1.2 content/punctuation/right-quotation/right-bracket/code/unknown/container x right-quotation
       const lastInsideToken = token[token.length - 1]
       if (lastInsideToken && lastInsideToken.markSide !== MarkSideType.LEFT) {
-        checkSpaceAfter(lastInsideToken, '', QUOTE_NOSPACE_INSIDE)
+        checkSpaceAfter(lastInsideToken, '', QUOTATION_NOSPACE_INSIDE)
       }
 
-      // 1.3 left-quote x right-quote
+      // 1.3 left-quotation x right-quotation
       if (!firstInsdieToken) {
-        checkInnerSpaceBefore(token, '', QUOTE_NOSPACE_INSIDE)
+        checkInnerSpaceBefore(token, '', QUOTATION_NOSPACE_INSIDE)
       }
     }
 
     // 2. space outside half/full quotation
     if (
-      typeof spaceOutsideHalfQuoteOption !== 'undefined' ||
-      noSpaceOutsideFullQuoteOption
+      typeof spaceOutsideHalfQuotationOption !== 'undefined' ||
+      noSpaceOutsideFullQuotationOption
     ) {
-      // 2.1 right-quote x left-quote
+      // 2.1 right-quotation x left-quotation
       const contentTokenAfter = findNonCodeVisibleTokenAfter(group, token)
       if (
         contentTokenAfter &&
@@ -109,25 +109,25 @@ const generateHandler = (options: Options): Handler => {
               contentTokenAfter.modifiedStartValue,
               adjustedFullWidthOption
             )
-          // 2.1.1 right-full-quote x left-full-quote
-          // 2.1.2 right-half-quote x left-half-quote
+          // 2.1.1 right-full-quotation x left-full-quotation
+          // 2.1.2 right-half-quotation x left-half-quotation
           if (fullWidth) {
-            if (noSpaceOutsideFullQuoteOption) {
-              checkSpaceAfter(spaceHost, '', QUOTE_SPACE_OUTSIDE)
+            if (noSpaceOutsideFullQuotationOption) {
+              checkSpaceAfter(spaceHost, '', QUOTATION_SPACE_OUTSIDE)
             }
           } else {
-            if (typeof spaceOutsideHalfQuoteOption !== 'undefined') {
-              const spaceAfter = spaceOutsideHalfQuoteOption ? ' ' : ''
-              const message = spaceOutsideHalfQuoteOption
-                ? QUOTE_SPACE_OUTSIDE
-                : QUOTE_NOSPACE_OUTSIDE
+            if (typeof spaceOutsideHalfQuotationOption !== 'undefined') {
+              const spaceAfter = spaceOutsideHalfQuotationOption ? ' ' : ''
+              const message = spaceOutsideHalfQuotationOption
+                ? QUOTATION_SPACE_OUTSIDE
+                : QUOTATION_NOSPACE_OUTSIDE
               checkSpaceAfter(spaceHost, spaceAfter, message)
             }
           }
         }
       }
 
-      // 2.2 content/code x left-quote
+      // 2.2 content/code x left-quotation
       const contentTokenBefore = findNonCodeVisibleTokenBefore(group, token)
       if (
         contentTokenBefore &&
@@ -145,25 +145,25 @@ const generateHandler = (options: Options): Handler => {
             adjustedFullWidthOption
           )
 
-          // 2.2.1 content/code x left-full-quote
-          // 2.2.2 content/code x left-half-quote
+          // 2.2.1 content/code x left-full-quotation
+          // 2.2.2 content/code x left-half-quotation
           if (fullWidth) {
-            if (noSpaceOutsideFullQuoteOption) {
-              checkSpaceAfter(spaceHost, '', QUOTE_NOSPACE_OUTSIDE)
+            if (noSpaceOutsideFullQuotationOption) {
+              checkSpaceAfter(spaceHost, '', QUOTATION_NOSPACE_OUTSIDE)
             }
           } else {
-            if (typeof spaceOutsideHalfQuoteOption !== 'undefined') {
-              const spaceAfter = spaceOutsideHalfQuoteOption ? ' ' : ''
-              const message = spaceOutsideHalfQuoteOption
-                ? QUOTE_SPACE_OUTSIDE
-                : QUOTE_NOSPACE_OUTSIDE
+            if (typeof spaceOutsideHalfQuotationOption !== 'undefined') {
+              const spaceAfter = spaceOutsideHalfQuotationOption ? ' ' : ''
+              const message = spaceOutsideHalfQuotationOption
+                ? QUOTATION_SPACE_OUTSIDE
+                : QUOTATION_NOSPACE_OUTSIDE
               checkSpaceAfter(spaceHost, spaceAfter, message)
             }
           }
         }
       }
 
-      // 2.3 right-quote x content/code
+      // 2.3 right-quotation x content/code
       if (
         contentTokenAfter &&
         (isLetterType(contentTokenAfter.type) ||
@@ -180,18 +180,18 @@ const generateHandler = (options: Options): Handler => {
             adjustedFullWidthOption
           )
 
-          // 2.3.1 right-full-quote x content/code
-          // 2.3.2 right-half-quote x content/code
+          // 2.3.1 right-full-quotation x content/code
+          // 2.3.2 right-half-quotation x content/code
           if (fullWidth) {
-            if (noSpaceOutsideFullQuoteOption) {
-              checkSpaceAfter(spaceHost, '', QUOTE_NOSPACE_OUTSIDE)
+            if (noSpaceOutsideFullQuotationOption) {
+              checkSpaceAfter(spaceHost, '', QUOTATION_NOSPACE_OUTSIDE)
             }
           } else {
-            if (typeof spaceOutsideHalfQuoteOption !== 'undefined') {
-              const spaceAfter = spaceOutsideHalfQuoteOption ? ' ' : ''
-              const message = spaceOutsideHalfQuoteOption
-                ? QUOTE_SPACE_OUTSIDE
-                : QUOTE_NOSPACE_OUTSIDE
+            if (typeof spaceOutsideHalfQuotationOption !== 'undefined') {
+              const spaceAfter = spaceOutsideHalfQuotationOption ? ' ' : ''
+              const message = spaceOutsideHalfQuotationOption
+                ? QUOTATION_SPACE_OUTSIDE
+                : QUOTATION_NOSPACE_OUTSIDE
               checkSpaceAfter(spaceHost, spaceAfter, message)
             }
           }
@@ -202,9 +202,9 @@ const generateHandler = (options: Options): Handler => {
 }
 
 export const defaultConfig: Options = {
-  spaceOutsideHalfQuote: true,
-  noSpaceInsideQuote: true,
-  noSpaceOutsideFullQuote: true
+  spaceOutsideHalfwidthQuotation: true,
+  noSpaceInsideQuotation: true,
+  noSpaceOutsideFullwidthQuotation: true
 }
 
 export default generateHandler
