@@ -65,13 +65,13 @@ zhlint --case-ignore <filepath>
 zhlint --dir <path>
 ```
 
-In the config file, you can write a JSON like:
+In the rc config file, you can write a JSON like:
 
 ```json
 {
   "preset": "default",
   "rules": {
-    "adjustedFullWidthPunctuation": ""
+    "adjustedFullwidthPunctuation": ""
   }
 }
 ```
@@ -156,7 +156,7 @@ You could find a JavaScript file `dist/zhlint.js` as a standalone version. To us
 
 ## API
 
-- `run(str: string, options?: Options): Result`: Lint a certain file.
+- `run(str: string, options?: Options): Result`: Lint a certain content.
   - parameters:
     - `str`: The text content you want to lint.
     - `options`: Some options to config.
@@ -166,8 +166,8 @@ You could find a JavaScript file `dist/zhlint.js` as a standalone version. To us
   - parameters:
     - `results`: An array for all linted results.
     - `logger`: The logger instance, by default it's `console` in Node.js/browser.
-- `readRc: (dir: string, config: string, ignore: string, logger?: Console) => Config`: Read config from rc file(s). For rc (run command).
-- `runWithConfig(str: string, config: Config): Result`: Lint a certain file with rc config. For rc (run command).
+- `readRc: (dir: string, config: string, fileIgnore: string, caseIgnore: string, logger?: Console) => Config`: Read config from rc & ignore file(s).
+- `runWithConfig(str: string, config: Config): Result`: Lint a certain content with rc config.
 
 ### Options
 
@@ -227,8 +227,6 @@ type Validation = {
   - `index`: The index of the target token in the input string.
   - `length`: The length of the target token in the input string.
   - `message`: The description of this validation in natural language.
-
-### Advanced usage
 
 ## Features
 
