@@ -40,6 +40,48 @@ zhlint --help
 
 ![](./docs/screenshot-cli.png)
 
+#### Advanced usage
+
+zhlint also supports rc and ignore config files for custom rules:
+
+```bash
+# .zhlintrc by default
+zhlint --config <filepath>
+
+# .zhlintignore by default
+zhlint --ignore <filepath>
+zhlint --file-ignore <filepath>
+
+# .zhlintcaseignore by default
+zhlint --case-ignore <filepath>
+
+# current directory by default
+zhlint --dir <path>
+```
+
+In the config file, you can write a JSON like:
+
+```json
+{
+  "preset": "default",
+  "rules": {
+    "adjustedFullWidthPunctuation": ""
+  }
+}
+```
+
+For more details, see [supported rules](#supported-rules).
+
+In the file-ignore file, you can write some lines to ignore files in [.gitignore syntax](https://git-scm.com/docs/gitignore#_pattern_format):
+
+In the case-ignore file, you can write some lines of ignored cases like:
+
+```txt
+( , )
+```
+
+For more details, see [setup ignored cases](#setup-ignored-cases).
+
 ### 作为 Node.js 包
 
 ```js
@@ -74,6 +116,26 @@ Invalid files:
 Found 2 errors.
 ```
 
+#### Advanced usage
+
+zhlint also supports rc and ignore config files for custom rules:
+
+```js
+const { readRc, runWithConfig } = require('zhlint')
+
+const value = '自动在中文和English之间加入空格'
+
+const dir = '...' // the target directory path
+const configPath = '...' // the config file path
+const fileIgnorePath = '...' // the file-ignore file path
+const caseIgnorePath = '...' // the case-ignore file path
+
+const config = readRc(dir, configPath, fileIgnorePath, caseIgnorePath)
+const output = runWithConfig(value, config)
+
+// ... further actions
+```
+
 ### 作为一个单独的包
 
 您可以找到一个 JavaScript 文件 `dist/zhlint.js` 作为独立版本。 例如，要使用它，您可以直接将它添加到您的浏览器中作为 `<script>` 标签。 即可访问全局变量 `zhlint`。
@@ -92,6 +154,8 @@ Found 2 errors.
   - 参数：
     - `results`：所有格式化结果的数组。
     - `logger`：日志处理器实例，默认是 Node.js/浏览器中的 `console`。
+- `readRc: (dir: string, config: string, ignore: string, logger?: Console) => Config`: Read config from rc file(s). For rc (run command).
+- `runWithConfig(str: string, config: Config): Result`: Lint a certain file with rc config. For rc (run command).
 
 ### 选项
 
@@ -113,20 +177,32 @@ type Options = {
     - 遵循该特定的格式，灵感来自 [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment)。
 - `logger`：和 `report(...)` 中的参数相同。
 
+### RC Config
+
+- `preset`: `string` (optional)
+- `rules`: `RuleOptions` without the `preset` field. (optional)
+- `hyperParsers`: `string[]` (optional)
+- `caseIgnores`: `string[]` and the priority is lower than `.zhlintcaseignore`. (optional)
+
 ### 输出格式
 
 ```ts
 type Result = {
+  // the basic info and availability of the file
   file?: string
+  disabled: boolean
+
+  // the original content of the file
   origin: string
-  result: string
+
+  // all the error messages
   validations: Validation[]
 }
 
 type Validation = {
+  message: string
   index: number
   length: number
-  message: string
 }
 ```
 
@@ -140,15 +216,25 @@ type Validation = {
   - `length`：输入的字符串中目标片段的长度。
   - `message`：对该校验信息的自然语言描述。
 
+### Advanced usage
+
 ## 特性
 
 ### Markdown 语法支持
+
+We support lint your text content in Markdown syntax by default. For example:
 
 ```js
 run('自动在_中文_和**English**之间加入空格')
 ```
 
+It will analyse the Markdown syntax first and extract the pure text content and do the lint job. After that the fixed pure text content could be replaced back to the raw Markdown string and returned as the output `value` in result.
+
 ### [Hexo tag](https://hexo.io/docs/tag-plugins) 语法支持
+
+Specially, we support [Hexo tags syntax](https://hexo.io/docs/tag-plugins) just because when we use Hexo to build Vue.js website, the markdown source files more or less include special tags like that so got the unpredictable result.
+
+As a result, we additionally skip the Hexo-style tags by default. For example:
 
 ```js
 run('现在过滤器只能用在插入文本中 (`{% raw %}{{ }}{% endraw %}` tags)。')
@@ -156,7 +242,7 @@ run('现在过滤器只能用在插入文本中 (`{% raw %}{{ }}{% endraw %}` ta
 
 ### 设置被忽略的特例
 
-通过 HTML 注释：
+In some real cases we have special text contents not follow the rules by reason. So we could ues `ignoredCases` option to config that. For example we'd like to keep the spaces inside a pair of brackets, which is invalid by default. Then we could write one more line of HTML comment anywhere inside the file:
 
 ```md
 <!-- the good case -->
@@ -177,6 +263,12 @@ vm.$on( event, callback )
 run(str, { ignoredCases: { textStart: '( ', textEnd: ' )' } })
 ```
 
+If you want to ignore the whole file, you can also add this HTML comment:
+
+```md
+<!-- zhlint disabled -->
+```
+
 ## 支持的预处理器 (超文本解析器)
 
 - `ignore`：通过 HTML 注释 `<!-- zhlint ignore: ... -->` 匹配所有被忽略的特例
@@ -189,7 +281,7 @@ _大多数规则都提炼自过往 [W3C 中文排版需求](https://www.w3.org/I
 
 _……这些规则也许存在争议。所以如果你对某些规则不够满意，我们非常希望得到大家的反馈和改进建议。我们也一直欢迎大家来创建 [issue](https://github.com/zhlint-project/zhlint/issues)，以讨论出可能更好的规则。_
 
-```ts
+````ts
 type RuleOptions = {
   /* PRESET */
 
@@ -309,7 +401,7 @@ type RuleOptions = {
   // e.g. `文字， 文字` -> `文字，文字`
   noSpaceAfterFullwidthPauseOrStop?: boolean
 
-  /* SPACES AROUND QUOTES */
+  /* SPACES AROUND QUOTATIONS */
 
   // default preset: `true`
   // - `true`: one space
@@ -372,5 +464,14 @@ type RuleOptions = {
   // default `true`
   // e.g. ` 文字 ` -> `文字`
   trimSpace?: boolean
+
+  /* SKIP PURE WESTERN SENTENCES */
+
+  // default `true`
+  skipPureWestern?: boolean
 }
-```
+````
+
+## More information
+
+zhlint is now open sourced on [GitHub](https://github.com/zhlint-project/zhlint) and [issues](https://github.com/zhlint-project/zhlint/issues) welcome.
