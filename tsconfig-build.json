@@ -6,6 +6,8 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "strictNullChecks": true,
+    "declaration": true,
+    "declarationMap": true,
     "outDir": "lib"
   },
   "include": ["./src"]

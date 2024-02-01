@@ -56,25 +56,31 @@ zhlint --config <filepath>
 
 # .zhlintignore by default
 zhlint --ignore <filepath>
+zhlint --file-ignore <filepath>
+
+# .zhlintcaseignore by default
+zhlint --case-ignore <filepath>
 
 # current directory by default
 zhlint --dir <path>
 ```
 
-In the config file, you can write a JSON like:
+In the rc config file, you can write a JSON like:
 
 ```json
 {
   "preset": "default",
   "rules": {
-    "adjustedFullWidthPunctuation": ""
+    "adjustedFullwidthPunctuation": ""
   }
 }
 ```
 
 For more details, see [supported rules](#supported-rules).
 
-In the ignore file, you can write some lines of ignored cases like:
+In the file-ignore file, you can write some lines to ignore files in [.gitignore syntax](https://git-scm.com/docs/gitignore#_pattern_format):
+
+In the case-ignore file, you can write some lines of ignored cases like:
 
 ```txt
 ( , )
@@ -131,9 +137,10 @@ const value = '自动在中文和English之间加入空格'
 
 const dir = '...' // the target directory path
 const configPath = '...' // the config file path
-const ignorePath = '...' // the ignore file path
+const fileIgnorePath = '...' // the file-ignore file path
+const caseIgnorePath = '...' // the case-ignore file path
 
-const config = readRc(dir, configPath, ignorePath)
+const config = readRc(dir, configPath, fileIgnorePath, caseIgnorePath)
 const output = runWithConfig(value, config)
 
 // ... further actions
@@ -149,7 +156,7 @@ You could find a JavaScript file `dist/zhlint.js` as a standalone version. To us
 
 ## API
 
-- `run(str: string, options?: Options): Result`: Lint a certain file.
+- `run(str: string, options?: Options): Result`: Lint a certain content.
   - parameters:
     - `str`: The text content you want to lint.
     - `options`: Some options to config.
@@ -159,8 +166,8 @@ You could find a JavaScript file `dist/zhlint.js` as a standalone version. To us
   - parameters:
     - `results`: An array for all linted results.
     - `logger`: The logger instance, by default it's `console` in Node.js/browser.
-- `readRc: (dir: string, config: string, ignore: string, logger?: Console) => Config`: Read config from rc file(s). For rc (run command).
-- `runWithConfig(str: string, config: Config): Result`: Lint a certain file with rc config. For rc (run command).
+- `readRc: (dir: string, config: string, fileIgnore: string, caseIgnore: string, logger?: Console) => Config`: Read config from rc & ignore file(s).
+- `runWithConfig(str: string, config: Config): Result`: Lint a certain content with rc config.
 
 ### Options
 
@@ -179,7 +186,7 @@ type Options = {
 - `hyperParse`: customize the hyper parser by their names. It could be `undefined` which means just use default [ignored cases parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/ignore.js), [Markdown parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/md.js) and the [Hexo tags parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/hexo.js).
 - `ignoredCases`: provide exception cases which you would like to skip.
   - `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
-    - Just follows a certain format inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
+    - Just follows a certain format `[prefix-,]textStart[,textEnd][,-suffix]` inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
 - `logger`: same to the parameter in `report(...)`.
 
 ### RC Config
@@ -187,7 +194,7 @@ type Options = {
 - `preset`: `string` (optional)
 - `rules`: `RuleOptions` without the `preset` field. (optional)
 - `hyperParsers`: `string[]` (optional)
-- `ignores`: `string[]` and the priority is lower than `.zhlintignore`. (optional)
+- `caseIgnores`: `string[]` and the priority is lower than `.zhlintcaseignore`. (optional)
 
 ### Output
 
@@ -220,8 +227,6 @@ type Validation = {
   - `index`: The index of the target token in the input string.
   - `length`: The length of the target token in the input string.
   - `message`: The description of this validation in natural language.
-
-### Advanced usage
 
 ## Features
 
@@ -287,9 +292,9 @@ If you want to ignore the whole file, you can also add this HTML comment:
 
 _Almost the rules come from the past translation experiences in [W3C Requirements for Chinese Text Layout](https://www.w3.org/International/clreq/), [W3C HTML Chinese interest group](https://www.w3.org/html/ig/zh/wiki/Main_Page) and [Vue.js Chinese docsite](https://github.com/vuejs/cn.vuejs.org/wiki)._
 
-_... and this part might be controversial. So if you don't feel well at some point, we definitely would love to know and improve. Opening an [issue](https://github.com/zhling-project/zhlint/issues) is always welcome. Then we could discuss about the possible better option or decision._
+_... and this part might be controversial. So if you don't feel well at some point, we definitely would love to know and improve. Opening an [issue](https://github.com/zhlint-project/zhlint/issues) is always welcome. Then we could discuss about the possible better option or decision._
 
-```ts
+````ts
 type RuleOptions = {
   /* PRESET */
 
@@ -409,7 +414,7 @@ type RuleOptions = {
   // e.g. `文字， 文字` -> `文字，文字`
   noSpaceAfterFullwidthPauseOrStop?: boolean
 
-  /* SPACES AROUND QUOTES */
+  /* SPACES AROUND QUOTATIONS */
 
   // default preset: `true`
   // - `true`: one space
@@ -472,8 +477,13 @@ type RuleOptions = {
   // default `true`
   // e.g. ` 文字 ` -> `文字`
   trimSpace?: boolean
+
+  /* SKIP PURE WESTERN SENTENCES */
+
+  // default `true`
+  skipPureWestern?: boolean
 }
-```
+````
 
 ## More information
 

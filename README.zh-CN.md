@@ -40,6 +40,48 @@ zhlint --help
 
 ![](./docs/screenshot-cli.png)
 
+#### 高阶用法
+
+zhlint 还支持 rc 和 ignore 配置文件：
+
+```bash
+# 默认为 .zhlintrc
+zhlint --config <filepath>
+
+# 默认为 .zhlintignore
+zhlint --ignore <filepath>
+zhlint --file-ignore <filepath>
+
+# 默认为 .zhlintcaseignore
+zhlint --case-ignore <filepath>
+
+# 默认为 current directory
+zhlint --dir <path>
+```
+
+在 rc 配置文件中，您可以写一个 JSON，例如：
+
+```json
+{
+  "preset": "default",
+  "rules": {
+    "adjustedFullwidthPunctuation": ""
+  }
+}
+```
+
+关于更多细节，请参见[支持的规则](#支持的规则)。
+
+在 file-ignore 文件中，您可以写多行内容来忽略相应的文件，其语法遵循 [.gitignore 语法](https://git-scm.com/docs/gitignore#_pattern_format)：
+
+在 case-ignore 文件中，您可以写多行内容来忽略一些特例，例如：
+
+```txt
+( , )
+```
+
+关于更多细节：请参见[设置被忽略的特例](#设置被忽略的特例)。
+
 ### 作为 Node.js 包
 
 ```js
@@ -74,6 +116,26 @@ Invalid files:
 Found 2 errors.
 ```
 
+#### 高阶用法
+
+zhlint 还支持 rc 和 ignore 配置文件：
+
+```js
+const { readRc, runWithConfig } = require('zhlint')
+
+const value = '自动在中文和English之间加入空格'
+
+const dir = '...' // 目标文件所在的目录
+const configPath = '...' // rc 配置文件路径
+const fileIgnorePath = '...' // file-ignore 文件路径
+const caseIgnorePath = '...' // case-ignore 文件路径
+
+const config = readRc(dir, configPath, fileIgnorePath, caseIgnorePath)
+const output = runWithConfig(value, config)
+
+// ... 后续操作
+```
+
 ### 作为一个单独的包
 
 您可以找到一个 JavaScript 文件 `dist/zhlint.js` 作为独立版本。 例如，要使用它，您可以直接将它添加到您的浏览器中作为 `<script>` 标签。 即可访问全局变量 `zhlint`。
@@ -82,16 +144,18 @@ Found 2 errors.
 
 ## API
 
-- `run(str: string, options?: Options): Result`：格式化某个文件。
+- `run(str: string, options?: Options): Result`：格式化某个文件内容。
   - 参数：
     - `str`：需要格式化的文本内容。
     - `options`：一些配置选项。
   - 返回值：
-    - 针对输入的单个字符串的处理结果。其包好了修复格式之后的文本内容 `value` 以及所有 `validation` 的校验信息。
-- `report(results: Result[], logger?: Console): void`：为每个文件打印校验报告。
+    - 针对输入的单个字符串的处理结果。其包好了修复格式之后的文本内容 `value` 以及所有 `validation` 的格式化信息。
+- `report(results: Result[], logger?: Console): void`：为每个文件打印格式化报告。
   - 参数：
     - `results`：所有格式化结果的数组。
     - `logger`：日志处理器实例，默认是 Node.js/浏览器中的 `console`。
+- `readRc: (dir: string, config: string, fileIgnore: string, caseIgnore: string, logger?: Console) => Config`：读取配置文件信息。
+- `runWithConfig(str: string, config: Config): Result`：通过配置信息格式化特定内容。
 
 ### 选项
 
@@ -113,20 +177,32 @@ type Options = {
     - 遵循该特定的格式，灵感来自 [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment)。
 - `logger`：和 `report(...)` 中的参数相同。
 
+### RC Config
+
+- `preset`: `string` (可选项)
+- `rules`: `RuleOptions` 但不包括 `preset` 字段。(可选项)
+- `hyperParsers`: `string[]` (可选项)
+- `caseIgnores`: `string[]` 该优先级低于 `.zhlintcaseignore`。(可选项)
+
 ### 输出格式
 
 ```ts
 type Result = {
+  // 基本信息和文件的可用性
   file?: string
+  disabled: boolean
+
+  // 原始的文本内容
   origin: string
-  result: string
+
+  // 所有错误信息
   validations: Validation[]
 }
 
 type Validation = {
+  message: string
   index: number
   length: number
-  message: string
 }
 ```
 
@@ -134,21 +210,29 @@ type Validation = {
   - `file`：文件名。这是一个可选的字段，只在 CLI 中适用。
   - `origin`：原始的文本内容。
   - `result`：最终修复格式的文本内容。
-  - `validations`：所有校验信息。
+  - `validations`：所有格式化信息。
 - `Validation`
   - `index`：输入的字符串中目标片段所在的索引值。
   - `length`：输入的字符串中目标片段的长度。
-  - `message`：对该校验信息的自然语言描述。
+  - `message`：对该格式化信息的自然语言描述。
 
 ## 特性
 
 ### Markdown 语法支持
 
+我们默认支持格式化 Markdown 语法的文本内容。例如：
+
 ```js
 run('自动在_中文_和**English**之间加入空格')
 ```
 
+这将首先分析 Markdown 语法并提取纯文本内容，然后执行格式化操作。修复后的纯文本内容可以复原为 Markdown 格式字符串，并作为结果中的输出 `value` 返回。
+
 ### [Hexo tag](https://hexo.io/docs/tag-plugins) 语法支持
+
+特别地，我们支持 [Hexo tag 语法](https://hexo.io/docs/tag-plugins)。这是因为当我们使用 Hexo 构建 Vue.js 网站时，Markdown 源文件中可能包含一些特殊的标签从而得到不可预测的格式化结果。
+
+因此，我们会默认跳过 Hexo 风格的标签。例如：
 
 ```js
 run('现在过滤器只能用在插入文本中 (`{% raw %}{{ }}{% endraw %}` tags)。')
@@ -156,7 +240,7 @@ run('现在过滤器只能用在插入文本中 (`{% raw %}{{ }}{% endraw %}` ta
 
 ### 设置被忽略的特例
 
-通过 HTML 注释：
+在一些特殊的情况下，我们可能会有一些特殊的文本内容不遵循规则。因此，我们可以使用 `ignoredCases` 选项来配置。例如，我们想要保留括号内的空格，这在默认情况下是格式不正确的。不过我们可以在文件的任何地方写一行 HTML 注释：
 
 ```md
 <!-- the good case -->
@@ -177,6 +261,12 @@ vm.$on( event, callback )
 run(str, { ignoredCases: { textStart: '( ', textEnd: ' )' } })
 ```
 
+如果你想要忽略整个文件，你也可以添加这个 HTML 注释：
+
+```md
+<!-- zhlint disabled -->
+```
+
 ## 支持的预处理器 (超文本解析器)
 
 - `ignore`：通过 HTML 注释 `<!-- zhlint ignore: ... -->` 匹配所有被忽略的特例
@@ -189,7 +279,7 @@ _大多数规则都提炼自过往 [W3C 中文排版需求](https://www.w3.org/I
 
 _……这些规则也许存在争议。所以如果你对某些规则不够满意，我们非常希望得到大家的反馈和改进建议。我们也一直欢迎大家来创建 [issue](https://github.com/zhlint-project/zhlint/issues)，以讨论出可能更好的规则。_
 
-```ts
+````ts
 type RuleOptions = {
   /* PRESET */
 
@@ -309,7 +399,7 @@ type RuleOptions = {
   // e.g. `文字， 文字` -> `文字，文字`
   noSpaceAfterFullwidthPauseOrStop?: boolean
 
-  /* SPACES AROUND QUOTES */
+  /* SPACES AROUND QUOTATIONS */
 
   // default preset: `true`
   // - `true`: one space
@@ -372,5 +462,14 @@ type RuleOptions = {
   // default `true`
   // e.g. ` 文字 ` -> `文字`
   trimSpace?: boolean
+
+  /* SKIP PURE WESTERN SENTENCES */
+
+  // default `true`
+  skipPureWestern?: boolean
 }
-```
+````
+
+## 更多信息
+
+zhlint 是一个开源项目，目前源代码在 [GitHub](https://github.com/zhlint-project/zhlint) 上，也欢迎大家来提交 [issue](https://github.com/zhlint-project/zhlint/issues)。

@@ -1,494 +1,255 @@
-var _a, _b;
-const ignoredCaseMatcher = /^(?:(?<prefix>.+?)-,)?(?<textStart>.+?)(?:,(?<textEnd>.+?))?(?:,-(?<suffix>.+?))?$/;
-const parseIngoredCase = (text2) => {
-  const matchResult = text2.match(ignoredCaseMatcher);
-  if (matchResult) {
-    const { prefix, textStart, textEnd, suffix } = matchResult.groups;
+const qs = /^(?:(?<prefix>.+?)-,)?(?<textStart>.+?)(?:,(?<textEnd>.+?))?(?:,-(?<suffix>.+?))?$/, Ia = (e) => {
+  const r = e.match(qs);
+  if (r) {
+    const { prefix: t, textStart: s, textEnd: n, suffix: i } = r.groups;
     return {
-      prefix,
-      textStart,
-      textEnd,
-      suffix
+      prefix: t,
+      textStart: s,
+      textEnd: n,
+      suffix: i
     };
   }
-};
-const parser$4 = (data) => {
-  const { ignoredByRules, value: raw } = data;
-  const matcher2 = /<!--\s*zhlint\s*ignore:\s*(.+?)\s*-->/g;
-  let result;
-  while ((result = matcher2.exec(raw)) !== null) {
-    const ignoredCase = parseIngoredCase(result[1]);
-    if (ignoredCase) {
-      ignoredByRules.push(ignoredCase);
-    }
+}, Hs = (e) => {
+  const { ignoredByRules: r, value: t } = e, s = /<!--\s*zhlint\s*ignore:\s*(.+?)\s*-->/g;
+  let n;
+  for (; (n = s.exec(t)) !== null; ) {
+    const i = Ia(n[1]);
+    i && r.push(i);
   }
-  return data;
-};
-const matcher$1 = /\{% ([^ ]+?) [^%]*?%\}(?:\n|\{(?!%)|[^{])*?\{% end(?:\1) %\}/g;
-const parser$3 = (data) => {
-  data.modifiedValue = data.modifiedValue.replace(
-    matcher$1,
-    (raw, name2, index2) => {
-      const { length } = raw;
-      data.ignoredByParsers.push({
-        name: name2,
-        meta: `hexo-${name2}`,
-        index: index2,
-        length,
-        originValue: raw
-      });
-      return "@".repeat(length);
-    }
-  );
-  return data;
-};
-let matcher;
+  return e;
+}, Ms = /\{% ([^ ]+?) [^%]*?%\}(?:\n|\{(?!%)|[^{])*?\{% end(?:\1) %\}/g, $s = (e) => (e.modifiedValue = e.modifiedValue.replace(
+  Ms,
+  (r, t, s) => {
+    const { length: n } = r;
+    return e.ignoredByParsers.push({
+      name: t,
+      meta: `hexo-${t}`,
+      index: s,
+      length: n,
+      originValue: r
+    }), "@".repeat(n);
+  }
+), e);
+let Kt;
 try {
-  matcher = new RegExp("(?<=^|\\n)(:::.*)\\n([\\s\\S]+?)\\n(:::)(?=\\n|$)", "g");
+  Kt = new RegExp("(?<=^|\\n)(:::.*)\\n([\\s\\S]+?)\\n(:::)(?=\\n|$)", "g");
 } catch {
-  matcher = /(:::.*)\n([\s\S]+?)\n(:::)/g;
+  Kt = /(:::.*)\n([\s\S]+?)\n(:::)/g;
 }
-const parser$2 = (data) => {
-  data.modifiedValue = data.modifiedValue.replace(
-    matcher,
-    (raw, start, value, end, index2) => {
-      const { length } = raw;
-      const name2 = start.substring(3).trim().split(" ")[0] || "default";
-      data.ignoredByParsers.push({
-        name: name2,
-        index: index2,
-        length: start.length,
-        originValue: start,
-        meta: `vuepress-${name2}-start`
-      });
-      data.ignoredByParsers.push({
-        name: name2,
-        index: index2 + length - 3,
-        length: 3,
-        originValue: end,
-        meta: `vuepress-${name2}-end`
-      });
-      return "@".repeat(start.length) + "\n" + value + "\n" + "@".repeat(3);
-    }
-  );
-  return data;
-};
-var hasOwn = Object.prototype.hasOwnProperty;
-var toStr = Object.prototype.toString;
-var defineProperty = Object.defineProperty;
-var gOPD = Object.getOwnPropertyDescriptor;
-var isArray$1 = function isArray(arr) {
-  if (typeof Array.isArray === "function") {
-    return Array.isArray(arr);
+const Us = (e) => (e.modifiedValue = e.modifiedValue.replace(
+  Kt,
+  (r, t, s, n, i) => {
+    const { length: a } = r, o = t.substring(3).trim().split(" ")[0] || "default";
+    return e.ignoredByParsers.push({
+      name: o,
+      index: i,
+      length: t.length,
+      originValue: t,
+      meta: `vuepress-${o}-start`
+    }), e.ignoredByParsers.push({
+      name: o,
+      index: i + a - 3,
+      length: 3,
+      originValue: n,
+      meta: `vuepress-${o}-end`
+    }), "@".repeat(t.length) + `
+` + s + `
+` + "@".repeat(3);
   }
-  return toStr.call(arr) === "[object Array]";
-};
-var isPlainObject = function isPlainObject2(obj) {
-  if (!obj || toStr.call(obj) !== "[object Object]") {
-    return false;
-  }
-  var hasOwnConstructor = hasOwn.call(obj, "constructor");
-  var hasIsPrototypeOf = obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype, "isPrototypeOf");
-  if (obj.constructor && !hasOwnConstructor && !hasIsPrototypeOf) {
-    return false;
-  }
-  var key;
-  for (key in obj) {
-  }
-  return typeof key === "undefined" || hasOwn.call(obj, key);
-};
-var setProperty = function setProperty2(target, options) {
-  if (defineProperty && options.name === "__proto__") {
-    defineProperty(target, options.name, {
-      enumerable: true,
-      configurable: true,
-      value: options.newValue,
-      writable: true
-    });
-  } else {
-    target[options.name] = options.newValue;
-  }
-};
-var getProperty = function getProperty2(obj, name2) {
-  if (name2 === "__proto__") {
-    if (!hasOwn.call(obj, name2)) {
-      return void 0;
-    } else if (gOPD) {
-      return gOPD(obj, name2).value;
-    }
-  }
-  return obj[name2];
-};
-var extend$2 = function extend() {
-  var options, name2, src, copy2, copyIsArray, clone;
-  var target = arguments[0];
-  var i = 1;
-  var length = arguments.length;
-  var deep = false;
-  if (typeof target === "boolean") {
-    deep = target;
-    target = arguments[1] || {};
-    i = 2;
-  }
-  if (target == null || typeof target !== "object" && typeof target !== "function") {
-    target = {};
-  }
-  for (; i < length; ++i) {
-    options = arguments[i];
-    if (options != null) {
-      for (name2 in options) {
-        src = getProperty(target, name2);
-        copy2 = getProperty(options, name2);
-        if (target !== copy2) {
-          if (deep && copy2 && (isPlainObject(copy2) || (copyIsArray = isArray$1(copy2)))) {
-            if (copyIsArray) {
-              copyIsArray = false;
-              clone = src && isArray$1(src) ? src : [];
-            } else {
-              clone = src && isPlainObject(src) ? src : {};
-            }
-            setProperty(target, { name: name2, newValue: extend(deep, clone, copy2) });
-          } else if (typeof copy2 !== "undefined") {
-            setProperty(target, { name: name2, newValue: copy2 });
-          }
-        }
-      }
-    }
-  }
-  return target;
-};
-var bail_1 = bail$1;
-function bail$1(err) {
-  if (err) {
-    throw err;
-  }
+), e);
+function gr(e) {
+  return e && e.__esModule && Object.prototype.hasOwnProperty.call(e, "default") ? e.default : e;
 }
-var own$4 = {}.hasOwnProperty;
-var unistUtilStringifyPosition = stringify$1;
-function stringify$1(value) {
-  if (!value || typeof value !== "object") {
-    return "";
-  }
-  if (own$4.call(value, "position") || own$4.call(value, "type")) {
-    return position(value.position);
-  }
-  if (own$4.call(value, "start") || own$4.call(value, "end")) {
-    return position(value);
-  }
-  if (own$4.call(value, "line") || own$4.call(value, "column")) {
-    return point(value);
-  }
-  return "";
+var ur = Object.prototype.hasOwnProperty, Pa = Object.prototype.toString, Bn = Object.defineProperty, Nn = Object.getOwnPropertyDescriptor, Fn = function(r) {
+  return typeof Array.isArray == "function" ? Array.isArray(r) : Pa.call(r) === "[object Array]";
+}, Ln = function(r) {
+  if (!r || Pa.call(r) !== "[object Object]")
+    return !1;
+  var t = ur.call(r, "constructor"), s = r.constructor && r.constructor.prototype && ur.call(r.constructor.prototype, "isPrototypeOf");
+  if (r.constructor && !t && !s)
+    return !1;
+  var n;
+  for (n in r)
+    ;
+  return typeof n > "u" || ur.call(r, n);
+}, qn = function(r, t) {
+  Bn && t.name === "__proto__" ? Bn(r, t.name, {
+    enumerable: !0,
+    configurable: !0,
+    value: t.newValue,
+    writable: !0
+  }) : r[t.name] = t.newValue;
+}, Hn = function(r, t) {
+  if (t === "__proto__")
+    if (ur.call(r, t)) {
+      if (Nn)
+        return Nn(r, t).value;
+    } else
+      return;
+  return r[t];
+}, Vs = function e() {
+  var r, t, s, n, i, a, o = arguments[0], c = 1, l = arguments.length, u = !1;
+  for (typeof o == "boolean" && (u = o, o = arguments[1] || {}, c = 2), (o == null || typeof o != "object" && typeof o != "function") && (o = {}); c < l; ++c)
+    if (r = arguments[c], r != null)
+      for (t in r)
+        s = Hn(o, t), n = Hn(r, t), o !== n && (u && n && (Ln(n) || (i = Fn(n))) ? (i ? (i = !1, a = s && Fn(s) ? s : []) : a = s && Ln(s) ? s : {}, qn(o, { name: t, newValue: e(u, a, n) })) : typeof n < "u" && qn(o, { name: t, newValue: n }));
+  return o;
+}, js = Ws;
+function Ws(e) {
+  if (e)
+    throw e;
 }
-function point(point2) {
-  if (!point2 || typeof point2 !== "object") {
-    point2 = {};
-  }
-  return index(point2.line) + ":" + index(point2.column);
+var Oe = {}.hasOwnProperty, zs = Ds;
+function Ds(e) {
+  return !e || typeof e != "object" ? "" : Oe.call(e, "position") || Oe.call(e, "type") ? Mn(e.position) : Oe.call(e, "start") || Oe.call(e, "end") ? Mn(e) : Oe.call(e, "line") || Oe.call(e, "column") ? Qt(e) : "";
 }
-function position(pos) {
-  if (!pos || typeof pos !== "object") {
-    pos = {};
-  }
-  return point(pos.start) + "-" + point(pos.end);
+function Qt(e) {
+  return (!e || typeof e != "object") && (e = {}), $n(e.line) + ":" + $n(e.column);
 }
-function index(value) {
-  return value && typeof value === "number" ? value : 1;
+function Mn(e) {
+  return (!e || typeof e != "object") && (e = {}), Qt(e.start) + "-" + Qt(e.end);
 }
-var stringify = unistUtilStringifyPosition;
-var vfileMessage = VMessage$1;
-function VMessagePrototype() {
+function $n(e) {
+  return e && typeof e == "number" ? e : 1;
 }
-VMessagePrototype.prototype = Error.prototype;
-VMessage$1.prototype = new VMessagePrototype();
-var proto$2 = VMessage$1.prototype;
-proto$2.file = "";
-proto$2.name = "";
-proto$2.reason = "";
-proto$2.message = "";
-proto$2.stack = "";
-proto$2.fatal = null;
-proto$2.column = null;
-proto$2.line = null;
-function VMessage$1(reason, position2, origin) {
-  var parts;
-  var range;
-  var location;
-  if (typeof position2 === "string") {
-    origin = position2;
-    position2 = null;
-  }
-  parts = parseOrigin(origin);
-  range = stringify(position2) || "1:1";
-  location = {
+var Gs = zs, Ks = fn;
+function _a() {
+}
+_a.prototype = Error.prototype;
+fn.prototype = new _a();
+var Ae = fn.prototype;
+Ae.file = "";
+Ae.name = "";
+Ae.reason = "";
+Ae.message = "";
+Ae.stack = "";
+Ae.fatal = null;
+Ae.column = null;
+Ae.line = null;
+function fn(e, r, t) {
+  var s, n, i;
+  typeof r == "string" && (t = r, r = null), s = Qs(t), n = Gs(r) || "1:1", i = {
     start: { line: null, column: null },
     end: { line: null, column: null }
-  };
-  if (position2 && position2.position) {
-    position2 = position2.position;
-  }
-  if (position2) {
-    if (position2.start) {
-      location = position2;
-      position2 = position2.start;
-    } else {
-      location.start = position2;
-    }
-  }
-  if (reason.stack) {
-    this.stack = reason.stack;
-    reason = reason.message;
-  }
-  this.message = reason;
-  this.name = range;
-  this.reason = reason;
-  this.line = position2 ? position2.line : null;
-  this.column = position2 ? position2.column : null;
-  this.location = location;
-  this.source = parts[0];
-  this.ruleId = parts[1];
+  }, r && r.position && (r = r.position), r && (r.start ? (i = r, r = r.start) : i.start = r), e.stack && (this.stack = e.stack, e = e.message), this.message = e, this.name = n, this.reason = e, this.line = r ? r.line : null, this.column = r ? r.column : null, this.location = i, this.source = s[0], this.ruleId = s[1];
 }
-function parseOrigin(origin) {
-  var result = [null, null];
-  var index2;
-  if (typeof origin === "string") {
-    index2 = origin.indexOf(":");
-    if (index2 === -1) {
-      result[1] = origin;
-    } else {
-      result[0] = origin.slice(0, index2);
-      result[1] = origin.slice(index2 + 1);
-    }
-  }
-  return result;
+function Qs(e) {
+  var r = [null, null], t;
+  return typeof e == "string" && (t = e.indexOf(":"), t === -1 ? r[1] = e : (r[0] = e.slice(0, t), r[1] = e.slice(t + 1))), r;
 }
-var minpath_browser = {};
-minpath_browser.basename = basename;
-minpath_browser.dirname = dirname;
-minpath_browser.extname = extname;
-minpath_browser.join = join$1;
-minpath_browser.sep = "/";
-function basename(path, ext) {
-  var start = 0;
-  var end = -1;
-  var index2;
-  var firstNonSlashEnd;
-  var seenNonSlash;
-  var extIndex;
-  if (ext !== void 0 && typeof ext !== "string") {
+var qe = {};
+qe.basename = Ys;
+qe.dirname = Js;
+qe.extname = Xs;
+qe.join = Zs;
+qe.sep = "/";
+function Ys(e, r) {
+  var t = 0, s = -1, n, i, a, o;
+  if (r !== void 0 && typeof r != "string")
     throw new TypeError('"ext" argument must be a string');
-  }
-  assertPath$2(path);
-  index2 = path.length;
-  if (ext === void 0 || !ext.length || ext.length > path.length) {
-    while (index2--) {
-      if (path.charCodeAt(index2) === 47) {
-        if (seenNonSlash) {
-          start = index2 + 1;
+  if (Je(e), n = e.length, r === void 0 || !r.length || r.length > e.length) {
+    for (; n--; )
+      if (e.charCodeAt(n) === 47) {
+        if (a) {
+          t = n + 1;
           break;
         }
-      } else if (end < 0) {
-        seenNonSlash = true;
-        end = index2 + 1;
-      }
-    }
-    return end < 0 ? "" : path.slice(start, end);
+      } else
+        s < 0 && (a = !0, s = n + 1);
+    return s < 0 ? "" : e.slice(t, s);
   }
-  if (ext === path) {
+  if (r === e)
     return "";
-  }
-  firstNonSlashEnd = -1;
-  extIndex = ext.length - 1;
-  while (index2--) {
-    if (path.charCodeAt(index2) === 47) {
-      if (seenNonSlash) {
-        start = index2 + 1;
+  for (i = -1, o = r.length - 1; n--; )
+    if (e.charCodeAt(n) === 47) {
+      if (a) {
+        t = n + 1;
         break;
       }
-    } else {
-      if (firstNonSlashEnd < 0) {
-        seenNonSlash = true;
-        firstNonSlashEnd = index2 + 1;
-      }
-      if (extIndex > -1) {
-        if (path.charCodeAt(index2) === ext.charCodeAt(extIndex--)) {
-          if (extIndex < 0) {
-            end = index2;
-          }
-        } else {
-          extIndex = -1;
-          end = firstNonSlashEnd;
-        }
-      }
-    }
-  }
-  if (start === end) {
-    end = firstNonSlashEnd;
-  } else if (end < 0) {
-    end = path.length;
-  }
-  return path.slice(start, end);
+    } else
+      i < 0 && (a = !0, i = n + 1), o > -1 && (e.charCodeAt(n) === r.charCodeAt(o--) ? o < 0 && (s = n) : (o = -1, s = i));
+  return t === s ? s = i : s < 0 && (s = e.length), e.slice(t, s);
 }
-function dirname(path) {
-  var end;
-  var unmatchedSlash;
-  var index2;
-  assertPath$2(path);
-  if (!path.length) {
+function Js(e) {
+  var r, t, s;
+  if (Je(e), !e.length)
     return ".";
-  }
-  end = -1;
-  index2 = path.length;
-  while (--index2) {
-    if (path.charCodeAt(index2) === 47) {
-      if (unmatchedSlash) {
-        end = index2;
+  for (r = -1, s = e.length; --s; )
+    if (e.charCodeAt(s) === 47) {
+      if (t) {
+        r = s;
         break;
       }
-    } else if (!unmatchedSlash) {
-      unmatchedSlash = true;
-    }
-  }
-  return end < 0 ? path.charCodeAt(0) === 47 ? "/" : "." : end === 1 && path.charCodeAt(0) === 47 ? "//" : path.slice(0, end);
+    } else
+      t || (t = !0);
+  return r < 0 ? e.charCodeAt(0) === 47 ? "/" : "." : r === 1 && e.charCodeAt(0) === 47 ? "//" : e.slice(0, r);
 }
-function extname(path) {
-  var startDot = -1;
-  var startPart = 0;
-  var end = -1;
-  var preDotState = 0;
-  var unmatchedSlash;
-  var code;
-  var index2;
-  assertPath$2(path);
-  index2 = path.length;
-  while (index2--) {
-    code = path.charCodeAt(index2);
-    if (code === 47) {
-      if (unmatchedSlash) {
-        startPart = index2 + 1;
+function Xs(e) {
+  var r = -1, t = 0, s = -1, n = 0, i, a, o;
+  for (Je(e), o = e.length; o--; ) {
+    if (a = e.charCodeAt(o), a === 47) {
+      if (i) {
+        t = o + 1;
         break;
       }
       continue;
     }
-    if (end < 0) {
-      unmatchedSlash = true;
-      end = index2 + 1;
-    }
-    if (code === 46) {
-      if (startDot < 0) {
-        startDot = index2;
-      } else if (preDotState !== 1) {
-        preDotState = 1;
-      }
-    } else if (startDot > -1) {
-      preDotState = -1;
-    }
+    s < 0 && (i = !0, s = o + 1), a === 46 ? r < 0 ? r = o : n !== 1 && (n = 1) : r > -1 && (n = -1);
   }
-  if (startDot < 0 || end < 0 || preDotState === 0 || preDotState === 1 && startDot === end - 1 && startDot === startPart + 1) {
-    return "";
-  }
-  return path.slice(startDot, end);
+  return r < 0 || s < 0 || // We saw a non-dot character immediately before the dot.
+  n === 0 || // The (right-most) trimmed path component is exactly `..`.
+  n === 1 && r === s - 1 && r === t + 1 ? "" : e.slice(r, s);
 }
-function join$1() {
-  var index2 = -1;
-  var joined;
-  while (++index2 < arguments.length) {
-    assertPath$2(arguments[index2]);
-    if (arguments[index2]) {
-      joined = joined === void 0 ? arguments[index2] : joined + "/" + arguments[index2];
-    }
-  }
-  return joined === void 0 ? "." : normalize$4(joined);
+function Zs() {
+  for (var e = -1, r; ++e < arguments.length; )
+    Je(arguments[e]), arguments[e] && (r = r === void 0 ? arguments[e] : r + "/" + arguments[e]);
+  return r === void 0 ? "." : eo(r);
 }
-function normalize$4(path) {
-  var absolute;
-  var value;
-  assertPath$2(path);
-  absolute = path.charCodeAt(0) === 47;
-  value = normalizeString(path, !absolute);
-  if (!value.length && !absolute) {
-    value = ".";
-  }
-  if (value.length && path.charCodeAt(path.length - 1) === 47) {
-    value += "/";
-  }
-  return absolute ? "/" + value : value;
+function eo(e) {
+  var r, t;
+  return Je(e), r = e.charCodeAt(0) === 47, t = ro(e, !r), !t.length && !r && (t = "."), t.length && e.charCodeAt(e.length - 1) === 47 && (t += "/"), r ? "/" + t : t;
 }
-function normalizeString(path, allowAboveRoot) {
-  var result = "";
-  var lastSegmentLength = 0;
-  var lastSlash = -1;
-  var dots = 0;
-  var index2 = -1;
-  var code;
-  var lastSlashIndex;
-  while (++index2 <= path.length) {
-    if (index2 < path.length) {
-      code = path.charCodeAt(index2);
-    } else if (code === 47) {
-      break;
-    } else {
-      code = 47;
+function ro(e, r) {
+  for (var t = "", s = 0, n = -1, i = 0, a = -1, o, c; ++a <= e.length; ) {
+    if (a < e.length)
+      o = e.charCodeAt(a);
+    else {
+      if (o === 47)
+        break;
+      o = 47;
     }
-    if (code === 47) {
-      if (lastSlash === index2 - 1 || dots === 1)
-        ;
-      else if (lastSlash !== index2 - 1 && dots === 2) {
-        if (result.length < 2 || lastSegmentLength !== 2 || result.charCodeAt(result.length - 1) !== 46 || result.charCodeAt(result.length - 2) !== 46) {
-          if (result.length > 2) {
-            lastSlashIndex = result.lastIndexOf("/");
-            if (lastSlashIndex !== result.length - 1) {
-              if (lastSlashIndex < 0) {
-                result = "";
-                lastSegmentLength = 0;
-              } else {
-                result = result.slice(0, lastSlashIndex);
-                lastSegmentLength = result.length - 1 - result.lastIndexOf("/");
+    if (o === 47) {
+      if (!(n === a - 1 || i === 1))
+        if (n !== a - 1 && i === 2) {
+          if (t.length < 2 || s !== 2 || t.charCodeAt(t.length - 1) !== 46 || t.charCodeAt(t.length - 2) !== 46) {
+            if (t.length > 2) {
+              if (c = t.lastIndexOf("/"), c !== t.length - 1) {
+                c < 0 ? (t = "", s = 0) : (t = t.slice(0, c), s = t.length - 1 - t.lastIndexOf("/")), n = a, i = 0;
+                continue;
               }
-              lastSlash = index2;
-              dots = 0;
+            } else if (t.length) {
+              t = "", s = 0, n = a, i = 0;
               continue;
             }
-          } else if (result.length) {
-            result = "";
-            lastSegmentLength = 0;
-            lastSlash = index2;
-            dots = 0;
-            continue;
           }
-        }
-        if (allowAboveRoot) {
-          result = result.length ? result + "/.." : "..";
-          lastSegmentLength = 2;
-        }
-      } else {
-        if (result.length) {
-          result += "/" + path.slice(lastSlash + 1, index2);
-        } else {
-          result = path.slice(lastSlash + 1, index2);
-        }
-        lastSegmentLength = index2 - lastSlash - 1;
-      }
-      lastSlash = index2;
-      dots = 0;
-    } else if (code === 46 && dots > -1) {
-      dots++;
-    } else {
-      dots = -1;
-    }
+          r && (t = t.length ? t + "/.." : "..", s = 2);
+        } else
+          t.length ? t += "/" + e.slice(n + 1, a) : t = e.slice(n + 1, a), s = a - n - 1;
+      n = a, i = 0;
+    } else
+      o === 46 && i > -1 ? i++ : i = -1;
   }
-  return result;
+  return t;
 }
-function assertPath$2(path) {
-  if (typeof path !== "string") {
+function Je(e) {
+  if (typeof e != "string")
     throw new TypeError(
-      "Path must be a string. Received " + JSON.stringify(path)
+      "Path must be a string. Received " + JSON.stringify(e)
     );
-  }
 }
-var minproc_browser = {};
-minproc_browser.cwd = cwd;
-function cwd() {
+var Ba = {};
+Ba.cwd = to;
+function to() {
   return "/";
 }
 /*!
@@ -497,1006 +258,586 @@ function cwd() {
  * @author   Feross Aboukhadijeh <https://feross.org>
  * @license  MIT
  */
-var isBuffer = function isBuffer2(obj) {
-  return obj != null && obj.constructor != null && typeof obj.constructor.isBuffer === "function" && obj.constructor.isBuffer(obj);
-};
-var p = minpath_browser;
-var proc = minproc_browser;
-var buffer = isBuffer;
-var core = VFile$1;
-var own$3 = {}.hasOwnProperty;
-var order = ["history", "path", "basename", "stem", "extname", "dirname"];
-VFile$1.prototype.toString = toString;
-Object.defineProperty(VFile$1.prototype, "path", { get: getPath, set: setPath });
-Object.defineProperty(VFile$1.prototype, "dirname", {
-  get: getDirname,
-  set: setDirname
+var no = function(r) {
+  return r != null && r.constructor != null && typeof r.constructor.isBuffer == "function" && r.constructor.isBuffer(r);
+}, ue = qe, io = Ba, ao = no, so = he, oo = {}.hasOwnProperty, Ir = ["history", "path", "basename", "stem", "extname", "dirname"];
+he.prototype.toString = bo;
+Object.defineProperty(he.prototype, "path", { get: co, set: lo });
+Object.defineProperty(he.prototype, "dirname", {
+  get: fo,
+  set: uo
 });
-Object.defineProperty(VFile$1.prototype, "basename", {
-  get: getBasename,
-  set: setBasename
+Object.defineProperty(he.prototype, "basename", {
+  get: ho,
+  set: po
 });
-Object.defineProperty(VFile$1.prototype, "extname", {
-  get: getExtname,
-  set: setExtname
+Object.defineProperty(he.prototype, "extname", {
+  get: vo,
+  set: go
 });
-Object.defineProperty(VFile$1.prototype, "stem", { get: getStem, set: setStem });
-function VFile$1(options) {
-  var prop;
-  var index2;
-  if (!options) {
-    options = {};
-  } else if (typeof options === "string" || buffer(options)) {
-    options = { contents: options };
-  } else if ("message" in options && "messages" in options) {
-    return options;
-  }
-  if (!(this instanceof VFile$1)) {
-    return new VFile$1(options);
-  }
-  this.data = {};
-  this.messages = [];
-  this.history = [];
-  this.cwd = proc.cwd();
-  index2 = -1;
-  while (++index2 < order.length) {
-    prop = order[index2];
-    if (own$3.call(options, prop)) {
-      this[prop] = options[prop];
-    }
-  }
-  for (prop in options) {
-    if (order.indexOf(prop) < 0) {
-      this[prop] = options[prop];
-    }
-  }
+Object.defineProperty(he.prototype, "stem", { get: mo, set: yo });
+function he(e) {
+  var r, t;
+  if (!e)
+    e = {};
+  else if (typeof e == "string" || ao(e))
+    e = { contents: e };
+  else if ("message" in e && "messages" in e)
+    return e;
+  if (!(this instanceof he))
+    return new he(e);
+  for (this.data = {}, this.messages = [], this.history = [], this.cwd = io.cwd(), t = -1; ++t < Ir.length; )
+    r = Ir[t], oo.call(e, r) && (this[r] = e[r]);
+  for (r in e)
+    Ir.indexOf(r) < 0 && (this[r] = e[r]);
 }
-function getPath() {
+function co() {
   return this.history[this.history.length - 1];
 }
-function setPath(path) {
-  assertNonEmpty(path, "path");
-  if (this.path !== path) {
-    this.history.push(path);
-  }
+function lo(e) {
+  dn(e, "path"), this.path !== e && this.history.push(e);
 }
-function getDirname() {
-  return typeof this.path === "string" ? p.dirname(this.path) : void 0;
+function fo() {
+  return typeof this.path == "string" ? ue.dirname(this.path) : void 0;
 }
-function setDirname(dirname3) {
-  assertPath$1(this.path, "dirname");
-  this.path = p.join(dirname3 || "", this.basename);
+function uo(e) {
+  Na(this.path, "dirname"), this.path = ue.join(e || "", this.basename);
 }
-function getBasename() {
-  return typeof this.path === "string" ? p.basename(this.path) : void 0;
+function ho() {
+  return typeof this.path == "string" ? ue.basename(this.path) : void 0;
 }
-function setBasename(basename3) {
-  assertNonEmpty(basename3, "basename");
-  assertPart(basename3, "basename");
-  this.path = p.join(this.dirname || "", basename3);
+function po(e) {
+  dn(e, "basename"), un(e, "basename"), this.path = ue.join(this.dirname || "", e);
 }
-function getExtname() {
-  return typeof this.path === "string" ? p.extname(this.path) : void 0;
+function vo() {
+  return typeof this.path == "string" ? ue.extname(this.path) : void 0;
 }
-function setExtname(extname3) {
-  assertPart(extname3, "extname");
-  assertPath$1(this.path, "extname");
-  if (extname3) {
-    if (extname3.charCodeAt(0) !== 46) {
+function go(e) {
+  if (un(e, "extname"), Na(this.path, "extname"), e) {
+    if (e.charCodeAt(0) !== 46)
       throw new Error("`extname` must start with `.`");
-    }
-    if (extname3.indexOf(".", 1) > -1) {
+    if (e.indexOf(".", 1) > -1)
       throw new Error("`extname` cannot contain multiple dots");
-    }
   }
-  this.path = p.join(this.dirname, this.stem + (extname3 || ""));
+  this.path = ue.join(this.dirname, this.stem + (e || ""));
 }
-function getStem() {
-  return typeof this.path === "string" ? p.basename(this.path, this.extname) : void 0;
+function mo() {
+  return typeof this.path == "string" ? ue.basename(this.path, this.extname) : void 0;
 }
-function setStem(stem) {
-  assertNonEmpty(stem, "stem");
-  assertPart(stem, "stem");
-  this.path = p.join(this.dirname || "", stem + (this.extname || ""));
+function yo(e) {
+  dn(e, "stem"), un(e, "stem"), this.path = ue.join(this.dirname || "", e + (this.extname || ""));
 }
-function toString(encoding) {
-  return (this.contents || "").toString(encoding);
+function bo(e) {
+  return (this.contents || "").toString(e);
 }
-function assertPart(part, name2) {
-  if (part && part.indexOf(p.sep) > -1) {
+function un(e, r) {
+  if (e && e.indexOf(ue.sep) > -1)
     throw new Error(
-      "`" + name2 + "` cannot be a path: did not expect `" + p.sep + "`"
+      "`" + r + "` cannot be a path: did not expect `" + ue.sep + "`"
     );
-  }
 }
-function assertNonEmpty(part, name2) {
-  if (!part) {
-    throw new Error("`" + name2 + "` cannot be empty");
-  }
+function dn(e, r) {
+  if (!e)
+    throw new Error("`" + r + "` cannot be empty");
 }
-function assertPath$1(path, name2) {
-  if (!path) {
-    throw new Error("Setting `" + name2 + "` requires `path` to be set too");
-  }
+function Na(e, r) {
+  if (!e)
+    throw new Error("Setting `" + r + "` requires `path` to be set too");
 }
-var VMessage = vfileMessage;
-var VFile = core;
-var lib = VFile;
-VFile.prototype.message = message;
-VFile.prototype.info = info;
-VFile.prototype.fail = fail;
-function message(reason, position2, origin) {
-  var message2 = new VMessage(reason, position2, origin);
-  if (this.path) {
-    message2.name = this.path + ":" + message2.name;
-    message2.file = this.path;
-  }
-  message2.fatal = false;
-  this.messages.push(message2);
-  return message2;
+var Ao = Ks, mr = so, wo = mr;
+mr.prototype.message = Eo;
+mr.prototype.info = ko;
+mr.prototype.fail = To;
+function Eo(e, r, t) {
+  var s = new Ao(e, r, t);
+  return this.path && (s.name = this.path + ":" + s.name, s.file = this.path), s.fatal = !1, this.messages.push(s), s;
 }
-function fail() {
-  var message2 = this.message.apply(this, arguments);
-  message2.fatal = true;
-  throw message2;
+function To() {
+  var e = this.message.apply(this, arguments);
+  throw e.fatal = !0, e;
 }
-function info() {
-  var message2 = this.message.apply(this, arguments);
-  message2.fatal = null;
-  return message2;
+function ko() {
+  var e = this.message.apply(this, arguments);
+  return e.fatal = null, e;
 }
-var vfile$1 = lib;
-var slice$2 = [].slice;
-var wrap_1 = wrap$2;
-function wrap$2(fn, callback) {
-  var invoked;
-  return wrapped;
-  function wrapped() {
-    var params = slice$2.call(arguments, 0);
-    var callback2 = fn.length > params.length;
-    var result;
-    if (callback2) {
-      params.push(done);
-    }
+var xo = wo, So = [].slice, Co = Oo;
+function Oo(e, r) {
+  var t;
+  return s;
+  function s() {
+    var a = So.call(arguments, 0), o = e.length > a.length, c;
+    o && a.push(n);
     try {
-      result = fn.apply(null, params);
-    } catch (error) {
-      if (callback2 && invoked) {
-        throw error;
-      }
-      return done(error);
+      c = e.apply(null, a);
+    } catch (l) {
+      if (o && t)
+        throw l;
+      return n(l);
     }
-    if (!callback2) {
-      if (result && typeof result.then === "function") {
-        result.then(then, done);
-      } else if (result instanceof Error) {
-        done(result);
-      } else {
-        then(result);
-      }
-    }
+    o || (c && typeof c.then == "function" ? c.then(i, n) : c instanceof Error ? n(c) : i(c));
   }
-  function done() {
-    if (!invoked) {
-      invoked = true;
-      callback.apply(null, arguments);
-    }
+  function n() {
+    t || (t = !0, r.apply(null, arguments));
   }
-  function then(value) {
-    done(null, value);
+  function i(a) {
+    n(null, a);
   }
 }
-var wrap$1 = wrap_1;
-var trough_1 = trough$1;
-trough$1.wrap = wrap$1;
-var slice$1 = [].slice;
-function trough$1() {
-  var fns = [];
-  var middleware = {};
-  middleware.run = run2;
-  middleware.use = use;
-  return middleware;
-  function run2() {
-    var index2 = -1;
-    var input = slice$1.call(arguments, 0, -1);
-    var done = arguments[arguments.length - 1];
-    if (typeof done !== "function") {
-      throw new Error("Expected function as last argument, not " + done);
-    }
-    next.apply(null, [null].concat(input));
-    function next(err) {
-      var fn = fns[++index2];
-      var params = slice$1.call(arguments, 0);
-      var values = params.slice(1);
-      var length = input.length;
-      var pos = -1;
-      if (err) {
-        done(err);
+var Fa = Co, Ro = La;
+La.wrap = Fa;
+var Un = [].slice;
+function La() {
+  var e = [], r = {};
+  return r.run = t, r.use = s, r;
+  function t() {
+    var n = -1, i = Un.call(arguments, 0, -1), a = arguments[arguments.length - 1];
+    if (typeof a != "function")
+      throw new Error("Expected function as last argument, not " + a);
+    o.apply(null, [null].concat(i));
+    function o(c) {
+      var l = e[++n], u = Un.call(arguments, 0), f = u.slice(1), d = i.length, h = -1;
+      if (c) {
+        a(c);
         return;
       }
-      while (++pos < length) {
-        if (values[pos] === null || values[pos] === void 0) {
-          values[pos] = input[pos];
-        }
-      }
-      input = values;
-      if (fn) {
-        wrap$1(fn, next).apply(null, input);
-      } else {
-        done.apply(null, [null].concat(input));
-      }
+      for (; ++h < d; )
+        (f[h] === null || f[h] === void 0) && (f[h] = i[h]);
+      i = f, l ? Fa(l, o).apply(null, i) : a.apply(null, [null].concat(i));
     }
   }
-  function use(fn) {
-    if (typeof fn !== "function") {
-      throw new Error("Expected `fn` to be a function, not " + fn);
-    }
-    fns.push(fn);
-    return middleware;
+  function s(n) {
+    if (typeof n != "function")
+      throw new Error("Expected `fn` to be a function, not " + n);
+    return e.push(n), r;
   }
 }
-var isPlainObj = (value) => {
-  if (Object.prototype.toString.call(value) !== "[object Object]") {
-    return false;
+var Io = (e) => {
+  if (Object.prototype.toString.call(e) !== "[object Object]")
+    return !1;
+  const r = Object.getPrototypeOf(e);
+  return r === null || r === Object.prototype;
+}, rr = Vs, Vn = js, We = xo, qa = Ro, jn = Io, Po = Ha().freeze(), _o = [].slice, Bo = {}.hasOwnProperty, No = qa().use(Fo).use(Lo).use(qo);
+function Fo(e, r) {
+  r.tree = e.parse(r.file);
+}
+function Lo(e, r, t) {
+  e.run(r.tree, r.file, s);
+  function s(n, i, a) {
+    n ? t(n) : (r.tree = i, r.file = a, t());
   }
-  const prototype = Object.getPrototypeOf(value);
-  return prototype === null || prototype === Object.prototype;
+}
+function qo(e, r) {
+  r.file.contents = e.stringify(r.tree, r.file);
+}
+function Ha() {
+  var e = [], r = qa(), t = {}, s = !1, n = -1;
+  return i.data = o, i.freeze = a, i.attachers = e, i.use = c, i.parse = u, i.stringify = h, i.run = f, i.runSync = d, i.process = m, i.processSync = y, i;
+  function i() {
+    for (var p = Ha(), v = e.length, g = -1; ++g < v; )
+      p.use.apply(null, e[g]);
+    return p.data(rr(!0, {}, t)), p;
+  }
+  function a() {
+    var p, v, g, b;
+    if (s)
+      return i;
+    for (; ++n < e.length; )
+      p = e[n], v = p[0], g = p[1], b = null, g !== !1 && (g === !0 && (p[1] = void 0), b = v.apply(i, p.slice(1)), typeof b == "function" && r.use(b));
+    return s = !0, n = 1 / 0, i;
+  }
+  function o(p, v) {
+    return typeof p == "string" ? arguments.length === 2 ? (Br("data", s), t[p] = v, i) : Bo.call(t, p) && t[p] || null : p ? (Br("data", s), t = p, i) : t;
+  }
+  function c(p) {
+    var v;
+    if (Br("use", s), p != null)
+      if (typeof p == "function")
+        A.apply(null, arguments);
+      else if (typeof p == "object")
+        "length" in p ? E(p) : g(p);
+      else
+        throw new Error("Expected usable value, not `" + p + "`");
+    return v && (t.settings = rr(t.settings || {}, v)), i;
+    function g(T) {
+      E(T.plugins), T.settings && (v = rr(v || {}, T.settings));
+    }
+    function b(T) {
+      if (typeof T == "function")
+        A(T);
+      else if (typeof T == "object")
+        "length" in T ? A.apply(null, T) : g(T);
+      else
+        throw new Error("Expected usable value, not `" + T + "`");
+    }
+    function E(T) {
+      var k, O;
+      if (T != null)
+        if (typeof T == "object" && "length" in T)
+          for (k = T.length, O = -1; ++O < k; )
+            b(T[O]);
+        else
+          throw new Error("Expected a list of plugins, not `" + T + "`");
+    }
+    function A(T, k) {
+      var O = l(T);
+      O ? (jn(O[1]) && jn(k) && (k = rr(O[1], k)), O[1] = k) : e.push(_o.call(arguments));
+    }
+  }
+  function l(p) {
+    for (var v = e.length, g = -1, b; ++g < v; )
+      if (b = e[g], b[0] === p)
+        return b;
+  }
+  function u(p) {
+    var v = We(p), g;
+    return a(), g = i.Parser, Pr("parse", g), Wn(g, "parse") ? new g(String(v), v).parse() : g(String(v), v);
+  }
+  function f(p, v, g) {
+    if (zn(p), a(), !g && typeof v == "function" && (g = v, v = null), !g)
+      return new Promise(b);
+    b(null, g);
+    function b(E, A) {
+      r.run(p, We(v), T);
+      function T(k, O, w) {
+        O = O || p, k ? A(k) : E ? E(O) : g(null, O, w);
+      }
+    }
+  }
+  function d(p, v) {
+    var g = !1, b;
+    return f(p, v, E), Dn("runSync", "run", g), b;
+    function E(A, T) {
+      g = !0, Vn(A), b = T;
+    }
+  }
+  function h(p, v) {
+    var g = We(v), b;
+    return a(), b = i.Compiler, _r("stringify", b), zn(p), Wn(b, "compile") ? new b(p, g).compile() : b(p, g);
+  }
+  function m(p, v) {
+    if (a(), Pr("process", i.Parser), _r("process", i.Compiler), !v)
+      return new Promise(g);
+    g(null, v);
+    function g(b, E) {
+      var A = We(p);
+      No.run(i, { file: A }, T);
+      function T(k) {
+        k ? E(k) : b ? b(A) : v(null, A);
+      }
+    }
+  }
+  function y(p) {
+    var v = !1, g;
+    return a(), Pr("processSync", i.Parser), _r("processSync", i.Compiler), g = We(p), m(g, b), Dn("processSync", "process", v), g;
+    function b(E) {
+      v = !0, Vn(E);
+    }
+  }
+}
+function Wn(e, r) {
+  return typeof e == "function" && e.prototype && // A function with keys in its prototype is probably a constructor.
+  // Classes’ prototype methods are not enumerable, so we check if some value
+  // exists in the prototype.
+  (Ho(e.prototype) || r in e.prototype);
+}
+function Ho(e) {
+  var r;
+  for (r in e)
+    return !0;
+  return !1;
+}
+function Pr(e, r) {
+  if (typeof r != "function")
+    throw new Error("Cannot `" + e + "` without `Parser`");
+}
+function _r(e, r) {
+  if (typeof r != "function")
+    throw new Error("Cannot `" + e + "` without `Compiler`");
+}
+function Br(e, r) {
+  if (r)
+    throw new Error(
+      "Cannot invoke `" + e + "` on a frozen processor.\nCreate a new processor first, by invoking it: use `processor()` instead of `processor`."
+    );
+}
+function zn(e) {
+  if (!e || typeof e.type != "string")
+    throw new Error("Expected node, got `" + e + "`");
+}
+function Dn(e, r, t) {
+  if (!t)
+    throw new Error(
+      "`" + e + "` finished async. Use `" + r + "` instead"
+    );
+}
+const Mo = /* @__PURE__ */ gr(Po);
+var Ce = Uo, $o = Object.prototype.hasOwnProperty;
+function Uo() {
+  for (var e = {}, r = 0; r < arguments.length; r++) {
+    var t = arguments[r];
+    for (var s in t)
+      $o.call(t, s) && (e[s] = t[s]);
+  }
+  return e;
+}
+var Yt = { exports: {} };
+typeof Object.create == "function" ? Yt.exports = function(r, t) {
+  t && (r.super_ = t, r.prototype = Object.create(t.prototype, {
+    constructor: {
+      value: r,
+      enumerable: !1,
+      writable: !0,
+      configurable: !0
+    }
+  }));
+} : Yt.exports = function(r, t) {
+  if (t) {
+    r.super_ = t;
+    var s = function() {
+    };
+    s.prototype = t.prototype, r.prototype = new s(), r.prototype.constructor = r;
+  }
 };
-var extend$1 = extend$2;
-var bail = bail_1;
-var vfile = vfile$1;
-var trough = trough_1;
-var plain = isPlainObj;
-var unified_1 = unified().freeze();
-var slice = [].slice;
-var own$2 = {}.hasOwnProperty;
-var pipeline = trough().use(pipelineParse).use(pipelineRun).use(pipelineStringify);
-function pipelineParse(p2, ctx) {
-  ctx.tree = p2.parse(ctx.file);
-}
-function pipelineRun(p2, ctx, next) {
-  p2.run(ctx.tree, ctx.file, done);
-  function done(err, tree, file) {
-    if (err) {
-      next(err);
-    } else {
-      ctx.tree = tree;
-      ctx.file = file;
-      next();
-    }
+var Vo = Yt.exports, jo = Ce, Gn = Vo, Wo = zo;
+function zo(e) {
+  var r, t, s;
+  Gn(i, e), Gn(n, i), r = i.prototype;
+  for (t in r)
+    s = r[t], s && typeof s == "object" && (r[t] = "concat" in s ? s.concat() : jo(s));
+  return i;
+  function n(a) {
+    return e.apply(this, a);
+  }
+  function i() {
+    return this instanceof i ? e.apply(this, arguments) : new n(arguments);
   }
 }
-function pipelineStringify(p2, ctx) {
-  ctx.file.contents = p2.stringify(ctx.tree, ctx.file);
-}
-function unified() {
-  var attachers = [];
-  var transformers = trough();
-  var namespace = {};
-  var frozen = false;
-  var freezeIndex = -1;
-  processor.data = data;
-  processor.freeze = freeze;
-  processor.attachers = attachers;
-  processor.use = use;
-  processor.parse = parse3;
-  processor.stringify = stringify2;
-  processor.run = run2;
-  processor.runSync = runSync;
-  processor.process = process2;
-  processor.processSync = processSync;
-  return processor;
-  function processor() {
-    var destination = unified();
-    var length = attachers.length;
-    var index2 = -1;
-    while (++index2 < length) {
-      destination.use.apply(null, attachers[index2]);
-    }
-    destination.data(extend$1(true, {}, namespace));
-    return destination;
-  }
-  function freeze() {
-    var values;
-    var plugin;
-    var options;
-    var transformer;
-    if (frozen) {
-      return processor;
-    }
-    while (++freezeIndex < attachers.length) {
-      values = attachers[freezeIndex];
-      plugin = values[0];
-      options = values[1];
-      transformer = null;
-      if (options === false) {
-        continue;
-      }
-      if (options === true) {
-        values[1] = void 0;
-      }
-      transformer = plugin.apply(processor, values.slice(1));
-      if (typeof transformer === "function") {
-        transformers.use(transformer);
-      }
-    }
-    frozen = true;
-    freezeIndex = Infinity;
-    return processor;
-  }
-  function data(key, value) {
-    if (typeof key === "string") {
-      if (arguments.length === 2) {
-        assertUnfrozen("data", frozen);
-        namespace[key] = value;
-        return processor;
-      }
-      return own$2.call(namespace, key) && namespace[key] || null;
-    }
-    if (key) {
-      assertUnfrozen("data", frozen);
-      namespace = key;
-      return processor;
-    }
-    return namespace;
-  }
-  function use(value) {
-    var settings;
-    assertUnfrozen("use", frozen);
-    if (value === null || value === void 0)
-      ;
-    else if (typeof value === "function") {
-      addPlugin.apply(null, arguments);
-    } else if (typeof value === "object") {
-      if ("length" in value) {
-        addList(value);
-      } else {
-        addPreset(value);
-      }
-    } else {
-      throw new Error("Expected usable value, not `" + value + "`");
-    }
-    if (settings) {
-      namespace.settings = extend$1(namespace.settings || {}, settings);
-    }
-    return processor;
-    function addPreset(result) {
-      addList(result.plugins);
-      if (result.settings) {
-        settings = extend$1(settings || {}, result.settings);
-      }
-    }
-    function add(value2) {
-      if (typeof value2 === "function") {
-        addPlugin(value2);
-      } else if (typeof value2 === "object") {
-        if ("length" in value2) {
-          addPlugin.apply(null, value2);
-        } else {
-          addPreset(value2);
-        }
-      } else {
-        throw new Error("Expected usable value, not `" + value2 + "`");
-      }
-    }
-    function addList(plugins) {
-      var length;
-      var index2;
-      if (plugins === null || plugins === void 0)
-        ;
-      else if (typeof plugins === "object" && "length" in plugins) {
-        length = plugins.length;
-        index2 = -1;
-        while (++index2 < length) {
-          add(plugins[index2]);
-        }
-      } else {
-        throw new Error("Expected a list of plugins, not `" + plugins + "`");
-      }
-    }
-    function addPlugin(plugin, value2) {
-      var entry = find(plugin);
-      if (entry) {
-        if (plain(entry[1]) && plain(value2)) {
-          value2 = extend$1(entry[1], value2);
-        }
-        entry[1] = value2;
-      } else {
-        attachers.push(slice.call(arguments));
-      }
-    }
-  }
-  function find(plugin) {
-    var length = attachers.length;
-    var index2 = -1;
-    var entry;
-    while (++index2 < length) {
-      entry = attachers[index2];
-      if (entry[0] === plugin) {
-        return entry;
-      }
-    }
-  }
-  function parse3(doc) {
-    var file = vfile(doc);
-    var Parser2;
-    freeze();
-    Parser2 = processor.Parser;
-    assertParser("parse", Parser2);
-    if (newable(Parser2, "parse")) {
-      return new Parser2(String(file), file).parse();
-    }
-    return Parser2(String(file), file);
-  }
-  function run2(node, file, cb) {
-    assertNode(node);
-    freeze();
-    if (!cb && typeof file === "function") {
-      cb = file;
-      file = null;
-    }
-    if (!cb) {
-      return new Promise(executor);
-    }
-    executor(null, cb);
-    function executor(resolve2, reject) {
-      transformers.run(node, vfile(file), done);
-      function done(err, tree, file2) {
-        tree = tree || node;
-        if (err) {
-          reject(err);
-        } else if (resolve2) {
-          resolve2(tree);
-        } else {
-          cb(null, tree, file2);
-        }
-      }
-    }
-  }
-  function runSync(node, file) {
-    var complete = false;
-    var result;
-    run2(node, file, done);
-    assertDone("runSync", "run", complete);
-    return result;
-    function done(err, tree) {
-      complete = true;
-      bail(err);
-      result = tree;
-    }
-  }
-  function stringify2(node, doc) {
-    var file = vfile(doc);
-    var Compiler;
-    freeze();
-    Compiler = processor.Compiler;
-    assertCompiler("stringify", Compiler);
-    assertNode(node);
-    if (newable(Compiler, "compile")) {
-      return new Compiler(node, file).compile();
-    }
-    return Compiler(node, file);
-  }
-  function process2(doc, cb) {
-    freeze();
-    assertParser("process", processor.Parser);
-    assertCompiler("process", processor.Compiler);
-    if (!cb) {
-      return new Promise(executor);
-    }
-    executor(null, cb);
-    function executor(resolve2, reject) {
-      var file = vfile(doc);
-      pipeline.run(processor, { file }, done);
-      function done(err) {
-        if (err) {
-          reject(err);
-        } else if (resolve2) {
-          resolve2(file);
-        } else {
-          cb(null, file);
-        }
-      }
-    }
-  }
-  function processSync(doc) {
-    var complete = false;
-    var file;
-    freeze();
-    assertParser("processSync", processor.Parser);
-    assertCompiler("processSync", processor.Compiler);
-    file = vfile(doc);
-    process2(file, done);
-    assertDone("processSync", "process", complete);
-    return file;
-    function done(err) {
-      complete = true;
-      bail(err);
+var Do = Go;
+function Go(e, r, t) {
+  return s;
+  function s() {
+    var n = t || this, i = n[e];
+    return n[e] = !r, a;
+    function a() {
+      n[e] = i;
     }
   }
 }
-function newable(value, name2) {
-  return typeof value === "function" && value.prototype && (keys$1(value.prototype) || name2 in value.prototype);
-}
-function keys$1(value) {
-  var key;
-  for (key in value) {
-    return true;
-  }
-  return false;
-}
-function assertParser(name2, Parser2) {
-  if (typeof Parser2 !== "function") {
-    throw new Error("Cannot `" + name2 + "` without `Parser`");
-  }
-}
-function assertCompiler(name2, Compiler) {
-  if (typeof Compiler !== "function") {
-    throw new Error("Cannot `" + name2 + "` without `Compiler`");
-  }
-}
-function assertUnfrozen(name2, frozen) {
-  if (frozen) {
-    throw new Error(
-      "Cannot invoke `" + name2 + "` on a frozen processor.\nCreate a new processor first, by invoking it: use `processor()` instead of `processor`."
-    );
-  }
-}
-function assertNode(node) {
-  if (!node || typeof node.type !== "string") {
-    throw new Error("Expected node, got `" + node + "`");
-  }
-}
-function assertDone(name2, asyncName, complete) {
-  if (!complete) {
-    throw new Error(
-      "`" + name2 + "` finished async. Use `" + asyncName + "` instead"
-    );
-  }
-}
-var immutable = extend2;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-function extend2() {
-  var target = {};
-  for (var i = 0; i < arguments.length; i++) {
-    var source2 = arguments[i];
-    for (var key in source2) {
-      if (hasOwnProperty.call(source2, key)) {
-        target[key] = source2[key];
-      }
-    }
-  }
-  return target;
-}
-var inherits_browser = { exports: {} };
-if (typeof Object.create === "function") {
-  inherits_browser.exports = function inherits2(ctor, superCtor) {
-    if (superCtor) {
-      ctor.super_ = superCtor;
-      ctor.prototype = Object.create(superCtor.prototype, {
-        constructor: {
-          value: ctor,
-          enumerable: false,
-          writable: true,
-          configurable: true
-        }
-      });
-    }
-  };
-} else {
-  inherits_browser.exports = function inherits2(ctor, superCtor) {
-    if (superCtor) {
-      ctor.super_ = superCtor;
-      var TempCtor = function() {
-      };
-      TempCtor.prototype = superCtor.prototype;
-      ctor.prototype = new TempCtor();
-      ctor.prototype.constructor = ctor;
-    }
-  };
-}
-var xtend$6 = immutable;
-var inherits = inherits_browser.exports;
-var unherit_1 = unherit$1;
-function unherit$1(Super) {
-  var result;
-  var key;
-  var value;
-  inherits(Of, Super);
-  inherits(From, Of);
-  result = Of.prototype;
-  for (key in result) {
-    value = result[key];
-    if (value && typeof value === "object") {
-      result[key] = "concat" in value ? value.concat() : xtend$6(value);
-    }
-  }
-  return Of;
-  function From(parameters) {
-    return Super.apply(this, parameters);
-  }
-  function Of() {
-    if (!(this instanceof Of)) {
-      return new From(arguments);
-    }
-    return Super.apply(this, arguments);
-  }
-}
-var stateToggle = factory$4;
-function factory$4(key, state, ctx) {
-  return enter;
-  function enter() {
-    var context = ctx || this;
-    var current = context[key];
-    context[key] = !state;
-    return exit;
-    function exit() {
-      context[key] = current;
-    }
-  }
-}
-var vfileLocation$1 = factory$3;
-function factory$3(file) {
-  var contents = indices(String(file));
+var Ko = Qo;
+function Qo(e) {
+  var r = Xo(String(e));
   return {
-    toPosition: offsetToPositionFactory(contents),
-    toOffset: positionToOffsetFactory(contents)
+    toPosition: Yo(r),
+    toOffset: Jo(r)
   };
 }
-function offsetToPositionFactory(indices2) {
-  return offsetToPosition;
-  function offsetToPosition(offset) {
-    var index2 = -1;
-    var length = indices2.length;
-    if (offset < 0) {
+function Yo(e) {
+  return r;
+  function r(t) {
+    var s = -1, n = e.length;
+    if (t < 0)
       return {};
-    }
-    while (++index2 < length) {
-      if (indices2[index2] > offset) {
+    for (; ++s < n; )
+      if (e[s] > t)
         return {
-          line: index2 + 1,
-          column: offset - (indices2[index2 - 1] || 0) + 1,
-          offset
+          line: s + 1,
+          column: t - (e[s - 1] || 0) + 1,
+          offset: t
         };
-      }
-    }
     return {};
   }
 }
-function positionToOffsetFactory(indices2) {
-  return positionToOffset;
-  function positionToOffset(position2) {
-    var line = position2 && position2.line;
-    var column = position2 && position2.column;
-    if (!isNaN(line) && !isNaN(column) && line - 1 in indices2) {
-      return (indices2[line - 2] || 0) + column - 1 || 0;
-    }
-    return -1;
+function Jo(e) {
+  return r;
+  function r(t) {
+    var s = t && t.line, n = t && t.column;
+    return !isNaN(s) && !isNaN(n) && s - 1 in e ? (e[s - 2] || 0) + n - 1 || 0 : -1;
   }
 }
-function indices(value) {
-  var result = [];
-  var index2 = value.indexOf("\n");
-  while (index2 !== -1) {
-    result.push(index2 + 1);
-    index2 = value.indexOf("\n", index2 + 1);
-  }
-  result.push(value.length + 1);
-  return result;
+function Xo(e) {
+  for (var r = [], t = e.indexOf(`
+`); t !== -1; )
+    r.push(t + 1), t = e.indexOf(`
+`, t + 1);
+  return r.push(e.length + 1), r;
 }
-var _unescape = factory$2;
-var backslash$8 = "\\";
-function factory$2(ctx, key) {
-  return unescape2;
-  function unescape2(value) {
-    var prev = 0;
-    var index2 = value.indexOf(backslash$8);
-    var escape2 = ctx[key];
-    var queue = [];
-    var character;
-    while (index2 !== -1) {
-      queue.push(value.slice(prev, index2));
-      prev = index2 + 1;
-      character = value.charAt(prev);
-      if (!character || escape2.indexOf(character) === -1) {
-        queue.push(backslash$8);
-      }
-      index2 = value.indexOf(backslash$8, prev + 1);
-    }
-    queue.push(value.slice(prev));
-    return queue.join("");
+var Zo = ec, Nr = "\\";
+function ec(e, r) {
+  return t;
+  function t(s) {
+    for (var n = 0, i = s.indexOf(Nr), a = e[r], o = [], c; i !== -1; )
+      o.push(s.slice(n, i)), n = i + 1, c = s.charAt(n), (!c || a.indexOf(c) === -1) && o.push(Nr), i = s.indexOf(Nr, n + 1);
+    return o.push(s.slice(n)), o.join("");
   }
 }
-const AElig = "\xC6";
-const AMP = "&";
-const Aacute = "\xC1";
-const Acirc = "\xC2";
-const Agrave = "\xC0";
-const Aring = "\xC5";
-const Atilde = "\xC3";
-const Auml = "\xC4";
-const COPY = "\xA9";
-const Ccedil = "\xC7";
-const ETH = "\xD0";
-const Eacute = "\xC9";
-const Ecirc = "\xCA";
-const Egrave = "\xC8";
-const Euml = "\xCB";
-const GT = ">";
-const Iacute = "\xCD";
-const Icirc = "\xCE";
-const Igrave = "\xCC";
-const Iuml = "\xCF";
-const LT = "<";
-const Ntilde = "\xD1";
-const Oacute = "\xD3";
-const Ocirc = "\xD4";
-const Ograve = "\xD2";
-const Oslash = "\xD8";
-const Otilde = "\xD5";
-const Ouml = "\xD6";
-const QUOT = '"';
-const REG = "\xAE";
-const THORN = "\xDE";
-const Uacute = "\xDA";
-const Ucirc = "\xDB";
-const Ugrave = "\xD9";
-const Uuml = "\xDC";
-const Yacute = "\xDD";
-const aacute = "\xE1";
-const acirc = "\xE2";
-const acute = "\xB4";
-const aelig = "\xE6";
-const agrave = "\xE0";
-const amp = "&";
-const aring = "\xE5";
-const atilde = "\xE3";
-const auml = "\xE4";
-const brvbar = "\xA6";
-const ccedil = "\xE7";
-const cedil = "\xB8";
-const cent = "\xA2";
-const copy = "\xA9";
-const curren = "\xA4";
-const deg = "\xB0";
-const divide = "\xF7";
-const eacute = "\xE9";
-const ecirc = "\xEA";
-const egrave = "\xE8";
-const eth = "\xF0";
-const euml = "\xEB";
-const frac12 = "\xBD";
-const frac14 = "\xBC";
-const frac34 = "\xBE";
-const gt = ">";
-const iacute = "\xED";
-const icirc = "\xEE";
-const iexcl = "\xA1";
-const igrave = "\xEC";
-const iquest = "\xBF";
-const iuml = "\xEF";
-const laquo = "\xAB";
-const lt = "<";
-const macr = "\xAF";
-const micro = "\xB5";
-const middot = "\xB7";
-const nbsp = "\xA0";
-const not = "\xAC";
-const ntilde = "\xF1";
-const oacute = "\xF3";
-const ocirc = "\xF4";
-const ograve = "\xF2";
-const ordf = "\xAA";
-const ordm = "\xBA";
-const oslash = "\xF8";
-const otilde = "\xF5";
-const ouml = "\xF6";
-const para = "\xB6";
-const plusmn = "\xB1";
-const pound = "\xA3";
-const quot = '"';
-const raquo = "\xBB";
-const reg = "\xAE";
-const sect = "\xA7";
-const shy = "\xAD";
-const sup1 = "\xB9";
-const sup2 = "\xB2";
-const sup3 = "\xB3";
-const szlig = "\xDF";
-const thorn = "\xFE";
-const times = "\xD7";
-const uacute = "\xFA";
-const ucirc = "\xFB";
-const ugrave = "\xF9";
-const uml = "\xA8";
-const uuml = "\xFC";
-const yacute = "\xFD";
-const yen = "\xA5";
-const yuml = "\xFF";
-var require$$0 = {
-  AElig,
-  AMP,
-  Aacute,
-  Acirc,
-  Agrave,
-  Aring,
-  Atilde,
-  Auml,
-  COPY,
-  Ccedil,
-  ETH,
-  Eacute,
-  Ecirc,
-  Egrave,
-  Euml,
-  GT,
-  Iacute,
-  Icirc,
-  Igrave,
-  Iuml,
-  LT,
-  Ntilde,
-  Oacute,
-  Ocirc,
-  Ograve,
-  Oslash,
-  Otilde,
-  Ouml,
-  QUOT,
-  REG,
-  THORN,
-  Uacute,
-  Ucirc,
-  Ugrave,
-  Uuml,
-  Yacute,
-  aacute,
-  acirc,
-  acute,
-  aelig,
-  agrave,
-  amp,
-  aring,
-  atilde,
-  auml,
-  brvbar,
-  ccedil,
-  cedil,
-  cent,
-  copy,
-  curren,
-  deg,
-  divide,
-  eacute,
-  ecirc,
-  egrave,
-  eth,
-  euml,
-  frac12,
-  frac14,
-  frac34,
-  gt,
-  iacute,
-  icirc,
-  iexcl,
-  igrave,
-  iquest,
-  iuml,
-  laquo,
-  lt,
-  macr,
-  micro,
-  middot,
-  nbsp,
-  not,
-  ntilde,
-  oacute,
-  ocirc,
-  ograve,
-  ordf,
-  ordm,
-  oslash,
-  otilde,
-  ouml,
-  para,
-  plusmn,
-  pound,
-  quot,
-  raquo,
-  reg,
-  sect,
-  shy,
-  sup1,
-  sup2,
-  sup3,
-  szlig,
-  thorn,
-  times,
-  uacute,
-  ucirc,
-  ugrave,
-  uml,
-  uuml,
-  yacute,
-  yen,
-  yuml
+const rc = "Æ", tc = "&", nc = "Á", ic = "Â", ac = "À", sc = "Å", oc = "Ã", cc = "Ä", lc = "©", fc = "Ç", uc = "Ð", dc = "É", hc = "Ê", pc = "È", vc = "Ë", gc = ">", mc = "Í", yc = "Î", bc = "Ì", Ac = "Ï", wc = "<", Ec = "Ñ", Tc = "Ó", kc = "Ô", xc = "Ò", Sc = "Ø", Cc = "Õ", Oc = "Ö", Rc = '"', Ic = "®", Pc = "Þ", _c = "Ú", Bc = "Û", Nc = "Ù", Fc = "Ü", Lc = "Ý", qc = "á", Hc = "â", Mc = "´", $c = "æ", Uc = "à", Vc = "&", jc = "å", Wc = "ã", zc = "ä", Dc = "¦", Gc = "ç", Kc = "¸", Qc = "¢", Yc = "©", Jc = "¤", Xc = "°", Zc = "÷", el = "é", rl = "ê", tl = "è", nl = "ð", il = "ë", al = "½", sl = "¼", ol = "¾", cl = ">", ll = "í", fl = "î", ul = "¡", dl = "ì", hl = "¿", pl = "ï", vl = "«", gl = "<", ml = "¯", yl = "µ", bl = "·", Al = " ", wl = "¬", El = "ñ", Tl = "ó", kl = "ô", xl = "ò", Sl = "ª", Cl = "º", Ol = "ø", Rl = "õ", Il = "ö", Pl = "¶", _l = "±", Bl = "£", Nl = '"', Fl = "»", Ll = "®", ql = "§", Hl = "­", Ml = "¹", $l = "²", Ul = "³", Vl = "ß", jl = "þ", Wl = "×", zl = "ú", Dl = "û", Gl = "ù", Kl = "¨", Ql = "ü", Yl = "ý", Jl = "¥", Xl = "ÿ", Zl = {
+  AElig: rc,
+  AMP: tc,
+  Aacute: nc,
+  Acirc: ic,
+  Agrave: ac,
+  Aring: sc,
+  Atilde: oc,
+  Auml: cc,
+  COPY: lc,
+  Ccedil: fc,
+  ETH: uc,
+  Eacute: dc,
+  Ecirc: hc,
+  Egrave: pc,
+  Euml: vc,
+  GT: gc,
+  Iacute: mc,
+  Icirc: yc,
+  Igrave: bc,
+  Iuml: Ac,
+  LT: wc,
+  Ntilde: Ec,
+  Oacute: Tc,
+  Ocirc: kc,
+  Ograve: xc,
+  Oslash: Sc,
+  Otilde: Cc,
+  Ouml: Oc,
+  QUOT: Rc,
+  REG: Ic,
+  THORN: Pc,
+  Uacute: _c,
+  Ucirc: Bc,
+  Ugrave: Nc,
+  Uuml: Fc,
+  Yacute: Lc,
+  aacute: qc,
+  acirc: Hc,
+  acute: Mc,
+  aelig: $c,
+  agrave: Uc,
+  amp: Vc,
+  aring: jc,
+  atilde: Wc,
+  auml: zc,
+  brvbar: Dc,
+  ccedil: Gc,
+  cedil: Kc,
+  cent: Qc,
+  copy: Yc,
+  curren: Jc,
+  deg: Xc,
+  divide: Zc,
+  eacute: el,
+  ecirc: rl,
+  egrave: tl,
+  eth: nl,
+  euml: il,
+  frac12: al,
+  frac14: sl,
+  frac34: ol,
+  gt: cl,
+  iacute: ll,
+  icirc: fl,
+  iexcl: ul,
+  igrave: dl,
+  iquest: hl,
+  iuml: pl,
+  laquo: vl,
+  lt: gl,
+  macr: ml,
+  micro: yl,
+  middot: bl,
+  nbsp: Al,
+  not: wl,
+  ntilde: El,
+  oacute: Tl,
+  ocirc: kl,
+  ograve: xl,
+  ordf: Sl,
+  ordm: Cl,
+  oslash: Ol,
+  otilde: Rl,
+  ouml: Il,
+  para: Pl,
+  plusmn: _l,
+  pound: Bl,
+  quot: Nl,
+  raquo: Fl,
+  reg: Ll,
+  sect: ql,
+  shy: Hl,
+  sup1: Ml,
+  sup2: $l,
+  sup3: Ul,
+  szlig: Vl,
+  thorn: jl,
+  times: Wl,
+  uacute: zl,
+  ucirc: Dl,
+  ugrave: Gl,
+  uml: Kl,
+  uuml: Ql,
+  yacute: Yl,
+  yen: Jl,
+  yuml: Xl
+}, ef = {
+  0: "�",
+  128: "€",
+  130: "‚",
+  131: "ƒ",
+  132: "„",
+  133: "…",
+  134: "†",
+  135: "‡",
+  136: "ˆ",
+  137: "‰",
+  138: "Š",
+  139: "‹",
+  140: "Œ",
+  142: "Ž",
+  145: "‘",
+  146: "’",
+  147: "“",
+  148: "”",
+  149: "•",
+  150: "–",
+  151: "—",
+  152: "˜",
+  153: "™",
+  154: "š",
+  155: "›",
+  156: "œ",
+  158: "ž",
+  159: "Ÿ"
 };
-var require$$1 = {
-  "0": "\uFFFD",
-  "128": "\u20AC",
-  "130": "\u201A",
-  "131": "\u0192",
-  "132": "\u201E",
-  "133": "\u2026",
-  "134": "\u2020",
-  "135": "\u2021",
-  "136": "\u02C6",
-  "137": "\u2030",
-  "138": "\u0160",
-  "139": "\u2039",
-  "140": "\u0152",
-  "142": "\u017D",
-  "145": "\u2018",
-  "146": "\u2019",
-  "147": "\u201C",
-  "148": "\u201D",
-  "149": "\u2022",
-  "150": "\u2013",
-  "151": "\u2014",
-  "152": "\u02DC",
-  "153": "\u2122",
-  "154": "\u0161",
-  "155": "\u203A",
-  "156": "\u0153",
-  "158": "\u017E",
-  "159": "\u0178"
-};
-var isDecimal = decimal$4;
-function decimal$4(character) {
-  var code = typeof character === "string" ? character.charCodeAt(0) : character;
-  return code >= 48 && code <= 57;
+var yr = rf;
+function rf(e) {
+  var r = typeof e == "string" ? e.charCodeAt(0) : e;
+  return r >= 48 && r <= 57;
 }
-var isHexadecimal = hexadecimal$1;
-function hexadecimal$1(character) {
-  var code = typeof character === "string" ? character.charCodeAt(0) : character;
-  return code >= 97 && code <= 102 || code >= 65 && code <= 70 || code >= 48 && code <= 57;
+var tf = nf;
+function nf(e) {
+  var r = typeof e == "string" ? e.charCodeAt(0) : e;
+  return r >= 97 && r <= 102 || r >= 65 && r <= 70 || r >= 48 && r <= 57;
 }
-var isAlphabetical = alphabetical$2;
-function alphabetical$2(character) {
-  var code = typeof character === "string" ? character.charCodeAt(0) : character;
-  return code >= 97 && code <= 122 || code >= 65 && code <= 90;
-}
-var alphabetical$1 = isAlphabetical;
-var decimal$3 = isDecimal;
-var isAlphanumerical = alphanumerical$1;
-function alphanumerical$1(character) {
-  return alphabetical$1(character) || decimal$3(character);
-}
-var el;
-var semicolon$2 = 59;
-var decodeEntity_browser = decodeEntity$1;
-function decodeEntity$1(characters) {
-  var entity = "&" + characters + ";";
-  var char;
-  el = el || document.createElement("i");
-  el.innerHTML = entity;
-  char = el.textContent;
-  if (char.charCodeAt(char.length - 1) === semicolon$2 && characters !== "semi") {
-    return false;
+var Fr, Kn;
+function Ma() {
+  if (Kn)
+    return Fr;
+  Kn = 1, Fr = e;
+  function e(r) {
+    var t = typeof r == "string" ? r.charCodeAt(0) : r;
+    return t >= 97 && t <= 122 || t >= 65 && t <= 90;
   }
-  return char === entity ? false : char;
+  return Fr;
 }
-var legacy = require$$0;
-var invalid = require$$1;
-var decimal$2 = isDecimal;
-var hexadecimal = isHexadecimal;
-var alphanumerical = isAlphanumerical;
-var decodeEntity = decodeEntity_browser;
-var parseEntities_1 = parseEntities;
-var own$1 = {}.hasOwnProperty;
-var fromCharCode = String.fromCharCode;
-var noop = Function.prototype;
-var defaults$3 = {
+var af = Ma(), sf = yr, of = cf;
+function cf(e) {
+  return af(e) || sf(e);
+}
+var tr, lf = 59, ff = uf;
+function uf(e) {
+  var r = "&" + e + ";", t;
+  return tr = tr || document.createElement("i"), tr.innerHTML = r, t = tr.textContent, t.charCodeAt(t.length - 1) === lf && e !== "semi" || t === r ? !1 : t;
+}
+var Qn = Zl, Yn = ef, df = yr, hf = tf, $a = of, pf = ff, hn = Cf, vf = {}.hasOwnProperty, Re = String.fromCharCode, gf = Function.prototype, Jn = {
   warning: null,
   reference: null,
   text: null,
@@ -1505,884 +846,509 @@ var defaults$3 = {
   textContext: null,
   position: {},
   additional: null,
-  attribute: false,
-  nonTerminated: true
-};
-var tab$e = 9;
-var lineFeed$j = 10;
-var formFeed = 12;
-var space$h = 32;
-var ampersand = 38;
-var semicolon$1 = 59;
-var lessThan$6 = 60;
-var equalsTo$1 = 61;
-var numberSign$1 = 35;
-var uppercaseX = 88;
-var lowercaseX$1 = 120;
-var replacementCharacter = 65533;
-var name = "named";
-var hexa = "hexadecimal";
-var deci = "decimal";
-var bases = {};
-bases[hexa] = 16;
-bases[deci] = 10;
-var tests = {};
-tests[name] = alphanumerical;
-tests[deci] = decimal$2;
-tests[hexa] = hexadecimal;
-var namedNotTerminated = 1;
-var numericNotTerminated = 2;
-var namedEmpty = 3;
-var numericEmpty = 4;
-var namedUnknown = 5;
-var numericDisallowed = 6;
-var numericProhibited = 7;
-var messages = {};
-messages[namedNotTerminated] = "Named character references must be terminated by a semicolon";
-messages[numericNotTerminated] = "Numeric character references must be terminated by a semicolon";
-messages[namedEmpty] = "Named character references cannot be empty";
-messages[numericEmpty] = "Numeric character references cannot be empty";
-messages[namedUnknown] = "Named character references must be known";
-messages[numericDisallowed] = "Numeric character references cannot be disallowed";
-messages[numericProhibited] = "Numeric character references cannot be outside the permissible Unicode range";
-function parseEntities(value, options) {
-  var settings = {};
-  var option;
-  var key;
-  if (!options) {
-    options = {};
-  }
-  for (key in defaults$3) {
-    option = options[key];
-    settings[key] = option === null || option === void 0 ? defaults$3[key] : option;
-  }
-  if (settings.position.indent || settings.position.start) {
-    settings.indent = settings.position.indent || [];
-    settings.position = settings.position.start;
-  }
-  return parse$5(value, settings);
+  attribute: !1,
+  nonTerminated: !0
+}, mf = 9, Xn = 10, yf = 12, bf = 32, Zn = 38, Af = 59, wf = 60, Ef = 61, Tf = 35, kf = 88, xf = 120, Sf = 65533, _e = "named", pn = "hexadecimal", vn = "decimal", gn = {};
+gn[pn] = 16;
+gn[vn] = 10;
+var br = {};
+br[_e] = $a;
+br[vn] = df;
+br[pn] = hf;
+var Ua = 1, Va = 2, ja = 3, Wa = 4, za = 5, Jt = 6, Da = 7, we = {};
+we[Ua] = "Named character references must be terminated by a semicolon";
+we[Va] = "Numeric character references must be terminated by a semicolon";
+we[ja] = "Named character references cannot be empty";
+we[Wa] = "Numeric character references cannot be empty";
+we[za] = "Named character references must be known";
+we[Jt] = "Numeric character references cannot be disallowed";
+we[Da] = "Numeric character references cannot be outside the permissible Unicode range";
+function Cf(e, r) {
+  var t = {}, s, n;
+  r || (r = {});
+  for (n in Jn)
+    s = r[n], t[n] = s ?? Jn[n];
+  return (t.position.indent || t.position.start) && (t.indent = t.position.indent || [], t.position = t.position.start), Of(e, t);
 }
-function parse$5(value, settings) {
-  var additional = settings.additional;
-  var nonTerminated = settings.nonTerminated;
-  var handleText = settings.text;
-  var handleReference = settings.reference;
-  var handleWarning = settings.warning;
-  var textContext = settings.textContext;
-  var referenceContext = settings.referenceContext;
-  var warningContext = settings.warningContext;
-  var pos = settings.position;
-  var indent = settings.indent || [];
-  var length = value.length;
-  var index2 = 0;
-  var lines = -1;
-  var column = pos.column || 1;
-  var line = pos.line || 1;
-  var queue = "";
-  var result = [];
-  var entityCharacters;
-  var namedEntity;
-  var terminated;
-  var characters;
-  var character;
-  var reference2;
-  var following;
-  var warning;
-  var reason;
-  var output;
-  var entity;
-  var begin;
-  var start;
-  var type;
-  var test;
-  var prev;
-  var next;
-  var diff;
-  var end;
-  if (typeof additional === "string") {
-    additional = additional.charCodeAt(0);
-  }
-  prev = now();
-  warning = handleWarning ? parseError : noop;
-  index2--;
-  length++;
-  while (++index2 < length) {
-    if (character === lineFeed$j) {
-      column = indent[lines] || 1;
-    }
-    character = value.charCodeAt(index2);
-    if (character === ampersand) {
-      following = value.charCodeAt(index2 + 1);
-      if (following === tab$e || following === lineFeed$j || following === formFeed || following === space$h || following === ampersand || following === lessThan$6 || following !== following || additional && following === additional) {
-        queue += fromCharCode(character);
-        column++;
+function Of(e, r) {
+  var t = r.additional, s = r.nonTerminated, n = r.text, i = r.reference, a = r.warning, o = r.textContext, c = r.referenceContext, l = r.warningContext, u = r.position, f = r.indent || [], d = e.length, h = 0, m = -1, y = u.column || 1, p = u.line || 1, v = "", g = [], b, E, A, T, k, O, w, C, S, R, x, I, N, _, H, P, M, U, B;
+  for (typeof t == "string" && (t = t.charCodeAt(0)), P = q(), C = a ? Q : gf, h--, d++; ++h < d; )
+    if (k === Xn && (y = f[m] || 1), k = e.charCodeAt(h), k === Zn) {
+      if (w = e.charCodeAt(h + 1), w === mf || w === Xn || w === yf || w === bf || w === Zn || w === wf || w !== w || t && w === t) {
+        v += Re(k), y++;
         continue;
       }
-      start = index2 + 1;
-      begin = start;
-      end = start;
-      if (following === numberSign$1) {
-        end = ++begin;
-        following = value.charCodeAt(end);
-        if (following === uppercaseX || following === lowercaseX$1) {
-          type = hexa;
-          end = ++begin;
-        } else {
-          type = deci;
-        }
-      } else {
-        type = name;
-      }
-      entityCharacters = "";
-      entity = "";
-      characters = "";
-      test = tests[type];
-      end--;
-      while (++end < length) {
-        following = value.charCodeAt(end);
-        if (!test(following)) {
-          break;
-        }
-        characters += fromCharCode(following);
-        if (type === name && own$1.call(legacy, characters)) {
-          entityCharacters = characters;
-          entity = legacy[characters];
-        }
-      }
-      terminated = value.charCodeAt(end) === semicolon$1;
-      if (terminated) {
-        end++;
-        namedEntity = type === name ? decodeEntity(characters) : false;
-        if (namedEntity) {
-          entityCharacters = characters;
-          entity = namedEntity;
-        }
-      }
-      diff = 1 + end - start;
-      if (!terminated && !nonTerminated)
-        ;
-      else if (!characters) {
-        if (type !== name) {
-          warning(numericEmpty, diff);
-        }
-      } else if (type === name) {
-        if (terminated && !entity) {
-          warning(namedUnknown, 1);
-        } else {
-          if (entityCharacters !== characters) {
-            end = begin + entityCharacters.length;
-            diff = 1 + end - begin;
-            terminated = false;
-          }
-          if (!terminated) {
-            reason = entityCharacters ? namedNotTerminated : namedEmpty;
-            if (settings.attribute) {
-              following = value.charCodeAt(end);
-              if (following === equalsTo$1) {
-                warning(reason, diff);
-                entity = null;
-              } else if (alphanumerical(following)) {
-                entity = null;
-              } else {
-                warning(reason, diff);
-              }
-            } else {
-              warning(reason, diff);
-            }
-          }
-        }
-        reference2 = entity;
-      } else {
-        if (!terminated) {
-          warning(numericNotTerminated, diff);
-        }
-        reference2 = parseInt(characters, bases[type]);
-        if (prohibited(reference2)) {
-          warning(numericProhibited, diff);
-          reference2 = fromCharCode(replacementCharacter);
-        } else if (reference2 in invalid) {
-          warning(numericDisallowed, diff);
-          reference2 = invalid[reference2];
-        } else {
-          output = "";
-          if (disallowed(reference2)) {
-            warning(numericDisallowed, diff);
-          }
-          if (reference2 > 65535) {
-            reference2 -= 65536;
-            output += fromCharCode(reference2 >>> (10 & 1023) | 55296);
-            reference2 = 56320 | reference2 & 1023;
-          }
-          reference2 = output + fromCharCode(reference2);
-        }
-      }
-      if (reference2) {
-        flush();
-        prev = now();
-        index2 = end - 1;
-        column += end - start + 1;
-        result.push(reference2);
-        next = now();
-        next.offset++;
-        if (handleReference) {
-          handleReference.call(
-            referenceContext,
-            reference2,
-            { start: prev, end: next },
-            value.slice(start - 1, end)
-          );
-        }
-        prev = next;
-      } else {
-        characters = value.slice(start - 1, end);
-        queue += characters;
-        column += characters.length;
-        index2 = end - 1;
-      }
-    } else {
-      if (character === 10) {
-        line++;
-        lines++;
-        column = 0;
-      }
-      if (character === character) {
-        queue += fromCharCode(character);
-        column++;
-      } else {
-        flush();
-      }
-    }
-  }
-  return result.join("");
-  function now() {
+      for (N = h + 1, I = N, B = N, w === Tf ? (B = ++I, w = e.charCodeAt(B), w === kf || w === xf ? (_ = pn, B = ++I) : _ = vn) : _ = _e, b = "", x = "", T = "", H = br[_], B--; ++B < d && (w = e.charCodeAt(B), !!H(w)); )
+        T += Re(w), _ === _e && vf.call(Qn, T) && (b = T, x = Qn[T]);
+      A = e.charCodeAt(B) === Af, A && (B++, E = _ === _e ? pf(T) : !1, E && (b = T, x = E)), U = 1 + B - N, !A && !s || (T ? _ === _e ? (A && !x ? C(za, 1) : (b !== T && (B = I + b.length, U = 1 + B - I, A = !1), A || (S = b ? Ua : ja, r.attribute ? (w = e.charCodeAt(B), w === Ef ? (C(S, U), x = null) : $a(w) ? x = null : C(S, U)) : C(S, U))), O = x) : (A || C(Va, U), O = parseInt(T, gn[_]), Rf(O) ? (C(Da, U), O = Re(Sf)) : O in Yn ? (C(Jt, U), O = Yn[O]) : (R = "", If(O) && C(Jt, U), O > 65535 && (O -= 65536, R += Re(O >>> 10 | 55296), O = 56320 | O & 1023), O = R + Re(O))) : _ !== _e && C(Wa, U)), O ? (F(), P = q(), h = B - 1, y += B - N + 1, g.push(O), M = q(), M.offset++, i && i.call(
+        c,
+        O,
+        { start: P, end: M },
+        e.slice(N - 1, B)
+      ), P = M) : (T = e.slice(N - 1, B), v += T, y += T.length, h = B - 1);
+    } else
+      k === 10 && (p++, m++, y = 0), k === k ? (v += Re(k), y++) : F();
+  return g.join("");
+  function q() {
     return {
-      line,
-      column,
-      offset: index2 + (pos.offset || 0)
+      line: p,
+      column: y,
+      offset: h + (u.offset || 0)
     };
   }
-  function parseError(code, offset) {
-    var position2 = now();
-    position2.column += offset;
-    position2.offset += offset;
-    handleWarning.call(warningContext, messages[code], position2, code);
+  function Q(Y, K) {
+    var ne = q();
+    ne.column += K, ne.offset += K, a.call(l, we[Y], ne, Y);
   }
-  function flush() {
-    if (queue) {
-      result.push(queue);
-      if (handleText) {
-        handleText.call(textContext, queue, { start: prev, end: now() });
-      }
-      queue = "";
-    }
+  function F() {
+    v && (g.push(v), n && n.call(o, v, { start: P, end: q() }), v = "");
   }
 }
-function prohibited(code) {
-  return code >= 55296 && code <= 57343 || code > 1114111;
+function Rf(e) {
+  return e >= 55296 && e <= 57343 || e > 1114111;
 }
-function disallowed(code) {
-  return code >= 1 && code <= 8 || code === 11 || code >= 13 && code <= 31 || code >= 127 && code <= 159 || code >= 64976 && code <= 65007 || (code & 65535) === 65535 || (code & 65535) === 65534;
+function If(e) {
+  return e >= 1 && e <= 8 || e === 11 || e >= 13 && e <= 31 || e >= 127 && e <= 159 || e >= 64976 && e <= 65007 || (e & 65535) === 65535 || (e & 65535) === 65534;
 }
-var xtend$5 = immutable;
-var entities = parseEntities_1;
-var decode$3 = factory$1;
-function factory$1(ctx) {
-  decoder.raw = decodeRaw;
-  return decoder;
-  function normalize3(position2) {
-    var offsets = ctx.offset;
-    var line = position2.line;
-    var result = [];
-    while (++line) {
-      if (!(line in offsets)) {
-        break;
-      }
-      result.push((offsets[line] || 0) + 1);
-    }
-    return { start: position2, indent: result };
+var Pf = Ce, ei = hn, _f = Bf;
+function Bf(e) {
+  return t.raw = s, t;
+  function r(i) {
+    for (var a = e.offset, o = i.line, c = []; ++o && o in a; )
+      c.push((a[o] || 0) + 1);
+    return { start: i, indent: c };
   }
-  function decoder(value, position2, handler) {
-    entities(value, {
-      position: normalize3(position2),
-      warning: handleWarning,
-      text: handler,
-      reference: handler,
-      textContext: ctx,
-      referenceContext: ctx
+  function t(i, a, o) {
+    ei(i, {
+      position: r(a),
+      warning: n,
+      text: o,
+      reference: o,
+      textContext: e,
+      referenceContext: e
     });
   }
-  function decodeRaw(value, position2, options) {
-    return entities(
-      value,
-      xtend$5(options, { position: normalize3(position2), warning: handleWarning })
+  function s(i, a, o) {
+    return ei(
+      i,
+      Pf(o, { position: r(a), warning: n })
     );
   }
-  function handleWarning(reason, position2, code) {
-    if (code !== 3) {
-      ctx.file.message(reason, position2);
-    }
+  function n(i, a, o) {
+    o !== 3 && e.file.message(i, a);
   }
 }
-var tokenizer$1 = factory;
-function factory(type) {
-  return tokenize;
-  function tokenize(value, location) {
-    var self = this;
-    var offset = self.offset;
-    var tokens = [];
-    var methods = self[type + "Methods"];
-    var tokenizers = self[type + "Tokenizers"];
-    var line = location.line;
-    var column = location.column;
-    var index2;
-    var length;
-    var method;
-    var name2;
-    var matched;
-    var valueLength;
-    if (!value) {
-      return tokens;
+var Nf = Ff;
+function Ff(e) {
+  return r;
+  function r(t, s) {
+    var n = this, i = n.offset, a = [], o = n[e + "Methods"], c = n[e + "Tokenizers"], l = s.line, u = s.column, f, d, h, m, y, p;
+    if (!t)
+      return a;
+    for (O.now = b, O.file = n.file, v(""); t; ) {
+      for (f = -1, d = o.length, y = !1; ++f < d && (m = o[f], h = c[m], !(h && /* istanbul ignore next */
+      (!h.onlyAtStart || n.atStart) && (!h.notInList || !n.inList) && (!h.notInBlock || !n.inBlock) && (!h.notInLink || !n.inLink) && (p = t.length, h.apply(n, [O, t]), y = p !== t.length, y))); )
+        ;
+      y || n.file.fail(new Error("Infinite loop"), O.now());
     }
-    eat.now = now;
-    eat.file = self.file;
-    updatePosition("");
-    while (value) {
-      index2 = -1;
-      length = methods.length;
-      matched = false;
-      while (++index2 < length) {
-        name2 = methods[index2];
-        method = tokenizers[name2];
-        if (method && (!method.onlyAtStart || self.atStart) && (!method.notInList || !self.inList) && (!method.notInBlock || !self.inBlock) && (!method.notInLink || !self.inLink)) {
-          valueLength = value.length;
-          method.apply(self, [eat, value]);
-          matched = valueLength !== value.length;
-          if (matched) {
-            break;
-          }
-        }
-      }
-      if (!matched) {
-        self.file.fail(new Error("Infinite loop"), eat.now());
-      }
+    return n.eof = b(), a;
+    function v(w) {
+      for (var C = -1, S = w.indexOf(`
+`); S !== -1; )
+        l++, C = S, S = w.indexOf(`
+`, S + 1);
+      C === -1 ? u += w.length : u = w.length - C, l in i && (C !== -1 ? u += i[l] : u <= i[l] && (u = i[l] + 1));
     }
-    self.eof = now();
-    return tokens;
-    function updatePosition(subvalue) {
-      var lastIndex = -1;
-      var index3 = subvalue.indexOf("\n");
-      while (index3 !== -1) {
-        line++;
-        lastIndex = index3;
-        index3 = subvalue.indexOf("\n", index3 + 1);
-      }
-      if (lastIndex === -1) {
-        column += subvalue.length;
-      } else {
-        column = subvalue.length - lastIndex;
-      }
-      if (line in offset) {
-        if (lastIndex !== -1) {
-          column += offset[line];
-        } else if (column <= offset[line]) {
-          column = offset[line] + 1;
-        }
-      }
-    }
-    function getOffset() {
-      var indentation2 = [];
-      var pos = line + 1;
+    function g() {
+      var w = [], C = l + 1;
       return function() {
-        var last = line + 1;
-        while (pos < last) {
-          indentation2.push((offset[pos] || 0) + 1);
-          pos++;
-        }
-        return indentation2;
+        for (var S = l + 1; C < S; )
+          w.push((i[C] || 0) + 1), C++;
+        return w;
       };
     }
-    function now() {
-      var pos = { line, column };
-      pos.offset = self.toOffset(pos);
-      return pos;
+    function b() {
+      var w = { line: l, column: u };
+      return w.offset = n.toOffset(w), w;
     }
-    function Position(start) {
-      this.start = start;
-      this.end = now();
+    function E(w) {
+      this.start = w, this.end = b();
     }
-    function validateEat(subvalue) {
-      if (value.slice(0, subvalue.length) !== subvalue) {
-        self.file.fail(
-          new Error(
-            "Incorrectly eaten value: please report this warning on https://git.io/vg5Ft"
-          ),
-          now()
-        );
-      }
-    }
-    function position2() {
-      var before = now();
-      return update;
-      function update(node, indent) {
-        var prev = node.position;
-        var start = prev ? prev.start : before;
-        var combined = [];
-        var n = prev && prev.end.line;
-        var l = before.line;
-        node.position = new Position(start);
-        if (prev && indent && prev.indent) {
-          combined = prev.indent;
-          if (n < l) {
-            while (++n < l) {
-              combined.push((offset[n] || 0) + 1);
-            }
-            combined.push(before.column);
-          }
-          indent = combined.concat(indent);
-        }
-        node.position.indent = indent || [];
-        return node;
-      }
-    }
-    function add(node, parent) {
-      var children = parent ? parent.children : tokens;
-      var prev = children[children.length - 1];
-      var fn;
-      if (prev && node.type === prev.type && (node.type === "text" || node.type === "blockquote") && mergeable(prev) && mergeable(node)) {
-        fn = node.type === "text" ? mergeText : mergeBlockquote;
-        node = fn.call(self, prev, node);
-      }
-      if (node !== prev) {
-        children.push(node);
-      }
-      if (self.atStart && tokens.length !== 0) {
-        self.exitStart();
-      }
-      return node;
-    }
-    function eat(subvalue) {
-      var indent = getOffset();
-      var pos = position2();
-      var current = now();
-      validateEat(subvalue);
-      apply.reset = reset;
-      reset.test = test;
-      apply.test = test;
-      value = value.slice(subvalue.length);
-      updatePosition(subvalue);
-      indent = indent();
-      return apply;
-      function apply(node, parent) {
-        return pos(add(pos(node), parent), indent);
-      }
-      function reset() {
-        var node = apply.apply(null, arguments);
-        line = current.line;
-        column = current.column;
-        value = subvalue + value;
-        return node;
-      }
-      function test() {
-        var result = pos({});
-        line = current.line;
-        column = current.column;
-        value = subvalue + value;
-        return result.position;
-      }
-    }
-  }
-}
-function mergeable(node) {
-  var start;
-  var end;
-  if (node.type !== "text" || !node.position) {
-    return true;
-  }
-  start = node.position.start;
-  end = node.position.end;
-  return start.line !== end.line || end.column - start.column === node.value.length;
-}
-function mergeText(prev, node) {
-  prev.value += node.value;
-  return prev;
-}
-function mergeBlockquote(prev, node) {
-  if (this.options.commonmark || this.options.gfm) {
-    return node;
-  }
-  prev.children = prev.children.concat(node.children);
-  return prev;
-}
-var markdownEscapes = escapes$1;
-var defaults$2 = [
-  "\\",
-  "`",
-  "*",
-  "{",
-  "}",
-  "[",
-  "]",
-  "(",
-  ")",
-  "#",
-  "+",
-  "-",
-  ".",
-  "!",
-  "_",
-  ">"
-];
-var gfm = defaults$2.concat(["~", "|"]);
-var commonmark = gfm.concat([
-  "\n",
-  '"',
-  "$",
-  "%",
-  "&",
-  "'",
-  ",",
-  "/",
-  ":",
-  ";",
-  "<",
-  "=",
-  "?",
-  "@",
-  "^"
-]);
-escapes$1.default = defaults$2;
-escapes$1.gfm = gfm;
-escapes$1.commonmark = commonmark;
-function escapes$1(options) {
-  var settings = options || {};
-  if (settings.commonmark) {
-    return commonmark;
-  }
-  return settings.gfm ? gfm : defaults$2;
-}
-var blockElements = [
-  "address",
-  "article",
-  "aside",
-  "base",
-  "basefont",
-  "blockquote",
-  "body",
-  "caption",
-  "center",
-  "col",
-  "colgroup",
-  "dd",
-  "details",
-  "dialog",
-  "dir",
-  "div",
-  "dl",
-  "dt",
-  "fieldset",
-  "figcaption",
-  "figure",
-  "footer",
-  "form",
-  "frame",
-  "frameset",
-  "h1",
-  "h2",
-  "h3",
-  "h4",
-  "h5",
-  "h6",
-  "head",
-  "header",
-  "hgroup",
-  "hr",
-  "html",
-  "iframe",
-  "legend",
-  "li",
-  "link",
-  "main",
-  "menu",
-  "menuitem",
-  "meta",
-  "nav",
-  "noframes",
-  "ol",
-  "optgroup",
-  "option",
-  "p",
-  "param",
-  "pre",
-  "section",
-  "source",
-  "title",
-  "summary",
-  "table",
-  "tbody",
-  "td",
-  "tfoot",
-  "th",
-  "thead",
-  "title",
-  "tr",
-  "track",
-  "ul"
-];
-var defaults$1 = {
-  position: true,
-  gfm: true,
-  commonmark: false,
-  footnotes: false,
-  pedantic: false,
-  blocks: blockElements
-};
-var xtend$4 = immutable;
-var escapes = markdownEscapes;
-var defaults = defaults$1;
-var setOptions_1 = setOptions;
-function setOptions(options) {
-  var self = this;
-  var current = self.options;
-  var key;
-  var value;
-  if (options == null) {
-    options = {};
-  } else if (typeof options === "object") {
-    options = xtend$4(options);
-  } else {
-    throw new Error("Invalid value `" + options + "` for setting `options`");
-  }
-  for (key in defaults) {
-    value = options[key];
-    if (value == null) {
-      value = current[key];
-    }
-    if (key !== "blocks" && typeof value !== "boolean" || key === "blocks" && typeof value !== "object") {
-      throw new Error(
-        "Invalid value `" + value + "` for setting `options." + key + "`"
+    function A(w) {
+      t.slice(0, w.length) !== w && n.file.fail(
+        new Error(
+          "Incorrectly eaten value: please report this warning on https://git.io/vg5Ft"
+        ),
+        b()
       );
     }
-    options[key] = value;
-  }
-  self.options = options;
-  self.escape = escapes(options);
-  return self;
-}
-var convert_1 = convert$3;
-function convert$3(test) {
-  if (typeof test === "string") {
-    return typeFactory(test);
-  }
-  if (test === null || test === void 0) {
-    return ok;
-  }
-  if (typeof test === "object") {
-    return ("length" in test ? anyFactory : matchesFactory)(test);
-  }
-  if (typeof test === "function") {
-    return test;
-  }
-  throw new Error("Expected function, string, or object as test");
-}
-function convertAll(tests2) {
-  var results = [];
-  var length = tests2.length;
-  var index2 = -1;
-  while (++index2 < length) {
-    results[index2] = convert$3(tests2[index2]);
-  }
-  return results;
-}
-function matchesFactory(test) {
-  return matches;
-  function matches(node) {
-    var key;
-    for (key in test) {
-      if (node[key] !== test[key]) {
-        return false;
+    function T() {
+      var w = b();
+      return C;
+      function C(S, R) {
+        var x = S.position, I = x ? x.start : w, N = [], _ = x && x.end.line, H = w.line;
+        if (S.position = new E(I), x && R && x.indent) {
+          if (N = x.indent, _ < H) {
+            for (; ++_ < H; )
+              N.push((i[_] || 0) + 1);
+            N.push(w.column);
+          }
+          R = N.concat(R);
+        }
+        return S.position.indent = R || [], S;
       }
     }
-    return true;
-  }
-}
-function anyFactory(tests2) {
-  var checks = convertAll(tests2);
-  var length = checks.length;
-  return matches;
-  function matches() {
-    var index2 = -1;
-    while (++index2 < length) {
-      if (checks[index2].apply(this, arguments)) {
-        return true;
+    function k(w, C) {
+      var S = C ? C.children : a, R = S[S.length - 1], x;
+      return R && w.type === R.type && (w.type === "text" || w.type === "blockquote") && ri(R) && ri(w) && (x = w.type === "text" ? Lf : qf, w = x.call(n, R, w)), w !== R && S.push(w), n.atStart && a.length !== 0 && n.exitStart(), w;
+    }
+    function O(w) {
+      var C = g(), S = T(), R = b();
+      return A(w), x.reset = I, I.test = N, x.test = N, t = t.slice(w.length), v(w), C = C(), x;
+      function x(_, H) {
+        return S(k(S(_), H), C);
+      }
+      function I() {
+        var _ = x.apply(null, arguments);
+        return l = R.line, u = R.column, t = w + t, _;
+      }
+      function N() {
+        var _ = S({});
+        return l = R.line, u = R.column, t = w + t, _.position;
       }
     }
-    return false;
   }
 }
-function typeFactory(test) {
-  return type;
-  function type(node) {
-    return Boolean(node && node.type === test);
-  }
+function ri(e) {
+  var r, t;
+  return e.type !== "text" || !e.position ? !0 : (r = e.position.start, t = e.position.end, r.line !== t.line || t.column - r.column === e.value.length);
 }
-function ok() {
-  return true;
+function Lf(e, r) {
+  return e.value += r.value, e;
 }
-var unistUtilVisitParents = visitParents$1;
-var convert$2 = convert_1;
-var CONTINUE$1 = true;
-var SKIP$1 = "skip";
-var EXIT$1 = false;
-visitParents$1.CONTINUE = CONTINUE$1;
-visitParents$1.SKIP = SKIP$1;
-visitParents$1.EXIT = EXIT$1;
-function visitParents$1(tree, test, visitor, reverse) {
-  var is;
-  if (typeof test === "function" && typeof visitor !== "function") {
-    reverse = visitor;
-    visitor = test;
-    test = null;
+function qf(e, r) {
+  return this.options.commonmark || this.options.gfm ? r : (e.children = e.children.concat(r.children), e);
+}
+var Lr, ti;
+function Hf() {
+  if (ti)
+    return Lr;
+  ti = 1, Lr = s;
+  var e = [
+    "\\",
+    "`",
+    "*",
+    "{",
+    "}",
+    "[",
+    "]",
+    "(",
+    ")",
+    "#",
+    "+",
+    "-",
+    ".",
+    "!",
+    "_",
+    ">"
+  ], r = e.concat(["~", "|"]), t = r.concat([
+    `
+`,
+    '"',
+    "$",
+    "%",
+    "&",
+    "'",
+    ",",
+    "/",
+    ":",
+    ";",
+    "<",
+    "=",
+    "?",
+    "@",
+    "^"
+  ]);
+  s.default = e, s.gfm = r, s.commonmark = t;
+  function s(n) {
+    var i = n || {};
+    return i.commonmark ? t : i.gfm ? r : e;
   }
-  is = convert$2(test);
-  one(tree, null, []);
-  function one(node, index2, parents) {
-    var result = [];
-    var subresult;
-    if (!test || is(node, index2, parents[parents.length - 1] || null)) {
-      result = toResult(visitor(node, parents));
-      if (result[0] === EXIT$1) {
-        return result;
+  return Lr;
+}
+var qr, ni;
+function Mf() {
+  return ni || (ni = 1, qr = [
+    "address",
+    "article",
+    "aside",
+    "base",
+    "basefont",
+    "blockquote",
+    "body",
+    "caption",
+    "center",
+    "col",
+    "colgroup",
+    "dd",
+    "details",
+    "dialog",
+    "dir",
+    "div",
+    "dl",
+    "dt",
+    "fieldset",
+    "figcaption",
+    "figure",
+    "footer",
+    "form",
+    "frame",
+    "frameset",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "head",
+    "header",
+    "hgroup",
+    "hr",
+    "html",
+    "iframe",
+    "legend",
+    "li",
+    "link",
+    "main",
+    "menu",
+    "menuitem",
+    "meta",
+    "nav",
+    "noframes",
+    "ol",
+    "optgroup",
+    "option",
+    "p",
+    "param",
+    "pre",
+    "section",
+    "source",
+    "title",
+    "summary",
+    "table",
+    "tbody",
+    "td",
+    "tfoot",
+    "th",
+    "thead",
+    "title",
+    "tr",
+    "track",
+    "ul"
+  ]), qr;
+}
+var Hr, ii;
+function Ga() {
+  return ii || (ii = 1, Hr = {
+    position: !0,
+    gfm: !0,
+    commonmark: !1,
+    footnotes: !1,
+    pedantic: !1,
+    blocks: Mf()
+  }), Hr;
+}
+var Mr, ai;
+function $f() {
+  if (ai)
+    return Mr;
+  ai = 1;
+  var e = Ce, r = Hf(), t = Ga();
+  Mr = s;
+  function s(n) {
+    var i = this, a = i.options, o, c;
+    if (n == null)
+      n = {};
+    else if (typeof n == "object")
+      n = e(n);
+    else
+      throw new Error("Invalid value `" + n + "` for setting `options`");
+    for (o in t) {
+      if (c = n[o], c == null && (c = a[o]), o !== "blocks" && typeof c != "boolean" || o === "blocks" && typeof c != "object")
+        throw new Error(
+          "Invalid value `" + c + "` for setting `options." + o + "`"
+        );
+      n[o] = c;
+    }
+    return i.options = n, i.escape = r(n), i;
+  }
+  return Mr;
+}
+var $r, si;
+function Uf() {
+  if (si)
+    return $r;
+  si = 1, $r = e;
+  function e(a) {
+    if (typeof a == "string")
+      return n(a);
+    if (a == null)
+      return i;
+    if (typeof a == "object")
+      return ("length" in a ? s : t)(a);
+    if (typeof a == "function")
+      return a;
+    throw new Error("Expected function, string, or object as test");
+  }
+  function r(a) {
+    for (var o = [], c = a.length, l = -1; ++l < c; )
+      o[l] = e(a[l]);
+    return o;
+  }
+  function t(a) {
+    return o;
+    function o(c) {
+      var l;
+      for (l in a)
+        if (c[l] !== a[l])
+          return !1;
+      return !0;
+    }
+  }
+  function s(a) {
+    var o = r(a), c = o.length;
+    return l;
+    function l() {
+      for (var u = -1; ++u < c; )
+        if (o[u].apply(this, arguments))
+          return !0;
+      return !1;
+    }
+  }
+  function n(a) {
+    return o;
+    function o(c) {
+      return !!(c && c.type === a);
+    }
+  }
+  function i() {
+    return !0;
+  }
+  return $r;
+}
+var Ur, oi;
+function Vf() {
+  if (oi)
+    return Ur;
+  oi = 1, Ur = n;
+  var e = Uf(), r = !0, t = "skip", s = !1;
+  n.CONTINUE = r, n.SKIP = t, n.EXIT = s;
+  function n(a, o, c, l) {
+    var u;
+    typeof o == "function" && typeof c != "function" && (l = c, c = o, o = null), u = e(o), f(a, null, []);
+    function f(h, m, y) {
+      var p = [], v;
+      return (!o || u(h, m, y[y.length - 1] || null)) && (p = i(c(h, y)), p[0] === s) ? p : h.children && p[0] !== t ? (v = i(d(h.children, y.concat(h))), v[0] === s ? v : p) : p;
+    }
+    function d(h, m) {
+      for (var y = -1, p = l ? -1 : 1, v = (l ? h.length : y) + p, g; v > y && v < h.length; ) {
+        if (g = f(h[v], v, m), g[0] === s)
+          return g;
+        v = typeof g[1] == "number" ? g[1] : v + p;
       }
     }
-    if (node.children && result[0] !== SKIP$1) {
-      subresult = toResult(all(node.children, parents.concat(node)));
-      return subresult[0] === EXIT$1 ? subresult : result;
+  }
+  function i(a) {
+    return a !== null && typeof a == "object" && "length" in a ? a : typeof a == "number" ? [r, a] : [a];
+  }
+  return Ur;
+}
+var Vr, ci;
+function jf() {
+  if (ci)
+    return Vr;
+  ci = 1, Vr = n;
+  var e = Vf(), r = e.CONTINUE, t = e.SKIP, s = e.EXIT;
+  n.CONTINUE = r, n.SKIP = t, n.EXIT = s;
+  function n(i, a, o, c) {
+    typeof a == "function" && typeof o != "function" && (c = o, o = a, a = null), e(i, a, l, c);
+    function l(u, f) {
+      var d = f[f.length - 1], h = d ? d.children.indexOf(u) : null;
+      return o(u, h, d);
     }
-    return result;
   }
-  function all(children, parents) {
-    var min = -1;
-    var step = reverse ? -1 : 1;
-    var index2 = (reverse ? children.length : min) + step;
-    var result;
-    while (index2 > min && index2 < children.length) {
-      result = one(children[index2], index2, parents);
-      if (result[0] === EXIT$1) {
-        return result;
-      }
-      index2 = typeof result[1] === "number" ? result[1] : index2 + step;
+  return Vr;
+}
+var jr, li;
+function Wf() {
+  if (li)
+    return jr;
+  li = 1;
+  var e = jf();
+  jr = r;
+  function r(n, i) {
+    return e(n, i ? t : s), n;
+  }
+  function t(n) {
+    delete n.position;
+  }
+  function s(n) {
+    n.position = void 0;
+  }
+  return jr;
+}
+var Wr, fi;
+function zf() {
+  if (fi)
+    return Wr;
+  fi = 1;
+  var e = Ce, r = Wf();
+  Wr = n;
+  var t = `
+`, s = /\r\n|\r/g;
+  function n() {
+    var i = this, a = String(i.file), o = { line: 1, column: 1, offset: 0 }, c = e(o), l;
+    return a = a.replace(s, t), a.charCodeAt(0) === 65279 && (a = a.slice(1), c.column++, c.offset++), l = {
+      type: "root",
+      children: i.tokenizeBlock(a, c),
+      position: { start: o, end: i.eof || e(o) }
+    }, i.options.position || r(l, !0), l;
+  }
+  return Wr;
+}
+var zr, ui;
+function se() {
+  if (ui)
+    return zr;
+  ui = 1, zr = t;
+  var e = String.fromCharCode, r = /\s/;
+  function t(s) {
+    return r.test(
+      typeof s == "number" ? e(s) : s.charAt(0)
+    );
+  }
+  return zr;
+}
+var Dr, di;
+function Df() {
+  if (di)
+    return Dr;
+  di = 1;
+  var e = se();
+  Dr = t;
+  var r = `
+`;
+  function t(s, n, i) {
+    var a = n.charAt(0), o, c, l, u;
+    if (a === r) {
+      if (i)
+        return !0;
+      for (u = 1, o = n.length, c = a, l = ""; u < o && (a = n.charAt(u), !!e(a)); )
+        l += a, a === r && (c += l, l = ""), u++;
+      s(c);
     }
   }
-}
-function toResult(value) {
-  if (value !== null && typeof value === "object" && "length" in value) {
-    return value;
-  }
-  if (typeof value === "number") {
-    return [CONTINUE$1, value];
-  }
-  return [value];
-}
-var unistUtilVisit = visit$1;
-var visitParents = unistUtilVisitParents;
-var CONTINUE = visitParents.CONTINUE;
-var SKIP = visitParents.SKIP;
-var EXIT = visitParents.EXIT;
-visit$1.CONTINUE = CONTINUE;
-visit$1.SKIP = SKIP;
-visit$1.EXIT = EXIT;
-function visit$1(tree, test, visitor, reverse) {
-  if (typeof test === "function" && typeof visitor !== "function") {
-    reverse = visitor;
-    visitor = test;
-    test = null;
-  }
-  visitParents(tree, test, overload, reverse);
-  function overload(node, parents) {
-    var parent = parents[parents.length - 1];
-    var index2 = parent ? parent.children.indexOf(node) : null;
-    return visitor(node, index2, parent);
-  }
-}
-var visit = unistUtilVisit;
-var unistUtilRemovePosition = removePosition$1;
-function removePosition$1(node, force) {
-  visit(node, force ? hard : soft);
-  return node;
-}
-function hard(node) {
-  delete node.position;
-}
-function soft(node) {
-  node.position = void 0;
-}
-var xtend$3 = immutable;
-var removePosition = unistUtilRemovePosition;
-var parse_1 = parse$4;
-var lineFeed$i = "\n";
-var lineBreaksExpression = /\r\n|\r/g;
-function parse$4() {
-  var self = this;
-  var value = String(self.file);
-  var start = { line: 1, column: 1, offset: 0 };
-  var content = xtend$3(start);
-  var node;
-  value = value.replace(lineBreaksExpression, lineFeed$i);
-  if (value.charCodeAt(0) === 65279) {
-    value = value.slice(1);
-    content.column++;
-    content.offset++;
-  }
-  node = {
-    type: "root",
-    children: self.tokenizeBlock(value, content),
-    position: { start, end: self.eof || xtend$3(start) }
-  };
-  if (!self.options.position) {
-    removePosition(node, true);
-  }
-  return node;
-}
-var isWhitespaceCharacter = whitespace$b;
-var fromCode$1 = String.fromCharCode;
-var re$1 = /\s/;
-function whitespace$b(character) {
-  return re$1.test(
-    typeof character === "number" ? fromCode$1(character) : character.charAt(0)
-  );
-}
-var whitespace$a = isWhitespaceCharacter;
-var newline_1 = newline;
-var lineFeed$h = "\n";
-function newline(eat, value, silent) {
-  var character = value.charAt(0);
-  var length;
-  var subvalue;
-  var queue;
-  var index2;
-  if (character !== lineFeed$h) {
-    return;
-  }
-  if (silent) {
-    return true;
-  }
-  index2 = 1;
-  length = value.length;
-  subvalue = character;
-  queue = "";
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (!whitespace$a(character)) {
-      break;
-    }
-    queue += character;
-    if (character === lineFeed$h) {
-      subvalue += queue;
-      queue = "";
-    }
-    index2++;
-  }
-  eat(subvalue);
+  return Dr;
 }
 /*!
  * repeat-string <https://github.com/jonschlinkert/repeat-string>
@@ -2390,3296 +1356,1598 @@ function newline(eat, value, silent) {
  * Copyright (c) 2014-2015, Jon Schlinkert.
  * Licensed under the MIT License.
  */
-var res = "";
-var cache;
-var repeatString = repeat$3;
-function repeat$3(str, num) {
-  if (typeof str !== "string") {
-    throw new TypeError("expected a string");
+var Gr, hi;
+function mn() {
+  if (hi)
+    return Gr;
+  hi = 1;
+  var e = "", r;
+  Gr = t;
+  function t(s, n) {
+    if (typeof s != "string")
+      throw new TypeError("expected a string");
+    if (n === 1)
+      return s;
+    if (n === 2)
+      return s + s;
+    var i = s.length * n;
+    if (r !== s || typeof r > "u")
+      r = s, e = "";
+    else if (e.length >= i)
+      return e.substr(0, i);
+    for (; i > e.length && n > 1; )
+      n & 1 && (e += s), n >>= 1, s += s;
+    return e += s, e = e.substr(0, i), e;
   }
-  if (num === 1)
-    return str;
-  if (num === 2)
-    return str + str;
-  var max = str.length * num;
-  if (cache !== str || typeof cache === "undefined") {
-    cache = str;
-    res = "";
-  } else if (res.length >= max) {
-    return res.substr(0, max);
-  }
-  while (max > res.length && num > 1) {
-    if (num & 1) {
-      res += str;
-    }
-    num >>= 1;
-    str += str;
-  }
-  res += str;
-  res = res.substr(0, max);
-  return res;
+  return Gr;
 }
-var trimTrailingLines_1 = trimTrailingLines$1;
-function trimTrailingLines$1(value) {
-  return String(value).replace(/\n+$/, "");
+var Kr, pi;
+function Ka() {
+  if (pi)
+    return Kr;
+  pi = 1, Kr = e;
+  function e(r) {
+    return String(r).replace(/\n+$/, "");
+  }
+  return Kr;
 }
-var repeat$2 = repeatString;
-var trim$7 = trimTrailingLines_1;
-var codeIndented = indentedCode;
-var lineFeed$g = "\n";
-var tab$d = "	";
-var space$g = " ";
-var tabSize$4 = 4;
-var codeIndent = repeat$2(space$g, tabSize$4);
-function indentedCode(eat, value, silent) {
-  var index2 = -1;
-  var length = value.length;
-  var subvalue = "";
-  var content = "";
-  var subvalueQueue = "";
-  var contentQueue = "";
-  var character;
-  var blankQueue;
-  var indent;
-  while (++index2 < length) {
-    character = value.charAt(index2);
-    if (indent) {
-      indent = false;
-      subvalue += subvalueQueue;
-      content += contentQueue;
-      subvalueQueue = "";
-      contentQueue = "";
-      if (character === lineFeed$g) {
-        subvalueQueue = character;
-        contentQueue = character;
-      } else {
-        subvalue += character;
-        content += character;
-        while (++index2 < length) {
-          character = value.charAt(index2);
-          if (!character || character === lineFeed$g) {
-            contentQueue = character;
-            subvalueQueue = character;
-            break;
-          }
-          subvalue += character;
-          content += character;
-        }
-      }
-    } else if (character === space$g && value.charAt(index2 + 1) === character && value.charAt(index2 + 2) === character && value.charAt(index2 + 3) === character) {
-      subvalueQueue += codeIndent;
-      index2 += 3;
-      indent = true;
-    } else if (character === tab$d) {
-      subvalueQueue += character;
-      indent = true;
-    } else {
-      blankQueue = "";
-      while (character === tab$d || character === space$g) {
-        blankQueue += character;
-        character = value.charAt(++index2);
-      }
-      if (character !== lineFeed$g) {
-        break;
-      }
-      subvalueQueue += blankQueue + character;
-      contentQueue += character;
-    }
-  }
-  if (content) {
-    if (silent) {
-      return true;
-    }
-    return eat(subvalue)({
-      type: "code",
-      lang: null,
-      meta: null,
-      value: trim$7(content)
-    });
-  }
-}
-var codeFenced = fencedCode;
-var lineFeed$f = "\n";
-var tab$c = "	";
-var space$f = " ";
-var tilde$1 = "~";
-var graveAccent$2 = "`";
-var minFenceCount = 3;
-var tabSize$3 = 4;
-function fencedCode(eat, value, silent) {
-  var self = this;
-  var gfm2 = self.options.gfm;
-  var length = value.length + 1;
-  var index2 = 0;
-  var subvalue = "";
-  var fenceCount;
-  var marker;
-  var character;
-  var flag;
-  var lang;
-  var meta;
-  var queue;
-  var content;
-  var exdentedContent;
-  var closing;
-  var exdentedClosing;
-  var indent;
-  var now;
-  if (!gfm2) {
-    return;
-  }
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character !== space$f && character !== tab$c) {
-      break;
-    }
-    subvalue += character;
-    index2++;
-  }
-  indent = index2;
-  character = value.charAt(index2);
-  if (character !== tilde$1 && character !== graveAccent$2) {
-    return;
-  }
-  index2++;
-  marker = character;
-  fenceCount = 1;
-  subvalue += character;
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character !== marker) {
-      break;
-    }
-    subvalue += character;
-    fenceCount++;
-    index2++;
-  }
-  if (fenceCount < minFenceCount) {
-    return;
-  }
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character !== space$f && character !== tab$c) {
-      break;
-    }
-    subvalue += character;
-    index2++;
-  }
-  flag = "";
-  queue = "";
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character === lineFeed$f || marker === graveAccent$2 && character === marker) {
-      break;
-    }
-    if (character === space$f || character === tab$c) {
-      queue += character;
-    } else {
-      flag += queue + character;
-      queue = "";
-    }
-    index2++;
-  }
-  character = value.charAt(index2);
-  if (character && character !== lineFeed$f) {
-    return;
-  }
-  if (silent) {
-    return true;
-  }
-  now = eat.now();
-  now.column += subvalue.length;
-  now.offset += subvalue.length;
-  subvalue += flag;
-  flag = self.decode.raw(self.unescape(flag), now);
-  if (queue) {
-    subvalue += queue;
-  }
-  queue = "";
-  closing = "";
-  exdentedClosing = "";
-  content = "";
-  exdentedContent = "";
-  var skip = true;
-  while (index2 < length) {
-    character = value.charAt(index2);
-    content += closing;
-    exdentedContent += exdentedClosing;
-    closing = "";
-    exdentedClosing = "";
-    if (character !== lineFeed$f) {
-      content += character;
-      exdentedClosing += character;
-      index2++;
-      continue;
-    }
-    if (skip) {
-      subvalue += character;
-      skip = false;
-    } else {
-      closing += character;
-      exdentedClosing += character;
-    }
-    queue = "";
-    index2++;
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (character !== space$f) {
-        break;
-      }
-      queue += character;
-      index2++;
-    }
-    closing += queue;
-    exdentedClosing += queue.slice(indent);
-    if (queue.length >= tabSize$3) {
-      continue;
-    }
-    queue = "";
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (character !== marker) {
-        break;
-      }
-      queue += character;
-      index2++;
-    }
-    closing += queue;
-    exdentedClosing += queue;
-    if (queue.length < fenceCount) {
-      continue;
-    }
-    queue = "";
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (character !== space$f && character !== tab$c) {
-        break;
-      }
-      closing += character;
-      exdentedClosing += character;
-      index2++;
-    }
-    if (!character || character === lineFeed$f) {
-      break;
-    }
-  }
-  subvalue += content + closing;
-  index2 = -1;
-  length = flag.length;
-  while (++index2 < length) {
-    character = flag.charAt(index2);
-    if (character === space$f || character === tab$c) {
-      if (!lang) {
-        lang = flag.slice(0, index2);
-      }
-    } else if (lang) {
-      meta = flag.slice(index2);
-      break;
-    }
-  }
-  return eat(subvalue)({
-    type: "code",
-    lang: lang || flag || null,
-    meta: meta || null,
-    value: exdentedContent
-  });
-}
-var trim$6 = { exports: {} };
-(function(module, exports) {
-  exports = module.exports = trim2;
-  function trim2(str) {
-    return str.replace(/^\s*|\s*$/g, "");
-  }
-  exports.left = function(str) {
-    return str.replace(/^\s*/, "");
-  };
-  exports.right = function(str) {
-    return str.replace(/\s*$/, "");
-  };
-})(trim$6, trim$6.exports);
-var interrupt_1 = interrupt$3;
-function interrupt$3(interruptors, tokenizers, ctx, params) {
-  var length = interruptors.length;
-  var index2 = -1;
-  var interruptor;
-  var config;
-  while (++index2 < length) {
-    interruptor = interruptors[index2];
-    config = interruptor[1] || {};
-    if (config.pedantic !== void 0 && config.pedantic !== ctx.options.pedantic) {
-      continue;
-    }
-    if (config.commonmark !== void 0 && config.commonmark !== ctx.options.commonmark) {
-      continue;
-    }
-    if (tokenizers[interruptor[0]].apply(ctx, params)) {
-      return true;
-    }
-  }
-  return false;
-}
-var trim$5 = trim$6.exports;
-var interrupt$2 = interrupt_1;
-var blockquote_1 = blockquote;
-var lineFeed$e = "\n";
-var tab$b = "	";
-var space$e = " ";
-var greaterThan$3 = ">";
-function blockquote(eat, value, silent) {
-  var self = this;
-  var offsets = self.offset;
-  var tokenizers = self.blockTokenizers;
-  var interruptors = self.interruptBlockquote;
-  var now = eat.now();
-  var currentLine = now.line;
-  var length = value.length;
-  var values = [];
-  var contents = [];
-  var indents = [];
-  var add;
-  var index2 = 0;
-  var character;
-  var rest;
-  var nextIndex;
-  var content;
-  var line;
-  var startIndex;
-  var prefixed;
-  var exit;
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character !== space$e && character !== tab$b) {
-      break;
-    }
-    index2++;
-  }
-  if (value.charAt(index2) !== greaterThan$3) {
-    return;
-  }
-  if (silent) {
-    return true;
-  }
-  index2 = 0;
-  while (index2 < length) {
-    nextIndex = value.indexOf(lineFeed$e, index2);
-    startIndex = index2;
-    prefixed = false;
-    if (nextIndex === -1) {
-      nextIndex = length;
-    }
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (character !== space$e && character !== tab$b) {
-        break;
-      }
-      index2++;
-    }
-    if (value.charAt(index2) === greaterThan$3) {
-      index2++;
-      prefixed = true;
-      if (value.charAt(index2) === space$e) {
-        index2++;
-      }
-    } else {
-      index2 = startIndex;
-    }
-    content = value.slice(index2, nextIndex);
-    if (!prefixed && !trim$5(content)) {
-      index2 = startIndex;
-      break;
-    }
-    if (!prefixed) {
-      rest = value.slice(index2);
-      if (interrupt$2(interruptors, tokenizers, self, [eat, rest, true])) {
-        break;
-      }
-    }
-    line = startIndex === index2 ? content : value.slice(startIndex, nextIndex);
-    indents.push(index2 - startIndex);
-    values.push(line);
-    contents.push(content);
-    index2 = nextIndex + 1;
-  }
-  index2 = -1;
-  length = indents.length;
-  add = eat(values.join(lineFeed$e));
-  while (++index2 < length) {
-    offsets[currentLine] = (offsets[currentLine] || 0) + indents[index2];
-    currentLine++;
-  }
-  exit = self.enterBlock();
-  contents = self.tokenizeBlock(contents.join(lineFeed$e), now);
-  exit();
-  return add({ type: "blockquote", children: contents });
-}
-var headingAtx = atxHeading;
-var lineFeed$d = "\n";
-var tab$a = "	";
-var space$d = " ";
-var numberSign = "#";
-var maxFenceCount = 6;
-function atxHeading(eat, value, silent) {
-  var self = this;
-  var pedantic = self.options.pedantic;
-  var length = value.length + 1;
-  var index2 = -1;
-  var now = eat.now();
-  var subvalue = "";
-  var content = "";
-  var character;
-  var queue;
-  var depth;
-  while (++index2 < length) {
-    character = value.charAt(index2);
-    if (character !== space$d && character !== tab$a) {
-      index2--;
-      break;
-    }
-    subvalue += character;
-  }
-  depth = 0;
-  while (++index2 <= length) {
-    character = value.charAt(index2);
-    if (character !== numberSign) {
-      index2--;
-      break;
-    }
-    subvalue += character;
-    depth++;
-  }
-  if (depth > maxFenceCount) {
-    return;
-  }
-  if (!depth || !pedantic && value.charAt(index2 + 1) === numberSign) {
-    return;
-  }
-  length = value.length + 1;
-  queue = "";
-  while (++index2 < length) {
-    character = value.charAt(index2);
-    if (character !== space$d && character !== tab$a) {
-      index2--;
-      break;
-    }
-    queue += character;
-  }
-  if (!pedantic && queue.length === 0 && character && character !== lineFeed$d) {
-    return;
-  }
-  if (silent) {
-    return true;
-  }
-  subvalue += queue;
-  queue = "";
-  content = "";
-  while (++index2 < length) {
-    character = value.charAt(index2);
-    if (!character || character === lineFeed$d) {
-      break;
-    }
-    if (character !== space$d && character !== tab$a && character !== numberSign) {
-      content += queue + character;
-      queue = "";
-      continue;
-    }
-    while (character === space$d || character === tab$a) {
-      queue += character;
-      character = value.charAt(++index2);
-    }
-    if (!pedantic && content && !queue && character === numberSign) {
-      content += character;
-      continue;
-    }
-    while (character === numberSign) {
-      queue += character;
-      character = value.charAt(++index2);
-    }
-    while (character === space$d || character === tab$a) {
-      queue += character;
-      character = value.charAt(++index2);
-    }
-    index2--;
-  }
-  now.column += subvalue.length;
-  now.offset += subvalue.length;
-  subvalue += content + queue;
-  return eat(subvalue)({
-    type: "heading",
-    depth,
-    children: self.tokenizeInline(content, now)
-  });
-}
-var thematicBreak_1 = thematicBreak;
-var tab$9 = "	";
-var lineFeed$c = "\n";
-var space$c = " ";
-var asterisk$3 = "*";
-var dash$3 = "-";
-var underscore$3 = "_";
-var maxCount = 3;
-function thematicBreak(eat, value, silent) {
-  var index2 = -1;
-  var length = value.length + 1;
-  var subvalue = "";
-  var character;
-  var marker;
-  var markerCount;
-  var queue;
-  while (++index2 < length) {
-    character = value.charAt(index2);
-    if (character !== tab$9 && character !== space$c) {
-      break;
-    }
-    subvalue += character;
-  }
-  if (character !== asterisk$3 && character !== dash$3 && character !== underscore$3) {
-    return;
-  }
-  marker = character;
-  subvalue += character;
-  markerCount = 1;
-  queue = "";
-  while (++index2 < length) {
-    character = value.charAt(index2);
-    if (character === marker) {
-      markerCount++;
-      subvalue += queue + marker;
-      queue = "";
-    } else if (character === space$c) {
-      queue += character;
-    } else if (markerCount >= maxCount && (!character || character === lineFeed$c)) {
-      subvalue += queue;
-      if (silent) {
-        return true;
-      }
-      return eat(subvalue)({ type: "thematicBreak" });
-    } else {
-      return;
-    }
-  }
-}
-var getIndentation = indentation$1;
-var tab$8 = "	";
-var space$b = " ";
-var spaceSize = 1;
-var tabSize$2 = 4;
-function indentation$1(value) {
-  var index2 = 0;
-  var indent = 0;
-  var character = value.charAt(index2);
-  var stops = {};
-  var size;
-  while (character === tab$8 || character === space$b) {
-    size = character === tab$8 ? tabSize$2 : spaceSize;
-    indent += size;
-    if (size > 1) {
-      indent = Math.floor(indent / size) * size;
-    }
-    stops[indent] = index2;
-    character = value.charAt(++index2);
-  }
-  return { indent, stops };
-}
-var trim$4 = trim$6.exports;
-var repeat$1 = repeatString;
-var getIndent$1 = getIndentation;
-var removeIndentation = indentation;
-var tab$7 = "	";
-var lineFeed$b = "\n";
-var space$a = " ";
-var exclamationMark$3 = "!";
-function indentation(value, maximum) {
-  var values = value.split(lineFeed$b);
-  var position2 = values.length + 1;
-  var minIndent = Infinity;
-  var matrix = [];
-  var index2;
-  var indentation2;
-  var stops;
-  var padding;
-  values.unshift(repeat$1(space$a, maximum) + exclamationMark$3);
-  while (position2--) {
-    indentation2 = getIndent$1(values[position2]);
-    matrix[position2] = indentation2.stops;
-    if (trim$4(values[position2]).length === 0) {
-      continue;
-    }
-    if (indentation2.indent) {
-      if (indentation2.indent > 0 && indentation2.indent < minIndent) {
-        minIndent = indentation2.indent;
-      }
-    } else {
-      minIndent = Infinity;
-      break;
-    }
-  }
-  if (minIndent !== Infinity) {
-    position2 = values.length;
-    while (position2--) {
-      stops = matrix[position2];
-      index2 = minIndent;
-      while (index2 && !(index2 in stops)) {
-        index2--;
-      }
-      if (trim$4(values[position2]).length !== 0 && minIndent && index2 !== minIndent) {
-        padding = tab$7;
-      } else {
-        padding = "";
-      }
-      values[position2] = padding + values[position2].slice(index2 in stops ? stops[index2] + 1 : 0);
-    }
-  }
-  values.shift();
-  return values.join(lineFeed$b);
-}
-var trim$3 = trim$6.exports;
-var repeat = repeatString;
-var decimal$1 = isDecimal;
-var getIndent = getIndentation;
-var removeIndent = removeIndentation;
-var interrupt$1 = interrupt_1;
-var list_1 = list;
-var asterisk$2 = "*";
-var underscore$2 = "_";
-var plusSign = "+";
-var dash$2 = "-";
-var dot$1 = ".";
-var space$9 = " ";
-var lineFeed$a = "\n";
-var tab$6 = "	";
-var rightParenthesis$3 = ")";
-var lowercaseX = "x";
-var tabSize$1 = 4;
-var looseListItemExpression = /\n\n(?!\s*$)/;
-var taskItemExpression = /^\[([ \t]|x|X)][ \t]/;
-var bulletExpression = /^([ \t]*)([*+-]|\d+[.)])( {1,4}(?! )| |\t|$|(?=\n))([^\n]*)/;
-var pedanticBulletExpression = /^([ \t]*)([*+-]|\d+[.)])([ \t]+)/;
-var initialIndentExpression = /^( {1,4}|\t)?/gm;
-function list(eat, value, silent) {
-  var self = this;
-  var commonmark2 = self.options.commonmark;
-  var pedantic = self.options.pedantic;
-  var tokenizers = self.blockTokenizers;
-  var interuptors = self.interruptList;
-  var index2 = 0;
-  var length = value.length;
-  var start = null;
-  var size = 0;
-  var queue;
-  var ordered;
-  var character;
-  var marker;
-  var nextIndex;
-  var startIndex;
-  var prefixed;
-  var currentMarker;
-  var content;
-  var line;
-  var prevEmpty;
-  var empty2;
-  var items;
-  var allLines;
-  var emptyLines;
-  var item;
-  var enterTop;
-  var exitBlockquote;
-  var spread = false;
-  var node;
-  var now;
-  var end;
-  var indented;
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character === tab$6) {
-      size += tabSize$1 - size % tabSize$1;
-    } else if (character === space$9) {
-      size++;
-    } else {
-      break;
-    }
-    index2++;
-  }
-  if (size >= tabSize$1) {
-    return;
-  }
-  character = value.charAt(index2);
-  if (character === asterisk$2 || character === plusSign || character === dash$2) {
-    marker = character;
-    ordered = false;
-  } else {
-    ordered = true;
-    queue = "";
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (!decimal$1(character)) {
-        break;
-      }
-      queue += character;
-      index2++;
-    }
-    character = value.charAt(index2);
-    if (!queue || !(character === dot$1 || commonmark2 && character === rightParenthesis$3)) {
-      return;
-    }
-    start = parseInt(queue, 10);
-    marker = character;
-  }
-  character = value.charAt(++index2);
-  if (character !== space$9 && character !== tab$6 && (pedantic || character !== lineFeed$a && character !== "")) {
-    return;
-  }
-  if (silent) {
-    return true;
-  }
-  index2 = 0;
-  items = [];
-  allLines = [];
-  emptyLines = [];
-  while (index2 < length) {
-    nextIndex = value.indexOf(lineFeed$a, index2);
-    startIndex = index2;
-    prefixed = false;
-    indented = false;
-    if (nextIndex === -1) {
-      nextIndex = length;
-    }
-    end = index2 + tabSize$1;
-    size = 0;
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (character === tab$6) {
-        size += tabSize$1 - size % tabSize$1;
-      } else if (character === space$9) {
-        size++;
-      } else {
-        break;
-      }
-      index2++;
-    }
-    if (size >= tabSize$1) {
-      indented = true;
-    }
-    if (item && size >= item.indent) {
-      indented = true;
-    }
-    character = value.charAt(index2);
-    currentMarker = null;
-    if (!indented) {
-      if (character === asterisk$2 || character === plusSign || character === dash$2) {
-        currentMarker = character;
-        index2++;
-        size++;
-      } else {
-        queue = "";
-        while (index2 < length) {
-          character = value.charAt(index2);
-          if (!decimal$1(character)) {
-            break;
-          }
-          queue += character;
-          index2++;
-        }
-        character = value.charAt(index2);
-        index2++;
-        if (queue && (character === dot$1 || commonmark2 && character === rightParenthesis$3)) {
-          currentMarker = character;
-          size += queue.length + 1;
-        }
-      }
-      if (currentMarker) {
-        character = value.charAt(index2);
-        if (character === tab$6) {
-          size += tabSize$1 - size % tabSize$1;
-          index2++;
-        } else if (character === space$9) {
-          end = index2 + tabSize$1;
-          while (index2 < end) {
-            if (value.charAt(index2) !== space$9) {
+var Qr, vi;
+function Gf() {
+  if (vi)
+    return Qr;
+  vi = 1;
+  var e = mn(), r = Ka();
+  Qr = o;
+  var t = `
+`, s = "	", n = " ", i = 4, a = e(n, i);
+  function o(c, l, u) {
+    for (var f = -1, d = l.length, h = "", m = "", y = "", p = "", v, g, b; ++f < d; )
+      if (v = l.charAt(f), b)
+        if (b = !1, h += y, m += p, y = "", p = "", v === t)
+          y = v, p = v;
+        else
+          for (h += v, m += v; ++f < d; ) {
+            if (v = l.charAt(f), !v || v === t) {
+              p = v, y = v;
               break;
             }
-            index2++;
-            size++;
+            h += v, m += v;
           }
-          if (index2 === end && value.charAt(index2) === space$9) {
-            index2 -= tabSize$1 - 1;
-            size -= tabSize$1 - 1;
-          }
-        } else if (character !== lineFeed$a && character !== "") {
-          currentMarker = null;
-        }
-      }
-    }
-    if (currentMarker) {
-      if (!pedantic && marker !== currentMarker) {
-        break;
-      }
-      prefixed = true;
-    } else {
-      if (!commonmark2 && !indented && value.charAt(startIndex) === space$9) {
-        indented = true;
-      } else if (commonmark2 && item) {
-        indented = size >= item.indent || size > tabSize$1;
-      }
-      prefixed = false;
-      index2 = startIndex;
-    }
-    line = value.slice(startIndex, nextIndex);
-    content = startIndex === index2 ? line : value.slice(index2, nextIndex);
-    if (currentMarker === asterisk$2 || currentMarker === underscore$2 || currentMarker === dash$2) {
-      if (tokenizers.thematicBreak.call(self, eat, line, true)) {
-        break;
-      }
-    }
-    prevEmpty = empty2;
-    empty2 = !prefixed && !trim$3(content).length;
-    if (indented && item) {
-      item.value = item.value.concat(emptyLines, line);
-      allLines = allLines.concat(emptyLines, line);
-      emptyLines = [];
-    } else if (prefixed) {
-      if (emptyLines.length !== 0) {
-        spread = true;
-        item.value.push("");
-        item.trail = emptyLines.concat();
-      }
-      item = {
-        value: [line],
-        indent: size,
-        trail: []
-      };
-      items.push(item);
-      allLines = allLines.concat(emptyLines, line);
-      emptyLines = [];
-    } else if (empty2) {
-      if (prevEmpty && !commonmark2) {
-        break;
-      }
-      emptyLines.push(line);
-    } else {
-      if (prevEmpty) {
-        break;
-      }
-      if (interrupt$1(interuptors, tokenizers, self, [eat, line, true])) {
-        break;
-      }
-      item.value = item.value.concat(emptyLines, line);
-      allLines = allLines.concat(emptyLines, line);
-      emptyLines = [];
-    }
-    index2 = nextIndex + 1;
-  }
-  node = eat(allLines.join(lineFeed$a)).reset({
-    type: "list",
-    ordered,
-    start,
-    spread,
-    children: []
-  });
-  enterTop = self.enterList();
-  exitBlockquote = self.enterBlock();
-  index2 = -1;
-  length = items.length;
-  while (++index2 < length) {
-    item = items[index2].value.join(lineFeed$a);
-    now = eat.now();
-    eat(item)(listItem(self, item, now), node);
-    item = items[index2].trail.join(lineFeed$a);
-    if (index2 !== length - 1) {
-      item += lineFeed$a;
-    }
-    eat(item);
-  }
-  enterTop();
-  exitBlockquote();
-  return node;
-}
-function listItem(ctx, value, position2) {
-  var offsets = ctx.offset;
-  var fn = ctx.options.pedantic ? pedanticListItem : normalListItem;
-  var checked = null;
-  var task;
-  var indent;
-  value = fn.apply(null, arguments);
-  if (ctx.options.gfm) {
-    task = value.match(taskItemExpression);
-    if (task) {
-      indent = task[0].length;
-      checked = task[1].toLowerCase() === lowercaseX;
-      offsets[position2.line] += indent;
-      value = value.slice(indent);
-    }
-  }
-  return {
-    type: "listItem",
-    spread: looseListItemExpression.test(value),
-    checked,
-    children: ctx.tokenizeBlock(value, position2)
-  };
-}
-function pedanticListItem(ctx, value, position2) {
-  var offsets = ctx.offset;
-  var line = position2.line;
-  value = value.replace(pedanticBulletExpression, replacer);
-  line = position2.line;
-  return value.replace(initialIndentExpression, replacer);
-  function replacer($0) {
-    offsets[line] = (offsets[line] || 0) + $0.length;
-    line++;
-    return "";
-  }
-}
-function normalListItem(ctx, value, position2) {
-  var offsets = ctx.offset;
-  var line = position2.line;
-  var max;
-  var bullet;
-  var rest;
-  var lines;
-  var trimmedLines;
-  var index2;
-  var length;
-  value = value.replace(bulletExpression, replacer);
-  lines = value.split(lineFeed$a);
-  trimmedLines = removeIndent(value, getIndent(max).indent).split(lineFeed$a);
-  trimmedLines[0] = rest;
-  offsets[line] = (offsets[line] || 0) + bullet.length;
-  line++;
-  index2 = 0;
-  length = lines.length;
-  while (++index2 < length) {
-    offsets[line] = (offsets[line] || 0) + lines[index2].length - trimmedLines[index2].length;
-    line++;
-  }
-  return trimmedLines.join(lineFeed$a);
-  function replacer($0, $1, $2, $3, $4) {
-    bullet = $1 + $2 + $3;
-    rest = $4;
-    if (Number($2) < 10 && bullet.length % 2 === 1) {
-      $2 = space$9 + $2;
-    }
-    max = $1 + repeat(space$9, $2.length) + $3;
-    return max + rest;
-  }
-}
-var headingSetext = setextHeading;
-var lineFeed$9 = "\n";
-var tab$5 = "	";
-var space$8 = " ";
-var equalsTo = "=";
-var dash$1 = "-";
-var maxIndent = 3;
-var equalsToDepth = 1;
-var dashDepth = 2;
-function setextHeading(eat, value, silent) {
-  var self = this;
-  var now = eat.now();
-  var length = value.length;
-  var index2 = -1;
-  var subvalue = "";
-  var content;
-  var queue;
-  var character;
-  var marker;
-  var depth;
-  while (++index2 < length) {
-    character = value.charAt(index2);
-    if (character !== space$8 || index2 >= maxIndent) {
-      index2--;
-      break;
-    }
-    subvalue += character;
-  }
-  content = "";
-  queue = "";
-  while (++index2 < length) {
-    character = value.charAt(index2);
-    if (character === lineFeed$9) {
-      index2--;
-      break;
-    }
-    if (character === space$8 || character === tab$5) {
-      queue += character;
-    } else {
-      content += queue + character;
-      queue = "";
-    }
-  }
-  now.column += subvalue.length;
-  now.offset += subvalue.length;
-  subvalue += content + queue;
-  character = value.charAt(++index2);
-  marker = value.charAt(++index2);
-  if (character !== lineFeed$9 || marker !== equalsTo && marker !== dash$1) {
-    return;
-  }
-  subvalue += character;
-  queue = marker;
-  depth = marker === equalsTo ? equalsToDepth : dashDepth;
-  while (++index2 < length) {
-    character = value.charAt(index2);
-    if (character !== marker) {
-      if (character !== lineFeed$9) {
-        return;
-      }
-      index2--;
-      break;
-    }
-    queue += character;
-  }
-  if (silent) {
-    return true;
-  }
-  return eat(subvalue + queue)({
-    type: "heading",
-    depth,
-    children: self.tokenizeInline(content, now)
-  });
-}
-var html = {};
-var attributeName = "[a-zA-Z_:][a-zA-Z0-9:._-]*";
-var unquoted = "[^\"'=<>`\\u0000-\\u0020]+";
-var singleQuoted = "'[^']*'";
-var doubleQuoted = '"[^"]*"';
-var attributeValue = "(?:" + unquoted + "|" + singleQuoted + "|" + doubleQuoted + ")";
-var attribute = "(?:\\s+" + attributeName + "(?:\\s*=\\s*" + attributeValue + ")?)";
-var openTag = "<[A-Za-z][A-Za-z0-9\\-]*" + attribute + "*\\s*\\/?>";
-var closeTag = "<\\/[A-Za-z][A-Za-z0-9\\-]*\\s*>";
-var comment = "<!---->|<!--(?:-?[^>-])(?:-?[^-])*-->";
-var processing = "<[?].*?[?]>";
-var declaration = "<![A-Za-z]+\\s+[^>]*>";
-var cdata = "<!\\[CDATA\\[[\\s\\S]*?\\]\\]>";
-html.openCloseTag = new RegExp("^(?:" + openTag + "|" + closeTag + ")");
-html.tag = new RegExp(
-  "^(?:" + openTag + "|" + closeTag + "|" + comment + "|" + processing + "|" + declaration + "|" + cdata + ")"
-);
-var openCloseTag = html.openCloseTag;
-var htmlBlock = blockHtml;
-var tab$4 = "	";
-var space$7 = " ";
-var lineFeed$8 = "\n";
-var lessThan$5 = "<";
-var rawOpenExpression = /^<(script|pre|style)(?=(\s|>|$))/i;
-var rawCloseExpression = /<\/(script|pre|style)>/i;
-var commentOpenExpression = /^<!--/;
-var commentCloseExpression = /-->/;
-var instructionOpenExpression = /^<\?/;
-var instructionCloseExpression = /\?>/;
-var directiveOpenExpression = /^<![A-Za-z]/;
-var directiveCloseExpression = />/;
-var cdataOpenExpression = /^<!\[CDATA\[/;
-var cdataCloseExpression = /\]\]>/;
-var elementCloseExpression = /^$/;
-var otherElementOpenExpression = new RegExp(openCloseTag.source + "\\s*$");
-function blockHtml(eat, value, silent) {
-  var self = this;
-  var blocks = self.options.blocks.join("|");
-  var elementOpenExpression = new RegExp(
-    "^</?(" + blocks + ")(?=(\\s|/?>|$))",
-    "i"
-  );
-  var length = value.length;
-  var index2 = 0;
-  var next;
-  var line;
-  var offset;
-  var character;
-  var count;
-  var sequence;
-  var subvalue;
-  var sequences = [
-    [rawOpenExpression, rawCloseExpression, true],
-    [commentOpenExpression, commentCloseExpression, true],
-    [instructionOpenExpression, instructionCloseExpression, true],
-    [directiveOpenExpression, directiveCloseExpression, true],
-    [cdataOpenExpression, cdataCloseExpression, true],
-    [elementOpenExpression, elementCloseExpression, true],
-    [otherElementOpenExpression, elementCloseExpression, false]
-  ];
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character !== tab$4 && character !== space$7) {
-      break;
-    }
-    index2++;
-  }
-  if (value.charAt(index2) !== lessThan$5) {
-    return;
-  }
-  next = value.indexOf(lineFeed$8, index2 + 1);
-  next = next === -1 ? length : next;
-  line = value.slice(index2, next);
-  offset = -1;
-  count = sequences.length;
-  while (++offset < count) {
-    if (sequences[offset][0].test(line)) {
-      sequence = sequences[offset];
-      break;
-    }
-  }
-  if (!sequence) {
-    return;
-  }
-  if (silent) {
-    return sequence[2];
-  }
-  index2 = next;
-  if (!sequence[1].test(line)) {
-    while (index2 < length) {
-      next = value.indexOf(lineFeed$8, index2 + 1);
-      next = next === -1 ? length : next;
-      line = value.slice(index2 + 1, next);
-      if (sequence[1].test(line)) {
-        if (line) {
-          index2 = next;
-        }
-        break;
-      }
-      index2 = next;
-    }
-  }
-  subvalue = value.slice(0, index2);
-  return eat(subvalue)({ type: "html", value: subvalue });
-}
-var collapseWhiteSpace$1 = collapse;
-function collapse(value) {
-  return String(value).replace(/\s+/g, " ");
-}
-var collapseWhiteSpace = collapseWhiteSpace$1;
-var normalize_1 = normalize$3;
-function normalize$3(value) {
-  return collapseWhiteSpace(value).toLowerCase();
-}
-var whitespace$9 = isWhitespaceCharacter;
-var normalize$2 = normalize_1;
-var footnoteDefinition_1 = footnoteDefinition;
-footnoteDefinition.notInList = true;
-footnoteDefinition.notInBlock = true;
-var backslash$7 = "\\";
-var lineFeed$7 = "\n";
-var tab$3 = "	";
-var space$6 = " ";
-var leftSquareBracket$4 = "[";
-var rightSquareBracket$4 = "]";
-var caret$1 = "^";
-var colon$3 = ":";
-var EXPRESSION_INITIAL_TAB = /^( {4}|\t)?/gm;
-function footnoteDefinition(eat, value, silent) {
-  var self = this;
-  var offsets = self.offset;
-  var index2;
-  var length;
-  var subvalue;
-  var now;
-  var currentLine;
-  var content;
-  var queue;
-  var subqueue;
-  var character;
-  var identifier;
-  var add;
-  var exit;
-  if (!self.options.footnotes) {
-    return;
-  }
-  index2 = 0;
-  length = value.length;
-  subvalue = "";
-  now = eat.now();
-  currentLine = now.line;
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (!whitespace$9(character)) {
-      break;
-    }
-    subvalue += character;
-    index2++;
-  }
-  if (value.charAt(index2) !== leftSquareBracket$4 || value.charAt(index2 + 1) !== caret$1) {
-    return;
-  }
-  subvalue += leftSquareBracket$4 + caret$1;
-  index2 = subvalue.length;
-  queue = "";
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character === rightSquareBracket$4) {
-      break;
-    } else if (character === backslash$7) {
-      queue += character;
-      index2++;
-      character = value.charAt(index2);
-    }
-    queue += character;
-    index2++;
-  }
-  if (!queue || value.charAt(index2) !== rightSquareBracket$4 || value.charAt(index2 + 1) !== colon$3) {
-    return;
-  }
-  if (silent) {
-    return true;
-  }
-  identifier = queue;
-  subvalue += queue + rightSquareBracket$4 + colon$3;
-  index2 = subvalue.length;
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character !== tab$3 && character !== space$6) {
-      break;
-    }
-    subvalue += character;
-    index2++;
-  }
-  now.column += subvalue.length;
-  now.offset += subvalue.length;
-  queue = "";
-  content = "";
-  subqueue = "";
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character === lineFeed$7) {
-      subqueue = character;
-      index2++;
-      while (index2 < length) {
-        character = value.charAt(index2);
-        if (character !== lineFeed$7) {
+      else if (v === n && l.charAt(f + 1) === v && l.charAt(f + 2) === v && l.charAt(f + 3) === v)
+        y += a, f += 3, b = !0;
+      else if (v === s)
+        y += v, b = !0;
+      else {
+        for (g = ""; v === s || v === n; )
+          g += v, v = l.charAt(++f);
+        if (v !== t)
           break;
-        }
-        subqueue += character;
-        index2++;
+        y += g + v, p += v;
       }
-      queue += subqueue;
-      subqueue = "";
-      while (index2 < length) {
-        character = value.charAt(index2);
-        if (character !== space$6) {
-          break;
-        }
-        subqueue += character;
-        index2++;
-      }
-      if (subqueue.length === 0) {
-        break;
-      }
-      queue += subqueue;
-    }
-    if (queue) {
-      content += queue;
-      queue = "";
-    }
-    content += character;
-    index2++;
+    if (m)
+      return u ? !0 : c(h)({
+        type: "code",
+        lang: null,
+        meta: null,
+        value: r(m)
+      });
   }
-  subvalue += content;
-  content = content.replace(EXPRESSION_INITIAL_TAB, function(line) {
-    offsets[currentLine] = (offsets[currentLine] || 0) + line.length;
-    currentLine++;
-    return "";
-  });
-  add = eat(subvalue);
-  exit = self.enterBlock();
-  content = self.tokenizeBlock(content, now);
-  exit();
-  return add({
-    type: "footnoteDefinition",
-    identifier: normalize$2(identifier),
-    label: identifier,
-    children: content
-  });
+  return Qr;
 }
-var whitespace$8 = isWhitespaceCharacter;
-var normalize$1 = normalize_1;
-var definition_1 = definition;
-var quotationMark$2 = '"';
-var apostrophe$2 = "'";
-var backslash$6 = "\\";
-var lineFeed$6 = "\n";
-var tab$2 = "	";
-var space$5 = " ";
-var leftSquareBracket$3 = "[";
-var rightSquareBracket$3 = "]";
-var leftParenthesis$2 = "(";
-var rightParenthesis$2 = ")";
-var colon$2 = ":";
-var lessThan$4 = "<";
-var greaterThan$2 = ">";
-function definition(eat, value, silent) {
-  var self = this;
-  var commonmark2 = self.options.commonmark;
-  var index2 = 0;
-  var length = value.length;
-  var subvalue = "";
-  var beforeURL;
-  var beforeTitle;
-  var queue;
-  var character;
-  var test;
-  var identifier;
-  var url2;
-  var title;
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character !== space$5 && character !== tab$2) {
-      break;
-    }
-    subvalue += character;
-    index2++;
-  }
-  character = value.charAt(index2);
-  if (character !== leftSquareBracket$3) {
-    return;
-  }
-  index2++;
-  subvalue += character;
-  queue = "";
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character === rightSquareBracket$3) {
-      break;
-    } else if (character === backslash$6) {
-      queue += character;
-      index2++;
-      character = value.charAt(index2);
-    }
-    queue += character;
-    index2++;
-  }
-  if (!queue || value.charAt(index2) !== rightSquareBracket$3 || value.charAt(index2 + 1) !== colon$2) {
-    return;
-  }
-  identifier = queue;
-  subvalue += queue + rightSquareBracket$3 + colon$2;
-  index2 = subvalue.length;
-  queue = "";
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character !== tab$2 && character !== space$5 && character !== lineFeed$6) {
-      break;
-    }
-    subvalue += character;
-    index2++;
-  }
-  character = value.charAt(index2);
-  queue = "";
-  beforeURL = subvalue;
-  if (character === lessThan$4) {
-    index2++;
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (!isEnclosedURLCharacter(character)) {
-        break;
-      }
-      queue += character;
-      index2++;
-    }
-    character = value.charAt(index2);
-    if (character === isEnclosedURLCharacter.delimiter) {
-      subvalue += lessThan$4 + queue + character;
-      index2++;
-    } else {
-      if (commonmark2) {
-        return;
-      }
-      index2 -= queue.length + 1;
-      queue = "";
-    }
-  }
-  if (!queue) {
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (!isUnclosedURLCharacter(character)) {
-        break;
-      }
-      queue += character;
-      index2++;
-    }
-    subvalue += queue;
-  }
-  if (!queue) {
-    return;
-  }
-  url2 = queue;
-  queue = "";
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character !== tab$2 && character !== space$5 && character !== lineFeed$6) {
-      break;
-    }
-    queue += character;
-    index2++;
-  }
-  character = value.charAt(index2);
-  test = null;
-  if (character === quotationMark$2) {
-    test = quotationMark$2;
-  } else if (character === apostrophe$2) {
-    test = apostrophe$2;
-  } else if (character === leftParenthesis$2) {
-    test = rightParenthesis$2;
-  }
-  if (!test) {
-    queue = "";
-    index2 = subvalue.length;
-  } else if (queue) {
-    subvalue += queue + character;
-    index2 = subvalue.length;
-    queue = "";
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (character === test) {
-        break;
-      }
-      if (character === lineFeed$6) {
-        index2++;
-        character = value.charAt(index2);
-        if (character === lineFeed$6 || character === test) {
-          return;
-        }
-        queue += lineFeed$6;
-      }
-      queue += character;
-      index2++;
-    }
-    character = value.charAt(index2);
-    if (character !== test) {
-      return;
-    }
-    beforeTitle = subvalue;
-    subvalue += queue + character;
-    index2++;
-    title = queue;
-    queue = "";
-  } else {
-    return;
-  }
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character !== tab$2 && character !== space$5) {
-      break;
-    }
-    subvalue += character;
-    index2++;
-  }
-  character = value.charAt(index2);
-  if (!character || character === lineFeed$6) {
-    if (silent) {
-      return true;
-    }
-    beforeURL = eat(beforeURL).test().end;
-    url2 = self.decode.raw(self.unescape(url2), beforeURL, { nonTerminated: false });
-    if (title) {
-      beforeTitle = eat(beforeTitle).test().end;
-      title = self.decode.raw(self.unescape(title), beforeTitle);
-    }
-    return eat(subvalue)({
-      type: "definition",
-      identifier: normalize$1(identifier),
-      label: identifier,
-      title: title || null,
-      url: url2
-    });
-  }
-}
-function isEnclosedURLCharacter(character) {
-  return character !== greaterThan$2 && character !== leftSquareBracket$3 && character !== rightSquareBracket$3;
-}
-isEnclosedURLCharacter.delimiter = greaterThan$2;
-function isUnclosedURLCharacter(character) {
-  return character !== leftSquareBracket$3 && character !== rightSquareBracket$3 && !whitespace$8(character);
-}
-var whitespace$7 = isWhitespaceCharacter;
-var table_1 = table;
-var tab$1 = "	";
-var lineFeed$5 = "\n";
-var space$4 = " ";
-var dash = "-";
-var colon$1 = ":";
-var backslash$5 = "\\";
-var verticalBar = "|";
-var minColumns = 1;
-var minRows = 2;
-var left = "left";
-var center = "center";
-var right = "right";
-function table(eat, value, silent) {
-  var self = this;
-  var index2;
-  var alignments;
-  var alignment;
-  var subvalue;
-  var row;
-  var length;
-  var lines;
-  var queue;
-  var character;
-  var hasDash;
-  var align;
-  var cell;
-  var preamble;
-  var now;
-  var position2;
-  var lineCount;
-  var line;
-  var rows;
-  var table2;
-  var lineIndex;
-  var pipeIndex;
-  var first;
-  if (!self.options.gfm) {
-    return;
-  }
-  index2 = 0;
-  lineCount = 0;
-  length = value.length + 1;
-  lines = [];
-  while (index2 < length) {
-    lineIndex = value.indexOf(lineFeed$5, index2);
-    pipeIndex = value.indexOf(verticalBar, index2 + 1);
-    if (lineIndex === -1) {
-      lineIndex = value.length;
-    }
-    if (pipeIndex === -1 || pipeIndex > lineIndex) {
-      if (lineCount < minRows) {
-        return;
-      }
-      break;
-    }
-    lines.push(value.slice(index2, lineIndex));
-    lineCount++;
-    index2 = lineIndex + 1;
-  }
-  subvalue = lines.join(lineFeed$5);
-  alignments = lines.splice(1, 1)[0] || [];
-  index2 = 0;
-  length = alignments.length;
-  lineCount--;
-  alignment = false;
-  align = [];
-  while (index2 < length) {
-    character = alignments.charAt(index2);
-    if (character === verticalBar) {
-      hasDash = null;
-      if (alignment === false) {
-        if (first === false) {
-          return;
-        }
-      } else {
-        align.push(alignment);
-        alignment = false;
-      }
-      first = false;
-    } else if (character === dash) {
-      hasDash = true;
-      alignment = alignment || null;
-    } else if (character === colon$1) {
-      if (alignment === left) {
-        alignment = center;
-      } else if (hasDash && alignment === null) {
-        alignment = right;
-      } else {
-        alignment = left;
-      }
-    } else if (!whitespace$7(character)) {
-      return;
-    }
-    index2++;
-  }
-  if (alignment !== false) {
-    align.push(alignment);
-  }
-  if (align.length < minColumns) {
-    return;
-  }
-  if (silent) {
-    return true;
-  }
-  position2 = -1;
-  rows = [];
-  table2 = eat(subvalue).reset({ type: "table", align, children: rows });
-  while (++position2 < lineCount) {
-    line = lines[position2];
-    row = { type: "tableRow", children: [] };
-    if (position2) {
-      eat(lineFeed$5);
-    }
-    eat(line).reset(row, table2);
-    length = line.length + 1;
-    index2 = 0;
-    queue = "";
-    cell = "";
-    preamble = true;
-    while (index2 < length) {
-      character = line.charAt(index2);
-      if (character === tab$1 || character === space$4) {
-        if (cell) {
-          queue += character;
-        } else {
-          eat(character);
-        }
-        index2++;
-        continue;
-      }
-      if (character === "" || character === verticalBar) {
-        if (preamble) {
-          eat(character);
-        } else {
-          if ((cell || character) && !preamble) {
-            subvalue = cell;
-            if (queue.length > 1) {
-              if (character) {
-                subvalue += queue.slice(0, queue.length - 1);
-                queue = queue.charAt(queue.length - 1);
-              } else {
-                subvalue += queue;
-                queue = "";
+var Yr, gi;
+function Kf() {
+  if (gi)
+    return Yr;
+  gi = 1, Yr = o;
+  var e = `
+`, r = "	", t = " ", s = "~", n = "`", i = 3, a = 4;
+  function o(c, l, u) {
+    var f = this, d = f.options.gfm, h = l.length + 1, m = 0, y = "", p, v, g, b, E, A, T, k, O, w, C, S, R;
+    if (d) {
+      for (; m < h && (g = l.charAt(m), !(g !== t && g !== r)); )
+        y += g, m++;
+      if (S = m, g = l.charAt(m), !(g !== s && g !== n)) {
+        for (m++, v = g, p = 1, y += g; m < h && (g = l.charAt(m), g === v); )
+          y += g, p++, m++;
+        if (!(p < i)) {
+          for (; m < h && (g = l.charAt(m), !(g !== t && g !== r)); )
+            y += g, m++;
+          for (b = "", T = ""; m < h && (g = l.charAt(m), !(g === e || v === n && g === v)); )
+            g === t || g === r ? T += g : (b += T + g, T = ""), m++;
+          if (g = l.charAt(m), !(g && g !== e)) {
+            if (u)
+              return !0;
+            R = c.now(), R.column += y.length, R.offset += y.length, y += b, b = f.decode.raw(f.unescape(b), R), T && (y += T), T = "", w = "", C = "", k = "", O = "";
+            for (var x = !0; m < h; ) {
+              if (g = l.charAt(m), k += w, O += C, w = "", C = "", g !== e) {
+                k += g, C += g, m++;
+                continue;
+              }
+              for (x ? (y += g, x = !1) : (w += g, C += g), T = "", m++; m < h && (g = l.charAt(m), g === t); )
+                T += g, m++;
+              if (w += T, C += T.slice(S), !(T.length >= a)) {
+                for (T = ""; m < h && (g = l.charAt(m), g === v); )
+                  T += g, m++;
+                if (w += T, C += T, !(T.length < p)) {
+                  for (T = ""; m < h && (g = l.charAt(m), !(g !== t && g !== r)); )
+                    w += g, C += g, m++;
+                  if (!g || g === e)
+                    break;
+                }
               }
             }
-            now = eat.now();
-            eat(subvalue)(
-              { type: "tableCell", children: self.tokenizeInline(cell, now) },
-              row
-            );
+            for (y += k + w, m = -1, h = b.length; ++m < h; )
+              if (g = b.charAt(m), g === t || g === r)
+                E || (E = b.slice(0, m));
+              else if (E) {
+                A = b.slice(m);
+                break;
+              }
+            return c(y)({
+              type: "code",
+              lang: E || b || null,
+              meta: A || null,
+              value: O
+            });
           }
-          eat(queue + character);
-          queue = "";
-          cell = "";
-        }
-      } else {
-        if (queue) {
-          cell += queue;
-          queue = "";
-        }
-        cell += character;
-        if (character === backslash$5 && index2 !== length - 2) {
-          cell += line.charAt(index2 + 1);
-          index2++;
         }
       }
-      preamble = false;
-      index2++;
-    }
-    if (!position2) {
-      eat(lineFeed$5 + alignments);
     }
   }
-  return table2;
+  return Yr;
 }
-var trim$2 = trim$6.exports;
-var decimal = isDecimal;
-var trimTrailingLines = trimTrailingLines_1;
-var interrupt = interrupt_1;
-var paragraph_1 = paragraph;
-var tab = "	";
-var lineFeed$4 = "\n";
-var space$3 = " ";
-var tabSize = 4;
-function paragraph(eat, value, silent) {
-  var self = this;
-  var settings = self.options;
-  var commonmark2 = settings.commonmark;
-  var gfm2 = settings.gfm;
-  var tokenizers = self.blockTokenizers;
-  var interruptors = self.interruptParagraph;
-  var index2 = value.indexOf(lineFeed$4);
-  var length = value.length;
-  var position2;
-  var subvalue;
-  var character;
-  var size;
-  var now;
-  while (index2 < length) {
-    if (index2 === -1) {
-      index2 = length;
-      break;
+var nr = { exports: {} }, mi;
+function He() {
+  return mi || (mi = 1, function(e, r) {
+    r = e.exports = t;
+    function t(s) {
+      return s.replace(/^\s*|\s*$/g, "");
     }
-    if (value.charAt(index2 + 1) === lineFeed$4) {
-      break;
-    }
-    if (commonmark2) {
-      size = 0;
-      position2 = index2 + 1;
-      while (position2 < length) {
-        character = value.charAt(position2);
-        if (character === tab) {
-          size = tabSize;
-          break;
-        } else if (character === space$3) {
-          size++;
-        } else {
+    r.left = function(s) {
+      return s.replace(/^\s*/, "");
+    }, r.right = function(s) {
+      return s.replace(/\s*$/, "");
+    };
+  }(nr, nr.exports)), nr.exports;
+}
+var Jr, yi;
+function yn() {
+  if (yi)
+    return Jr;
+  yi = 1, Jr = e;
+  function e(r, t, s, n) {
+    for (var i = r.length, a = -1, o, c; ++a < i; )
+      if (o = r[a], c = o[1] || {}, !(c.pedantic !== void 0 && c.pedantic !== s.options.pedantic) && !(c.commonmark !== void 0 && c.commonmark !== s.options.commonmark) && t[o[0]].apply(s, n))
+        return !0;
+    return !1;
+  }
+  return Jr;
+}
+var Xr, bi;
+function Qf() {
+  if (bi)
+    return Xr;
+  bi = 1;
+  var e = He(), r = yn();
+  Xr = a;
+  var t = `
+`, s = "	", n = " ", i = ">";
+  function a(o, c, l) {
+    for (var u = this, f = u.offset, d = u.blockTokenizers, h = u.interruptBlockquote, m = o.now(), y = m.line, p = c.length, v = [], g = [], b = [], E, A = 0, T, k, O, w, C, S, R, x; A < p && (T = c.charAt(A), !(T !== n && T !== s)); )
+      A++;
+    if (c.charAt(A) === i) {
+      if (l)
+        return !0;
+      for (A = 0; A < p; ) {
+        for (O = c.indexOf(t, A), S = A, R = !1, O === -1 && (O = p); A < p && (T = c.charAt(A), !(T !== n && T !== s)); )
+          A++;
+        if (c.charAt(A) === i ? (A++, R = !0, c.charAt(A) === n && A++) : A = S, w = c.slice(A, O), !R && !e(w)) {
+          A = S;
           break;
         }
-        position2++;
+        if (!R && (k = c.slice(A), r(h, d, u, [o, k, !0])))
+          break;
+        C = S === A ? w : c.slice(S, O), b.push(A - S), v.push(C), g.push(w), A = O + 1;
       }
-      if (size >= tabSize && character !== lineFeed$4) {
-        index2 = value.indexOf(lineFeed$4, index2 + 1);
-        continue;
-      }
-    }
-    subvalue = value.slice(index2 + 1);
-    if (interrupt(interruptors, tokenizers, self, [eat, subvalue, true])) {
-      break;
-    }
-    if (tokenizers.list.call(self, eat, subvalue, true) && (self.inList || commonmark2 || gfm2 && !decimal(trim$2.left(subvalue).charAt(0)))) {
-      break;
-    }
-    position2 = index2;
-    index2 = value.indexOf(lineFeed$4, index2 + 1);
-    if (index2 !== -1 && trim$2(value.slice(position2, index2)) === "") {
-      index2 = position2;
-      break;
+      for (A = -1, p = b.length, E = o(v.join(t)); ++A < p; )
+        f[y] = (f[y] || 0) + b[A], y++;
+      return x = u.enterBlock(), g = u.tokenizeBlock(g.join(t), m), x(), E({ type: "blockquote", children: g });
     }
   }
-  subvalue = value.slice(0, index2);
-  if (trim$2(subvalue) === "") {
-    eat(subvalue);
-    return null;
-  }
-  if (silent) {
-    return true;
-  }
-  now = eat.now();
-  subvalue = trimTrailingLines(subvalue);
-  return eat(subvalue)({
-    type: "paragraph",
-    children: self.tokenizeInline(subvalue, now)
-  });
+  return Xr;
 }
-var _escape$1 = locate$j;
-function locate$j(value, fromIndex) {
-  return value.indexOf("\\", fromIndex);
-}
-var locate$i = _escape$1;
-var _escape = escape;
-escape.locator = locate$i;
-var lineFeed$3 = "\n";
-var backslash$4 = "\\";
-function escape(eat, value, silent) {
-  var self = this;
-  var character;
-  var node;
-  if (value.charAt(0) === backslash$4) {
-    character = value.charAt(1);
-    if (self.escape.indexOf(character) !== -1) {
-      if (silent) {
-        return true;
-      }
-      if (character === lineFeed$3) {
-        node = { type: "break" };
-      } else {
-        node = { type: "text", value: character };
-      }
-      return eat(backslash$4 + character)(node);
-    }
-  }
-}
-var tag$1 = locate$h;
-function locate$h(value, fromIndex) {
-  return value.indexOf("<", fromIndex);
-}
-var whitespace$6 = isWhitespaceCharacter;
-var decode$2 = parseEntities_1;
-var locate$g = tag$1;
-var autoLink_1 = autoLink;
-autoLink.locator = locate$g;
-autoLink.notInLink = true;
-var lessThan$3 = "<";
-var greaterThan$1 = ">";
-var atSign$1 = "@";
-var slash$1 = "/";
-var mailto$1 = "mailto:";
-var mailtoLength = mailto$1.length;
-function autoLink(eat, value, silent) {
-  var self = this;
-  var subvalue = "";
-  var length = value.length;
-  var index2 = 0;
-  var queue = "";
-  var hasAtCharacter = false;
-  var link2 = "";
-  var character;
-  var now;
-  var content;
-  var tokenizers;
-  var exit;
-  if (value.charAt(0) !== lessThan$3) {
-    return;
-  }
-  index2++;
-  subvalue = lessThan$3;
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (whitespace$6(character) || character === greaterThan$1 || character === atSign$1 || character === ":" && value.charAt(index2 + 1) === slash$1) {
-      break;
-    }
-    queue += character;
-    index2++;
-  }
-  if (!queue) {
-    return;
-  }
-  link2 += queue;
-  queue = "";
-  character = value.charAt(index2);
-  link2 += character;
-  index2++;
-  if (character === atSign$1) {
-    hasAtCharacter = true;
-  } else {
-    if (character !== ":" || value.charAt(index2 + 1) !== slash$1) {
-      return;
-    }
-    link2 += slash$1;
-    index2++;
-  }
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (whitespace$6(character) || character === greaterThan$1) {
-      break;
-    }
-    queue += character;
-    index2++;
-  }
-  character = value.charAt(index2);
-  if (!queue || character !== greaterThan$1) {
-    return;
-  }
-  if (silent) {
-    return true;
-  }
-  link2 += queue;
-  content = link2;
-  subvalue += link2 + character;
-  now = eat.now();
-  now.column++;
-  now.offset++;
-  if (hasAtCharacter) {
-    if (link2.slice(0, mailtoLength).toLowerCase() === mailto$1) {
-      content = content.slice(mailtoLength);
-      now.column += mailtoLength;
-      now.offset += mailtoLength;
-    } else {
-      link2 = mailto$1 + link2;
-    }
-  }
-  tokenizers = self.inlineTokenizers;
-  self.inlineTokenizers = { text: tokenizers.text };
-  exit = self.enterLink();
-  content = self.tokenizeInline(content, now);
-  self.inlineTokenizers = tokenizers;
-  exit();
-  return eat(subvalue)({
-    type: "link",
-    title: null,
-    url: decode$2(link2, { nonTerminated: false }),
-    children: content
-  });
-}
-var url$1 = locate$f;
-var protocols$1 = ["https://", "http://", "mailto:"];
-function locate$f(value, fromIndex) {
-  var length = protocols$1.length;
-  var index2 = -1;
-  var min = -1;
-  var position2;
-  if (!this.options.gfm) {
-    return -1;
-  }
-  while (++index2 < length) {
-    position2 = value.indexOf(protocols$1[index2], fromIndex);
-    if (position2 !== -1 && (position2 < min || min === -1)) {
-      min = position2;
-    }
-  }
-  return min;
-}
-var decode$1 = parseEntities_1;
-var whitespace$5 = isWhitespaceCharacter;
-var locate$e = url$1;
-var url_1 = url;
-url.locator = locate$e;
-url.notInLink = true;
-var quotationMark$1 = '"';
-var apostrophe$1 = "'";
-var leftParenthesis$1 = "(";
-var rightParenthesis$1 = ")";
-var comma = ",";
-var dot = ".";
-var colon = ":";
-var semicolon = ";";
-var lessThan$2 = "<";
-var atSign = "@";
-var leftSquareBracket$2 = "[";
-var rightSquareBracket$2 = "]";
-var http = "http://";
-var https = "https://";
-var mailto = "mailto:";
-var protocols = [http, https, mailto];
-var protocolsLength = protocols.length;
-function url(eat, value, silent) {
-  var self = this;
-  var subvalue;
-  var content;
-  var character;
-  var index2;
-  var position2;
-  var protocol;
-  var match;
-  var length;
-  var queue;
-  var parenCount;
-  var nextCharacter;
-  var tokenizers;
-  var exit;
-  if (!self.options.gfm) {
-    return;
-  }
-  subvalue = "";
-  index2 = -1;
-  while (++index2 < protocolsLength) {
-    protocol = protocols[index2];
-    match = value.slice(0, protocol.length);
-    if (match.toLowerCase() === protocol) {
-      subvalue = match;
-      break;
-    }
-  }
-  if (!subvalue) {
-    return;
-  }
-  index2 = subvalue.length;
-  length = value.length;
-  queue = "";
-  parenCount = 0;
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (whitespace$5(character) || character === lessThan$2) {
-      break;
-    }
-    if (character === dot || character === comma || character === colon || character === semicolon || character === quotationMark$1 || character === apostrophe$1 || character === rightParenthesis$1 || character === rightSquareBracket$2) {
-      nextCharacter = value.charAt(index2 + 1);
-      if (!nextCharacter || whitespace$5(nextCharacter)) {
+var Zr, Ai;
+function Yf() {
+  if (Ai)
+    return Zr;
+  Ai = 1, Zr = i;
+  var e = `
+`, r = "	", t = " ", s = "#", n = 6;
+  function i(a, o, c) {
+    for (var l = this, u = l.options.pedantic, f = o.length + 1, d = -1, h = a.now(), m = "", y = "", p, v, g; ++d < f; ) {
+      if (p = o.charAt(d), p !== t && p !== r) {
+        d--;
         break;
       }
+      m += p;
     }
-    if (character === leftParenthesis$1 || character === leftSquareBracket$2) {
-      parenCount++;
-    }
-    if (character === rightParenthesis$1 || character === rightSquareBracket$2) {
-      parenCount--;
-      if (parenCount < 0) {
+    for (g = 0; ++d <= f; ) {
+      if (p = o.charAt(d), p !== s) {
+        d--;
         break;
       }
+      m += p, g++;
     }
-    queue += character;
-    index2++;
-  }
-  if (!queue) {
-    return;
-  }
-  subvalue += queue;
-  content = subvalue;
-  if (protocol === mailto) {
-    position2 = queue.indexOf(atSign);
-    if (position2 === -1 || position2 === length - 1) {
-      return;
+    if (!(g > n) && !(!g || !u && o.charAt(d + 1) === s)) {
+      for (f = o.length + 1, v = ""; ++d < f; ) {
+        if (p = o.charAt(d), p !== t && p !== r) {
+          d--;
+          break;
+        }
+        v += p;
+      }
+      if (!(!u && v.length === 0 && p && p !== e)) {
+        if (c)
+          return !0;
+        for (m += v, v = "", y = ""; ++d < f && (p = o.charAt(d), !(!p || p === e)); ) {
+          if (p !== t && p !== r && p !== s) {
+            y += v + p, v = "";
+            continue;
+          }
+          for (; p === t || p === r; )
+            v += p, p = o.charAt(++d);
+          if (!u && y && !v && p === s) {
+            y += p;
+            continue;
+          }
+          for (; p === s; )
+            v += p, p = o.charAt(++d);
+          for (; p === t || p === r; )
+            v += p, p = o.charAt(++d);
+          d--;
+        }
+        return h.column += m.length, h.offset += m.length, m += y + v, a(m)({
+          type: "heading",
+          depth: g,
+          children: l.tokenizeInline(y, h)
+        });
+      }
     }
-    content = content.slice(mailto.length);
   }
-  if (silent) {
-    return true;
-  }
-  exit = self.enterLink();
-  tokenizers = self.inlineTokenizers;
-  self.inlineTokenizers = { text: tokenizers.text };
-  content = self.tokenizeInline(content, eat.now());
-  self.inlineTokenizers = tokenizers;
-  exit();
-  return eat(subvalue)({
-    type: "link",
-    title: null,
-    url: decode$1(subvalue, { nonTerminated: false }),
-    children: content
-  });
+  return Zr;
 }
-var alphabetical = isAlphabetical;
-var locate$d = tag$1;
-var tag = html.tag;
-var htmlInline = inlineHTML;
-inlineHTML.locator = locate$d;
-var lessThan$1 = "<";
-var questionMark = "?";
-var exclamationMark$2 = "!";
-var slash = "/";
-var htmlLinkOpenExpression = /^<a /i;
-var htmlLinkCloseExpression = /^<\/a>/i;
-function inlineHTML(eat, value, silent) {
-  var self = this;
-  var length = value.length;
-  var character;
-  var subvalue;
-  if (value.charAt(0) !== lessThan$1 || length < 3) {
-    return;
+var et, wi;
+function Jf() {
+  if (wi)
+    return et;
+  wi = 1, et = o;
+  var e = "	", r = `
+`, t = " ", s = "*", n = "-", i = "_", a = 3;
+  function o(c, l, u) {
+    for (var f = -1, d = l.length + 1, h = "", m, y, p, v; ++f < d && (m = l.charAt(f), !(m !== e && m !== t)); )
+      h += m;
+    if (!(m !== s && m !== n && m !== i))
+      for (y = m, h += m, p = 1, v = ""; ++f < d; )
+        if (m = l.charAt(f), m === y)
+          p++, h += v + y, v = "";
+        else if (m === t)
+          v += m;
+        else
+          return p >= a && (!m || m === r) ? (h += v, u ? !0 : c(h)({ type: "thematicBreak" })) : void 0;
   }
-  character = value.charAt(1);
-  if (!alphabetical(character) && character !== questionMark && character !== exclamationMark$2 && character !== slash) {
-    return;
-  }
-  subvalue = value.match(tag);
-  if (!subvalue) {
-    return;
-  }
-  if (silent) {
-    return true;
-  }
-  subvalue = subvalue[0];
-  if (!self.inLink && htmlLinkOpenExpression.test(subvalue)) {
-    self.inLink = true;
-  } else if (self.inLink && htmlLinkCloseExpression.test(subvalue)) {
-    self.inLink = false;
-  }
-  return eat(subvalue)({ type: "html", value: subvalue });
+  return et;
 }
-var link$3 = locate$c;
-function locate$c(value, fromIndex) {
-  var link2 = value.indexOf("[", fromIndex);
-  var image2 = value.indexOf("![", fromIndex);
-  if (image2 === -1) {
-    return link2;
+var rt, Ei;
+function Qa() {
+  if (Ei)
+    return rt;
+  Ei = 1, rt = n;
+  var e = "	", r = " ", t = 1, s = 4;
+  function n(i) {
+    for (var a = 0, o = 0, c = i.charAt(a), l = {}, u; c === e || c === r; )
+      u = c === e ? s : t, o += u, u > 1 && (o = Math.floor(o / u) * u), l[o] = a, c = i.charAt(++a);
+    return { indent: o, stops: l };
   }
-  return link2 < image2 ? link2 : image2;
+  return rt;
 }
-var whitespace$4 = isWhitespaceCharacter;
-var locate$b = link$3;
-var link_1 = link$2;
-link$2.locator = locate$b;
-var lineFeed$2 = "\n";
-var exclamationMark$1 = "!";
-var quotationMark = '"';
-var apostrophe = "'";
-var leftParenthesis = "(";
-var rightParenthesis = ")";
-var lessThan = "<";
-var greaterThan = ">";
-var leftSquareBracket$1 = "[";
-var backslash$3 = "\\";
-var rightSquareBracket$1 = "]";
-var graveAccent$1 = "`";
-function link$2(eat, value, silent) {
-  var self = this;
-  var subvalue = "";
-  var index2 = 0;
-  var character = value.charAt(0);
-  var pedantic = self.options.pedantic;
-  var commonmark2 = self.options.commonmark;
-  var gfm2 = self.options.gfm;
-  var closed;
-  var count;
-  var opening;
-  var beforeURL;
-  var beforeTitle;
-  var subqueue;
-  var hasMarker;
-  var isImage;
-  var content;
-  var marker;
-  var length;
-  var title;
-  var depth;
-  var queue;
-  var url2;
-  var now;
-  var exit;
-  var node;
-  if (character === exclamationMark$1) {
-    isImage = true;
-    subvalue = character;
-    character = value.charAt(++index2);
-  }
-  if (character !== leftSquareBracket$1) {
-    return;
-  }
-  if (!isImage && self.inLink) {
-    return;
-  }
-  subvalue += character;
-  queue = "";
-  index2++;
-  length = value.length;
-  now = eat.now();
-  depth = 0;
-  now.column += index2;
-  now.offset += index2;
-  while (index2 < length) {
-    character = value.charAt(index2);
-    subqueue = character;
-    if (character === graveAccent$1) {
-      count = 1;
-      while (value.charAt(index2 + 1) === graveAccent$1) {
-        subqueue += character;
-        index2++;
-        count++;
+var tt, Ti;
+function Xf() {
+  if (Ti)
+    return tt;
+  Ti = 1;
+  var e = He(), r = mn(), t = Qa();
+  tt = o;
+  var s = "	", n = `
+`, i = " ", a = "!";
+  function o(c, l) {
+    var u = c.split(n), f = u.length + 1, d = 1 / 0, h = [], m, y, p, v;
+    for (u.unshift(r(i, l) + a); f--; )
+      if (y = t(u[f]), h[f] = y.stops, e(u[f]).length !== 0)
+        if (y.indent)
+          y.indent > 0 && y.indent < d && (d = y.indent);
+        else {
+          d = 1 / 0;
+          break;
+        }
+    if (d !== 1 / 0)
+      for (f = u.length; f--; ) {
+        for (p = h[f], m = d; m && !(m in p); )
+          m--;
+        e(u[f]).length !== 0 && d && m !== d ? v = s : v = "", u[f] = v + u[f].slice(m in p ? p[m] + 1 : 0);
       }
-      if (!opening) {
-        opening = count;
-      } else if (count >= opening) {
-        opening = 0;
+    return u.shift(), u.join(n);
+  }
+  return tt;
+}
+var nt, ki;
+function Zf() {
+  if (ki)
+    return nt;
+  ki = 1;
+  var e = He(), r = mn(), t = yr, s = Qa(), n = Xf(), i = yn();
+  nt = T;
+  var a = "*", o = "_", c = "+", l = "-", u = ".", f = " ", d = `
+`, h = "	", m = ")", y = "x", p = 4, v = /\n\n(?!\s*$)/, g = /^\[([ \t]|x|X)][ \t]/, b = /^([ \t]*)([*+-]|\d+[.)])( {1,4}(?! )| |\t|$|(?=\n))([^\n]*)/, E = /^([ \t]*)([*+-]|\d+[.)])([ \t]+)/, A = /^( {1,4}|\t)?/gm;
+  function T(C, S, R) {
+    for (var x = this, I = x.options.commonmark, N = x.options.pedantic, _ = x.blockTokenizers, H = x.interruptList, P = 0, M = S.length, U = null, B = 0, q, Q, F, Y, K, ne, Ve, oe, On, ie, Cr, Or, je, ge, ee, D, Rn, In, Pn = !1, Rr, _n, er, me; P < M; ) {
+      if (F = S.charAt(P), F === h)
+        B += p - B % p;
+      else if (F === f)
+        B++;
+      else
+        break;
+      P++;
+    }
+    if (!(B >= p)) {
+      if (F = S.charAt(P), F === a || F === c || F === l)
+        Y = F, Q = !1;
+      else {
+        for (Q = !0, q = ""; P < M && (F = S.charAt(P), !!t(F)); )
+          q += F, P++;
+        if (F = S.charAt(P), !q || !(F === u || I && F === m))
+          return;
+        U = parseInt(q, 10), Y = F;
       }
-    } else if (character === backslash$3) {
-      index2++;
-      subqueue += value.charAt(index2);
-    } else if ((!opening || gfm2) && character === leftSquareBracket$1) {
-      depth++;
-    } else if ((!opening || gfm2) && character === rightSquareBracket$1) {
-      if (depth) {
-        depth--;
-      } else {
-        if (!pedantic) {
-          while (index2 < length) {
-            character = value.charAt(index2 + 1);
-            if (!whitespace$4(character)) {
+      if (F = S.charAt(++P), !(F !== f && F !== h && (N || F !== d && F !== ""))) {
+        if (R)
+          return !0;
+        for (P = 0, je = [], ge = [], ee = []; P < M; ) {
+          for (K = S.indexOf(d, P), ne = P, Ve = !1, me = !1, K === -1 && (K = M), er = P + p, B = 0; P < M; ) {
+            if (F = S.charAt(P), F === h)
+              B += p - B % p;
+            else if (F === f)
+              B++;
+            else
               break;
+            P++;
+          }
+          if (B >= p && (me = !0), D && B >= D.indent && (me = !0), F = S.charAt(P), oe = null, !me) {
+            if (F === a || F === c || F === l)
+              oe = F, P++, B++;
+            else {
+              for (q = ""; P < M && (F = S.charAt(P), !!t(F)); )
+                q += F, P++;
+              F = S.charAt(P), P++, q && (F === u || I && F === m) && (oe = F, B += q.length + 1);
             }
-            subqueue += character;
-            index2++;
+            if (oe)
+              if (F = S.charAt(P), F === h)
+                B += p - B % p, P++;
+              else if (F === f) {
+                for (er = P + p; P < er && S.charAt(P) === f; )
+                  P++, B++;
+                P === er && S.charAt(P) === f && (P -= p - 1, B -= p - 1);
+              } else
+                F !== d && F !== "" && (oe = null);
           }
-        }
-        if (value.charAt(index2 + 1) !== leftParenthesis) {
-          return;
-        }
-        subqueue += leftParenthesis;
-        closed = true;
-        index2++;
-        break;
-      }
-    }
-    queue += subqueue;
-    subqueue = "";
-    index2++;
-  }
-  if (!closed) {
-    return;
-  }
-  content = queue;
-  subvalue += queue + subqueue;
-  index2++;
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (!whitespace$4(character)) {
-      break;
-    }
-    subvalue += character;
-    index2++;
-  }
-  character = value.charAt(index2);
-  queue = "";
-  beforeURL = subvalue;
-  if (character === lessThan) {
-    index2++;
-    beforeURL += lessThan;
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (character === greaterThan) {
-        break;
-      }
-      if (commonmark2 && character === lineFeed$2) {
-        return;
-      }
-      queue += character;
-      index2++;
-    }
-    if (value.charAt(index2) !== greaterThan) {
-      return;
-    }
-    subvalue += lessThan + queue + greaterThan;
-    url2 = queue;
-    index2++;
-  } else {
-    character = null;
-    subqueue = "";
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (subqueue && (character === quotationMark || character === apostrophe || commonmark2 && character === leftParenthesis)) {
-        break;
-      }
-      if (whitespace$4(character)) {
-        if (!pedantic) {
-          break;
-        }
-        subqueue += character;
-      } else {
-        if (character === leftParenthesis) {
-          depth++;
-        } else if (character === rightParenthesis) {
-          if (depth === 0) {
+          if (oe) {
+            if (!N && Y !== oe)
+              break;
+            Ve = !0;
+          } else
+            !I && !me && S.charAt(ne) === f ? me = !0 : I && D && (me = B >= D.indent || B > p), Ve = !1, P = ne;
+          if (ie = S.slice(ne, K), On = ne === P ? ie : S.slice(P, K), (oe === a || oe === o || oe === l) && _.thematicBreak.call(x, C, ie, !0))
             break;
+          if (Cr = Or, Or = !Ve && !e(On).length, me && D)
+            D.value = D.value.concat(ee, ie), ge = ge.concat(ee, ie), ee = [];
+          else if (Ve)
+            ee.length !== 0 && (Pn = !0, D.value.push(""), D.trail = ee.concat()), D = {
+              value: [ie],
+              indent: B,
+              trail: []
+            }, je.push(D), ge = ge.concat(ee, ie), ee = [];
+          else if (Or) {
+            if (Cr && !I)
+              break;
+            ee.push(ie);
+          } else {
+            if (Cr || i(H, _, x, [C, ie, !0]))
+              break;
+            D.value = D.value.concat(ee, ie), ge = ge.concat(ee, ie), ee = [];
           }
-          depth--;
+          P = K + 1;
         }
-        queue += subqueue;
-        subqueue = "";
-        if (character === backslash$3) {
-          queue += backslash$3;
-          character = value.charAt(++index2);
-        }
-        queue += character;
-      }
-      index2++;
-    }
-    subvalue += queue;
-    url2 = queue;
-    index2 = subvalue.length;
-  }
-  queue = "";
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (!whitespace$4(character)) {
-      break;
-    }
-    queue += character;
-    index2++;
-  }
-  character = value.charAt(index2);
-  subvalue += queue;
-  if (queue && (character === quotationMark || character === apostrophe || commonmark2 && character === leftParenthesis)) {
-    index2++;
-    subvalue += character;
-    queue = "";
-    marker = character === leftParenthesis ? rightParenthesis : character;
-    beforeTitle = subvalue;
-    if (commonmark2) {
-      while (index2 < length) {
-        character = value.charAt(index2);
-        if (character === marker) {
-          break;
-        }
-        if (character === backslash$3) {
-          queue += backslash$3;
-          character = value.charAt(++index2);
-        }
-        index2++;
-        queue += character;
-      }
-      character = value.charAt(index2);
-      if (character !== marker) {
-        return;
-      }
-      title = queue;
-      subvalue += queue + character;
-      index2++;
-      while (index2 < length) {
-        character = value.charAt(index2);
-        if (!whitespace$4(character)) {
-          break;
-        }
-        subvalue += character;
-        index2++;
-      }
-    } else {
-      subqueue = "";
-      while (index2 < length) {
-        character = value.charAt(index2);
-        if (character === marker) {
-          if (hasMarker) {
-            queue += marker + subqueue;
-            subqueue = "";
-          }
-          hasMarker = true;
-        } else if (!hasMarker) {
-          queue += character;
-        } else if (character === rightParenthesis) {
-          subvalue += queue + marker + subqueue;
-          title = queue;
-          break;
-        } else if (whitespace$4(character)) {
-          subqueue += character;
-        } else {
-          queue += marker + subqueue + character;
-          subqueue = "";
-          hasMarker = false;
-        }
-        index2++;
+        for (Rr = C(ge.join(d)).reset({
+          type: "list",
+          ordered: Q,
+          start: U,
+          spread: Pn,
+          children: []
+        }), Rn = x.enterList(), In = x.enterBlock(), P = -1, M = je.length; ++P < M; )
+          D = je[P].value.join(d), _n = C.now(), C(D)(k(x, D, _n), Rr), D = je[P].trail.join(d), P !== M - 1 && (D += d), C(D);
+        return Rn(), In(), Rr;
       }
     }
   }
-  if (value.charAt(index2) !== rightParenthesis) {
-    return;
+  function k(C, S, R) {
+    var x = C.offset, I = C.options.pedantic ? O : w, N = null, _, H;
+    return S = I.apply(null, arguments), C.options.gfm && (_ = S.match(g), _ && (H = _[0].length, N = _[1].toLowerCase() === y, x[R.line] += H, S = S.slice(H))), {
+      type: "listItem",
+      spread: v.test(S),
+      checked: N,
+      children: C.tokenizeBlock(S, R)
+    };
   }
-  if (silent) {
-    return true;
+  function O(C, S, R) {
+    var x = C.offset, I = R.line;
+    return S = S.replace(E, N), I = R.line, S.replace(A, N);
+    function N(_) {
+      return x[I] = (x[I] || 0) + _.length, I++, "";
+    }
   }
-  subvalue += rightParenthesis;
-  url2 = self.decode.raw(self.unescape(url2), eat(beforeURL).test().end, {
-    nonTerminated: false
-  });
-  if (title) {
-    beforeTitle = eat(beforeTitle).test().end;
-    title = self.decode.raw(self.unescape(title), beforeTitle);
+  function w(C, S, R) {
+    var x = C.offset, I = R.line, N, _, H, P, M, U, B;
+    for (S = S.replace(b, q), P = S.split(d), M = n(S, s(N).indent).split(d), M[0] = H, x[I] = (x[I] || 0) + _.length, I++, U = 0, B = P.length; ++U < B; )
+      x[I] = (x[I] || 0) + P[U].length - M[U].length, I++;
+    return M.join(d);
+    function q(Q, F, Y, K, ne) {
+      return _ = F + Y + K, H = ne, Number(Y) < 10 && _.length % 2 === 1 && (Y = f + Y), N = F + r(f, Y.length) + K, N + H;
+    }
   }
-  node = {
-    type: isImage ? "image" : "link",
-    title: title || null,
-    url: url2
-  };
-  if (isImage) {
-    node.alt = self.decode.raw(self.unescape(content), now) || null;
-  } else {
-    exit = self.enterLink();
-    node.children = self.tokenizeInline(content, now);
-    exit();
-  }
-  return eat(subvalue)(node);
+  return nt;
 }
-var whitespace$3 = isWhitespaceCharacter;
-var locate$a = link$3;
-var normalize = normalize_1;
-var reference_1 = reference;
-reference.locator = locate$a;
-var link$1 = "link";
-var image = "image";
-var footnote = "footnote";
-var shortcut = "shortcut";
-var collapsed = "collapsed";
-var full = "full";
-var space$2 = " ";
-var exclamationMark = "!";
-var leftSquareBracket = "[";
-var backslash$2 = "\\";
-var rightSquareBracket = "]";
-var caret = "^";
-function reference(eat, value, silent) {
-  var self = this;
-  var commonmark2 = self.options.commonmark;
-  var footnotes = self.options.footnotes;
-  var character = value.charAt(0);
-  var index2 = 0;
-  var length = value.length;
-  var subvalue = "";
-  var intro = "";
-  var type = link$1;
-  var referenceType = shortcut;
-  var content;
-  var identifier;
-  var now;
-  var node;
-  var exit;
-  var queue;
-  var bracketed;
-  var depth;
-  if (character === exclamationMark) {
-    type = image;
-    intro = character;
-    character = value.charAt(++index2);
-  }
-  if (character !== leftSquareBracket) {
-    return;
-  }
-  index2++;
-  intro += character;
-  queue = "";
-  if (footnotes && value.charAt(index2) === caret) {
-    if (type === image) {
-      return;
-    }
-    intro += caret;
-    index2++;
-    type = footnote;
-  }
-  depth = 0;
-  while (index2 < length) {
-    character = value.charAt(index2);
-    if (character === leftSquareBracket) {
-      bracketed = true;
-      depth++;
-    } else if (character === rightSquareBracket) {
-      if (!depth) {
+var it, xi;
+function eu() {
+  if (xi)
+    return it;
+  xi = 1, it = c;
+  var e = `
+`, r = "	", t = " ", s = "=", n = "-", i = 3, a = 1, o = 2;
+  function c(l, u, f) {
+    for (var d = this, h = l.now(), m = u.length, y = -1, p = "", v, g, b, E, A; ++y < m; ) {
+      if (b = u.charAt(y), b !== t || y >= i) {
+        y--;
         break;
       }
-      depth--;
+      p += b;
     }
-    if (character === backslash$2) {
-      queue += backslash$2;
-      character = value.charAt(++index2);
-    }
-    queue += character;
-    index2++;
-  }
-  subvalue = queue;
-  content = queue;
-  character = value.charAt(index2);
-  if (character !== rightSquareBracket) {
-    return;
-  }
-  index2++;
-  subvalue += character;
-  queue = "";
-  if (!commonmark2) {
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (!whitespace$3(character)) {
+    for (v = "", g = ""; ++y < m; ) {
+      if (b = u.charAt(y), b === e) {
+        y--;
         break;
       }
-      queue += character;
-      index2++;
+      b === t || b === r ? g += b : (v += g + b, g = "");
     }
-  }
-  character = value.charAt(index2);
-  if (type !== footnote && character === leftSquareBracket && (!footnotes || value.charAt(index2 + 1) !== caret)) {
-    identifier = "";
-    queue += character;
-    index2++;
-    while (index2 < length) {
-      character = value.charAt(index2);
-      if (character === leftSquareBracket || character === rightSquareBracket) {
-        break;
-      }
-      if (character === backslash$2) {
-        identifier += backslash$2;
-        character = value.charAt(++index2);
-      }
-      identifier += character;
-      index2++;
-    }
-    character = value.charAt(index2);
-    if (character === rightSquareBracket) {
-      referenceType = identifier ? full : collapsed;
-      queue += identifier + character;
-      index2++;
-    } else {
-      identifier = "";
-    }
-    subvalue += queue;
-    queue = "";
-  } else {
-    if (!content) {
-      return;
-    }
-    identifier = content;
-  }
-  if (referenceType !== full && bracketed) {
-    return;
-  }
-  subvalue = intro + subvalue;
-  if (type === link$1 && self.inLink) {
-    return null;
-  }
-  if (silent) {
-    return true;
-  }
-  if (type === footnote && content.indexOf(space$2) !== -1) {
-    return eat(subvalue)({
-      type: footnote,
-      children: this.tokenizeInline(content, eat.now())
-    });
-  }
-  now = eat.now();
-  now.column += intro.length;
-  now.offset += intro.length;
-  identifier = referenceType === full ? identifier : content;
-  node = {
-    type: type + "Reference",
-    identifier: normalize(identifier),
-    label: identifier
-  };
-  if (type === link$1 || type === image) {
-    node.referenceType = referenceType;
-  }
-  if (type === link$1) {
-    exit = self.enterLink();
-    node.children = self.tokenizeInline(content, now);
-    exit();
-  } else if (type === image) {
-    node.alt = self.decode.raw(self.unescape(content), now) || null;
-  }
-  return eat(subvalue)(node);
-}
-var strong$1 = locate$9;
-function locate$9(value, fromIndex) {
-  var asterisk2 = value.indexOf("**", fromIndex);
-  var underscore2 = value.indexOf("__", fromIndex);
-  if (underscore2 === -1) {
-    return asterisk2;
-  }
-  if (asterisk2 === -1) {
-    return underscore2;
-  }
-  return underscore2 < asterisk2 ? underscore2 : asterisk2;
-}
-var trim$1 = trim$6.exports;
-var whitespace$2 = isWhitespaceCharacter;
-var locate$8 = strong$1;
-var strong_1 = strong;
-strong.locator = locate$8;
-var backslash$1 = "\\";
-var asterisk$1 = "*";
-var underscore$1 = "_";
-function strong(eat, value, silent) {
-  var self = this;
-  var index2 = 0;
-  var character = value.charAt(index2);
-  var now;
-  var pedantic;
-  var marker;
-  var queue;
-  var subvalue;
-  var length;
-  var prev;
-  if (character !== asterisk$1 && character !== underscore$1 || value.charAt(++index2) !== character) {
-    return;
-  }
-  pedantic = self.options.pedantic;
-  marker = character;
-  subvalue = marker + marker;
-  length = value.length;
-  index2++;
-  queue = "";
-  character = "";
-  if (pedantic && whitespace$2(value.charAt(index2))) {
-    return;
-  }
-  while (index2 < length) {
-    prev = character;
-    character = value.charAt(index2);
-    if (character === marker && value.charAt(index2 + 1) === marker && (!pedantic || !whitespace$2(prev))) {
-      character = value.charAt(index2 + 2);
-      if (character !== marker) {
-        if (!trim$1(queue)) {
-          return;
+    if (h.column += p.length, h.offset += p.length, p += v + g, b = u.charAt(++y), E = u.charAt(++y), !(b !== e || E !== s && E !== n)) {
+      for (p += b, g = E, A = E === s ? a : o; ++y < m; ) {
+        if (b = u.charAt(y), b !== E) {
+          if (b !== e)
+            return;
+          y--;
+          break;
         }
-        if (silent) {
-          return true;
-        }
-        now = eat.now();
-        now.column += 2;
-        now.offset += 2;
-        return eat(subvalue + queue + subvalue)({
-          type: "strong",
-          children: self.tokenizeInline(queue, now)
-        });
+        g += b;
       }
-    }
-    if (!pedantic && character === backslash$1) {
-      queue += character;
-      character = value.charAt(++index2);
-    }
-    queue += character;
-    index2++;
-  }
-}
-var isWordCharacter = wordCharacter;
-var fromCode = String.fromCharCode;
-var re = /\w/;
-function wordCharacter(character) {
-  return re.test(
-    typeof character === "number" ? fromCode(character) : character.charAt(0)
-  );
-}
-var emphasis$1 = locate$7;
-function locate$7(value, fromIndex) {
-  var asterisk2 = value.indexOf("*", fromIndex);
-  var underscore2 = value.indexOf("_", fromIndex);
-  if (underscore2 === -1) {
-    return asterisk2;
-  }
-  if (asterisk2 === -1) {
-    return underscore2;
-  }
-  return underscore2 < asterisk2 ? underscore2 : asterisk2;
-}
-var trim = trim$6.exports;
-var word = isWordCharacter;
-var whitespace$1 = isWhitespaceCharacter;
-var locate$6 = emphasis$1;
-var emphasis_1 = emphasis;
-emphasis.locator = locate$6;
-var asterisk = "*";
-var underscore = "_";
-var backslash = "\\";
-function emphasis(eat, value, silent) {
-  var self = this;
-  var index2 = 0;
-  var character = value.charAt(index2);
-  var now;
-  var pedantic;
-  var marker;
-  var queue;
-  var subvalue;
-  var length;
-  var prev;
-  if (character !== asterisk && character !== underscore) {
-    return;
-  }
-  pedantic = self.options.pedantic;
-  subvalue = character;
-  marker = character;
-  length = value.length;
-  index2++;
-  queue = "";
-  character = "";
-  if (pedantic && whitespace$1(value.charAt(index2))) {
-    return;
-  }
-  while (index2 < length) {
-    prev = character;
-    character = value.charAt(index2);
-    if (character === marker && (!pedantic || !whitespace$1(prev))) {
-      character = value.charAt(++index2);
-      if (character !== marker) {
-        if (!trim(queue) || prev === marker) {
-          return;
-        }
-        if (!pedantic && marker === underscore && word(character)) {
-          queue += marker;
-          continue;
-        }
-        if (silent) {
-          return true;
-        }
-        now = eat.now();
-        now.column++;
-        now.offset++;
-        return eat(subvalue + queue + marker)({
-          type: "emphasis",
-          children: self.tokenizeInline(queue, now)
-        });
-      }
-      queue += marker;
-    }
-    if (!pedantic && character === backslash) {
-      queue += character;
-      character = value.charAt(++index2);
-    }
-    queue += character;
-    index2++;
-  }
-}
-var _delete$1 = locate$5;
-function locate$5(value, fromIndex) {
-  return value.indexOf("~~", fromIndex);
-}
-var whitespace = isWhitespaceCharacter;
-var locate$4 = _delete$1;
-var _delete = strikethrough;
-strikethrough.locator = locate$4;
-var tilde = "~";
-var fence$3 = "~~";
-function strikethrough(eat, value, silent) {
-  var self = this;
-  var character = "";
-  var previous = "";
-  var preceding = "";
-  var subvalue = "";
-  var index2;
-  var length;
-  var now;
-  if (!self.options.gfm || value.charAt(0) !== tilde || value.charAt(1) !== tilde || whitespace(value.charAt(2))) {
-    return;
-  }
-  index2 = 1;
-  length = value.length;
-  now = eat.now();
-  now.column += 2;
-  now.offset += 2;
-  while (++index2 < length) {
-    character = value.charAt(index2);
-    if (character === tilde && previous === tilde && (!preceding || !whitespace(preceding))) {
-      if (silent) {
-        return true;
-      }
-      return eat(fence$3 + subvalue + fence$3)({
-        type: "delete",
-        children: self.tokenizeInline(subvalue, now)
+      return f ? !0 : l(p + g)({
+        type: "heading",
+        depth: A,
+        children: d.tokenizeInline(v, h)
       });
     }
-    subvalue += previous;
-    preceding = previous;
-    previous = character;
   }
+  return it;
 }
-var codeInline$1 = locate$3;
-function locate$3(value, fromIndex) {
-  return value.indexOf("`", fromIndex);
+var ir = {}, Si;
+function Ya() {
+  if (Si)
+    return ir;
+  Si = 1;
+  var e = "[a-zA-Z_:][a-zA-Z0-9:._-]*", r = "[^\"'=<>`\\u0000-\\u0020]+", t = "'[^']*'", s = '"[^"]*"', n = "(?:" + r + "|" + t + "|" + s + ")", i = "(?:\\s+" + e + "(?:\\s*=\\s*" + n + ")?)", a = "<[A-Za-z][A-Za-z0-9\\-]*" + i + "*\\s*\\/?>", o = "<\\/[A-Za-z][A-Za-z0-9\\-]*\\s*>", c = "<!---->|<!--(?:-?[^>-])(?:-?[^-])*-->", l = "<[?].*?[?]>", u = "<![A-Za-z]+\\s+[^>]*>", f = "<!\\[CDATA\\[[\\s\\S]*?\\]\\]>";
+  return ir.openCloseTag = new RegExp("^(?:" + a + "|" + o + ")"), ir.tag = new RegExp(
+    "^(?:" + a + "|" + o + "|" + c + "|" + l + "|" + u + "|" + f + ")"
+  ), ir;
 }
-var locate$2 = codeInline$1;
-var codeInline = inlineCode;
-inlineCode.locator = locate$2;
-var lineFeed$1 = 10;
-var space$1 = 32;
-var graveAccent = 96;
-function inlineCode(eat, value, silent) {
-  var length = value.length;
-  var index2 = 0;
-  var openingFenceEnd;
-  var closingFenceStart;
-  var closingFenceEnd;
-  var code;
-  var next;
-  var found;
-  while (index2 < length) {
-    if (value.charCodeAt(index2) !== graveAccent) {
-      break;
-    }
-    index2++;
-  }
-  if (index2 === 0 || index2 === length) {
-    return;
-  }
-  openingFenceEnd = index2;
-  next = value.charCodeAt(index2);
-  while (index2 < length) {
-    code = next;
-    next = value.charCodeAt(index2 + 1);
-    if (code === graveAccent) {
-      if (closingFenceStart === void 0) {
-        closingFenceStart = index2;
+var at, Ci;
+function ru() {
+  if (Ci)
+    return at;
+  Ci = 1;
+  var e = Ya().openCloseTag;
+  at = v;
+  var r = "	", t = " ", s = `
+`, n = "<", i = /^<(script|pre|style)(?=(\s|>|$))/i, a = /<\/(script|pre|style)>/i, o = /^<!--/, c = /-->/, l = /^<\?/, u = /\?>/, f = /^<![A-Za-z]/, d = />/, h = /^<!\[CDATA\[/, m = /\]\]>/, y = /^$/, p = new RegExp(e.source + "\\s*$");
+  function v(g, b, E) {
+    for (var A = this, T = A.options.blocks.join("|"), k = new RegExp(
+      "^</?(" + T + ")(?=(\\s|/?>|$))",
+      "i"
+    ), O = b.length, w = 0, C, S, R, x, I, N, _, H = [
+      [i, a, !0],
+      [o, c, !0],
+      [l, u, !0],
+      [f, d, !0],
+      [h, m, !0],
+      [k, y, !0],
+      [p, y, !1]
+    ]; w < O && (x = b.charAt(w), !(x !== r && x !== t)); )
+      w++;
+    if (b.charAt(w) === n) {
+      for (C = b.indexOf(s, w + 1), C = C === -1 ? O : C, S = b.slice(w, C), R = -1, I = H.length; ++R < I; )
+        if (H[R][0].test(S)) {
+          N = H[R];
+          break;
+        }
+      if (N) {
+        if (E)
+          return N[2];
+        if (w = C, !N[1].test(S))
+          for (; w < O; ) {
+            if (C = b.indexOf(s, w + 1), C = C === -1 ? O : C, S = b.slice(w + 1, C), N[1].test(S)) {
+              S && (w = C);
+              break;
+            }
+            w = C;
+          }
+        return _ = b.slice(0, w), g(_)({ type: "html", value: _ });
       }
-      closingFenceEnd = index2 + 1;
-      if (next !== graveAccent && closingFenceEnd - closingFenceStart === openingFenceEnd) {
-        found = true;
+    }
+  }
+  return at;
+}
+var st, Oi;
+function tu() {
+  if (Oi)
+    return st;
+  Oi = 1, st = e;
+  function e(r) {
+    return String(r).replace(/\s+/g, " ");
+  }
+  return st;
+}
+var ot, Ri;
+function bn() {
+  if (Ri)
+    return ot;
+  Ri = 1;
+  var e = tu();
+  ot = r;
+  function r(t) {
+    return e(t).toLowerCase();
+  }
+  return ot;
+}
+var ct, Ii;
+function nu() {
+  if (Ii)
+    return ct;
+  Ii = 1;
+  var e = se(), r = bn();
+  ct = f, f.notInList = !0, f.notInBlock = !0;
+  var t = "\\", s = `
+`, n = "	", i = " ", a = "[", o = "]", c = "^", l = ":", u = /^( {4}|\t)?/gm;
+  function f(d, h, m) {
+    var y = this, p = y.offset, v, g, b, E, A, T, k, O, w, C, S, R;
+    if (y.options.footnotes) {
+      for (v = 0, g = h.length, b = "", E = d.now(), A = E.line; v < g && (w = h.charAt(v), !!e(w)); )
+        b += w, v++;
+      if (!(h.charAt(v) !== a || h.charAt(v + 1) !== c)) {
+        for (b += a + c, v = b.length, k = ""; v < g && (w = h.charAt(v), w !== o); )
+          w === t && (k += w, v++, w = h.charAt(v)), k += w, v++;
+        if (!(!k || h.charAt(v) !== o || h.charAt(v + 1) !== l)) {
+          if (m)
+            return !0;
+          for (C = k, b += k + o + l, v = b.length; v < g && (w = h.charAt(v), !(w !== n && w !== i)); )
+            b += w, v++;
+          for (E.column += b.length, E.offset += b.length, k = "", T = "", O = ""; v < g; ) {
+            if (w = h.charAt(v), w === s) {
+              for (O = w, v++; v < g && (w = h.charAt(v), w === s); )
+                O += w, v++;
+              for (k += O, O = ""; v < g && (w = h.charAt(v), w === i); )
+                O += w, v++;
+              if (O.length === 0)
+                break;
+              k += O;
+            }
+            k && (T += k, k = ""), T += w, v++;
+          }
+          return b += T, T = T.replace(u, function(x) {
+            return p[A] = (p[A] || 0) + x.length, A++, "";
+          }), S = d(b), R = y.enterBlock(), T = y.tokenizeBlock(T, E), R(), S({
+            type: "footnoteDefinition",
+            identifier: r(C),
+            label: C,
+            children: T
+          });
+        }
+      }
+    }
+  }
+  return ct;
+}
+var lt, Pi;
+function iu() {
+  if (Pi)
+    return lt;
+  Pi = 1;
+  var e = se(), r = bn();
+  lt = y;
+  var t = '"', s = "'", n = "\\", i = `
+`, a = "	", o = " ", c = "[", l = "]", u = "(", f = ")", d = ":", h = "<", m = ">";
+  function y(g, b, E) {
+    for (var A = this, T = A.options.commonmark, k = 0, O = b.length, w = "", C, S, R, x, I, N, _, H; k < O && (x = b.charAt(k), !(x !== o && x !== a)); )
+      w += x, k++;
+    if (x = b.charAt(k), x === c) {
+      for (k++, w += x, R = ""; k < O && (x = b.charAt(k), x !== l); )
+        x === n && (R += x, k++, x = b.charAt(k)), R += x, k++;
+      if (!(!R || b.charAt(k) !== l || b.charAt(k + 1) !== d)) {
+        for (N = R, w += R + l + d, k = w.length, R = ""; k < O && (x = b.charAt(k), !(x !== a && x !== o && x !== i)); )
+          w += x, k++;
+        if (x = b.charAt(k), R = "", C = w, x === h) {
+          for (k++; k < O && (x = b.charAt(k), !!p(x)); )
+            R += x, k++;
+          if (x = b.charAt(k), x === p.delimiter)
+            w += h + R + x, k++;
+          else {
+            if (T)
+              return;
+            k -= R.length + 1, R = "";
+          }
+        }
+        if (!R) {
+          for (; k < O && (x = b.charAt(k), !!v(x)); )
+            R += x, k++;
+          w += R;
+        }
+        if (R) {
+          for (_ = R, R = ""; k < O && (x = b.charAt(k), !(x !== a && x !== o && x !== i)); )
+            R += x, k++;
+          if (x = b.charAt(k), I = null, x === t ? I = t : x === s ? I = s : x === u && (I = f), !I)
+            R = "", k = w.length;
+          else if (R) {
+            for (w += R + x, k = w.length, R = ""; k < O && (x = b.charAt(k), x !== I); ) {
+              if (x === i) {
+                if (k++, x = b.charAt(k), x === i || x === I)
+                  return;
+                R += i;
+              }
+              R += x, k++;
+            }
+            if (x = b.charAt(k), x !== I)
+              return;
+            S = w, w += R + x, k++, H = R, R = "";
+          } else
+            return;
+          for (; k < O && (x = b.charAt(k), !(x !== a && x !== o)); )
+            w += x, k++;
+          if (x = b.charAt(k), !x || x === i)
+            return E ? !0 : (C = g(C).test().end, _ = A.decode.raw(A.unescape(_), C, { nonTerminated: !1 }), H && (S = g(S).test().end, H = A.decode.raw(A.unescape(H), S)), g(w)({
+              type: "definition",
+              identifier: r(N),
+              label: N,
+              title: H || null,
+              url: _
+            }));
+        }
+      }
+    }
+  }
+  function p(g) {
+    return g !== m && g !== c && g !== l;
+  }
+  p.delimiter = m;
+  function v(g) {
+    return g !== c && g !== l && !e(g);
+  }
+  return lt;
+}
+var ft, _i;
+function au() {
+  if (_i)
+    return ft;
+  _i = 1;
+  var e = se();
+  ft = h;
+  var r = "	", t = `
+`, s = " ", n = "-", i = ":", a = "\\", o = "|", c = 1, l = 2, u = "left", f = "center", d = "right";
+  function h(m, y, p) {
+    var v = this, g, b, E, A, T, k, O, w, C, S, R, x, I, N, _, H, P, M, U, B, q, Q;
+    if (v.options.gfm) {
+      for (g = 0, H = 0, k = y.length + 1, O = []; g < k; ) {
+        if (B = y.indexOf(t, g), q = y.indexOf(o, g + 1), B === -1 && (B = y.length), q === -1 || q > B) {
+          if (H < l)
+            return;
+          break;
+        }
+        O.push(y.slice(g, B)), H++, g = B + 1;
+      }
+      for (A = O.join(t), b = O.splice(1, 1)[0] || [], g = 0, k = b.length, H--, E = !1, R = []; g < k; ) {
+        if (C = b.charAt(g), C === o) {
+          if (S = null, E === !1) {
+            if (Q === !1)
+              return;
+          } else
+            R.push(E), E = !1;
+          Q = !1;
+        } else if (C === n)
+          S = !0, E = E || null;
+        else if (C === i)
+          E === u ? E = f : S && E === null ? E = d : E = u;
+        else if (!e(C))
+          return;
+        g++;
+      }
+      if (E !== !1 && R.push(E), !(R.length < c)) {
+        if (p)
+          return !0;
+        for (_ = -1, M = [], U = m(A).reset({ type: "table", align: R, children: M }); ++_ < H; ) {
+          for (P = O[_], T = { type: "tableRow", children: [] }, _ && m(t), m(P).reset(T, U), k = P.length + 1, g = 0, w = "", x = "", I = !0; g < k; ) {
+            if (C = P.charAt(g), C === r || C === s) {
+              x ? w += C : m(C), g++;
+              continue;
+            }
+            C === "" || C === o ? I ? m(C) : ((x || C) && !I && (A = x, w.length > 1 && (C ? (A += w.slice(0, w.length - 1), w = w.charAt(w.length - 1)) : (A += w, w = "")), N = m.now(), m(A)(
+              { type: "tableCell", children: v.tokenizeInline(x, N) },
+              T
+            )), m(w + C), w = "", x = "") : (w && (x += w, w = ""), x += C, C === a && g !== k - 2 && (x += P.charAt(g + 1), g++)), I = !1, g++;
+          }
+          _ || m(t + b);
+        }
+        return U;
+      }
+    }
+  }
+  return ft;
+}
+var ut, Bi;
+function su() {
+  if (Bi)
+    return ut;
+  Bi = 1;
+  var e = He(), r = yr, t = Ka(), s = yn();
+  ut = c;
+  var n = "	", i = `
+`, a = " ", o = 4;
+  function c(l, u, f) {
+    for (var d = this, h = d.options, m = h.commonmark, y = h.gfm, p = d.blockTokenizers, v = d.interruptParagraph, g = u.indexOf(i), b = u.length, E, A, T, k, O; g < b; ) {
+      if (g === -1) {
+        g = b;
         break;
       }
-    } else if (closingFenceStart !== void 0) {
-      closingFenceStart = void 0;
-      closingFenceEnd = void 0;
-    }
-    index2++;
-  }
-  if (!found) {
-    return;
-  }
-  if (silent) {
-    return true;
-  }
-  index2 = openingFenceEnd;
-  length = closingFenceStart;
-  code = value.charCodeAt(index2);
-  next = value.charCodeAt(length - 1);
-  found = false;
-  if (length - index2 > 2 && (code === space$1 || code === lineFeed$1) && (next === space$1 || next === lineFeed$1)) {
-    index2++;
-    length--;
-    while (index2 < length) {
-      code = value.charCodeAt(index2);
-      if (code !== space$1 && code !== lineFeed$1) {
-        found = true;
+      if (u.charAt(g + 1) === i)
+        break;
+      if (m) {
+        for (k = 0, E = g + 1; E < b; ) {
+          if (T = u.charAt(E), T === n) {
+            k = o;
+            break;
+          } else if (T === a)
+            k++;
+          else
+            break;
+          E++;
+        }
+        if (k >= o && T !== i) {
+          g = u.indexOf(i, g + 1);
+          continue;
+        }
+      }
+      if (A = u.slice(g + 1), s(v, p, d, [l, A, !0]) || p.list.call(d, l, A, !0) && (d.inList || m || y && !r(e.left(A).charAt(0))))
+        break;
+      if (E = g, g = u.indexOf(i, g + 1), g !== -1 && e(u.slice(E, g)) === "") {
+        g = E;
         break;
       }
-      index2++;
     }
-    if (found === true) {
-      openingFenceEnd++;
-      closingFenceStart--;
+    return A = u.slice(0, g), e(A) === "" ? (l(A), null) : f ? !0 : (O = l.now(), A = t(A), l(A)({
+      type: "paragraph",
+      children: d.tokenizeInline(A, O)
+    }));
+  }
+  return ut;
+}
+var dt, Ni;
+function ou() {
+  if (Ni)
+    return dt;
+  Ni = 1, dt = e;
+  function e(r, t) {
+    return r.indexOf("\\", t);
+  }
+  return dt;
+}
+var ht, Fi;
+function cu() {
+  if (Fi)
+    return ht;
+  Fi = 1;
+  var e = ou();
+  ht = s, s.locator = e;
+  var r = `
+`, t = "\\";
+  function s(n, i, a) {
+    var o = this, c, l;
+    if (i.charAt(0) === t && (c = i.charAt(1), o.escape.indexOf(c) !== -1))
+      return a ? !0 : (c === r ? l = { type: "break" } : l = { type: "text", value: c }, n(t + c)(l));
+  }
+  return ht;
+}
+var pt, Li;
+function Ja() {
+  if (Li)
+    return pt;
+  Li = 1, pt = e;
+  function e(r, t) {
+    return r.indexOf("<", t);
+  }
+  return pt;
+}
+var vt, qi;
+function lu() {
+  if (qi)
+    return vt;
+  qi = 1;
+  var e = se(), r = hn, t = Ja();
+  vt = l, l.locator = t, l.notInLink = !0;
+  var s = "<", n = ">", i = "@", a = "/", o = "mailto:", c = o.length;
+  function l(u, f, d) {
+    var h = this, m = "", y = f.length, p = 0, v = "", g = !1, b = "", E, A, T, k, O;
+    if (f.charAt(0) === s) {
+      for (p++, m = s; p < y && (E = f.charAt(p), !(e(E) || E === n || E === i || E === ":" && f.charAt(p + 1) === a)); )
+        v += E, p++;
+      if (v) {
+        if (b += v, v = "", E = f.charAt(p), b += E, p++, E === i)
+          g = !0;
+        else {
+          if (E !== ":" || f.charAt(p + 1) !== a)
+            return;
+          b += a, p++;
+        }
+        for (; p < y && (E = f.charAt(p), !(e(E) || E === n)); )
+          v += E, p++;
+        if (E = f.charAt(p), !(!v || E !== n))
+          return d ? !0 : (b += v, T = b, m += b + E, A = u.now(), A.column++, A.offset++, g && (b.slice(0, c).toLowerCase() === o ? (T = T.slice(c), A.column += c, A.offset += c) : b = o + b), k = h.inlineTokenizers, h.inlineTokenizers = { text: k.text }, O = h.enterLink(), T = h.tokenizeInline(T, A), h.inlineTokenizers = k, O(), u(m)({
+            type: "link",
+            title: null,
+            url: r(b, { nonTerminated: !1 }),
+            children: T
+          }));
+      }
     }
   }
-  return eat(value.slice(0, closingFenceEnd))({
-    type: "inlineCode",
-    value: value.slice(openingFenceEnd, closingFenceStart)
-  });
+  return vt;
 }
-var _break$1 = locate$1;
-function locate$1(value, fromIndex) {
-  var index2 = value.indexOf("\n", fromIndex);
-  while (index2 > fromIndex) {
-    if (value.charAt(index2 - 1) !== " ") {
-      break;
-    }
-    index2--;
+var gt, Hi;
+function fu() {
+  if (Hi)
+    return gt;
+  Hi = 1, gt = r;
+  var e = ["https://", "http://", "mailto:"];
+  function r(t, s) {
+    var n = e.length, i = -1, a = -1, o;
+    if (!this.options.gfm)
+      return -1;
+    for (; ++i < n; )
+      o = t.indexOf(e[i], s), o !== -1 && (o < a || a === -1) && (a = o);
+    return a;
   }
-  return index2;
+  return gt;
 }
-var locate = _break$1;
-var _break = hardBreak;
-hardBreak.locator = locate;
-var space = " ";
-var lineFeed = "\n";
-var minBreakLength = 2;
-function hardBreak(eat, value, silent) {
-  var length = value.length;
-  var index2 = -1;
-  var queue = "";
-  var character;
-  while (++index2 < length) {
-    character = value.charAt(index2);
-    if (character === lineFeed) {
-      if (index2 < minBreakLength) {
+var mt, Mi;
+function uu() {
+  if (Mi)
+    return mt;
+  Mi = 1;
+  var e = hn, r = se(), t = fu();
+  mt = E, E.locator = t, E.notInLink = !0;
+  var s = '"', n = "'", i = "(", a = ")", o = ",", c = ".", l = ":", u = ";", f = "<", d = "@", h = "[", m = "]", y = "http://", p = "https://", v = "mailto:", g = [y, p, v], b = g.length;
+  function E(A, T, k) {
+    var O = this, w, C, S, R, x, I, N, _, H, P, M, U, B;
+    if (O.options.gfm) {
+      for (w = "", R = -1; ++R < b; )
+        if (I = g[R], N = T.slice(0, I.length), N.toLowerCase() === I) {
+          w = N;
+          break;
+        }
+      if (w) {
+        for (R = w.length, _ = T.length, H = "", P = 0; R < _ && (S = T.charAt(R), !(r(S) || S === f || (S === c || S === o || S === l || S === u || S === s || S === n || S === a || S === m) && (M = T.charAt(R + 1), !M || r(M)) || ((S === i || S === h) && P++, (S === a || S === m) && (P--, P < 0)))); )
+          H += S, R++;
+        if (H) {
+          if (w += H, C = w, I === v) {
+            if (x = H.indexOf(d), x === -1 || x === _ - 1)
+              return;
+            C = C.slice(v.length);
+          }
+          return k ? !0 : (B = O.enterLink(), U = O.inlineTokenizers, O.inlineTokenizers = { text: U.text }, C = O.tokenizeInline(C, A.now()), O.inlineTokenizers = U, B(), A(w)({
+            type: "link",
+            title: null,
+            url: e(w, { nonTerminated: !1 }),
+            children: C
+          }));
+        }
+      }
+    }
+  }
+  return mt;
+}
+var yt, $i;
+function du() {
+  if ($i)
+    return yt;
+  $i = 1;
+  var e = Ma(), r = Ja(), t = Ya().tag;
+  yt = l, l.locator = r;
+  var s = "<", n = "?", i = "!", a = "/", o = /^<a /i, c = /^<\/a>/i;
+  function l(u, f, d) {
+    var h = this, m = f.length, y, p;
+    if (!(f.charAt(0) !== s || m < 3) && (y = f.charAt(1), !(!e(y) && y !== n && y !== i && y !== a) && (p = f.match(t), !!p)))
+      return d ? !0 : (p = p[0], !h.inLink && o.test(p) ? h.inLink = !0 : h.inLink && c.test(p) && (h.inLink = !1), u(p)({ type: "html", value: p }));
+  }
+  return yt;
+}
+var bt, Ui;
+function Xa() {
+  if (Ui)
+    return bt;
+  Ui = 1, bt = e;
+  function e(r, t) {
+    var s = r.indexOf("[", t), n = r.indexOf("![", t);
+    return n === -1 || s < n ? s : n;
+  }
+  return bt;
+}
+var At, Vi;
+function hu() {
+  if (Vi)
+    return At;
+  Vi = 1;
+  var e = se(), r = Xa();
+  At = m, m.locator = r;
+  var t = `
+`, s = "!", n = '"', i = "'", a = "(", o = ")", c = "<", l = ">", u = "[", f = "\\", d = "]", h = "`";
+  function m(y, p, v) {
+    var g = this, b = "", E = 0, A = p.charAt(0), T = g.options.pedantic, k = g.options.commonmark, O = g.options.gfm, w, C, S, R, x, I, N, _, H, P, M, U, B, q, Q, F, Y, K;
+    if (A === s && (_ = !0, b = A, A = p.charAt(++E)), A === u && !(!_ && g.inLink)) {
+      for (b += A, q = "", E++, M = p.length, F = y.now(), B = 0, F.column += E, F.offset += E; E < M; ) {
+        if (A = p.charAt(E), I = A, A === h) {
+          for (C = 1; p.charAt(E + 1) === h; )
+            I += A, E++, C++;
+          S ? C >= S && (S = 0) : S = C;
+        } else if (A === f)
+          E++, I += p.charAt(E);
+        else if ((!S || O) && A === u)
+          B++;
+        else if ((!S || O) && A === d)
+          if (B)
+            B--;
+          else {
+            if (!T)
+              for (; E < M && (A = p.charAt(E + 1), !!e(A)); )
+                I += A, E++;
+            if (p.charAt(E + 1) !== a)
+              return;
+            I += a, w = !0, E++;
+            break;
+          }
+        q += I, I = "", E++;
+      }
+      if (w) {
+        for (H = q, b += q + I, E++; E < M && (A = p.charAt(E), !!e(A)); )
+          b += A, E++;
+        if (A = p.charAt(E), q = "", R = b, A === c) {
+          for (E++, R += c; E < M && (A = p.charAt(E), A !== l); ) {
+            if (k && A === t)
+              return;
+            q += A, E++;
+          }
+          if (p.charAt(E) !== l)
+            return;
+          b += c + q + l, Q = q, E++;
+        } else {
+          for (A = null, I = ""; E < M && (A = p.charAt(E), !(I && (A === n || A === i || k && A === a))); ) {
+            if (e(A)) {
+              if (!T)
+                break;
+              I += A;
+            } else {
+              if (A === a)
+                B++;
+              else if (A === o) {
+                if (B === 0)
+                  break;
+                B--;
+              }
+              q += I, I = "", A === f && (q += f, A = p.charAt(++E)), q += A;
+            }
+            E++;
+          }
+          b += q, Q = q, E = b.length;
+        }
+        for (q = ""; E < M && (A = p.charAt(E), !!e(A)); )
+          q += A, E++;
+        if (A = p.charAt(E), b += q, q && (A === n || A === i || k && A === a))
+          if (E++, b += A, q = "", P = A === a ? o : A, x = b, k) {
+            for (; E < M && (A = p.charAt(E), A !== P); )
+              A === f && (q += f, A = p.charAt(++E)), E++, q += A;
+            if (A = p.charAt(E), A !== P)
+              return;
+            for (U = q, b += q + A, E++; E < M && (A = p.charAt(E), !!e(A)); )
+              b += A, E++;
+          } else
+            for (I = ""; E < M; ) {
+              if (A = p.charAt(E), A === P)
+                N && (q += P + I, I = ""), N = !0;
+              else if (!N)
+                q += A;
+              else if (A === o) {
+                b += q + P + I, U = q;
+                break;
+              } else
+                e(A) ? I += A : (q += P + I + A, I = "", N = !1);
+              E++;
+            }
+        if (p.charAt(E) === o)
+          return v ? !0 : (b += o, Q = g.decode.raw(g.unescape(Q), y(R).test().end, {
+            nonTerminated: !1
+          }), U && (x = y(x).test().end, U = g.decode.raw(g.unescape(U), x)), K = {
+            type: _ ? "image" : "link",
+            title: U || null,
+            url: Q
+          }, _ ? K.alt = g.decode.raw(g.unescape(H), F) || null : (Y = g.enterLink(), K.children = g.tokenizeInline(H, F), Y()), y(b)(K));
+      }
+    }
+  }
+  return At;
+}
+var wt, ji;
+function pu() {
+  if (ji)
+    return wt;
+  ji = 1;
+  var e = se(), r = Xa(), t = bn();
+  wt = y, y.locator = r;
+  var s = "link", n = "image", i = "footnote", a = "shortcut", o = "collapsed", c = "full", l = " ", u = "!", f = "[", d = "\\", h = "]", m = "^";
+  function y(p, v, g) {
+    var b = this, E = b.options.commonmark, A = b.options.footnotes, T = v.charAt(0), k = 0, O = v.length, w = "", C = "", S = s, R = a, x, I, N, _, H, P, M, U;
+    if (T === u && (S = n, C = T, T = v.charAt(++k)), T === f) {
+      if (k++, C += T, P = "", A && v.charAt(k) === m) {
+        if (S === n)
+          return;
+        C += m, k++, S = i;
+      }
+      for (U = 0; k < O; ) {
+        if (T = v.charAt(k), T === f)
+          M = !0, U++;
+        else if (T === h) {
+          if (!U)
+            break;
+          U--;
+        }
+        T === d && (P += d, T = v.charAt(++k)), P += T, k++;
+      }
+      if (w = P, x = P, T = v.charAt(k), T === h) {
+        if (k++, w += T, P = "", !E)
+          for (; k < O && (T = v.charAt(k), !!e(T)); )
+            P += T, k++;
+        if (T = v.charAt(k), S !== i && T === f && (!A || v.charAt(k + 1) !== m)) {
+          for (I = "", P += T, k++; k < O && (T = v.charAt(k), !(T === f || T === h)); )
+            T === d && (I += d, T = v.charAt(++k)), I += T, k++;
+          T = v.charAt(k), T === h ? (R = I ? c : o, P += I + T, k++) : I = "", w += P, P = "";
+        } else {
+          if (!x)
+            return;
+          I = x;
+        }
+        if (!(R !== c && M))
+          return w = C + w, S === s && b.inLink ? null : g ? !0 : S === i && x.indexOf(l) !== -1 ? p(w)({
+            type: i,
+            children: this.tokenizeInline(x, p.now())
+          }) : (N = p.now(), N.column += C.length, N.offset += C.length, I = R === c ? I : x, _ = {
+            type: S + "Reference",
+            identifier: t(I),
+            label: I
+          }, (S === s || S === n) && (_.referenceType = R), S === s ? (H = b.enterLink(), _.children = b.tokenizeInline(x, N), H()) : S === n && (_.alt = b.decode.raw(b.unescape(x), N) || null), p(w)(_));
+      }
+    }
+  }
+  return wt;
+}
+var Et, Wi;
+function vu() {
+  if (Wi)
+    return Et;
+  Wi = 1, Et = e;
+  function e(r, t) {
+    var s = r.indexOf("**", t), n = r.indexOf("__", t);
+    return n === -1 ? s : s === -1 || n < s ? n : s;
+  }
+  return Et;
+}
+var Tt, zi;
+function gu() {
+  if (zi)
+    return Tt;
+  zi = 1;
+  var e = He(), r = se(), t = vu();
+  Tt = a, a.locator = t;
+  var s = "\\", n = "*", i = "_";
+  function a(o, c, l) {
+    var u = this, f = 0, d = c.charAt(f), h, m, y, p, v, g, b;
+    if (!(d !== n && d !== i || c.charAt(++f) !== d) && (m = u.options.pedantic, y = d, v = y + y, g = c.length, f++, p = "", d = "", !(m && r(c.charAt(f)))))
+      for (; f < g; ) {
+        if (b = d, d = c.charAt(f), d === y && c.charAt(f + 1) === y && (!m || !r(b)) && (d = c.charAt(f + 2), d !== y))
+          return e(p) ? l ? !0 : (h = o.now(), h.column += 2, h.offset += 2, o(v + p + v)({
+            type: "strong",
+            children: u.tokenizeInline(p, h)
+          })) : void 0;
+        !m && d === s && (p += d, d = c.charAt(++f)), p += d, f++;
+      }
+  }
+  return Tt;
+}
+var kt, Di;
+function mu() {
+  if (Di)
+    return kt;
+  Di = 1, kt = t;
+  var e = String.fromCharCode, r = /\w/;
+  function t(s) {
+    return r.test(
+      typeof s == "number" ? e(s) : s.charAt(0)
+    );
+  }
+  return kt;
+}
+var xt, Gi;
+function yu() {
+  if (Gi)
+    return xt;
+  Gi = 1, xt = e;
+  function e(r, t) {
+    var s = r.indexOf("*", t), n = r.indexOf("_", t);
+    return n === -1 ? s : s === -1 || n < s ? n : s;
+  }
+  return xt;
+}
+var St, Ki;
+function bu() {
+  if (Ki)
+    return St;
+  Ki = 1;
+  var e = He(), r = mu(), t = se(), s = yu();
+  St = o, o.locator = s;
+  var n = "*", i = "_", a = "\\";
+  function o(c, l, u) {
+    var f = this, d = 0, h = l.charAt(d), m, y, p, v, g, b, E;
+    if (!(h !== n && h !== i) && (y = f.options.pedantic, g = h, p = h, b = l.length, d++, v = "", h = "", !(y && t(l.charAt(d)))))
+      for (; d < b; ) {
+        if (E = h, h = l.charAt(d), h === p && (!y || !t(E))) {
+          if (h = l.charAt(++d), h !== p) {
+            if (!e(v) || E === p)
+              return;
+            if (!y && p === i && r(h)) {
+              v += p;
+              continue;
+            }
+            return u ? !0 : (m = c.now(), m.column++, m.offset++, c(g + v + p)({
+              type: "emphasis",
+              children: f.tokenizeInline(v, m)
+            }));
+          }
+          v += p;
+        }
+        !y && h === a && (v += h, h = l.charAt(++d)), v += h, d++;
+      }
+  }
+  return St;
+}
+var Ct, Qi;
+function Au() {
+  if (Qi)
+    return Ct;
+  Qi = 1, Ct = e;
+  function e(r, t) {
+    return r.indexOf("~~", t);
+  }
+  return Ct;
+}
+var Ot, Yi;
+function wu() {
+  if (Yi)
+    return Ot;
+  Yi = 1;
+  var e = se(), r = Au();
+  Ot = n, n.locator = r;
+  var t = "~", s = "~~";
+  function n(i, a, o) {
+    var c = this, l = "", u = "", f = "", d = "", h, m, y;
+    if (!(!c.options.gfm || a.charAt(0) !== t || a.charAt(1) !== t || e(a.charAt(2))))
+      for (h = 1, m = a.length, y = i.now(), y.column += 2, y.offset += 2; ++h < m; ) {
+        if (l = a.charAt(h), l === t && u === t && (!f || !e(f)))
+          return o ? !0 : i(s + d + s)({
+            type: "delete",
+            children: c.tokenizeInline(d, y)
+          });
+        d += u, f = u, u = l;
+      }
+  }
+  return Ot;
+}
+var Rt, Ji;
+function Eu() {
+  if (Ji)
+    return Rt;
+  Ji = 1, Rt = e;
+  function e(r, t) {
+    return r.indexOf("`", t);
+  }
+  return Rt;
+}
+var It, Xi;
+function Tu() {
+  if (Xi)
+    return It;
+  Xi = 1;
+  var e = Eu();
+  It = n, n.locator = e;
+  var r = 10, t = 32, s = 96;
+  function n(i, a, o) {
+    for (var c = a.length, l = 0, u, f, d, h, m, y; l < c && a.charCodeAt(l) === s; )
+      l++;
+    if (!(l === 0 || l === c)) {
+      for (u = l, m = a.charCodeAt(l); l < c; ) {
+        if (h = m, m = a.charCodeAt(l + 1), h === s) {
+          if (f === void 0 && (f = l), d = l + 1, m !== s && d - f === u) {
+            y = !0;
+            break;
+          }
+        } else
+          f !== void 0 && (f = void 0, d = void 0);
+        l++;
+      }
+      if (y) {
+        if (o)
+          return !0;
+        if (l = u, c = f, h = a.charCodeAt(l), m = a.charCodeAt(c - 1), y = !1, c - l > 2 && (h === t || h === r) && (m === t || m === r)) {
+          for (l++, c--; l < c; ) {
+            if (h = a.charCodeAt(l), h !== t && h !== r) {
+              y = !0;
+              break;
+            }
+            l++;
+          }
+          y === !0 && (u++, f--);
+        }
+        return i(a.slice(0, d))({
+          type: "inlineCode",
+          value: a.slice(u, f)
+        });
+      }
+    }
+  }
+  return It;
+}
+var Pt, Zi;
+function ku() {
+  if (Zi)
+    return Pt;
+  Zi = 1, Pt = e;
+  function e(r, t) {
+    for (var s = r.indexOf(`
+`, t); s > t && r.charAt(s - 1) === " "; )
+      s--;
+    return s;
+  }
+  return Pt;
+}
+var _t, ea;
+function xu() {
+  if (ea)
+    return _t;
+  ea = 1;
+  var e = ku();
+  _t = n, n.locator = e;
+  var r = " ", t = `
+`, s = 2;
+  function n(i, a, o) {
+    for (var c = a.length, l = -1, u = "", f; ++l < c; ) {
+      if (f = a.charAt(l), f === t)
+        return l < s ? void 0 : o ? !0 : (u += f, i(u)({ type: "break" }));
+      if (f !== r)
         return;
-      }
-      if (silent) {
-        return true;
-      }
-      queue += character;
-      return eat(queue)({ type: "break" });
+      u += f;
     }
-    if (character !== space) {
-      return;
-    }
-    queue += character;
   }
+  return _t;
 }
-var text_1 = text;
-function text(eat, value, silent) {
-  var self = this;
-  var methods;
-  var tokenizers;
-  var index2;
-  var length;
-  var subvalue;
-  var position2;
-  var tokenizer2;
-  var name2;
-  var min;
-  var now;
-  if (silent) {
-    return true;
-  }
-  methods = self.inlineMethods;
-  length = methods.length;
-  tokenizers = self.inlineTokenizers;
-  index2 = -1;
-  min = value.length;
-  while (++index2 < length) {
-    name2 = methods[index2];
-    if (name2 === "text" || !tokenizers[name2]) {
-      continue;
-    }
-    tokenizer2 = tokenizers[name2].locator;
-    if (!tokenizer2) {
-      eat.file.fail("Missing locator: `" + name2 + "`");
-    }
-    position2 = tokenizer2.call(self, value, 1);
-    if (position2 !== -1 && position2 < min) {
-      min = position2;
+var Bt, ra;
+function Su() {
+  if (ra)
+    return Bt;
+  ra = 1, Bt = e;
+  function e(r, t, s) {
+    var n = this, i, a, o, c, l, u, f, d, h, m;
+    if (s)
+      return !0;
+    for (i = n.inlineMethods, c = i.length, a = n.inlineTokenizers, o = -1, h = t.length; ++o < c; )
+      d = i[o], !(d === "text" || !a[d]) && (f = a[d].locator, f || r.file.fail("Missing locator: `" + d + "`"), u = f.call(n, t, 1), u !== -1 && u < h && (h = u));
+    l = t.slice(0, h), m = r.now(), n.decode(l, m, y);
+    function y(p, v, g) {
+      r(g || p)({ type: "text", value: p });
     }
   }
-  subvalue = value.slice(0, min);
-  now = eat.now();
-  self.decode(subvalue, now, handler);
-  function handler(content, position3, source2) {
-    eat(source2 || content)({ type: "text", value: content });
-  }
+  return Bt;
 }
-var xtend$2 = immutable;
-var toggle = stateToggle;
-var vfileLocation = vfileLocation$1;
-var unescape$1 = _unescape;
-var decode = decode$3;
-var tokenizer = tokenizer$1;
-var parser$1 = Parser$1;
-function Parser$1(doc, file) {
-  this.file = file;
-  this.offset = {};
-  this.options = xtend$2(this.options);
-  this.setOptions({});
-  this.inList = false;
-  this.inBlock = false;
-  this.inLink = false;
-  this.atStart = true;
-  this.toOffset = vfileLocation(file).toOffset;
-  this.unescape = unescape$1(this, "escape");
-  this.decode = decode(this);
+var Cu = Ce, Ar = Do, Ou = Ko, Ru = Zo, Iu = _f, An = Nf, Pu = Za;
+function Za(e, r) {
+  this.file = r, this.offset = {}, this.options = Cu(this.options), this.setOptions({}), this.inList = !1, this.inBlock = !1, this.inLink = !1, this.atStart = !0, this.toOffset = Ou(r).toOffset, this.unescape = Ru(this, "escape"), this.decode = Iu(this);
 }
-var proto$1 = Parser$1.prototype;
-proto$1.setOptions = setOptions_1;
-proto$1.parse = parse_1;
-proto$1.options = defaults$1;
-proto$1.exitStart = toggle("atStart", true);
-proto$1.enterList = toggle("inList", false);
-proto$1.enterLink = toggle("inLink", false);
-proto$1.enterBlock = toggle("inBlock", false);
-proto$1.interruptParagraph = [
+var G = Za.prototype;
+G.setOptions = $f();
+G.parse = zf();
+G.options = Ga();
+G.exitStart = Ar("atStart", !0);
+G.enterList = Ar("inList", !1);
+G.enterLink = Ar("inLink", !1);
+G.enterBlock = Ar("inBlock", !1);
+G.interruptParagraph = [
   ["thematicBreak"],
   ["atxHeading"],
   ["fencedCode"],
   ["blockquote"],
   ["html"],
-  ["setextHeading", { commonmark: false }],
-  ["definition", { commonmark: false }],
-  ["footnote", { commonmark: false }]
+  ["setextHeading", { commonmark: !1 }],
+  ["definition", { commonmark: !1 }],
+  ["footnote", { commonmark: !1 }]
 ];
-proto$1.interruptList = [
-  ["atxHeading", { pedantic: false }],
-  ["fencedCode", { pedantic: false }],
-  ["thematicBreak", { pedantic: false }],
-  ["definition", { commonmark: false }],
-  ["footnote", { commonmark: false }]
+G.interruptList = [
+  ["atxHeading", { pedantic: !1 }],
+  ["fencedCode", { pedantic: !1 }],
+  ["thematicBreak", { pedantic: !1 }],
+  ["definition", { commonmark: !1 }],
+  ["footnote", { commonmark: !1 }]
 ];
-proto$1.interruptBlockquote = [
-  ["indentedCode", { commonmark: true }],
-  ["fencedCode", { commonmark: true }],
-  ["atxHeading", { commonmark: true }],
-  ["setextHeading", { commonmark: true }],
-  ["thematicBreak", { commonmark: true }],
-  ["html", { commonmark: true }],
-  ["list", { commonmark: true }],
-  ["definition", { commonmark: false }],
-  ["footnote", { commonmark: false }]
+G.interruptBlockquote = [
+  ["indentedCode", { commonmark: !0 }],
+  ["fencedCode", { commonmark: !0 }],
+  ["atxHeading", { commonmark: !0 }],
+  ["setextHeading", { commonmark: !0 }],
+  ["thematicBreak", { commonmark: !0 }],
+  ["html", { commonmark: !0 }],
+  ["list", { commonmark: !0 }],
+  ["definition", { commonmark: !1 }],
+  ["footnote", { commonmark: !1 }]
 ];
-proto$1.blockTokenizers = {
-  newline: newline_1,
-  indentedCode: codeIndented,
-  fencedCode: codeFenced,
-  blockquote: blockquote_1,
-  atxHeading: headingAtx,
-  thematicBreak: thematicBreak_1,
-  list: list_1,
-  setextHeading: headingSetext,
-  html: htmlBlock,
-  footnote: footnoteDefinition_1,
-  definition: definition_1,
-  table: table_1,
-  paragraph: paragraph_1
+G.blockTokenizers = {
+  newline: Df(),
+  indentedCode: Gf(),
+  fencedCode: Kf(),
+  blockquote: Qf(),
+  atxHeading: Yf(),
+  thematicBreak: Jf(),
+  list: Zf(),
+  setextHeading: eu(),
+  html: ru(),
+  footnote: nu(),
+  definition: iu(),
+  table: au(),
+  paragraph: su()
 };
-proto$1.inlineTokenizers = {
-  escape: _escape,
-  autoLink: autoLink_1,
-  url: url_1,
-  html: htmlInline,
-  link: link_1,
-  reference: reference_1,
-  strong: strong_1,
-  emphasis: emphasis_1,
-  deletion: _delete,
-  code: codeInline,
-  break: _break,
-  text: text_1
+G.inlineTokenizers = {
+  escape: cu(),
+  autoLink: lu(),
+  url: uu(),
+  html: du(),
+  link: hu(),
+  reference: pu(),
+  strong: gu(),
+  emphasis: bu(),
+  deletion: wu(),
+  code: Tu(),
+  break: xu(),
+  text: Su()
 };
-proto$1.blockMethods = keys(proto$1.blockTokenizers);
-proto$1.inlineMethods = keys(proto$1.inlineTokenizers);
-proto$1.tokenizeBlock = tokenizer("block");
-proto$1.tokenizeInline = tokenizer("inline");
-proto$1.tokenizeFactory = tokenizer;
-function keys(value) {
-  var result = [];
-  var key;
-  for (key in value) {
-    result.push(key);
-  }
-  return result;
+G.blockMethods = es(G.blockTokenizers);
+G.inlineMethods = es(G.inlineTokenizers);
+G.tokenizeBlock = An("block");
+G.tokenizeInline = An("inline");
+G.tokenizeFactory = An;
+function es(e) {
+  var r = [], t;
+  for (t in e)
+    r.push(t);
+  return r;
 }
-var unherit = unherit_1;
-var xtend$1 = immutable;
-var Parser = parser$1;
-var remarkParse = parse$3;
-parse$3.Parser = Parser;
-function parse$3(options) {
-  var settings = this.data("settings");
-  var Local = unherit(Parser);
-  Local.prototype.options = xtend$1(Local.prototype.options, settings, options);
-  this.Parser = Local;
+var _u = Wo, Bu = Ce, rs = Pu, Nu = ts;
+ts.Parser = rs;
+function ts(e) {
+  var r = this.data("settings"), t = _u(rs);
+  t.prototype.options = Bu(t.prototype.options, r, e), this.Parser = t;
 }
-var format = { exports: {} };
-(function(module) {
+const Fu = /* @__PURE__ */ gr(Nu);
+var ns = { exports: {} };
+(function(e) {
   (function() {
-    var namespace;
-    {
-      namespace = module.exports = format3;
+    var r;
+    r = e.exports = n, r.format = n, r.vsprintf = s, typeof console < "u" && typeof console.log == "function" && (r.printf = t);
+    function t() {
+      console.log(n.apply(null, arguments));
     }
-    namespace.format = format3;
-    namespace.vsprintf = vsprintf;
-    if (typeof console !== "undefined" && typeof console.log === "function") {
-      namespace.printf = printf;
+    function s(i, a) {
+      return n.apply(null, [i].concat(a));
     }
-    function printf() {
-      console.log(format3.apply(null, arguments));
-    }
-    function vsprintf(fmt, replacements) {
-      return format3.apply(null, [fmt].concat(replacements));
-    }
-    function format3(fmt) {
-      var argIndex = 1, args = [].slice.call(arguments), i = 0, n = fmt.length, result = "", c, escaped = false, arg, tmp, leadingZero = false, precision, nextArg = function() {
-        return args[argIndex++];
-      }, slurpNumber = function() {
-        var digits = "";
-        while (/\d/.test(fmt[i])) {
-          digits += fmt[i++];
-          c = fmt[i];
-        }
-        return digits.length > 0 ? parseInt(digits) : null;
-      };
-      for (; i < n; ++i) {
-        c = fmt[i];
-        if (escaped) {
-          escaped = false;
-          if (c == ".") {
-            leadingZero = false;
-            c = fmt[++i];
-          } else if (c == "0" && fmt[i + 1] == ".") {
-            leadingZero = true;
-            i += 2;
-            c = fmt[i];
-          } else {
-            leadingZero = true;
-          }
-          precision = slurpNumber();
-          switch (c) {
+    function n(i) {
+      for (var a = 1, o = [].slice.call(arguments), c = 0, l = i.length, u = "", f, d = !1, h, m, y = !1, p, v = function() {
+        return o[a++];
+      }, g = function() {
+        for (var b = ""; /\d/.test(i[c]); )
+          b += i[c++], f = i[c];
+        return b.length > 0 ? parseInt(b) : null;
+      }; c < l; ++c)
+        if (f = i[c], d)
+          switch (d = !1, f == "." ? (y = !1, f = i[++c]) : f == "0" && i[c + 1] == "." ? (y = !0, c += 2, f = i[c]) : y = !0, p = g(), f) {
             case "b":
-              result += parseInt(nextArg(), 10).toString(2);
+              u += parseInt(v(), 10).toString(2);
               break;
             case "c":
-              arg = nextArg();
-              if (typeof arg === "string" || arg instanceof String)
-                result += arg;
-              else
-                result += String.fromCharCode(parseInt(arg, 10));
+              h = v(), typeof h == "string" || h instanceof String ? u += h : u += String.fromCharCode(parseInt(h, 10));
               break;
             case "d":
-              result += parseInt(nextArg(), 10);
+              u += parseInt(v(), 10);
               break;
             case "f":
-              tmp = String(parseFloat(nextArg()).toFixed(precision || 6));
-              result += leadingZero ? tmp : tmp.replace(/^0/, "");
+              m = String(parseFloat(v()).toFixed(p || 6)), u += y ? m : m.replace(/^0/, "");
               break;
             case "j":
-              result += JSON.stringify(nextArg());
+              u += JSON.stringify(v());
               break;
             case "o":
-              result += "0" + parseInt(nextArg(), 10).toString(8);
+              u += "0" + parseInt(v(), 10).toString(8);
               break;
             case "s":
-              result += nextArg();
+              u += v();
               break;
             case "x":
-              result += "0x" + parseInt(nextArg(), 10).toString(16);
+              u += "0x" + parseInt(v(), 10).toString(16);
               break;
             case "X":
-              result += "0x" + parseInt(nextArg(), 10).toString(16).toUpperCase();
+              u += "0x" + parseInt(v(), 10).toString(16).toUpperCase();
               break;
             default:
-              result += c;
+              u += f;
               break;
           }
-        } else if (c === "%") {
-          escaped = true;
-        } else {
-          result += c;
-        }
-      }
-      return result;
+        else
+          f === "%" ? d = !0 : u += f;
+      return u;
     }
   })();
-})(format);
-var formatter = format.exports;
-var fault$1 = create$2(Error);
-var fault_1 = fault$1;
-fault$1.eval = create$2(EvalError);
-fault$1.range = create$2(RangeError);
-fault$1.reference = create$2(ReferenceError);
-fault$1.syntax = create$2(SyntaxError);
-fault$1.type = create$2(TypeError);
-fault$1.uri = create$2(URIError);
-fault$1.create = create$2;
-function create$2(EConstructor) {
-  FormattedError.displayName = EConstructor.displayName || EConstructor.name;
-  return FormattedError;
-  function FormattedError(format3) {
-    if (format3) {
-      format3 = formatter.apply(null, arguments);
-    }
-    return new EConstructor(format3);
+})(ns);
+var Lu = ns.exports, qu = Lu, Ee = Te(Error), Hu = Ee;
+Ee.eval = Te(EvalError);
+Ee.range = Te(RangeError);
+Ee.reference = Te(ReferenceError);
+Ee.syntax = Te(SyntaxError);
+Ee.type = Te(TypeError);
+Ee.uri = Te(URIError);
+Ee.create = Te;
+function Te(e) {
+  return r.displayName = e.displayName || e.name, r;
+  function r(t) {
+    return t && (t = qu.apply(null, arguments)), new e(t);
   }
 }
-var fault = fault_1;
-var matters_1 = matters$1;
-var own = {}.hasOwnProperty;
-var markers = {
+var ar = Hu, Mu = $u, sr = {}.hasOwnProperty, ta = {
   yaml: "-",
   toml: "+"
 };
-function matters$1(options) {
-  var results = [];
-  var index2 = -1;
-  var length;
-  if (typeof options === "string" || !("length" in options)) {
-    options = [options];
-  }
-  length = options.length;
-  while (++index2 < length) {
-    results[index2] = matter(options[index2]);
-  }
-  return results;
+function $u(e) {
+  var r = [], t = -1, s;
+  for ((typeof e == "string" || !("length" in e)) && (e = [e]), s = e.length; ++t < s; )
+    r[t] = Uu(e[t]);
+  return r;
 }
-function matter(option) {
-  var result = option;
-  if (typeof result === "string") {
-    if (!own.call(markers, result)) {
-      throw fault("Missing matter definition for `%s`", result);
-    }
-    result = { type: result, marker: markers[result] };
-  } else if (typeof result !== "object") {
-    throw fault("Expected matter to be an object, not `%j`", result);
-  }
-  if (!own.call(result, "type")) {
-    throw fault("Missing `type` in matter `%j`", result);
-  }
-  if (!own.call(result, "fence") && !own.call(result, "marker")) {
-    throw fault("Missing `marker` or `fence` in matter `%j`", result);
-  }
-  return result;
+function Uu(e) {
+  var r = e;
+  if (typeof r == "string") {
+    if (!sr.call(ta, r))
+      throw ar("Missing matter definition for `%s`", r);
+    r = { type: r, marker: ta[r] };
+  } else if (typeof r != "object")
+    throw ar("Expected matter to be an object, not `%j`", r);
+  if (!sr.call(r, "type"))
+    throw ar("Missing `type` in matter `%j`", r);
+  if (!sr.call(r, "fence") && !sr.call(r, "marker"))
+    throw ar("Missing `marker` or `fence` in matter `%j`", r);
+  return r;
 }
-var fence_1 = fence$2;
-function fence$2(matter2, prop) {
-  var marker;
-  if (matter2.marker) {
-    marker = pick(matter2.marker, prop);
-    return marker + marker + marker;
-  }
-  return pick(matter2.fence, prop);
+var is = Vu;
+function Vu(e, r) {
+  var t;
+  return e.marker ? (t = na(e.marker, r), t + t + t) : na(e.fence, r);
 }
-function pick(schema, prop) {
-  return typeof schema === "string" ? schema : schema[prop];
+function na(e, r) {
+  return typeof e == "string" ? e : e[r];
 }
-var fence$1 = fence_1;
-var parse$2 = create$1;
-function create$1(matter2) {
-  var name2 = matter2.type + "FrontMatter";
-  var open = fence$1(matter2, "open");
-  var close = fence$1(matter2, "close");
-  var newline2 = "\n";
-  var anywhere = matter2.anywhere;
-  frontmatter2.displayName = name2;
-  frontmatter2.onlyAtStart = typeof anywhere === "boolean" ? !anywhere : true;
-  return [name2, frontmatter2];
-  function frontmatter2(eat, value, silent) {
-    var index2 = open.length;
-    var offset;
-    if (value.slice(0, index2) !== open || value.charAt(index2) !== newline2) {
-      return;
-    }
-    offset = value.indexOf(close, index2);
-    while (offset !== -1 && value.charAt(offset - 1) !== newline2) {
-      index2 = offset + close.length;
-      offset = value.indexOf(close, index2);
-    }
-    if (offset !== -1) {
-      if (silent) {
-        return true;
-      }
-      return eat(value.slice(0, offset + close.length))({
-        type: matter2.type,
-        value: value.slice(open.length + 1, offset - 1)
-      });
+var ia = is, ju = Wu;
+function Wu(e) {
+  var r = e.type + "FrontMatter", t = ia(e, "open"), s = ia(e, "close"), n = `
+`, i = e.anywhere;
+  return a.displayName = r, a.onlyAtStart = typeof i == "boolean" ? !i : !0, [r, a];
+  function a(o, c, l) {
+    var u = t.length, f;
+    if (!(c.slice(0, u) !== t || c.charAt(u) !== n)) {
+      for (f = c.indexOf(s, u); f !== -1 && c.charAt(f - 1) !== n; )
+        u = f + s.length, f = c.indexOf(s, u);
+      if (f !== -1)
+        return l ? !0 : o(c.slice(0, f + s.length))({
+          type: e.type,
+          value: c.slice(t.length + 1, f - 1)
+        });
     }
   }
 }
-var fence = fence_1;
-var compile$1 = create;
-function create(matter2) {
-  var type = matter2.type;
-  var open = fence(matter2, "open");
-  var close = fence(matter2, "close");
-  frontmatter2.displayName = type + "FrontMatter";
-  return [type, frontmatter2];
-  function frontmatter2(node) {
-    return open + (node.value ? "\n" + node.value : "") + "\n" + close;
+var aa = is, zu = Du;
+function Du(e) {
+  var r = e.type, t = aa(e, "open"), s = aa(e, "close");
+  return n.displayName = r + "FrontMatter", [r, n];
+  function n(i) {
+    return t + (i.value ? `
+` + i.value : "") + `
+` + s;
   }
 }
-var xtend = immutable;
-var matters = matters_1;
-var parse$1 = parse$2;
-var compile = compile$1;
-var remarkFrontmatter = frontmatter;
-function frontmatter(options) {
-  var parser2 = this.Parser;
-  var compiler = this.Compiler;
-  var config = matters(options || ["yaml"]);
-  if (isRemarkParser(parser2)) {
-    attachParser(parser2, config);
-  }
-  if (isRemarkCompiler(compiler)) {
-    attachCompiler(compiler, config);
-  }
+var as = Ce, Gu = Mu, Ku = ju, Qu = zu, Yu = Ju;
+function Ju(e) {
+  var r = this.Parser, t = this.Compiler, s = Gu(e || ["yaml"]);
+  ed(r) && Xu(r, s), rd(t) && Zu(t, s);
 }
-function attachParser(parser2, matters2) {
-  var proto2 = parser2.prototype;
-  var tokenizers = wrap(parse$1, matters2);
-  var names = [];
-  var key;
-  for (key in tokenizers) {
-    names.push(key);
-  }
-  proto2.blockMethods = names.concat(proto2.blockMethods);
-  proto2.blockTokenizers = xtend(tokenizers, proto2.blockTokenizers);
+function Xu(e, r) {
+  var t = e.prototype, s = ss(Ku, r), n = [], i;
+  for (i in s)
+    n.push(i);
+  t.blockMethods = n.concat(t.blockMethods), t.blockTokenizers = as(s, t.blockTokenizers);
 }
-function attachCompiler(compiler, matters2) {
-  var proto2 = compiler.prototype;
-  proto2.visitors = xtend(wrap(compile, matters2), proto2.visitors);
+function Zu(e, r) {
+  var t = e.prototype;
+  t.visitors = as(ss(Qu, r), t.visitors);
 }
-function wrap(func, matters2) {
-  var result = {};
-  var length = matters2.length;
-  var index2 = -1;
-  var tuple;
-  while (++index2 < length) {
-    tuple = func(matters2[index2]);
-    result[tuple[0]] = tuple[1];
-  }
-  return result;
+function ss(e, r) {
+  for (var t = {}, s = r.length, n = -1, i; ++n < s; )
+    i = e(r[n]), t[i[0]] = i[1];
+  return t;
 }
-function isRemarkParser(parser2) {
-  return Boolean(parser2 && parser2.prototype && parser2.prototype.blockTokenizers);
+function ed(e) {
+  return !!(e && e.prototype && e.prototype.blockTokenizers);
 }
-function isRemarkCompiler(compiler) {
-  return Boolean(compiler && compiler.prototype && compiler.prototype.visitors);
+function rd(e) {
+  return !!(e && e.prototype && e.prototype.visitors);
 }
-var CharType = /* @__PURE__ */ ((CharType2) => {
-  CharType2["EMPTY"] = "empty";
-  CharType2["SPACE"] = "space";
-  CharType2["WESTERN_LETTER"] = "western-letter";
-  CharType2["CJK_CHAR"] = "cjk-char";
-  CharType2["HALFWIDTH_PAUSE_OR_STOP"] = "halfwidth-pause-or-stop";
-  CharType2["FULLWIDTH_PAUSE_OR_STOP"] = "fullwidth-pause-or-stop";
-  CharType2["HALFWIDTH_QUOTATION"] = "halfwidth-quotation";
-  CharType2["FULLWIDTH_QUOTATION"] = "fullwidth-quotation";
-  CharType2["HALFWIDTH_BRACKET"] = "halfwidth-bracket";
-  CharType2["FULLWIDTH_BRACKET"] = "fullwidth-bracket";
-  CharType2["HALFWIDTH_OTHER_PUNCTUATION"] = "halfwidth-other-punctuation";
-  CharType2["FULLWIDTH_OTHER_PUNCTUATION"] = "fullwidth-other-punctuation";
-  CharType2["UNKNOWN"] = "unknown";
-  return CharType2;
-})(CharType || {});
-const BRACKET_CHAR_SET = {
-  left: "([{\uFF08\u3014\uFF3B\uFF5B",
-  right: ")]}\uFF09\u3015\uFF3D\uFF5D"
-};
-const QUOTATION_CHAR_SET = {
-  left: `\u201C\u2018\u300A\u3008\u300E\u300C\u3010\u3016`,
-  right: `\u201D\u2019\u300B\u3009\u300F\u300D\u3011\u3017`,
+const td = /* @__PURE__ */ gr(Yu);
+var L = /* @__PURE__ */ ((e) => (e.EMPTY = "empty", e.SPACE = "space", e.WESTERN_LETTER = "western-letter", e.CJK_CHAR = "cjk-char", e.HALFWIDTH_PAUSE_OR_STOP = "halfwidth-pause-or-stop", e.FULLWIDTH_PAUSE_OR_STOP = "fullwidth-pause-or-stop", e.HALFWIDTH_QUOTATION = "halfwidth-quotation", e.FULLWIDTH_QUOTATION = "fullwidth-quotation", e.HALFWIDTH_BRACKET = "halfwidth-bracket", e.FULLWIDTH_BRACKET = "fullwidth-bracket", e.HALFWIDTH_OTHER_PUNCTUATION = "halfwidth-other-punctuation", e.FULLWIDTH_OTHER_PUNCTUATION = "fullwidth-other-punctuation", e.UNKNOWN = "unknown", e))(L || {});
+const sa = {
+  left: "([{（〔［｛",
+  right: ")]}）〕］｝"
+}, Nt = {
+  left: "“‘《〈『「【〖",
+  right: "”’》〉』」】〗",
   neutral: `'"`
-};
-const SHORTHAND_CHARS = `'\u2019`;
-const SHORTHAND_PAIR_SET = {
-  [`'`]: `'`,
-  [`\u2019`]: `\u2018`
-};
-const FULLWIDTH_PAIRS = `\u201C\u201D\u2018\u2019\uFF08\uFF09\u3014\u3015\uFF3B\uFF3D\uFF5B\uFF5D\u300A\u300B\u3008\u3009\u300C\u300D\u300E\u300F\u3010\u3011\u3016\u3017`;
-const isFullwidthPair = (str) => FULLWIDTH_PAIRS.indexOf(str) >= 0;
-var MarkType = /* @__PURE__ */ ((MarkType2) => {
-  MarkType2["BRACKETS"] = "brackets";
-  MarkType2["HYPER"] = "hyper";
-  MarkType2["RAW"] = "raw";
-  return MarkType2;
-})(MarkType || {});
-var MarkSideType = /* @__PURE__ */ ((MarkSideType2) => {
-  MarkSideType2["LEFT"] = "left";
-  MarkSideType2["RIGHT"] = "right";
-  return MarkSideType2;
-})(MarkSideType || {});
-const isRawMark = (mark) => {
-  return mark.code !== void 0;
-};
-var HyperTokenType = /* @__PURE__ */ ((HyperTokenType2) => {
-  HyperTokenType2["BRACKET_MARK"] = "bracket-mark";
-  HyperTokenType2["HYPER_MARK"] = "hyper-mark";
-  HyperTokenType2["CODE_CONTENT"] = "code-content";
-  HyperTokenType2["HYPER_CONTENT"] = "hyper-content";
-  HyperTokenType2["UNMATCHED"] = "unmatched";
-  HyperTokenType2["INDETERMINATED"] = "indeterminated";
-  return HyperTokenType2;
-})(HyperTokenType || {});
-var GroupTokenType = /* @__PURE__ */ ((GroupTokenType2) => {
-  GroupTokenType2["GROUP"] = "group";
-  return GroupTokenType2;
-})(GroupTokenType || {});
-const getHalfwidthTokenType = (type) => {
-  switch (type) {
+}, nd = "'’", id = {
+  "'": "'",
+  "’": "‘"
+}, ad = "“”‘’（）〔〕［］｛｝《》〈〉「」『』【】〖〗", hr = (e) => ad.indexOf(e) >= 0;
+var ae = /* @__PURE__ */ ((e) => (e.BRACKETS = "brackets", e.HYPER = "hyper", e.RAW = "raw", e))(ae || {}), W = /* @__PURE__ */ ((e) => (e.LEFT = "left", e.RIGHT = "right", e))(W || {});
+const sd = (e) => e.code !== void 0;
+var j = /* @__PURE__ */ ((e) => (e.BRACKET_MARK = "bracket-mark", e.HYPER_MARK = "hyper-mark", e.CODE_CONTENT = "code-content", e.HYPER_CONTENT = "hyper-content", e.UNMATCHED = "unmatched", e.INDETERMINATED = "indeterminated", e))(j || {}), J = /* @__PURE__ */ ((e) => (e.GROUP = "group", e))(J || {});
+const os = (e) => {
+  switch (e) {
     case "cjk-char":
       return "western-letter";
     case "fullwidth-pause-or-stop":
@@ -5687,10 +2955,9 @@ const getHalfwidthTokenType = (type) => {
     case "fullwidth-other-punctuation":
       return "halfwidth-other-punctuation";
   }
-  return type;
-};
-const getFullwidthTokenType = (type) => {
-  switch (type) {
+  return e;
+}, od = (e) => {
+  switch (e) {
     case "western-letter":
       return "cjk-char";
     case "halfwidth-pause-or-stop":
@@ -5698,1120 +2965,627 @@ const getFullwidthTokenType = (type) => {
     case "halfwidth-other-punctuation":
       return "fullwidth-other-punctuation";
   }
-  return type;
-};
-const isLetterType = (type) => {
-  return type === "western-letter" || type === "cjk-char";
-};
-const isPauseOrStopType = (type) => {
-  return type === "halfwidth-pause-or-stop" || type === "fullwidth-pause-or-stop";
-};
-const isQuotationType = (type) => {
-  return type === "halfwidth-quotation" || type === "fullwidth-quotation";
-};
-const isBracketType = (type) => {
-  return type === "halfwidth-bracket" || type === "fullwidth-bracket";
-};
-const isOtherPunctuationType = (type) => {
-  return type === "halfwidth-other-punctuation" || type === "fullwidth-other-punctuation";
-};
-const isSinglePunctuationType = (type) => {
-  return isPauseOrStopType(type) || isOtherPunctuationType(type);
-};
-const isPunctuationType = (type) => {
-  return isPauseOrStopType(type) || isQuotationType(type) || isBracketType(type) || isOtherPunctuationType(type);
-};
-const isHalfwidthPunctuationType = (type) => {
-  return type === "halfwidth-pause-or-stop" || type === "halfwidth-quotation" || type === "halfwidth-bracket" || type === "halfwidth-other-punctuation";
-};
-const isFullwidthPunctuationType = (type) => {
-  return type === "fullwidth-pause-or-stop" || type === "fullwidth-quotation" || type === "fullwidth-bracket" || type === "fullwidth-other-punctuation";
-};
-const isNonCodeVisibleType = (type) => {
-  return isLetterType(type) || isSinglePunctuationType(type) || type === "bracket-mark" || type === "group";
-};
-const isVisibleType = (type) => {
-  return isNonCodeVisibleType(type) || type === "code-content";
-};
-const isInvisibleType = (type) => {
-  return type === "hyper-mark";
-};
-const newCharTypeSet = {
-  [CharType.HALFWIDTH_PAUSE_OR_STOP]: ",.;:?!",
-  [CharType.FULLWIDTH_PAUSE_OR_STOP]: [
-    "\uFF0C\u3002\u3001\uFF1B\uFF1A\uFF1F\uFF01",
-    "\u2048\u2047\u203C\u2049"
+  return e;
+}, re = (e) => e === "western-letter" || e === "cjk-char", wn = (e) => e === "halfwidth-pause-or-stop" || e === "fullwidth-pause-or-stop", cs = (e) => e === "halfwidth-quotation" || e === "fullwidth-quotation", ls = (e) => e === "halfwidth-bracket" || e === "fullwidth-bracket", fs = (e) => e === "halfwidth-other-punctuation" || e === "fullwidth-other-punctuation", Xt = (e) => wn(e) || fs(e), cd = (e) => wn(e) || cs(e) || ls(e) || fs(e), be = (e) => e === "halfwidth-pause-or-stop" || e === "halfwidth-quotation" || e === "halfwidth-bracket" || e === "halfwidth-other-punctuation", En = (e) => e === "fullwidth-pause-or-stop" || e === "fullwidth-quotation" || e === "fullwidth-bracket" || e === "fullwidth-other-punctuation", ld = (e) => e === "cjk-char" || En(e), Tn = (e) => re(e) || Xt(e) || e === "bracket-mark" || e === "group", us = (e) => Tn(e) || e === "code-content", wr = (e) => e === "hyper-mark", fd = {
+  [L.HALFWIDTH_PAUSE_OR_STOP]: ",.;:?!",
+  [L.FULLWIDTH_PAUSE_OR_STOP]: [
+    // normal punctuation marks
+    "，。、；：？！",
+    // special punctuation marks
+    "⁈⁇‼⁉"
   ].join(""),
-  [CharType.HALFWIDTH_QUOTATION]: `'"`,
-  [CharType.FULLWIDTH_QUOTATION]: "\u2018\u2019\u201C\u201D\u300A\u300B\u3008\u3009\u300E\u300F\u300C\u300D\u3010\u3011\u3016\u3017",
-  [CharType.HALFWIDTH_BRACKET]: "()[]{}",
-  [CharType.FULLWIDTH_BRACKET]: "\uFF08\uFF09\u3014\u3015\uFF3B\uFF3D\uFF5B\uFF5D",
-  [CharType.HALFWIDTH_OTHER_PUNCTUATION]: [
+  [L.HALFWIDTH_QUOTATION]: `'"`,
+  [L.FULLWIDTH_QUOTATION]: "‘’“”《》〈〉『』「」【】〖〗",
+  [L.HALFWIDTH_BRACKET]: "()[]{}",
+  [L.FULLWIDTH_BRACKET]: "（）〔〕［］｛｝",
+  [L.HALFWIDTH_OTHER_PUNCTUATION]: [
+    // on-keyboard symbols
     '~-+*/\\%=&|"`<>@#$^',
-    "\u2020\u2021"
+    // symbol of death
+    "†‡"
   ].join(""),
-  [CharType.FULLWIDTH_OTHER_PUNCTUATION]: [
-    "\u2014\u2E3A",
-    "\u2026\u22EF",
-    "\uFF5E",
-    "\u25CF\u2022\xB7\u2027\u30FB"
+  [L.FULLWIDTH_OTHER_PUNCTUATION]: [
+    // U+2E3A TWO-EM DASH, U+2014 EM DASH
+    "—⸺",
+    // U+2026 HORIZONTAL ELLIPSIS, U+22EF MIDLINE HORIZONTAL ELLIPSIS
+    "…⋯",
+    // U+FF5E FULLWIDTH TILDE
+    "～",
+    // U+25CF BLACK CIRCLE, U+2022 BULLET, U+00B7 MIDDLE DOT,
+    // U+2027 HYPHENATION POINT, U+30FB KATAKANA MIDDLE DOT
+    "●•·‧・"
   ].join("")
-};
-const checkCharType = (char) => {
-  if (char === "") {
-    return CharType.EMPTY;
-  }
-  if (char.match(/\s/) != null) {
-    return CharType.SPACE;
-  }
-  for (const [charType, charSet] of Object.entries(newCharTypeSet)) {
-    if ((charSet == null ? void 0 : charSet.indexOf(char)) >= 0) {
-      return charType;
-    }
-  }
-  if (char.match(/[0-9]/) != null) {
-    return CharType.WESTERN_LETTER;
-  }
-  if (char.match(/[\u0020-\u007F]/) != null) {
-    return CharType.WESTERN_LETTER;
-  }
-  if (char.match(/[\u00A0-\u00FF]/) != null) {
-    return CharType.WESTERN_LETTER;
-  }
-  if (char.match(/[\u0100-\u017F]/) != null) {
-    return CharType.WESTERN_LETTER;
-  }
-  if (char.match(/[\u0180-\u024F]/) != null) {
-    return CharType.WESTERN_LETTER;
-  }
-  if (char.match(/[\u0370-\u03FF]/) != null) {
-    return CharType.WESTERN_LETTER;
-  }
-  if (char.match(/[\u4E00-\u9FFF]/) != null) {
-    return CharType.CJK_CHAR;
-  }
-  if (char.match(/[\u3400-\u4DBF]/) != null) {
-    return CharType.CJK_CHAR;
-  }
-  if (char.match(/[\ud840-\ud868][\udc00-\udfff]|\ud869[\udc00-\uded6]/) != null) {
-    return CharType.CJK_CHAR;
-  }
-  if (char.match(
+}, Le = (e) => {
+  if (e === "")
+    return L.EMPTY;
+  if (e.match(/\s/) != null)
+    return L.SPACE;
+  for (const [r, t] of Object.entries(fd))
+    if ((t == null ? void 0 : t.indexOf(e)) >= 0)
+      return r;
+  return e.match(/[0-9]/) != null || e.match(/[\u0020-\u007F]/) != null || e.match(/[\u00A0-\u00FF]/) != null || e.match(/[\u0100-\u017F]/) != null || e.match(/[\u0180-\u024F]/) != null || e.match(/[\u0370-\u03FF]/) != null ? L.WESTERN_LETTER : e.match(/[\u4E00-\u9FFF]/) != null || e.match(/[\u3400-\u4DBF]/) != null || e.match(/[\ud840-\ud868][\udc00-\udfff]|\ud869[\udc00-\uded6]/) != null || e.match(
     /\ud869[\udf00-\udfff]|[\ud86a-\ud86c][\udc00-\udfff]|\ud86d[\udc00-\udf34]/
-  ) != null) {
-    return CharType.CJK_CHAR;
-  }
-  if (char.match(/\ud86d[\udf40-\udfff]|\ud86e[\udc00-\udc1d]/) != null) {
-    return CharType.CJK_CHAR;
-  }
-  if (char.match(/[\uF900-\uFAFF]/) != null) {
-    return CharType.CJK_CHAR;
-  }
-  if (char.match(/[\uFE30-\uFE4F]/) != null) {
-    return CharType.CJK_CHAR;
-  }
-  if (char.match(/[\u2E80-\u2EFF]/) != null) {
-    return CharType.CJK_CHAR;
-  }
-  if (char.match(/[\uE815-\uE864]/) != null) {
-    return CharType.CJK_CHAR;
-  }
-  if (char.match(/[\u{20000}-\u{2A6DF}]/u) != null) {
-    return CharType.CJK_CHAR;
-  }
-  if (char.match(/[\u{2F800}-\u{2FA1F}]/u) != null) {
-    return CharType.CJK_CHAR;
-  }
-  if (char.match(/[\u3000-\u303F]/) != null) {
-    return CharType.FULLWIDTH_OTHER_PUNCTUATION;
-  }
-  return CharType.UNKNOWN;
+  ) != null || e.match(/\ud86d[\udf40-\udfff]|\ud86e[\udc00-\udc1d]/) != null || e.match(/[\uF900-\uFAFF]/) != null || e.match(/[\uFE30-\uFE4F]/) != null || e.match(/[\u2E80-\u2EFF]/) != null || e.match(/[\uE815-\uE864]/) != null || e.match(/[\u{20000}-\u{2A6DF}]/u) != null || e.match(/[\u{2F800}-\u{2FA1F}]/u) != null ? L.CJK_CHAR : e.match(/[\u3000-\u303F]/) != null ? L.FULLWIDTH_OTHER_PUNCTUATION : L.UNKNOWN;
 };
-var ansiStyles$1 = { exports: {} };
-var colorName = {
-  "aliceblue": [240, 248, 255],
-  "antiquewhite": [250, 235, 215],
-  "aqua": [0, 255, 255],
-  "aquamarine": [127, 255, 212],
-  "azure": [240, 255, 255],
-  "beige": [245, 245, 220],
-  "bisque": [255, 228, 196],
-  "black": [0, 0, 0],
-  "blanchedalmond": [255, 235, 205],
-  "blue": [0, 0, 255],
-  "blueviolet": [138, 43, 226],
-  "brown": [165, 42, 42],
-  "burlywood": [222, 184, 135],
-  "cadetblue": [95, 158, 160],
-  "chartreuse": [127, 255, 0],
-  "chocolate": [210, 105, 30],
-  "coral": [255, 127, 80],
-  "cornflowerblue": [100, 149, 237],
-  "cornsilk": [255, 248, 220],
-  "crimson": [220, 20, 60],
-  "cyan": [0, 255, 255],
-  "darkblue": [0, 0, 139],
-  "darkcyan": [0, 139, 139],
-  "darkgoldenrod": [184, 134, 11],
-  "darkgray": [169, 169, 169],
-  "darkgreen": [0, 100, 0],
-  "darkgrey": [169, 169, 169],
-  "darkkhaki": [189, 183, 107],
-  "darkmagenta": [139, 0, 139],
-  "darkolivegreen": [85, 107, 47],
-  "darkorange": [255, 140, 0],
-  "darkorchid": [153, 50, 204],
-  "darkred": [139, 0, 0],
-  "darksalmon": [233, 150, 122],
-  "darkseagreen": [143, 188, 143],
-  "darkslateblue": [72, 61, 139],
-  "darkslategray": [47, 79, 79],
-  "darkslategrey": [47, 79, 79],
-  "darkturquoise": [0, 206, 209],
-  "darkviolet": [148, 0, 211],
-  "deeppink": [255, 20, 147],
-  "deepskyblue": [0, 191, 255],
-  "dimgray": [105, 105, 105],
-  "dimgrey": [105, 105, 105],
-  "dodgerblue": [30, 144, 255],
-  "firebrick": [178, 34, 34],
-  "floralwhite": [255, 250, 240],
-  "forestgreen": [34, 139, 34],
-  "fuchsia": [255, 0, 255],
-  "gainsboro": [220, 220, 220],
-  "ghostwhite": [248, 248, 255],
-  "gold": [255, 215, 0],
-  "goldenrod": [218, 165, 32],
-  "gray": [128, 128, 128],
-  "green": [0, 128, 0],
-  "greenyellow": [173, 255, 47],
-  "grey": [128, 128, 128],
-  "honeydew": [240, 255, 240],
-  "hotpink": [255, 105, 180],
-  "indianred": [205, 92, 92],
-  "indigo": [75, 0, 130],
-  "ivory": [255, 255, 240],
-  "khaki": [240, 230, 140],
-  "lavender": [230, 230, 250],
-  "lavenderblush": [255, 240, 245],
-  "lawngreen": [124, 252, 0],
-  "lemonchiffon": [255, 250, 205],
-  "lightblue": [173, 216, 230],
-  "lightcoral": [240, 128, 128],
-  "lightcyan": [224, 255, 255],
-  "lightgoldenrodyellow": [250, 250, 210],
-  "lightgray": [211, 211, 211],
-  "lightgreen": [144, 238, 144],
-  "lightgrey": [211, 211, 211],
-  "lightpink": [255, 182, 193],
-  "lightsalmon": [255, 160, 122],
-  "lightseagreen": [32, 178, 170],
-  "lightskyblue": [135, 206, 250],
-  "lightslategray": [119, 136, 153],
-  "lightslategrey": [119, 136, 153],
-  "lightsteelblue": [176, 196, 222],
-  "lightyellow": [255, 255, 224],
-  "lime": [0, 255, 0],
-  "limegreen": [50, 205, 50],
-  "linen": [250, 240, 230],
-  "magenta": [255, 0, 255],
-  "maroon": [128, 0, 0],
-  "mediumaquamarine": [102, 205, 170],
-  "mediumblue": [0, 0, 205],
-  "mediumorchid": [186, 85, 211],
-  "mediumpurple": [147, 112, 219],
-  "mediumseagreen": [60, 179, 113],
-  "mediumslateblue": [123, 104, 238],
-  "mediumspringgreen": [0, 250, 154],
-  "mediumturquoise": [72, 209, 204],
-  "mediumvioletred": [199, 21, 133],
-  "midnightblue": [25, 25, 112],
-  "mintcream": [245, 255, 250],
-  "mistyrose": [255, 228, 225],
-  "moccasin": [255, 228, 181],
-  "navajowhite": [255, 222, 173],
-  "navy": [0, 0, 128],
-  "oldlace": [253, 245, 230],
-  "olive": [128, 128, 0],
-  "olivedrab": [107, 142, 35],
-  "orange": [255, 165, 0],
-  "orangered": [255, 69, 0],
-  "orchid": [218, 112, 214],
-  "palegoldenrod": [238, 232, 170],
-  "palegreen": [152, 251, 152],
-  "paleturquoise": [175, 238, 238],
-  "palevioletred": [219, 112, 147],
-  "papayawhip": [255, 239, 213],
-  "peachpuff": [255, 218, 185],
-  "peru": [205, 133, 63],
-  "pink": [255, 192, 203],
-  "plum": [221, 160, 221],
-  "powderblue": [176, 224, 230],
-  "purple": [128, 0, 128],
-  "rebeccapurple": [102, 51, 153],
-  "red": [255, 0, 0],
-  "rosybrown": [188, 143, 143],
-  "royalblue": [65, 105, 225],
-  "saddlebrown": [139, 69, 19],
-  "salmon": [250, 128, 114],
-  "sandybrown": [244, 164, 96],
-  "seagreen": [46, 139, 87],
-  "seashell": [255, 245, 238],
-  "sienna": [160, 82, 45],
-  "silver": [192, 192, 192],
-  "skyblue": [135, 206, 235],
-  "slateblue": [106, 90, 205],
-  "slategray": [112, 128, 144],
-  "slategrey": [112, 128, 144],
-  "snow": [255, 250, 250],
-  "springgreen": [0, 255, 127],
-  "steelblue": [70, 130, 180],
-  "tan": [210, 180, 140],
-  "teal": [0, 128, 128],
-  "thistle": [216, 191, 216],
-  "tomato": [255, 99, 71],
-  "turquoise": [64, 224, 208],
-  "violet": [238, 130, 238],
-  "wheat": [245, 222, 179],
-  "white": [255, 255, 255],
-  "whitesmoke": [245, 245, 245],
-  "yellow": [255, 255, 0],
-  "yellowgreen": [154, 205, 50]
-};
-const cssKeywords = colorName;
-const reverseKeywords = {};
-for (const key of Object.keys(cssKeywords)) {
-  reverseKeywords[cssKeywords[key]] = key;
+var kn = { exports: {} }, Ft, oa;
+function ud() {
+  return oa || (oa = 1, Ft = {
+    aliceblue: [240, 248, 255],
+    antiquewhite: [250, 235, 215],
+    aqua: [0, 255, 255],
+    aquamarine: [127, 255, 212],
+    azure: [240, 255, 255],
+    beige: [245, 245, 220],
+    bisque: [255, 228, 196],
+    black: [0, 0, 0],
+    blanchedalmond: [255, 235, 205],
+    blue: [0, 0, 255],
+    blueviolet: [138, 43, 226],
+    brown: [165, 42, 42],
+    burlywood: [222, 184, 135],
+    cadetblue: [95, 158, 160],
+    chartreuse: [127, 255, 0],
+    chocolate: [210, 105, 30],
+    coral: [255, 127, 80],
+    cornflowerblue: [100, 149, 237],
+    cornsilk: [255, 248, 220],
+    crimson: [220, 20, 60],
+    cyan: [0, 255, 255],
+    darkblue: [0, 0, 139],
+    darkcyan: [0, 139, 139],
+    darkgoldenrod: [184, 134, 11],
+    darkgray: [169, 169, 169],
+    darkgreen: [0, 100, 0],
+    darkgrey: [169, 169, 169],
+    darkkhaki: [189, 183, 107],
+    darkmagenta: [139, 0, 139],
+    darkolivegreen: [85, 107, 47],
+    darkorange: [255, 140, 0],
+    darkorchid: [153, 50, 204],
+    darkred: [139, 0, 0],
+    darksalmon: [233, 150, 122],
+    darkseagreen: [143, 188, 143],
+    darkslateblue: [72, 61, 139],
+    darkslategray: [47, 79, 79],
+    darkslategrey: [47, 79, 79],
+    darkturquoise: [0, 206, 209],
+    darkviolet: [148, 0, 211],
+    deeppink: [255, 20, 147],
+    deepskyblue: [0, 191, 255],
+    dimgray: [105, 105, 105],
+    dimgrey: [105, 105, 105],
+    dodgerblue: [30, 144, 255],
+    firebrick: [178, 34, 34],
+    floralwhite: [255, 250, 240],
+    forestgreen: [34, 139, 34],
+    fuchsia: [255, 0, 255],
+    gainsboro: [220, 220, 220],
+    ghostwhite: [248, 248, 255],
+    gold: [255, 215, 0],
+    goldenrod: [218, 165, 32],
+    gray: [128, 128, 128],
+    green: [0, 128, 0],
+    greenyellow: [173, 255, 47],
+    grey: [128, 128, 128],
+    honeydew: [240, 255, 240],
+    hotpink: [255, 105, 180],
+    indianred: [205, 92, 92],
+    indigo: [75, 0, 130],
+    ivory: [255, 255, 240],
+    khaki: [240, 230, 140],
+    lavender: [230, 230, 250],
+    lavenderblush: [255, 240, 245],
+    lawngreen: [124, 252, 0],
+    lemonchiffon: [255, 250, 205],
+    lightblue: [173, 216, 230],
+    lightcoral: [240, 128, 128],
+    lightcyan: [224, 255, 255],
+    lightgoldenrodyellow: [250, 250, 210],
+    lightgray: [211, 211, 211],
+    lightgreen: [144, 238, 144],
+    lightgrey: [211, 211, 211],
+    lightpink: [255, 182, 193],
+    lightsalmon: [255, 160, 122],
+    lightseagreen: [32, 178, 170],
+    lightskyblue: [135, 206, 250],
+    lightslategray: [119, 136, 153],
+    lightslategrey: [119, 136, 153],
+    lightsteelblue: [176, 196, 222],
+    lightyellow: [255, 255, 224],
+    lime: [0, 255, 0],
+    limegreen: [50, 205, 50],
+    linen: [250, 240, 230],
+    magenta: [255, 0, 255],
+    maroon: [128, 0, 0],
+    mediumaquamarine: [102, 205, 170],
+    mediumblue: [0, 0, 205],
+    mediumorchid: [186, 85, 211],
+    mediumpurple: [147, 112, 219],
+    mediumseagreen: [60, 179, 113],
+    mediumslateblue: [123, 104, 238],
+    mediumspringgreen: [0, 250, 154],
+    mediumturquoise: [72, 209, 204],
+    mediumvioletred: [199, 21, 133],
+    midnightblue: [25, 25, 112],
+    mintcream: [245, 255, 250],
+    mistyrose: [255, 228, 225],
+    moccasin: [255, 228, 181],
+    navajowhite: [255, 222, 173],
+    navy: [0, 0, 128],
+    oldlace: [253, 245, 230],
+    olive: [128, 128, 0],
+    olivedrab: [107, 142, 35],
+    orange: [255, 165, 0],
+    orangered: [255, 69, 0],
+    orchid: [218, 112, 214],
+    palegoldenrod: [238, 232, 170],
+    palegreen: [152, 251, 152],
+    paleturquoise: [175, 238, 238],
+    palevioletred: [219, 112, 147],
+    papayawhip: [255, 239, 213],
+    peachpuff: [255, 218, 185],
+    peru: [205, 133, 63],
+    pink: [255, 192, 203],
+    plum: [221, 160, 221],
+    powderblue: [176, 224, 230],
+    purple: [128, 0, 128],
+    rebeccapurple: [102, 51, 153],
+    red: [255, 0, 0],
+    rosybrown: [188, 143, 143],
+    royalblue: [65, 105, 225],
+    saddlebrown: [139, 69, 19],
+    salmon: [250, 128, 114],
+    sandybrown: [244, 164, 96],
+    seagreen: [46, 139, 87],
+    seashell: [255, 245, 238],
+    sienna: [160, 82, 45],
+    silver: [192, 192, 192],
+    skyblue: [135, 206, 235],
+    slateblue: [106, 90, 205],
+    slategray: [112, 128, 144],
+    slategrey: [112, 128, 144],
+    snow: [255, 250, 250],
+    springgreen: [0, 255, 127],
+    steelblue: [70, 130, 180],
+    tan: [210, 180, 140],
+    teal: [0, 128, 128],
+    thistle: [216, 191, 216],
+    tomato: [255, 99, 71],
+    turquoise: [64, 224, 208],
+    violet: [238, 130, 238],
+    wheat: [245, 222, 179],
+    white: [255, 255, 255],
+    whitesmoke: [245, 245, 245],
+    yellow: [255, 255, 0],
+    yellowgreen: [154, 205, 50]
+  }), Ft;
 }
-const convert$1 = {
-  rgb: { channels: 3, labels: "rgb" },
-  hsl: { channels: 3, labels: "hsl" },
-  hsv: { channels: 3, labels: "hsv" },
-  hwb: { channels: 3, labels: "hwb" },
-  cmyk: { channels: 4, labels: "cmyk" },
-  xyz: { channels: 3, labels: "xyz" },
-  lab: { channels: 3, labels: "lab" },
-  lch: { channels: 3, labels: "lch" },
-  hex: { channels: 1, labels: ["hex"] },
-  keyword: { channels: 1, labels: ["keyword"] },
-  ansi16: { channels: 1, labels: ["ansi16"] },
-  ansi256: { channels: 1, labels: ["ansi256"] },
-  hcg: { channels: 3, labels: ["h", "c", "g"] },
-  apple: { channels: 3, labels: ["r16", "g16", "b16"] },
-  gray: { channels: 1, labels: ["gray"] }
-};
-var conversions$2 = convert$1;
-for (const model of Object.keys(convert$1)) {
-  if (!("channels" in convert$1[model])) {
-    throw new Error("missing channels property: " + model);
-  }
-  if (!("labels" in convert$1[model])) {
-    throw new Error("missing channel labels property: " + model);
-  }
-  if (convert$1[model].labels.length !== convert$1[model].channels) {
-    throw new Error("channel and label counts mismatch: " + model);
-  }
-  const { channels, labels } = convert$1[model];
-  delete convert$1[model].channels;
-  delete convert$1[model].labels;
-  Object.defineProperty(convert$1[model], "channels", { value: channels });
-  Object.defineProperty(convert$1[model], "labels", { value: labels });
-}
-convert$1.rgb.hsl = function(rgb) {
-  const r = rgb[0] / 255;
-  const g = rgb[1] / 255;
-  const b = rgb[2] / 255;
-  const min = Math.min(r, g, b);
-  const max = Math.max(r, g, b);
-  const delta = max - min;
-  let h;
-  let s;
-  if (max === min) {
-    h = 0;
-  } else if (r === max) {
-    h = (g - b) / delta;
-  } else if (g === max) {
-    h = 2 + (b - r) / delta;
-  } else if (b === max) {
-    h = 4 + (r - g) / delta;
-  }
-  h = Math.min(h * 60, 360);
-  if (h < 0) {
-    h += 360;
-  }
-  const l = (min + max) / 2;
-  if (max === min) {
-    s = 0;
-  } else if (l <= 0.5) {
-    s = delta / (max + min);
-  } else {
-    s = delta / (2 - max - min);
-  }
-  return [h, s * 100, l * 100];
-};
-convert$1.rgb.hsv = function(rgb) {
-  let rdif;
-  let gdif;
-  let bdif;
-  let h;
-  let s;
-  const r = rgb[0] / 255;
-  const g = rgb[1] / 255;
-  const b = rgb[2] / 255;
-  const v = Math.max(r, g, b);
-  const diff = v - Math.min(r, g, b);
-  const diffc = function(c) {
-    return (v - c) / 6 / diff + 1 / 2;
+var Lt, ca;
+function ds() {
+  if (ca)
+    return Lt;
+  ca = 1;
+  const e = ud(), r = {};
+  for (const n of Object.keys(e))
+    r[e[n]] = n;
+  const t = {
+    rgb: { channels: 3, labels: "rgb" },
+    hsl: { channels: 3, labels: "hsl" },
+    hsv: { channels: 3, labels: "hsv" },
+    hwb: { channels: 3, labels: "hwb" },
+    cmyk: { channels: 4, labels: "cmyk" },
+    xyz: { channels: 3, labels: "xyz" },
+    lab: { channels: 3, labels: "lab" },
+    lch: { channels: 3, labels: "lch" },
+    hex: { channels: 1, labels: ["hex"] },
+    keyword: { channels: 1, labels: ["keyword"] },
+    ansi16: { channels: 1, labels: ["ansi16"] },
+    ansi256: { channels: 1, labels: ["ansi256"] },
+    hcg: { channels: 3, labels: ["h", "c", "g"] },
+    apple: { channels: 3, labels: ["r16", "g16", "b16"] },
+    gray: { channels: 1, labels: ["gray"] }
   };
-  if (diff === 0) {
-    h = 0;
-    s = 0;
-  } else {
-    s = diff / v;
-    rdif = diffc(r);
-    gdif = diffc(g);
-    bdif = diffc(b);
-    if (r === v) {
-      h = bdif - gdif;
-    } else if (g === v) {
-      h = 1 / 3 + rdif - bdif;
-    } else if (b === v) {
-      h = 2 / 3 + gdif - rdif;
-    }
-    if (h < 0) {
-      h += 1;
-    } else if (h > 1) {
-      h -= 1;
-    }
+  Lt = t;
+  for (const n of Object.keys(t)) {
+    if (!("channels" in t[n]))
+      throw new Error("missing channels property: " + n);
+    if (!("labels" in t[n]))
+      throw new Error("missing channel labels property: " + n);
+    if (t[n].labels.length !== t[n].channels)
+      throw new Error("channel and label counts mismatch: " + n);
+    const { channels: i, labels: a } = t[n];
+    delete t[n].channels, delete t[n].labels, Object.defineProperty(t[n], "channels", { value: i }), Object.defineProperty(t[n], "labels", { value: a });
   }
-  return [
-    h * 360,
-    s * 100,
-    v * 100
-  ];
-};
-convert$1.rgb.hwb = function(rgb) {
-  const r = rgb[0];
-  const g = rgb[1];
-  let b = rgb[2];
-  const h = convert$1.rgb.hsl(rgb)[0];
-  const w = 1 / 255 * Math.min(r, Math.min(g, b));
-  b = 1 - 1 / 255 * Math.max(r, Math.max(g, b));
-  return [h, w * 100, b * 100];
-};
-convert$1.rgb.cmyk = function(rgb) {
-  const r = rgb[0] / 255;
-  const g = rgb[1] / 255;
-  const b = rgb[2] / 255;
-  const k = Math.min(1 - r, 1 - g, 1 - b);
-  const c = (1 - r - k) / (1 - k) || 0;
-  const m = (1 - g - k) / (1 - k) || 0;
-  const y = (1 - b - k) / (1 - k) || 0;
-  return [c * 100, m * 100, y * 100, k * 100];
-};
-function comparativeDistance(x, y) {
-  return (x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2 + (x[2] - y[2]) ** 2;
+  t.rgb.hsl = function(n) {
+    const i = n[0] / 255, a = n[1] / 255, o = n[2] / 255, c = Math.min(i, a, o), l = Math.max(i, a, o), u = l - c;
+    let f, d;
+    l === c ? f = 0 : i === l ? f = (a - o) / u : a === l ? f = 2 + (o - i) / u : o === l && (f = 4 + (i - a) / u), f = Math.min(f * 60, 360), f < 0 && (f += 360);
+    const h = (c + l) / 2;
+    return l === c ? d = 0 : h <= 0.5 ? d = u / (l + c) : d = u / (2 - l - c), [f, d * 100, h * 100];
+  }, t.rgb.hsv = function(n) {
+    let i, a, o, c, l;
+    const u = n[0] / 255, f = n[1] / 255, d = n[2] / 255, h = Math.max(u, f, d), m = h - Math.min(u, f, d), y = function(p) {
+      return (h - p) / 6 / m + 1 / 2;
+    };
+    return m === 0 ? (c = 0, l = 0) : (l = m / h, i = y(u), a = y(f), o = y(d), u === h ? c = o - a : f === h ? c = 1 / 3 + i - o : d === h && (c = 2 / 3 + a - i), c < 0 ? c += 1 : c > 1 && (c -= 1)), [
+      c * 360,
+      l * 100,
+      h * 100
+    ];
+  }, t.rgb.hwb = function(n) {
+    const i = n[0], a = n[1];
+    let o = n[2];
+    const c = t.rgb.hsl(n)[0], l = 1 / 255 * Math.min(i, Math.min(a, o));
+    return o = 1 - 1 / 255 * Math.max(i, Math.max(a, o)), [c, l * 100, o * 100];
+  }, t.rgb.cmyk = function(n) {
+    const i = n[0] / 255, a = n[1] / 255, o = n[2] / 255, c = Math.min(1 - i, 1 - a, 1 - o), l = (1 - i - c) / (1 - c) || 0, u = (1 - a - c) / (1 - c) || 0, f = (1 - o - c) / (1 - c) || 0;
+    return [l * 100, u * 100, f * 100, c * 100];
+  };
+  function s(n, i) {
+    return (n[0] - i[0]) ** 2 + (n[1] - i[1]) ** 2 + (n[2] - i[2]) ** 2;
+  }
+  return t.rgb.keyword = function(n) {
+    const i = r[n];
+    if (i)
+      return i;
+    let a = 1 / 0, o;
+    for (const c of Object.keys(e)) {
+      const l = e[c], u = s(n, l);
+      u < a && (a = u, o = c);
+    }
+    return o;
+  }, t.keyword.rgb = function(n) {
+    return e[n];
+  }, t.rgb.xyz = function(n) {
+    let i = n[0] / 255, a = n[1] / 255, o = n[2] / 255;
+    i = i > 0.04045 ? ((i + 0.055) / 1.055) ** 2.4 : i / 12.92, a = a > 0.04045 ? ((a + 0.055) / 1.055) ** 2.4 : a / 12.92, o = o > 0.04045 ? ((o + 0.055) / 1.055) ** 2.4 : o / 12.92;
+    const c = i * 0.4124 + a * 0.3576 + o * 0.1805, l = i * 0.2126 + a * 0.7152 + o * 0.0722, u = i * 0.0193 + a * 0.1192 + o * 0.9505;
+    return [c * 100, l * 100, u * 100];
+  }, t.rgb.lab = function(n) {
+    const i = t.rgb.xyz(n);
+    let a = i[0], o = i[1], c = i[2];
+    a /= 95.047, o /= 100, c /= 108.883, a = a > 8856e-6 ? a ** (1 / 3) : 7.787 * a + 16 / 116, o = o > 8856e-6 ? o ** (1 / 3) : 7.787 * o + 16 / 116, c = c > 8856e-6 ? c ** (1 / 3) : 7.787 * c + 16 / 116;
+    const l = 116 * o - 16, u = 500 * (a - o), f = 200 * (o - c);
+    return [l, u, f];
+  }, t.hsl.rgb = function(n) {
+    const i = n[0] / 360, a = n[1] / 100, o = n[2] / 100;
+    let c, l, u;
+    if (a === 0)
+      return u = o * 255, [u, u, u];
+    o < 0.5 ? c = o * (1 + a) : c = o + a - o * a;
+    const f = 2 * o - c, d = [0, 0, 0];
+    for (let h = 0; h < 3; h++)
+      l = i + 1 / 3 * -(h - 1), l < 0 && l++, l > 1 && l--, 6 * l < 1 ? u = f + (c - f) * 6 * l : 2 * l < 1 ? u = c : 3 * l < 2 ? u = f + (c - f) * (2 / 3 - l) * 6 : u = f, d[h] = u * 255;
+    return d;
+  }, t.hsl.hsv = function(n) {
+    const i = n[0];
+    let a = n[1] / 100, o = n[2] / 100, c = a;
+    const l = Math.max(o, 0.01);
+    o *= 2, a *= o <= 1 ? o : 2 - o, c *= l <= 1 ? l : 2 - l;
+    const u = (o + a) / 2, f = o === 0 ? 2 * c / (l + c) : 2 * a / (o + a);
+    return [i, f * 100, u * 100];
+  }, t.hsv.rgb = function(n) {
+    const i = n[0] / 60, a = n[1] / 100;
+    let o = n[2] / 100;
+    const c = Math.floor(i) % 6, l = i - Math.floor(i), u = 255 * o * (1 - a), f = 255 * o * (1 - a * l), d = 255 * o * (1 - a * (1 - l));
+    switch (o *= 255, c) {
+      case 0:
+        return [o, d, u];
+      case 1:
+        return [f, o, u];
+      case 2:
+        return [u, o, d];
+      case 3:
+        return [u, f, o];
+      case 4:
+        return [d, u, o];
+      case 5:
+        return [o, u, f];
+    }
+  }, t.hsv.hsl = function(n) {
+    const i = n[0], a = n[1] / 100, o = n[2] / 100, c = Math.max(o, 0.01);
+    let l, u;
+    u = (2 - a) * o;
+    const f = (2 - a) * c;
+    return l = a * c, l /= f <= 1 ? f : 2 - f, l = l || 0, u /= 2, [i, l * 100, u * 100];
+  }, t.hwb.rgb = function(n) {
+    const i = n[0] / 360;
+    let a = n[1] / 100, o = n[2] / 100;
+    const c = a + o;
+    let l;
+    c > 1 && (a /= c, o /= c);
+    const u = Math.floor(6 * i), f = 1 - o;
+    l = 6 * i - u, u & 1 && (l = 1 - l);
+    const d = a + l * (f - a);
+    let h, m, y;
+    switch (u) {
+      default:
+      case 6:
+      case 0:
+        h = f, m = d, y = a;
+        break;
+      case 1:
+        h = d, m = f, y = a;
+        break;
+      case 2:
+        h = a, m = f, y = d;
+        break;
+      case 3:
+        h = a, m = d, y = f;
+        break;
+      case 4:
+        h = d, m = a, y = f;
+        break;
+      case 5:
+        h = f, m = a, y = d;
+        break;
+    }
+    return [h * 255, m * 255, y * 255];
+  }, t.cmyk.rgb = function(n) {
+    const i = n[0] / 100, a = n[1] / 100, o = n[2] / 100, c = n[3] / 100, l = 1 - Math.min(1, i * (1 - c) + c), u = 1 - Math.min(1, a * (1 - c) + c), f = 1 - Math.min(1, o * (1 - c) + c);
+    return [l * 255, u * 255, f * 255];
+  }, t.xyz.rgb = function(n) {
+    const i = n[0] / 100, a = n[1] / 100, o = n[2] / 100;
+    let c, l, u;
+    return c = i * 3.2406 + a * -1.5372 + o * -0.4986, l = i * -0.9689 + a * 1.8758 + o * 0.0415, u = i * 0.0557 + a * -0.204 + o * 1.057, c = c > 31308e-7 ? 1.055 * c ** (1 / 2.4) - 0.055 : c * 12.92, l = l > 31308e-7 ? 1.055 * l ** (1 / 2.4) - 0.055 : l * 12.92, u = u > 31308e-7 ? 1.055 * u ** (1 / 2.4) - 0.055 : u * 12.92, c = Math.min(Math.max(0, c), 1), l = Math.min(Math.max(0, l), 1), u = Math.min(Math.max(0, u), 1), [c * 255, l * 255, u * 255];
+  }, t.xyz.lab = function(n) {
+    let i = n[0], a = n[1], o = n[2];
+    i /= 95.047, a /= 100, o /= 108.883, i = i > 8856e-6 ? i ** (1 / 3) : 7.787 * i + 16 / 116, a = a > 8856e-6 ? a ** (1 / 3) : 7.787 * a + 16 / 116, o = o > 8856e-6 ? o ** (1 / 3) : 7.787 * o + 16 / 116;
+    const c = 116 * a - 16, l = 500 * (i - a), u = 200 * (a - o);
+    return [c, l, u];
+  }, t.lab.xyz = function(n) {
+    const i = n[0], a = n[1], o = n[2];
+    let c, l, u;
+    l = (i + 16) / 116, c = a / 500 + l, u = l - o / 200;
+    const f = l ** 3, d = c ** 3, h = u ** 3;
+    return l = f > 8856e-6 ? f : (l - 16 / 116) / 7.787, c = d > 8856e-6 ? d : (c - 16 / 116) / 7.787, u = h > 8856e-6 ? h : (u - 16 / 116) / 7.787, c *= 95.047, l *= 100, u *= 108.883, [c, l, u];
+  }, t.lab.lch = function(n) {
+    const i = n[0], a = n[1], o = n[2];
+    let c;
+    c = Math.atan2(o, a) * 360 / 2 / Math.PI, c < 0 && (c += 360);
+    const u = Math.sqrt(a * a + o * o);
+    return [i, u, c];
+  }, t.lch.lab = function(n) {
+    const i = n[0], a = n[1], c = n[2] / 360 * 2 * Math.PI, l = a * Math.cos(c), u = a * Math.sin(c);
+    return [i, l, u];
+  }, t.rgb.ansi16 = function(n, i = null) {
+    const [a, o, c] = n;
+    let l = i === null ? t.rgb.hsv(n)[2] : i;
+    if (l = Math.round(l / 50), l === 0)
+      return 30;
+    let u = 30 + (Math.round(c / 255) << 2 | Math.round(o / 255) << 1 | Math.round(a / 255));
+    return l === 2 && (u += 60), u;
+  }, t.hsv.ansi16 = function(n) {
+    return t.rgb.ansi16(t.hsv.rgb(n), n[2]);
+  }, t.rgb.ansi256 = function(n) {
+    const i = n[0], a = n[1], o = n[2];
+    return i === a && a === o ? i < 8 ? 16 : i > 248 ? 231 : Math.round((i - 8) / 247 * 24) + 232 : 16 + 36 * Math.round(i / 255 * 5) + 6 * Math.round(a / 255 * 5) + Math.round(o / 255 * 5);
+  }, t.ansi16.rgb = function(n) {
+    let i = n % 10;
+    if (i === 0 || i === 7)
+      return n > 50 && (i += 3.5), i = i / 10.5 * 255, [i, i, i];
+    const a = (~~(n > 50) + 1) * 0.5, o = (i & 1) * a * 255, c = (i >> 1 & 1) * a * 255, l = (i >> 2 & 1) * a * 255;
+    return [o, c, l];
+  }, t.ansi256.rgb = function(n) {
+    if (n >= 232) {
+      const l = (n - 232) * 10 + 8;
+      return [l, l, l];
+    }
+    n -= 16;
+    let i;
+    const a = Math.floor(n / 36) / 5 * 255, o = Math.floor((i = n % 36) / 6) / 5 * 255, c = i % 6 / 5 * 255;
+    return [a, o, c];
+  }, t.rgb.hex = function(n) {
+    const a = (((Math.round(n[0]) & 255) << 16) + ((Math.round(n[1]) & 255) << 8) + (Math.round(n[2]) & 255)).toString(16).toUpperCase();
+    return "000000".substring(a.length) + a;
+  }, t.hex.rgb = function(n) {
+    const i = n.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
+    if (!i)
+      return [0, 0, 0];
+    let a = i[0];
+    i[0].length === 3 && (a = a.split("").map((f) => f + f).join(""));
+    const o = parseInt(a, 16), c = o >> 16 & 255, l = o >> 8 & 255, u = o & 255;
+    return [c, l, u];
+  }, t.rgb.hcg = function(n) {
+    const i = n[0] / 255, a = n[1] / 255, o = n[2] / 255, c = Math.max(Math.max(i, a), o), l = Math.min(Math.min(i, a), o), u = c - l;
+    let f, d;
+    return u < 1 ? f = l / (1 - u) : f = 0, u <= 0 ? d = 0 : c === i ? d = (a - o) / u % 6 : c === a ? d = 2 + (o - i) / u : d = 4 + (i - a) / u, d /= 6, d %= 1, [d * 360, u * 100, f * 100];
+  }, t.hsl.hcg = function(n) {
+    const i = n[1] / 100, a = n[2] / 100, o = a < 0.5 ? 2 * i * a : 2 * i * (1 - a);
+    let c = 0;
+    return o < 1 && (c = (a - 0.5 * o) / (1 - o)), [n[0], o * 100, c * 100];
+  }, t.hsv.hcg = function(n) {
+    const i = n[1] / 100, a = n[2] / 100, o = i * a;
+    let c = 0;
+    return o < 1 && (c = (a - o) / (1 - o)), [n[0], o * 100, c * 100];
+  }, t.hcg.rgb = function(n) {
+    const i = n[0] / 360, a = n[1] / 100, o = n[2] / 100;
+    if (a === 0)
+      return [o * 255, o * 255, o * 255];
+    const c = [0, 0, 0], l = i % 1 * 6, u = l % 1, f = 1 - u;
+    let d = 0;
+    switch (Math.floor(l)) {
+      case 0:
+        c[0] = 1, c[1] = u, c[2] = 0;
+        break;
+      case 1:
+        c[0] = f, c[1] = 1, c[2] = 0;
+        break;
+      case 2:
+        c[0] = 0, c[1] = 1, c[2] = u;
+        break;
+      case 3:
+        c[0] = 0, c[1] = f, c[2] = 1;
+        break;
+      case 4:
+        c[0] = u, c[1] = 0, c[2] = 1;
+        break;
+      default:
+        c[0] = 1, c[1] = 0, c[2] = f;
+    }
+    return d = (1 - a) * o, [
+      (a * c[0] + d) * 255,
+      (a * c[1] + d) * 255,
+      (a * c[2] + d) * 255
+    ];
+  }, t.hcg.hsv = function(n) {
+    const i = n[1] / 100, a = n[2] / 100, o = i + a * (1 - i);
+    let c = 0;
+    return o > 0 && (c = i / o), [n[0], c * 100, o * 100];
+  }, t.hcg.hsl = function(n) {
+    const i = n[1] / 100, o = n[2] / 100 * (1 - i) + 0.5 * i;
+    let c = 0;
+    return o > 0 && o < 0.5 ? c = i / (2 * o) : o >= 0.5 && o < 1 && (c = i / (2 * (1 - o))), [n[0], c * 100, o * 100];
+  }, t.hcg.hwb = function(n) {
+    const i = n[1] / 100, a = n[2] / 100, o = i + a * (1 - i);
+    return [n[0], (o - i) * 100, (1 - o) * 100];
+  }, t.hwb.hcg = function(n) {
+    const i = n[1] / 100, o = 1 - n[2] / 100, c = o - i;
+    let l = 0;
+    return c < 1 && (l = (o - c) / (1 - c)), [n[0], c * 100, l * 100];
+  }, t.apple.rgb = function(n) {
+    return [n[0] / 65535 * 255, n[1] / 65535 * 255, n[2] / 65535 * 255];
+  }, t.rgb.apple = function(n) {
+    return [n[0] / 255 * 65535, n[1] / 255 * 65535, n[2] / 255 * 65535];
+  }, t.gray.rgb = function(n) {
+    return [n[0] / 100 * 255, n[0] / 100 * 255, n[0] / 100 * 255];
+  }, t.gray.hsl = function(n) {
+    return [0, 0, n[0]];
+  }, t.gray.hsv = t.gray.hsl, t.gray.hwb = function(n) {
+    return [0, 100, n[0]];
+  }, t.gray.cmyk = function(n) {
+    return [0, 0, 0, n[0]];
+  }, t.gray.lab = function(n) {
+    return [n[0], 0, 0];
+  }, t.gray.hex = function(n) {
+    const i = Math.round(n[0] / 100 * 255) & 255, o = ((i << 16) + (i << 8) + i).toString(16).toUpperCase();
+    return "000000".substring(o.length) + o;
+  }, t.rgb.gray = function(n) {
+    return [(n[0] + n[1] + n[2]) / 3 / 255 * 100];
+  }, Lt;
 }
-convert$1.rgb.keyword = function(rgb) {
-  const reversed = reverseKeywords[rgb];
-  if (reversed) {
-    return reversed;
+var qt, la;
+function dd() {
+  if (la)
+    return qt;
+  la = 1;
+  const e = ds();
+  function r() {
+    const i = {}, a = Object.keys(e);
+    for (let o = a.length, c = 0; c < o; c++)
+      i[a[c]] = {
+        // http://jsperf.com/1-vs-infinity
+        // micro-opt, but this is simple.
+        distance: -1,
+        parent: null
+      };
+    return i;
   }
-  let currentClosestDistance = Infinity;
-  let currentClosestKeyword;
-  for (const keyword of Object.keys(cssKeywords)) {
-    const value = cssKeywords[keyword];
-    const distance = comparativeDistance(rgb, value);
-    if (distance < currentClosestDistance) {
-      currentClosestDistance = distance;
-      currentClosestKeyword = keyword;
+  function t(i) {
+    const a = r(), o = [i];
+    for (a[i].distance = 0; o.length; ) {
+      const c = o.pop(), l = Object.keys(e[c]);
+      for (let u = l.length, f = 0; f < u; f++) {
+        const d = l[f], h = a[d];
+        h.distance === -1 && (h.distance = a[c].distance + 1, h.parent = c, o.unshift(d));
+      }
     }
+    return a;
   }
-  return currentClosestKeyword;
-};
-convert$1.keyword.rgb = function(keyword) {
-  return cssKeywords[keyword];
-};
-convert$1.rgb.xyz = function(rgb) {
-  let r = rgb[0] / 255;
-  let g = rgb[1] / 255;
-  let b = rgb[2] / 255;
-  r = r > 0.04045 ? ((r + 0.055) / 1.055) ** 2.4 : r / 12.92;
-  g = g > 0.04045 ? ((g + 0.055) / 1.055) ** 2.4 : g / 12.92;
-  b = b > 0.04045 ? ((b + 0.055) / 1.055) ** 2.4 : b / 12.92;
-  const x = r * 0.4124 + g * 0.3576 + b * 0.1805;
-  const y = r * 0.2126 + g * 0.7152 + b * 0.0722;
-  const z = r * 0.0193 + g * 0.1192 + b * 0.9505;
-  return [x * 100, y * 100, z * 100];
-};
-convert$1.rgb.lab = function(rgb) {
-  const xyz = convert$1.rgb.xyz(rgb);
-  let x = xyz[0];
-  let y = xyz[1];
-  let z = xyz[2];
-  x /= 95.047;
-  y /= 100;
-  z /= 108.883;
-  x = x > 8856e-6 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
-  y = y > 8856e-6 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
-  z = z > 8856e-6 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
-  const l = 116 * y - 16;
-  const a = 500 * (x - y);
-  const b = 200 * (y - z);
-  return [l, a, b];
-};
-convert$1.hsl.rgb = function(hsl) {
-  const h = hsl[0] / 360;
-  const s = hsl[1] / 100;
-  const l = hsl[2] / 100;
-  let t2;
-  let t3;
-  let val;
-  if (s === 0) {
-    val = l * 255;
-    return [val, val, val];
-  }
-  if (l < 0.5) {
-    t2 = l * (1 + s);
-  } else {
-    t2 = l + s - l * s;
-  }
-  const t1 = 2 * l - t2;
-  const rgb = [0, 0, 0];
-  for (let i = 0; i < 3; i++) {
-    t3 = h + 1 / 3 * -(i - 1);
-    if (t3 < 0) {
-      t3++;
-    }
-    if (t3 > 1) {
-      t3--;
-    }
-    if (6 * t3 < 1) {
-      val = t1 + (t2 - t1) * 6 * t3;
-    } else if (2 * t3 < 1) {
-      val = t2;
-    } else if (3 * t3 < 2) {
-      val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
-    } else {
-      val = t1;
-    }
-    rgb[i] = val * 255;
-  }
-  return rgb;
-};
-convert$1.hsl.hsv = function(hsl) {
-  const h = hsl[0];
-  let s = hsl[1] / 100;
-  let l = hsl[2] / 100;
-  let smin = s;
-  const lmin = Math.max(l, 0.01);
-  l *= 2;
-  s *= l <= 1 ? l : 2 - l;
-  smin *= lmin <= 1 ? lmin : 2 - lmin;
-  const v = (l + s) / 2;
-  const sv = l === 0 ? 2 * smin / (lmin + smin) : 2 * s / (l + s);
-  return [h, sv * 100, v * 100];
-};
-convert$1.hsv.rgb = function(hsv) {
-  const h = hsv[0] / 60;
-  const s = hsv[1] / 100;
-  let v = hsv[2] / 100;
-  const hi = Math.floor(h) % 6;
-  const f = h - Math.floor(h);
-  const p2 = 255 * v * (1 - s);
-  const q = 255 * v * (1 - s * f);
-  const t = 255 * v * (1 - s * (1 - f));
-  v *= 255;
-  switch (hi) {
-    case 0:
-      return [v, t, p2];
-    case 1:
-      return [q, v, p2];
-    case 2:
-      return [p2, v, t];
-    case 3:
-      return [p2, q, v];
-    case 4:
-      return [t, p2, v];
-    case 5:
-      return [v, p2, q];
-  }
-};
-convert$1.hsv.hsl = function(hsv) {
-  const h = hsv[0];
-  const s = hsv[1] / 100;
-  const v = hsv[2] / 100;
-  const vmin = Math.max(v, 0.01);
-  let sl;
-  let l;
-  l = (2 - s) * v;
-  const lmin = (2 - s) * vmin;
-  sl = s * vmin;
-  sl /= lmin <= 1 ? lmin : 2 - lmin;
-  sl = sl || 0;
-  l /= 2;
-  return [h, sl * 100, l * 100];
-};
-convert$1.hwb.rgb = function(hwb) {
-  const h = hwb[0] / 360;
-  let wh = hwb[1] / 100;
-  let bl = hwb[2] / 100;
-  const ratio = wh + bl;
-  let f;
-  if (ratio > 1) {
-    wh /= ratio;
-    bl /= ratio;
-  }
-  const i = Math.floor(6 * h);
-  const v = 1 - bl;
-  f = 6 * h - i;
-  if ((i & 1) !== 0) {
-    f = 1 - f;
-  }
-  const n = wh + f * (v - wh);
-  let r;
-  let g;
-  let b;
-  switch (i) {
-    default:
-    case 6:
-    case 0:
-      r = v;
-      g = n;
-      b = wh;
-      break;
-    case 1:
-      r = n;
-      g = v;
-      b = wh;
-      break;
-    case 2:
-      r = wh;
-      g = v;
-      b = n;
-      break;
-    case 3:
-      r = wh;
-      g = n;
-      b = v;
-      break;
-    case 4:
-      r = n;
-      g = wh;
-      b = v;
-      break;
-    case 5:
-      r = v;
-      g = wh;
-      b = n;
-      break;
-  }
-  return [r * 255, g * 255, b * 255];
-};
-convert$1.cmyk.rgb = function(cmyk) {
-  const c = cmyk[0] / 100;
-  const m = cmyk[1] / 100;
-  const y = cmyk[2] / 100;
-  const k = cmyk[3] / 100;
-  const r = 1 - Math.min(1, c * (1 - k) + k);
-  const g = 1 - Math.min(1, m * (1 - k) + k);
-  const b = 1 - Math.min(1, y * (1 - k) + k);
-  return [r * 255, g * 255, b * 255];
-};
-convert$1.xyz.rgb = function(xyz) {
-  const x = xyz[0] / 100;
-  const y = xyz[1] / 100;
-  const z = xyz[2] / 100;
-  let r;
-  let g;
-  let b;
-  r = x * 3.2406 + y * -1.5372 + z * -0.4986;
-  g = x * -0.9689 + y * 1.8758 + z * 0.0415;
-  b = x * 0.0557 + y * -0.204 + z * 1.057;
-  r = r > 31308e-7 ? 1.055 * r ** (1 / 2.4) - 0.055 : r * 12.92;
-  g = g > 31308e-7 ? 1.055 * g ** (1 / 2.4) - 0.055 : g * 12.92;
-  b = b > 31308e-7 ? 1.055 * b ** (1 / 2.4) - 0.055 : b * 12.92;
-  r = Math.min(Math.max(0, r), 1);
-  g = Math.min(Math.max(0, g), 1);
-  b = Math.min(Math.max(0, b), 1);
-  return [r * 255, g * 255, b * 255];
-};
-convert$1.xyz.lab = function(xyz) {
-  let x = xyz[0];
-  let y = xyz[1];
-  let z = xyz[2];
-  x /= 95.047;
-  y /= 100;
-  z /= 108.883;
-  x = x > 8856e-6 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
-  y = y > 8856e-6 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
-  z = z > 8856e-6 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
-  const l = 116 * y - 16;
-  const a = 500 * (x - y);
-  const b = 200 * (y - z);
-  return [l, a, b];
-};
-convert$1.lab.xyz = function(lab) {
-  const l = lab[0];
-  const a = lab[1];
-  const b = lab[2];
-  let x;
-  let y;
-  let z;
-  y = (l + 16) / 116;
-  x = a / 500 + y;
-  z = y - b / 200;
-  const y2 = y ** 3;
-  const x2 = x ** 3;
-  const z2 = z ** 3;
-  y = y2 > 8856e-6 ? y2 : (y - 16 / 116) / 7.787;
-  x = x2 > 8856e-6 ? x2 : (x - 16 / 116) / 7.787;
-  z = z2 > 8856e-6 ? z2 : (z - 16 / 116) / 7.787;
-  x *= 95.047;
-  y *= 100;
-  z *= 108.883;
-  return [x, y, z];
-};
-convert$1.lab.lch = function(lab) {
-  const l = lab[0];
-  const a = lab[1];
-  const b = lab[2];
-  let h;
-  const hr = Math.atan2(b, a);
-  h = hr * 360 / 2 / Math.PI;
-  if (h < 0) {
-    h += 360;
-  }
-  const c = Math.sqrt(a * a + b * b);
-  return [l, c, h];
-};
-convert$1.lch.lab = function(lch) {
-  const l = lch[0];
-  const c = lch[1];
-  const h = lch[2];
-  const hr = h / 360 * 2 * Math.PI;
-  const a = c * Math.cos(hr);
-  const b = c * Math.sin(hr);
-  return [l, a, b];
-};
-convert$1.rgb.ansi16 = function(args, saturation = null) {
-  const [r, g, b] = args;
-  let value = saturation === null ? convert$1.rgb.hsv(args)[2] : saturation;
-  value = Math.round(value / 50);
-  if (value === 0) {
-    return 30;
-  }
-  let ansi = 30 + (Math.round(b / 255) << 2 | Math.round(g / 255) << 1 | Math.round(r / 255));
-  if (value === 2) {
-    ansi += 60;
-  }
-  return ansi;
-};
-convert$1.hsv.ansi16 = function(args) {
-  return convert$1.rgb.ansi16(convert$1.hsv.rgb(args), args[2]);
-};
-convert$1.rgb.ansi256 = function(args) {
-  const r = args[0];
-  const g = args[1];
-  const b = args[2];
-  if (r === g && g === b) {
-    if (r < 8) {
-      return 16;
-    }
-    if (r > 248) {
-      return 231;
-    }
-    return Math.round((r - 8) / 247 * 24) + 232;
-  }
-  const ansi = 16 + 36 * Math.round(r / 255 * 5) + 6 * Math.round(g / 255 * 5) + Math.round(b / 255 * 5);
-  return ansi;
-};
-convert$1.ansi16.rgb = function(args) {
-  let color = args % 10;
-  if (color === 0 || color === 7) {
-    if (args > 50) {
-      color += 3.5;
-    }
-    color = color / 10.5 * 255;
-    return [color, color, color];
-  }
-  const mult = (~~(args > 50) + 1) * 0.5;
-  const r = (color & 1) * mult * 255;
-  const g = (color >> 1 & 1) * mult * 255;
-  const b = (color >> 2 & 1) * mult * 255;
-  return [r, g, b];
-};
-convert$1.ansi256.rgb = function(args) {
-  if (args >= 232) {
-    const c = (args - 232) * 10 + 8;
-    return [c, c, c];
-  }
-  args -= 16;
-  let rem;
-  const r = Math.floor(args / 36) / 5 * 255;
-  const g = Math.floor((rem = args % 36) / 6) / 5 * 255;
-  const b = rem % 6 / 5 * 255;
-  return [r, g, b];
-};
-convert$1.rgb.hex = function(args) {
-  const integer = ((Math.round(args[0]) & 255) << 16) + ((Math.round(args[1]) & 255) << 8) + (Math.round(args[2]) & 255);
-  const string = integer.toString(16).toUpperCase();
-  return "000000".substring(string.length) + string;
-};
-convert$1.hex.rgb = function(args) {
-  const match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
-  if (!match) {
-    return [0, 0, 0];
-  }
-  let colorString = match[0];
-  if (match[0].length === 3) {
-    colorString = colorString.split("").map((char) => {
-      return char + char;
-    }).join("");
-  }
-  const integer = parseInt(colorString, 16);
-  const r = integer >> 16 & 255;
-  const g = integer >> 8 & 255;
-  const b = integer & 255;
-  return [r, g, b];
-};
-convert$1.rgb.hcg = function(rgb) {
-  const r = rgb[0] / 255;
-  const g = rgb[1] / 255;
-  const b = rgb[2] / 255;
-  const max = Math.max(Math.max(r, g), b);
-  const min = Math.min(Math.min(r, g), b);
-  const chroma = max - min;
-  let grayscale;
-  let hue;
-  if (chroma < 1) {
-    grayscale = min / (1 - chroma);
-  } else {
-    grayscale = 0;
-  }
-  if (chroma <= 0) {
-    hue = 0;
-  } else if (max === r) {
-    hue = (g - b) / chroma % 6;
-  } else if (max === g) {
-    hue = 2 + (b - r) / chroma;
-  } else {
-    hue = 4 + (r - g) / chroma;
-  }
-  hue /= 6;
-  hue %= 1;
-  return [hue * 360, chroma * 100, grayscale * 100];
-};
-convert$1.hsl.hcg = function(hsl) {
-  const s = hsl[1] / 100;
-  const l = hsl[2] / 100;
-  const c = l < 0.5 ? 2 * s * l : 2 * s * (1 - l);
-  let f = 0;
-  if (c < 1) {
-    f = (l - 0.5 * c) / (1 - c);
-  }
-  return [hsl[0], c * 100, f * 100];
-};
-convert$1.hsv.hcg = function(hsv) {
-  const s = hsv[1] / 100;
-  const v = hsv[2] / 100;
-  const c = s * v;
-  let f = 0;
-  if (c < 1) {
-    f = (v - c) / (1 - c);
-  }
-  return [hsv[0], c * 100, f * 100];
-};
-convert$1.hcg.rgb = function(hcg) {
-  const h = hcg[0] / 360;
-  const c = hcg[1] / 100;
-  const g = hcg[2] / 100;
-  if (c === 0) {
-    return [g * 255, g * 255, g * 255];
-  }
-  const pure = [0, 0, 0];
-  const hi = h % 1 * 6;
-  const v = hi % 1;
-  const w = 1 - v;
-  let mg = 0;
-  switch (Math.floor(hi)) {
-    case 0:
-      pure[0] = 1;
-      pure[1] = v;
-      pure[2] = 0;
-      break;
-    case 1:
-      pure[0] = w;
-      pure[1] = 1;
-      pure[2] = 0;
-      break;
-    case 2:
-      pure[0] = 0;
-      pure[1] = 1;
-      pure[2] = v;
-      break;
-    case 3:
-      pure[0] = 0;
-      pure[1] = w;
-      pure[2] = 1;
-      break;
-    case 4:
-      pure[0] = v;
-      pure[1] = 0;
-      pure[2] = 1;
-      break;
-    default:
-      pure[0] = 1;
-      pure[1] = 0;
-      pure[2] = w;
-  }
-  mg = (1 - c) * g;
-  return [
-    (c * pure[0] + mg) * 255,
-    (c * pure[1] + mg) * 255,
-    (c * pure[2] + mg) * 255
-  ];
-};
-convert$1.hcg.hsv = function(hcg) {
-  const c = hcg[1] / 100;
-  const g = hcg[2] / 100;
-  const v = c + g * (1 - c);
-  let f = 0;
-  if (v > 0) {
-    f = c / v;
-  }
-  return [hcg[0], f * 100, v * 100];
-};
-convert$1.hcg.hsl = function(hcg) {
-  const c = hcg[1] / 100;
-  const g = hcg[2] / 100;
-  const l = g * (1 - c) + 0.5 * c;
-  let s = 0;
-  if (l > 0 && l < 0.5) {
-    s = c / (2 * l);
-  } else if (l >= 0.5 && l < 1) {
-    s = c / (2 * (1 - l));
-  }
-  return [hcg[0], s * 100, l * 100];
-};
-convert$1.hcg.hwb = function(hcg) {
-  const c = hcg[1] / 100;
-  const g = hcg[2] / 100;
-  const v = c + g * (1 - c);
-  return [hcg[0], (v - c) * 100, (1 - v) * 100];
-};
-convert$1.hwb.hcg = function(hwb) {
-  const w = hwb[1] / 100;
-  const b = hwb[2] / 100;
-  const v = 1 - b;
-  const c = v - w;
-  let g = 0;
-  if (c < 1) {
-    g = (v - c) / (1 - c);
-  }
-  return [hwb[0], c * 100, g * 100];
-};
-convert$1.apple.rgb = function(apple) {
-  return [apple[0] / 65535 * 255, apple[1] / 65535 * 255, apple[2] / 65535 * 255];
-};
-convert$1.rgb.apple = function(rgb) {
-  return [rgb[0] / 255 * 65535, rgb[1] / 255 * 65535, rgb[2] / 255 * 65535];
-};
-convert$1.gray.rgb = function(args) {
-  return [args[0] / 100 * 255, args[0] / 100 * 255, args[0] / 100 * 255];
-};
-convert$1.gray.hsl = function(args) {
-  return [0, 0, args[0]];
-};
-convert$1.gray.hsv = convert$1.gray.hsl;
-convert$1.gray.hwb = function(gray) {
-  return [0, 100, gray[0]];
-};
-convert$1.gray.cmyk = function(gray) {
-  return [0, 0, 0, gray[0]];
-};
-convert$1.gray.lab = function(gray) {
-  return [gray[0], 0, 0];
-};
-convert$1.gray.hex = function(gray) {
-  const val = Math.round(gray[0] / 100 * 255) & 255;
-  const integer = (val << 16) + (val << 8) + val;
-  const string = integer.toString(16).toUpperCase();
-  return "000000".substring(string.length) + string;
-};
-convert$1.rgb.gray = function(rgb) {
-  const val = (rgb[0] + rgb[1] + rgb[2]) / 3;
-  return [val / 255 * 100];
-};
-const conversions$1 = conversions$2;
-function buildGraph() {
-  const graph = {};
-  const models2 = Object.keys(conversions$1);
-  for (let len = models2.length, i = 0; i < len; i++) {
-    graph[models2[i]] = {
-      distance: -1,
-      parent: null
+  function s(i, a) {
+    return function(o) {
+      return a(i(o));
     };
   }
-  return graph;
-}
-function deriveBFS(fromModel) {
-  const graph = buildGraph();
-  const queue = [fromModel];
-  graph[fromModel].distance = 0;
-  while (queue.length) {
-    const current = queue.pop();
-    const adjacents = Object.keys(conversions$1[current]);
-    for (let len = adjacents.length, i = 0; i < len; i++) {
-      const adjacent = adjacents[i];
-      const node = graph[adjacent];
-      if (node.distance === -1) {
-        node.distance = graph[current].distance + 1;
-        node.parent = current;
-        queue.unshift(adjacent);
-      }
-    }
+  function n(i, a) {
+    const o = [a[i].parent, i];
+    let c = e[a[i].parent][i], l = a[i].parent;
+    for (; a[l].parent; )
+      o.unshift(a[l].parent), c = s(e[a[l].parent][l], c), l = a[l].parent;
+    return c.conversion = o, c;
   }
-  return graph;
+  return qt = function(i) {
+    const a = t(i), o = {}, c = Object.keys(a);
+    for (let l = c.length, u = 0; u < l; u++) {
+      const f = c[u];
+      a[f].parent !== null && (o[f] = n(f, a));
+    }
+    return o;
+  }, qt;
 }
-function link(from, to) {
-  return function(args) {
-    return to(from(args));
-  };
-}
-function wrapConversion(toModel, graph) {
-  const path = [graph[toModel].parent, toModel];
-  let fn = conversions$1[graph[toModel].parent][toModel];
-  let cur = graph[toModel].parent;
-  while (graph[cur].parent) {
-    path.unshift(graph[cur].parent);
-    fn = link(conversions$1[graph[cur].parent][cur], fn);
-    cur = graph[cur].parent;
+var Ht, fa;
+function hd() {
+  if (fa)
+    return Ht;
+  fa = 1;
+  const e = ds(), r = dd(), t = {}, s = Object.keys(e);
+  function n(a) {
+    const o = function(...c) {
+      const l = c[0];
+      return l == null ? l : (l.length > 1 && (c = l), a(c));
+    };
+    return "conversion" in a && (o.conversion = a.conversion), o;
   }
-  fn.conversion = path;
-  return fn;
-}
-var route$1 = function(fromModel) {
-  const graph = deriveBFS(fromModel);
-  const conversion = {};
-  const models2 = Object.keys(graph);
-  for (let len = models2.length, i = 0; i < len; i++) {
-    const toModel = models2[i];
-    const node = graph[toModel];
-    if (node.parent === null) {
-      continue;
-    }
-    conversion[toModel] = wrapConversion(toModel, graph);
+  function i(a) {
+    const o = function(...c) {
+      const l = c[0];
+      if (l == null)
+        return l;
+      l.length > 1 && (c = l);
+      const u = a(c);
+      if (typeof u == "object")
+        for (let f = u.length, d = 0; d < f; d++)
+          u[d] = Math.round(u[d]);
+      return u;
+    };
+    return "conversion" in a && (o.conversion = a.conversion), o;
   }
-  return conversion;
-};
-const conversions = conversions$2;
-const route = route$1;
-const convert = {};
-const models = Object.keys(conversions);
-function wrapRaw(fn) {
-  const wrappedFn = function(...args) {
-    const arg0 = args[0];
-    if (arg0 === void 0 || arg0 === null) {
-      return arg0;
-    }
-    if (arg0.length > 1) {
-      args = arg0;
-    }
-    return fn(args);
-  };
-  if ("conversion" in fn) {
-    wrappedFn.conversion = fn.conversion;
-  }
-  return wrappedFn;
+  return s.forEach((a) => {
+    t[a] = {}, Object.defineProperty(t[a], "channels", { value: e[a].channels }), Object.defineProperty(t[a], "labels", { value: e[a].labels });
+    const o = r(a);
+    Object.keys(o).forEach((l) => {
+      const u = o[l];
+      t[a][l] = i(u), t[a][l].raw = n(u);
+    });
+  }), Ht = t, Ht;
 }
-function wrapRounded(fn) {
-  const wrappedFn = function(...args) {
-    const arg0 = args[0];
-    if (arg0 === void 0 || arg0 === null) {
-      return arg0;
-    }
-    if (arg0.length > 1) {
-      args = arg0;
-    }
-    const result = fn(args);
-    if (typeof result === "object") {
-      for (let len = result.length, i = 0; i < len; i++) {
-        result[i] = Math.round(result[i]);
-      }
-    }
-    return result;
-  };
-  if ("conversion" in fn) {
-    wrappedFn.conversion = fn.conversion;
-  }
-  return wrappedFn;
-}
-models.forEach((fromModel) => {
-  convert[fromModel] = {};
-  Object.defineProperty(convert[fromModel], "channels", { value: conversions[fromModel].channels });
-  Object.defineProperty(convert[fromModel], "labels", { value: conversions[fromModel].labels });
-  const routes = route(fromModel);
-  const routeModels = Object.keys(routes);
-  routeModels.forEach((toModel) => {
-    const fn = routes[toModel];
-    convert[fromModel][toModel] = wrapRounded(fn);
-    convert[fromModel][toModel].raw = wrapRaw(fn);
-  });
-});
-var colorConvert = convert;
-(function(module) {
-  const wrapAnsi16 = (fn, offset) => (...args) => {
-    const code = fn(...args);
-    return `\x1B[${code + offset}m`;
-  };
-  const wrapAnsi256 = (fn, offset) => (...args) => {
-    const code = fn(...args);
-    return `\x1B[${38 + offset};5;${code}m`;
-  };
-  const wrapAnsi16m = (fn, offset) => (...args) => {
-    const rgb = fn(...args);
-    return `\x1B[${38 + offset};2;${rgb[0]};${rgb[1]};${rgb[2]}m`;
-  };
-  const ansi2ansi = (n) => n;
-  const rgb2rgb = (r, g, b) => [r, g, b];
-  const setLazyProperty = (object, property, get) => {
-    Object.defineProperty(object, property, {
+kn.exports;
+(function(e) {
+  const r = (u, f) => (...d) => `\x1B[${u(...d) + f}m`, t = (u, f) => (...d) => {
+    const h = u(...d);
+    return `\x1B[${38 + f};5;${h}m`;
+  }, s = (u, f) => (...d) => {
+    const h = u(...d);
+    return `\x1B[${38 + f};2;${h[0]};${h[1]};${h[2]}m`;
+  }, n = (u) => u, i = (u, f, d) => [u, f, d], a = (u, f, d) => {
+    Object.defineProperty(u, f, {
       get: () => {
-        const value = get();
-        Object.defineProperty(object, property, {
-          value,
-          enumerable: true,
-          configurable: true
-        });
-        return value;
+        const h = d();
+        return Object.defineProperty(u, f, {
+          value: h,
+          enumerable: !0,
+          configurable: !0
+        }), h;
       },
-      enumerable: true,
-      configurable: true
+      enumerable: !0,
+      configurable: !0
     });
   };
-  let colorConvert$1;
-  const makeDynamicStyles = (wrap2, targetSpace, identity, isBackground) => {
-    if (colorConvert$1 === void 0) {
-      colorConvert$1 = colorConvert;
+  let o;
+  const c = (u, f, d, h) => {
+    o === void 0 && (o = hd());
+    const m = h ? 10 : 0, y = {};
+    for (const [p, v] of Object.entries(o)) {
+      const g = p === "ansi16" ? "ansi" : p;
+      p === f ? y[g] = u(d, m) : typeof v == "object" && (y[g] = u(v[f], m));
     }
-    const offset = isBackground ? 10 : 0;
-    const styles2 = {};
-    for (const [sourceSpace, suite] of Object.entries(colorConvert$1)) {
-      const name2 = sourceSpace === "ansi16" ? "ansi" : sourceSpace;
-      if (sourceSpace === targetSpace) {
-        styles2[name2] = wrap2(identity, offset);
-      } else if (typeof suite === "object") {
-        styles2[name2] = wrap2(suite[targetSpace], offset);
-      }
-    }
-    return styles2;
+    return y;
   };
-  function assembleStyles() {
-    const codes = /* @__PURE__ */ new Map();
-    const styles2 = {
+  function l() {
+    const u = /* @__PURE__ */ new Map(), f = {
       modifier: {
         reset: [0, 0],
+        // 21 isn't widely supported and 22 does the same thing
         bold: [1, 22],
         dim: [2, 22],
         italic: [3, 23],
@@ -6829,6 +3603,7 @@ var colorConvert = convert;
         magenta: [35, 39],
         cyan: [36, 39],
         white: [37, 39],
+        // Bright color
         blackBright: [90, 39],
         redBright: [91, 39],
         greenBright: [92, 39],
@@ -6847,6 +3622,7 @@ var colorConvert = convert;
         bgMagenta: [45, 49],
         bgCyan: [46, 49],
         bgWhite: [47, 49],
+        // Bright color
         bgBlackBright: [100, 49],
         bgRedBright: [101, 49],
         bgGreenBright: [102, 49],
@@ -6857,2149 +3633,1279 @@ var colorConvert = convert;
         bgWhiteBright: [107, 49]
       }
     };
-    styles2.color.gray = styles2.color.blackBright;
-    styles2.bgColor.bgGray = styles2.bgColor.bgBlackBright;
-    styles2.color.grey = styles2.color.blackBright;
-    styles2.bgColor.bgGrey = styles2.bgColor.bgBlackBright;
-    for (const [groupName, group] of Object.entries(styles2)) {
-      for (const [styleName, style] of Object.entries(group)) {
-        styles2[styleName] = {
-          open: `\x1B[${style[0]}m`,
-          close: `\x1B[${style[1]}m`
-        };
-        group[styleName] = styles2[styleName];
-        codes.set(style[0], style[1]);
-      }
-      Object.defineProperty(styles2, groupName, {
-        value: group,
-        enumerable: false
+    f.color.gray = f.color.blackBright, f.bgColor.bgGray = f.bgColor.bgBlackBright, f.color.grey = f.color.blackBright, f.bgColor.bgGrey = f.bgColor.bgBlackBright;
+    for (const [d, h] of Object.entries(f)) {
+      for (const [m, y] of Object.entries(h))
+        f[m] = {
+          open: `\x1B[${y[0]}m`,
+          close: `\x1B[${y[1]}m`
+        }, h[m] = f[m], u.set(y[0], y[1]);
+      Object.defineProperty(f, d, {
+        value: h,
+        enumerable: !1
       });
     }
-    Object.defineProperty(styles2, "codes", {
-      value: codes,
-      enumerable: false
-    });
-    styles2.color.close = "\x1B[39m";
-    styles2.bgColor.close = "\x1B[49m";
-    setLazyProperty(styles2.color, "ansi", () => makeDynamicStyles(wrapAnsi16, "ansi16", ansi2ansi, false));
-    setLazyProperty(styles2.color, "ansi256", () => makeDynamicStyles(wrapAnsi256, "ansi256", ansi2ansi, false));
-    setLazyProperty(styles2.color, "ansi16m", () => makeDynamicStyles(wrapAnsi16m, "rgb", rgb2rgb, false));
-    setLazyProperty(styles2.bgColor, "ansi", () => makeDynamicStyles(wrapAnsi16, "ansi16", ansi2ansi, true));
-    setLazyProperty(styles2.bgColor, "ansi256", () => makeDynamicStyles(wrapAnsi256, "ansi256", ansi2ansi, true));
-    setLazyProperty(styles2.bgColor, "ansi16m", () => makeDynamicStyles(wrapAnsi16m, "rgb", rgb2rgb, true));
-    return styles2;
+    return Object.defineProperty(f, "codes", {
+      value: u,
+      enumerable: !1
+    }), f.color.close = "\x1B[39m", f.bgColor.close = "\x1B[49m", a(f.color, "ansi", () => c(r, "ansi16", n, !1)), a(f.color, "ansi256", () => c(t, "ansi256", n, !1)), a(f.color, "ansi16m", () => c(s, "rgb", i, !1)), a(f.bgColor, "ansi", () => c(r, "ansi16", n, !0)), a(f.bgColor, "ansi256", () => c(t, "ansi256", n, !0)), a(f.bgColor, "ansi16m", () => c(s, "rgb", i, !0)), f;
   }
-  Object.defineProperty(module, "exports", {
-    enumerable: true,
-    get: assembleStyles
+  Object.defineProperty(e, "exports", {
+    enumerable: !0,
+    get: l
   });
-})(ansiStyles$1);
-var browser = {
-  stdout: false,
-  stderr: false
+})(kn);
+var pd = kn.exports, vd = {
+  stdout: !1,
+  stderr: !1
 };
-const stringReplaceAll$1 = (string, substring, replacer) => {
-  let index2 = string.indexOf(substring);
-  if (index2 === -1) {
-    return string;
-  }
-  const substringLength = substring.length;
-  let endIndex = 0;
-  let returnValue = "";
+const gd = (e, r, t) => {
+  let s = e.indexOf(r);
+  if (s === -1)
+    return e;
+  const n = r.length;
+  let i = 0, a = "";
+  do
+    a += e.substr(i, s - i) + r + t, i = s + n, s = e.indexOf(r, i);
+  while (s !== -1);
+  return a += e.substr(i), a;
+}, md = (e, r, t, s) => {
+  let n = 0, i = "";
   do {
-    returnValue += string.substr(endIndex, index2 - endIndex) + substring + replacer;
-    endIndex = index2 + substringLength;
-    index2 = string.indexOf(substring, endIndex);
-  } while (index2 !== -1);
-  returnValue += string.substr(endIndex);
-  return returnValue;
+    const a = e[s - 1] === "\r";
+    i += e.substr(n, (a ? s - 1 : s) - n) + r + (a ? `\r
+` : `
+`) + t, n = s + 1, s = e.indexOf(`
+`, n);
+  } while (s !== -1);
+  return i += e.substr(n), i;
 };
-const stringEncaseCRLFWithFirstIndex$1 = (string, prefix, postfix, index2) => {
-  let endIndex = 0;
-  let returnValue = "";
-  do {
-    const gotCR = string[index2 - 1] === "\r";
-    returnValue += string.substr(endIndex, (gotCR ? index2 - 1 : index2) - endIndex) + prefix + (gotCR ? "\r\n" : "\n") + postfix;
-    endIndex = index2 + 1;
-    index2 = string.indexOf("\n", endIndex);
-  } while (index2 !== -1);
-  returnValue += string.substr(endIndex);
-  return returnValue;
-};
-var util = {
-  stringReplaceAll: stringReplaceAll$1,
-  stringEncaseCRLFWithFirstIndex: stringEncaseCRLFWithFirstIndex$1
-};
-const TEMPLATE_REGEX = /(?:\\(u(?:[a-f\d]{4}|\{[a-f\d]{1,6}\})|x[a-f\d]{2}|.))|(?:\{(~)?(\w+(?:\([^)]*\))?(?:\.\w+(?:\([^)]*\))?)*)(?:[ \t]|(?=\r?\n)))|(\})|((?:.|[\r\n\f])+?)/gi;
-const STYLE_REGEX = /(?:^|\.)(\w+)(?:\(([^)]*)\))?/g;
-const STRING_REGEX = /^(['"])((?:\\.|(?!\1)[^\\])*)\1$/;
-const ESCAPE_REGEX = /\\(u(?:[a-f\d]{4}|{[a-f\d]{1,6}})|x[a-f\d]{2}|.)|([^\\])/gi;
-const ESCAPES = /* @__PURE__ */ new Map([
-  ["n", "\n"],
-  ["r", "\r"],
-  ["t", "	"],
-  ["b", "\b"],
-  ["f", "\f"],
-  ["v", "\v"],
-  ["0", "\0"],
-  ["\\", "\\"],
-  ["e", "\x1B"],
-  ["a", "\x07"]
-]);
-function unescape(c) {
-  const u = c[0] === "u";
-  const bracket = c[1] === "{";
-  if (u && !bracket && c.length === 5 || c[0] === "x" && c.length === 3) {
-    return String.fromCharCode(parseInt(c.slice(1), 16));
+var yd = {
+  stringReplaceAll: gd,
+  stringEncaseCRLFWithFirstIndex: md
+}, Mt, ua;
+function bd() {
+  if (ua)
+    return Mt;
+  ua = 1;
+  const e = /(?:\\(u(?:[a-f\d]{4}|\{[a-f\d]{1,6}\})|x[a-f\d]{2}|.))|(?:\{(~)?(\w+(?:\([^)]*\))?(?:\.\w+(?:\([^)]*\))?)*)(?:[ \t]|(?=\r?\n)))|(\})|((?:.|[\r\n\f])+?)/gi, r = /(?:^|\.)(\w+)(?:\(([^)]*)\))?/g, t = /^(['"])((?:\\.|(?!\1)[^\\])*)\1$/, s = /\\(u(?:[a-f\d]{4}|{[a-f\d]{1,6}})|x[a-f\d]{2}|.)|([^\\])/gi, n = /* @__PURE__ */ new Map([
+    ["n", `
+`],
+    ["r", "\r"],
+    ["t", "	"],
+    ["b", "\b"],
+    ["f", "\f"],
+    ["v", "\v"],
+    ["0", "\0"],
+    ["\\", "\\"],
+    ["e", "\x1B"],
+    ["a", "\x07"]
+  ]);
+  function i(l) {
+    const u = l[0] === "u", f = l[1] === "{";
+    return u && !f && l.length === 5 || l[0] === "x" && l.length === 3 ? String.fromCharCode(parseInt(l.slice(1), 16)) : u && f ? String.fromCodePoint(parseInt(l.slice(2, -1), 16)) : n.get(l) || l;
   }
-  if (u && bracket) {
-    return String.fromCodePoint(parseInt(c.slice(2, -1), 16));
-  }
-  return ESCAPES.get(c) || c;
-}
-function parseArguments(name2, arguments_) {
-  const results = [];
-  const chunks = arguments_.trim().split(/\s*,\s*/g);
-  let matches;
-  for (const chunk of chunks) {
-    const number = Number(chunk);
-    if (!Number.isNaN(number)) {
-      results.push(number);
-    } else if (matches = chunk.match(STRING_REGEX)) {
-      results.push(matches[2].replace(ESCAPE_REGEX, (m, escape2, character) => escape2 ? unescape(escape2) : character));
-    } else {
-      throw new Error(`Invalid Chalk template style argument: ${chunk} (in style '${name2}')`);
+  function a(l, u) {
+    const f = [], d = u.trim().split(/\s*,\s*/g);
+    let h;
+    for (const m of d) {
+      const y = Number(m);
+      if (!Number.isNaN(y))
+        f.push(y);
+      else if (h = m.match(t))
+        f.push(h[2].replace(s, (p, v, g) => v ? i(v) : g));
+      else
+        throw new Error(`Invalid Chalk template style argument: ${m} (in style '${l}')`);
     }
+    return f;
   }
-  return results;
-}
-function parseStyle(style) {
-  STYLE_REGEX.lastIndex = 0;
-  const results = [];
-  let matches;
-  while ((matches = STYLE_REGEX.exec(style)) !== null) {
-    const name2 = matches[1];
-    if (matches[2]) {
-      const args = parseArguments(name2, matches[2]);
-      results.push([name2].concat(args));
-    } else {
-      results.push([name2]);
+  function o(l) {
+    r.lastIndex = 0;
+    const u = [];
+    let f;
+    for (; (f = r.exec(l)) !== null; ) {
+      const d = f[1];
+      if (f[2]) {
+        const h = a(d, f[2]);
+        u.push([d].concat(h));
+      } else
+        u.push([d]);
     }
+    return u;
   }
-  return results;
-}
-function buildStyle(chalk2, styles2) {
-  const enabled = {};
-  for (const layer of styles2) {
-    for (const style of layer.styles) {
-      enabled[style[0]] = layer.inverse ? null : style.slice(1);
-    }
-  }
-  let current = chalk2;
-  for (const [styleName, styles3] of Object.entries(enabled)) {
-    if (!Array.isArray(styles3)) {
-      continue;
-    }
-    if (!(styleName in current)) {
-      throw new Error(`Unknown Chalk style: ${styleName}`);
-    }
-    current = styles3.length > 0 ? current[styleName](...styles3) : current[styleName];
-  }
-  return current;
-}
-var templates = (chalk2, temporary) => {
-  const styles2 = [];
-  const chunks = [];
-  let chunk = [];
-  temporary.replace(TEMPLATE_REGEX, (m, escapeCharacter, inverse, style, close, character) => {
-    if (escapeCharacter) {
-      chunk.push(unescape(escapeCharacter));
-    } else if (style) {
-      const string = chunk.join("");
-      chunk = [];
-      chunks.push(styles2.length === 0 ? string : buildStyle(chalk2, styles2)(string));
-      styles2.push({ inverse, styles: parseStyle(style) });
-    } else if (close) {
-      if (styles2.length === 0) {
-        throw new Error("Found extraneous } in Chalk template literal");
+  function c(l, u) {
+    const f = {};
+    for (const h of u)
+      for (const m of h.styles)
+        f[m[0]] = h.inverse ? null : m.slice(1);
+    let d = l;
+    for (const [h, m] of Object.entries(f))
+      if (Array.isArray(m)) {
+        if (!(h in d))
+          throw new Error(`Unknown Chalk style: ${h}`);
+        d = m.length > 0 ? d[h](...m) : d[h];
       }
-      chunks.push(buildStyle(chalk2, styles2)(chunk.join("")));
-      chunk = [];
-      styles2.pop();
-    } else {
-      chunk.push(character);
-    }
-  });
-  chunks.push(chunk.join(""));
-  if (styles2.length > 0) {
-    const errMessage = `Chalk template literal is missing ${styles2.length} closing bracket${styles2.length === 1 ? "" : "s"} (\`}\`)`;
-    throw new Error(errMessage);
+    return d;
   }
-  return chunks.join("");
-};
-const ansiStyles = ansiStyles$1.exports;
-const { stdout: stdoutColor, stderr: stderrColor } = browser;
-const {
-  stringReplaceAll,
-  stringEncaseCRLFWithFirstIndex
-} = util;
-const { isArray: isArray2 } = Array;
-const levelMapping = [
+  return Mt = (l, u) => {
+    const f = [], d = [];
+    let h = [];
+    if (u.replace(e, (m, y, p, v, g, b) => {
+      if (y)
+        h.push(i(y));
+      else if (v) {
+        const E = h.join("");
+        h = [], d.push(f.length === 0 ? E : c(l, f)(E)), f.push({ inverse: p, styles: o(v) });
+      } else if (g) {
+        if (f.length === 0)
+          throw new Error("Found extraneous } in Chalk template literal");
+        d.push(c(l, f)(h.join(""))), h = [], f.pop();
+      } else
+        h.push(b);
+    }), d.push(h.join("")), f.length > 0) {
+      const m = `Chalk template literal is missing ${f.length} closing bracket${f.length === 1 ? "" : "s"} (\`}\`)`;
+      throw new Error(m);
+    }
+    return d.join("");
+  }, Mt;
+}
+const Ye = pd, { stdout: Zt, stderr: en } = vd, {
+  stringReplaceAll: Ad,
+  stringEncaseCRLFWithFirstIndex: wd
+} = yd, { isArray: pr } = Array, hs = [
   "ansi",
   "ansi",
   "ansi256",
   "ansi16m"
-];
-const styles = /* @__PURE__ */ Object.create(null);
-const applyOptions = (object, options = {}) => {
-  if (options.level && !(Number.isInteger(options.level) && options.level >= 0 && options.level <= 3)) {
+], Me = /* @__PURE__ */ Object.create(null), Ed = (e, r = {}) => {
+  if (r.level && !(Number.isInteger(r.level) && r.level >= 0 && r.level <= 3))
     throw new Error("The `level` option should be an integer from 0 to 3");
-  }
-  const colorLevel = stdoutColor ? stdoutColor.level : 0;
-  object.level = options.level === void 0 ? colorLevel : options.level;
+  const t = Zt ? Zt.level : 0;
+  e.level = r.level === void 0 ? t : r.level;
 };
-class ChalkClass {
-  constructor(options) {
-    return chalkFactory(options);
+class Td {
+  constructor(r) {
+    return ps(r);
   }
 }
-const chalkFactory = (options) => {
-  const chalk2 = {};
-  applyOptions(chalk2, options);
-  chalk2.template = (...arguments_) => chalkTag(chalk2.template, ...arguments_);
-  Object.setPrototypeOf(chalk2, Chalk.prototype);
-  Object.setPrototypeOf(chalk2.template, chalk2);
-  chalk2.template.constructor = () => {
+const ps = (e) => {
+  const r = {};
+  return Ed(r, e), r.template = (...t) => gs(r.template, ...t), Object.setPrototypeOf(r, Er.prototype), Object.setPrototypeOf(r.template, r), r.template.constructor = () => {
     throw new Error("`chalk.constructor()` is deprecated. Use `new chalk.Instance()` instead.");
-  };
-  chalk2.template.Instance = ChalkClass;
-  return chalk2.template;
+  }, r.template.Instance = Td, r.template;
 };
-function Chalk(options) {
-  return chalkFactory(options);
+function Er(e) {
+  return ps(e);
 }
-for (const [styleName, style] of Object.entries(ansiStyles)) {
-  styles[styleName] = {
+for (const [e, r] of Object.entries(Ye))
+  Me[e] = {
     get() {
-      const builder = createBuilder(this, createStyler(style.open, style.close, this._styler), this._isEmpty);
-      Object.defineProperty(this, styleName, { value: builder });
-      return builder;
+      const t = Tr(this, xn(r.open, r.close, this._styler), this._isEmpty);
+      return Object.defineProperty(this, e, { value: t }), t;
     }
   };
-}
-styles.visible = {
+Me.visible = {
   get() {
-    const builder = createBuilder(this, this._styler, true);
-    Object.defineProperty(this, "visible", { value: builder });
-    return builder;
+    const e = Tr(this, this._styler, !0);
+    return Object.defineProperty(this, "visible", { value: e }), e;
   }
 };
-const usedModels = ["rgb", "hex", "keyword", "hsl", "hsv", "hwb", "ansi", "ansi256"];
-for (const model of usedModels) {
-  styles[model] = {
+const vs = ["rgb", "hex", "keyword", "hsl", "hsv", "hwb", "ansi", "ansi256"];
+for (const e of vs)
+  Me[e] = {
     get() {
-      const { level } = this;
-      return function(...arguments_) {
-        const styler = createStyler(ansiStyles.color[levelMapping[level]][model](...arguments_), ansiStyles.color.close, this._styler);
-        return createBuilder(this, styler, this._isEmpty);
+      const { level: r } = this;
+      return function(...t) {
+        const s = xn(Ye.color[hs[r]][e](...t), Ye.color.close, this._styler);
+        return Tr(this, s, this._isEmpty);
+      };
+    }
+  };
+for (const e of vs) {
+  const r = "bg" + e[0].toUpperCase() + e.slice(1);
+  Me[r] = {
+    get() {
+      const { level: t } = this;
+      return function(...s) {
+        const n = xn(Ye.bgColor[hs[t]][e](...s), Ye.bgColor.close, this._styler);
+        return Tr(this, n, this._isEmpty);
       };
     }
   };
 }
-for (const model of usedModels) {
-  const bgModel = "bg" + model[0].toUpperCase() + model.slice(1);
-  styles[bgModel] = {
-    get() {
-      const { level } = this;
-      return function(...arguments_) {
-        const styler = createStyler(ansiStyles.bgColor[levelMapping[level]][model](...arguments_), ansiStyles.bgColor.close, this._styler);
-        return createBuilder(this, styler, this._isEmpty);
-      };
-    }
-  };
-}
-const proto = Object.defineProperties(() => {
+const kd = Object.defineProperties(() => {
 }, {
-  ...styles,
+  ...Me,
   level: {
-    enumerable: true,
+    enumerable: !0,
     get() {
       return this._generator.level;
     },
-    set(level) {
-      this._generator.level = level;
+    set(e) {
+      this._generator.level = e;
     }
   }
-});
-const createStyler = (open, close, parent) => {
-  let openAll;
-  let closeAll;
-  if (parent === void 0) {
-    openAll = open;
-    closeAll = close;
-  } else {
-    openAll = parent.openAll + open;
-    closeAll = close + parent.closeAll;
-  }
-  return {
-    open,
-    close,
-    openAll,
-    closeAll,
-    parent
+}), xn = (e, r, t) => {
+  let s, n;
+  return t === void 0 ? (s = e, n = r) : (s = t.openAll + e, n = r + t.closeAll), {
+    open: e,
+    close: r,
+    openAll: s,
+    closeAll: n,
+    parent: t
   };
+}, Tr = (e, r, t) => {
+  const s = (...n) => pr(n[0]) && pr(n[0].raw) ? da(s, gs(s, ...n)) : da(s, n.length === 1 ? "" + n[0] : n.join(" "));
+  return Object.setPrototypeOf(s, kd), s._generator = e, s._styler = r, s._isEmpty = t, s;
+}, da = (e, r) => {
+  if (e.level <= 0 || !r)
+    return e._isEmpty ? "" : r;
+  let t = e._styler;
+  if (t === void 0)
+    return r;
+  const { openAll: s, closeAll: n } = t;
+  if (r.indexOf("\x1B") !== -1)
+    for (; t !== void 0; )
+      r = Ad(r, t.close, t.open), t = t.parent;
+  const i = r.indexOf(`
+`);
+  return i !== -1 && (r = wd(r, n, s, i)), s + r + n;
 };
-const createBuilder = (self, _styler, _isEmpty) => {
-  const builder = (...arguments_) => {
-    if (isArray2(arguments_[0]) && isArray2(arguments_[0].raw)) {
-      return applyStyle(builder, chalkTag(builder, ...arguments_));
-    }
-    return applyStyle(builder, arguments_.length === 1 ? "" + arguments_[0] : arguments_.join(" "));
-  };
-  Object.setPrototypeOf(builder, proto);
-  builder._generator = self;
-  builder._styler = _styler;
-  builder._isEmpty = _isEmpty;
-  return builder;
-};
-const applyStyle = (self, string) => {
-  if (self.level <= 0 || !string) {
-    return self._isEmpty ? "" : string;
-  }
-  let styler = self._styler;
-  if (styler === void 0) {
-    return string;
-  }
-  const { openAll, closeAll } = styler;
-  if (string.indexOf("\x1B") !== -1) {
-    while (styler !== void 0) {
-      string = stringReplaceAll(string, styler.close, styler.open);
-      styler = styler.parent;
-    }
-  }
-  const lfIndex = string.indexOf("\n");
-  if (lfIndex !== -1) {
-    string = stringEncaseCRLFWithFirstIndex(string, closeAll, openAll, lfIndex);
-  }
-  return openAll + string + closeAll;
-};
-let template;
-const chalkTag = (chalk2, ...strings) => {
-  const [firstString] = strings;
-  if (!isArray2(firstString) || !isArray2(firstString.raw)) {
-    return strings.join(" ");
-  }
-  const arguments_ = strings.slice(1);
-  const parts = [firstString.raw[0]];
-  for (let i = 1; i < firstString.length; i++) {
-    parts.push(
-      String(arguments_[i - 1]).replace(/[{}\\]/g, "\\$&"),
-      String(firstString.raw[i])
+let $t;
+const gs = (e, ...r) => {
+  const [t] = r;
+  if (!pr(t) || !pr(t.raw))
+    return r.join(" ");
+  const s = r.slice(1), n = [t.raw[0]];
+  for (let i = 1; i < t.length; i++)
+    n.push(
+      String(s[i - 1]).replace(/[{}\\]/g, "\\$&"),
+      String(t.raw[i])
     );
-  }
-  if (template === void 0) {
-    template = templates;
-  }
-  return template(chalk2, parts.join(""));
+  return $t === void 0 && ($t = bd()), $t(e, n.join(""));
 };
-Object.defineProperties(Chalk.prototype, styles);
-const chalk = Chalk();
-chalk.supportsColor = stdoutColor;
-chalk.stderr = Chalk({ level: stderrColor ? stderrColor.level : 0 });
-chalk.stderr.supportsColor = stderrColor;
-var source = chalk;
-const env = {
-  stdout: (_a = globalThis == null ? void 0 : globalThis.process) == null ? void 0 : _a.stdout,
-  stderr: (_b = globalThis == null ? void 0 : globalThis.process) == null ? void 0 : _b.stderr,
+Object.defineProperties(Er.prototype, Me);
+const kr = Er();
+kr.supportsColor = Zt;
+kr.stderr = Er({ level: en ? en.level : 0 });
+kr.stderr.supportsColor = en;
+var xd = kr;
+const Ge = /* @__PURE__ */ gr(xd);
+var Oa, Ra;
+const ke = {
+  stdout: (Oa = globalThis == null ? void 0 : globalThis.process) == null ? void 0 : Oa.stdout,
+  stderr: (Ra = globalThis == null ? void 0 : globalThis.process) == null ? void 0 : Ra.stderr,
   defaultLogger: console
-};
-const getPositionByOffset = (str, offset) => {
-  const rows = str.split("\n");
-  const rowLengthList = rows.map((substr) => substr.length);
-  const position2 = {
-    offset,
+}, Sd = (e, r) => {
+  const t = e.split(`
+`), s = t.map((i) => i.length), n = {
+    offset: r,
     row: 0,
     column: 0,
     line: ""
   };
-  while (position2.offset >= 0 && rows.length) {
-    position2.row++;
-    position2.column = position2.offset;
-    position2.line = rows.shift() || "";
-    position2.offset -= (rowLengthList.shift() || 0) + 1;
-  }
-  return position2;
+  for (; n.offset >= 0 && t.length; )
+    n.row++, n.column = n.offset, n.line = t.shift() || "", n.offset -= (s.shift() || 0) + 1;
+  return n;
 };
-var ValidationTarget = /* @__PURE__ */ ((ValidationTarget2) => {
-  ValidationTarget2["VALUE"] = "value";
-  ValidationTarget2["START_VALUE"] = "startValue";
-  ValidationTarget2["END_VALUE"] = "endValue";
-  ValidationTarget2["SPACE_AFTER"] = "spaceAfter";
-  ValidationTarget2["INNER_SPACE_BEFORE"] = "innerSpaceBefore";
-  return ValidationTarget2;
-})(ValidationTarget || {});
-const adjustedFullwidthPunctuations = `\u201C\u201D\u2018\u2019`;
-const generateMarker = (str, index2) => {
-  const prefix = str.substring(0, index2);
-  let fullwidthCount = 0;
-  let halfwidthCount = 0;
-  for (let i = 0; i < prefix.length; i++) {
-    const charType = checkCharType(prefix[i]);
-    if (charType === CharType.CJK_CHAR || isFullwidthPunctuationType(charType) && adjustedFullwidthPunctuations.indexOf(prefix[i]) === -1) {
-      fullwidthCount++;
-    } else if (charType === CharType.WESTERN_LETTER || isHalfwidthPunctuationType(charType) && adjustedFullwidthPunctuations.indexOf(prefix[i]) !== -1 || charType === CharType.SPACE) {
-      halfwidthCount++;
-    }
+var $ = /* @__PURE__ */ ((e) => (e.VALUE = "value", e.START_VALUE = "startValue", e.END_VALUE = "endValue", e.SPACE_AFTER = "spaceAfter", e.INNER_SPACE_BEFORE = "innerSpaceBefore", e))($ || {});
+const ha = "“”‘’", Cd = (e, r) => {
+  const t = e.substring(0, r);
+  let s = 0, n = 0;
+  for (let i = 0; i < t.length; i++) {
+    const a = Le(t[i]);
+    a === L.CJK_CHAR || En(a) && ha.indexOf(t[i]) === -1 ? s++ : (a === L.WESTERN_LETTER || be(a) && ha.indexOf(t[i]) !== -1 || a === L.SPACE) && n++;
   }
-  return " ".repeat(halfwidthCount) + "\u3000".repeat(fullwidthCount) + `${source.red("^")}`;
-};
-const reportItem = (file = "", str, validations, logger = env.defaultLogger) => {
-  validations.forEach(({ index: index2, length, target, message: message2 }) => {
-    const finalIndex = target === "spaceAfter" || target === "endValue" ? index2 + length : index2;
-    const { row, column, line } = getPositionByOffset(str, finalIndex);
-    const fileDisplay = `${source.blue.bgWhite(file)}${file ? ":" : ""}`;
-    const positionDisplay = `${source.yellow(row)}:${source.yellow(column)}`;
-    const headline = `${fileDisplay}${positionDisplay} - ${message2}`;
-    const displayRange = 20;
-    const displayStart = column - displayRange < 0 ? 0 : column - displayRange;
-    const displayEnd = column + length + displayRange > line.length - 1 ? line.length : column + length + displayRange;
-    const displayFragment = line.substring(displayStart, displayEnd).replace(/\n/g, "\\n");
-    const markerBelow = generateMarker(displayFragment, column - displayStart);
-    logger.error(`${headline}
+  return " ".repeat(n) + "　".repeat(s) + `${Ge.red("^")}`;
+}, Od = (e = "", r, t, s = ke.defaultLogger) => {
+  t.forEach(({ index: n, length: i, target: a, message: o }) => {
+    const c = a === "spaceAfter" || a === "endValue" ? n + i : n, { row: l, column: u, line: f } = Sd(r, c), d = `${Ge.blue.bgWhite(e)}${e ? ":" : ""}`, h = `${Ge.yellow(l)}:${Ge.yellow(u)}`, m = `${d}${h} - ${o}`, y = 20, p = u - y < 0 ? 0 : u - y, v = u + i + y > f.length - 1 ? f.length : u + i + y, g = f.substring(p, v).replace(/\n/g, "\\n"), b = Cd(g, u - p);
+    s.error(`${m}
 
-${displayFragment}
-${markerBelow}
+${g}
+${b}
 `);
   });
-};
-const report = (resultList, logger = env.defaultLogger) => {
-  let errorCount = 0;
-  const invalidFiles = [];
-  resultList.filter(({ file, disabled }) => {
-    if (disabled) {
-      if (file) {
-        logger.log(`${source.blue.bgWhite(file)}: disabled`);
-      } else {
-        logger.log(`disabled`);
-      }
-      return false;
-    }
-    return true;
-  }).forEach(({ file, origin, validations }) => {
-    reportItem(file, origin, validations, logger);
-    errorCount += validations.length;
-    if (file && validations.length) {
-      invalidFiles.push(file);
-    }
-  });
-  if (errorCount) {
-    const errors = [];
-    errors.push("Invalid files:");
-    errors.push("- " + invalidFiles.join("\n- ") + "\n");
-    errors.push(`Found ${errorCount} ${errorCount > 1 ? "errors" : "error"}.`);
-    logger.error(errors.join("\n"));
-    return 1;
-  } else {
-    logger.log(`No error found.`);
-  }
-};
-const BRACKET_NOT_CLOSED = "\u62EC\u53F7\u672A\u95ED\u5408";
-const BRACKET_NOT_OPEN = "\u62EC\u53F7\u672A\u5339\u914D";
-const QUOTE_NOT_CLOSED = "\u5F15\u53F7\u672A\u95ED\u5408";
-const QUOTE_NOT_OPEN = "\u5F15\u53F7\u672A\u5339\u914D";
-const handlePunctuation = (i, char, type, status) => {
-  finalizeLastToken(status, i);
-  if (isBracketType(type)) {
-    if (BRACKET_CHAR_SET.left.indexOf(char) >= 0) {
-      initNewMark(status, i, char);
-      addBracketToken(status, i, char, MarkSideType.LEFT);
-    } else if (BRACKET_CHAR_SET.right.indexOf(char) >= 0) {
-      if (!status.lastMark || !status.lastMark.startValue) {
-        addUnmatchedToken(status, i, char);
-        addError(status, i, BRACKET_NOT_OPEN);
-      } else {
-        addBracketToken(status, i, char, MarkSideType.RIGHT);
-        finalizeCurrentMark(status, i, char);
-      }
-    }
+}, ip = (e, r = ke.defaultLogger) => {
+  let t = 0;
+  const s = [];
+  if (e.filter(({ file: n, disabled: i }) => i ? (n ? r.log(`${Ge.blue.bgWhite(n)}: disabled`) : r.log("disabled"), !1) : !0).forEach(({ file: n, origin: i, validations: a }) => {
+    Od(n, i, a, r), t += a.length, n && a.length && s.push(n);
+  }), t) {
+    const n = [];
+    return n.push("Invalid files:"), n.push("- " + s.join(`
+- `) + `
+`), n.push(`Found ${t} ${t > 1 ? "errors" : "error"}.`), r.error(n.join(`
+`)), 1;
+  } else
+    r.log("No error found.");
+}, pa = "括号未闭合", Rd = "括号未匹配", va = "引号未闭合", Id = "引号未匹配", Pd = (e, r, t, s) => {
+  if (Ke(s, e), ls(t)) {
+    sa.left.indexOf(r) >= 0 ? (Fd(s, e, r), ya(s, e, r, W.LEFT)) : sa.right.indexOf(r) >= 0 && (!s.lastMark || !s.lastMark.startValue ? (ba(s, e, r), Be(s, e, Rd)) : (ya(s, e, r, W.RIGHT), Ld(s, e, r)));
     return;
   }
-  if (isQuotationType(type)) {
-    if (QUOTATION_CHAR_SET.neutral.indexOf(char) >= 0) {
-      if (status.lastGroup && char === status.lastGroup.startValue) {
-        finalizeCurrentGroup(status, i, char);
-      } else {
-        initNewGroup(status, i, char);
-      }
-    } else if (QUOTATION_CHAR_SET.left.indexOf(char) >= 0) {
-      initNewGroup(status, i, char);
-    } else if (QUOTATION_CHAR_SET.right.indexOf(char) >= 0) {
-      if (!status.lastGroup || !status.lastGroup.startValue) {
-        addUnmatchedToken(status, i, char);
-        addError(status, i, QUOTE_NOT_OPEN);
-      } else {
-        finalizeCurrentGroup(status, i, char);
-      }
-    }
+  if (cs(t)) {
+    Nt.neutral.indexOf(r) >= 0 ? s.lastGroup && r === s.lastGroup.startValue ? wa(s, e, r) : Aa(s, e, r) : Nt.left.indexOf(r) >= 0 ? Aa(s, e, r) : Nt.right.indexOf(r) >= 0 && (!s.lastGroup || !s.lastGroup.startValue ? (ba(s, e, r), Be(s, e, Id)) : wa(s, e, r));
     return;
   }
-  addSinglePunctuationToken(status, i, char, type);
-};
-const handleLetter = (i, char, type, status) => {
-  if (status.lastToken) {
-    if (status.lastToken.type !== type) {
-      finalizeLastToken(status, i);
-      initNewContent(status, i, char, type);
-    } else {
-      appendValue(status, char);
-    }
-  } else {
-    initNewContent(status, i, char, type);
-  }
-};
-const initNewStatus = (str, hyperMarks) => {
-  const tokens = [];
-  Object.assign(tokens, {
-    type: GroupTokenType.GROUP,
+  qd(s, e, r, t);
+}, ga = (e, r, t, s) => {
+  s.lastToken ? s.lastToken.type !== t ? (Ke(s, e), Ea(s, e, r, t)) : ms(s, r) : Ea(s, e, r, t);
+}, _d = (e, r) => {
+  const t = [];
+  return Object.assign(t, {
+    type: J.GROUP,
     index: 0,
     spaceAfter: "",
     startIndex: 0,
-    endIndex: str.length - 1,
+    endIndex: e.length - 1,
     startValue: "",
     endValue: "",
     innerSpaceBefore: ""
-  });
-  const status = {
+  }), {
     lastToken: void 0,
-    lastGroup: tokens,
+    lastGroup: t,
     lastMark: void 0,
-    tokens,
-    marks: [...hyperMarks],
+    tokens: t,
+    marks: [...r],
     groups: [],
     markStack: [],
     groupStack: [],
     errors: []
   };
-  return status;
-};
-const finalizeLastToken = (status, index2) => {
-  if (status.lastToken) {
-    status.lastToken.length = index2 - status.lastToken.index;
-    status.lastGroup && status.lastGroup.push(status.lastToken);
-    status.lastToken = void 0;
+}, Ke = (e, r) => {
+  e.lastToken && (e.lastToken.length = r - e.lastToken.index, e.lastGroup && e.lastGroup.push(e.lastToken), e.lastToken = void 0);
+}, Xe = (e, r) => {
+  e.lastGroup && e.lastGroup.push(r), e.lastToken = void 0;
+}, Bd = (e) => {
+  switch (e) {
+    case ae.HYPER:
+      return j.HYPER_MARK;
+    case ae.BRACKETS:
+      return j.BRACKET_MARK;
+    case ae.RAW:
+      return j.INDETERMINATED;
   }
-};
-const finalizeCurrentToken = (status, token) => {
-  status.lastGroup && status.lastGroup.push(token);
-  status.lastToken = void 0;
-};
-const markTypeToTokenType = (type) => {
-  switch (type) {
-    case MarkType.HYPER:
-      return HyperTokenType.HYPER_MARK;
-    case MarkType.BRACKETS:
-      return HyperTokenType.BRACKET_MARK;
-    case MarkType.RAW:
-      return HyperTokenType.INDETERMINATED;
-  }
-};
-const addHyperToken = (status, index2, mark, value, markSide) => {
-  const token = {
-    type: markTypeToTokenType(mark.type),
-    index: index2,
-    length: value.length,
-    value,
+}, ma = (e, r, t, s, n) => {
+  const i = {
+    type: Bd(t.type),
+    index: r,
+    length: s.length,
+    value: s,
     spaceAfter: "",
-    mark,
-    markSide
+    // to be finalized
+    mark: t,
+    markSide: n
   };
-  finalizeCurrentToken(status, token);
-};
-const addRawContent = (status, index2, value) => {
-  const token = {
-    type: getHyperContentType(value),
-    index: index2,
-    length: value.length,
-    value,
+  Xe(e, i);
+}, Nd = (e, r, t) => {
+  const s = {
+    type: Vd(t),
+    index: r,
+    length: t.length,
+    value: t,
     spaceAfter: ""
+    // to be finalized
   };
-  finalizeCurrentToken(status, token);
-};
-const initNewMark = (status, index2, char, type = MarkType.BRACKETS) => {
-  if (status.lastMark) {
-    status.markStack.push(status.lastMark);
-    status.lastMark = void 0;
-  }
-  const mark = {
-    type,
-    startIndex: index2,
-    startValue: char,
+  Xe(e, s);
+}, Fd = (e, r, t, s = ae.BRACKETS) => {
+  e.lastMark && (e.markStack.push(e.lastMark), e.lastMark = void 0);
+  const n = {
+    type: s,
+    startIndex: r,
+    startValue: t,
     endIndex: -1,
+    // to be finalized
     endValue: ""
+    // to be finalized
   };
-  status.marks.push(mark);
-  status.lastMark = mark;
-};
-const addBracketToken = (status, index2, char, markSide) => {
-  const token = {
-    type: HyperTokenType.BRACKET_MARK,
-    index: index2,
+  e.marks.push(n), e.lastMark = n;
+}, ya = (e, r, t, s) => {
+  const n = {
+    type: j.BRACKET_MARK,
+    index: r,
     length: 1,
-    value: char,
+    value: t,
     spaceAfter: "",
-    mark: status.lastMark,
-    markSide
+    // to be finalized
+    mark: e.lastMark,
+    markSide: s
   };
-  finalizeCurrentToken(status, token);
-};
-const finalizeCurrentMark = (status, index2, char) => {
-  if (!status.lastMark) {
-    return;
-  }
-  status.lastMark.endIndex = index2;
-  status.lastMark.endValue = char;
-  if (status.markStack.length > 0) {
-    status.lastMark = status.markStack.pop();
-  } else {
-    status.lastMark = void 0;
-  }
-};
-const addSinglePunctuationToken = (status, index2, char, type) => {
-  const token = {
-    type,
-    index: index2,
+  Xe(e, n);
+}, Ld = (e, r, t) => {
+  e.lastMark && (e.lastMark.endIndex = r, e.lastMark.endValue = t, e.markStack.length > 0 ? e.lastMark = e.markStack.pop() : e.lastMark = void 0);
+}, qd = (e, r, t, s) => {
+  Xe(e, {
+    type: s,
+    index: r,
     length: 1,
-    value: char,
+    value: t,
+    spaceAfter: ""
+    // to be finalized
+  });
+}, ba = (e, r, t) => {
+  const s = {
+    type: j.UNMATCHED,
+    index: r,
+    length: 1,
+    value: t,
     spaceAfter: ""
   };
-  finalizeCurrentToken(status, token);
-};
-const addUnmatchedToken = (status, i, char) => {
-  const token = {
-    type: HyperTokenType.UNMATCHED,
-    index: i,
-    length: 1,
-    value: char,
-    spaceAfter: ""
-  };
-  finalizeCurrentToken(status, token);
-};
-const initNewGroup = (status, index2, char) => {
-  status.lastGroup && status.groupStack.push(status.lastGroup);
-  const lastGroup = [];
-  Object.assign(lastGroup, {
-    type: GroupTokenType.GROUP,
-    index: index2,
+  Xe(e, s);
+}, Aa = (e, r, t) => {
+  e.lastGroup && e.groupStack.push(e.lastGroup);
+  const s = [];
+  Object.assign(s, {
+    type: J.GROUP,
+    index: r,
     spaceAfter: "",
-    startIndex: index2,
-    startValue: char,
+    // to be finalized
+    startIndex: r,
+    startValue: t,
     endIndex: -1,
+    // to be finalized
     endValue: "",
+    // to be finalized
     innerSpaceBefore: ""
-  });
-  status.groupStack[status.groupStack.length - 1].push(lastGroup);
-  status.lastGroup = lastGroup;
-  status.groups.push(lastGroup);
-};
-const finalizeCurrentGroup = (status, index2, char) => {
-  if (status.lastGroup) {
-    status.lastGroup.endIndex = index2;
-    status.lastGroup.endValue = char;
-  }
-  if (status.groupStack.length > 0) {
-    status.lastGroup = status.groupStack.pop();
-  } else {
-    status.lastGroup = void 0;
-  }
-};
-const initNewContent = (status, index2, char, type) => {
-  status.lastToken = {
-    type,
-    index: index2,
+    // to be finalized
+  }), e.groupStack[e.groupStack.length - 1].push(s), e.lastGroup = s, e.groups.push(s);
+}, wa = (e, r, t) => {
+  e.lastGroup && (e.lastGroup.endIndex = r, e.lastGroup.endValue = t), e.groupStack.length > 0 ? e.lastGroup = e.groupStack.pop() : e.lastGroup = void 0;
+}, Ea = (e, r, t, s) => {
+  e.lastToken = {
+    type: s,
+    index: r,
     length: 1,
-    value: char,
+    // to be finalized
+    value: t,
+    // to be finalized
     spaceAfter: ""
+    // to be finalized
   };
-};
-const appendValue = (status, char) => {
-  if (status.lastToken) {
-    status.lastToken.value += char;
-    status.lastToken.length++;
-  }
-};
-const getConnectingSpaceLength = (str, start) => {
-  if (checkCharType(str[start]) !== CharType.SPACE) {
+}, ms = (e, r) => {
+  e.lastToken && (e.lastToken.value += r, e.lastToken.length++);
+}, Hd = (e, r) => {
+  if (Le(e[r]) !== L.SPACE)
     return 0;
+  for (let t = r + 1; t < e.length; t++) {
+    const s = e[t];
+    if (Le(s) !== L.SPACE)
+      return t - r;
   }
-  for (let i = start + 1; i < str.length; i++) {
-    const char = str[i];
-    const type = checkCharType(char);
-    if (type !== CharType.SPACE) {
-      return i - start;
-    }
-  }
-  return str.length - start;
-};
-const getPreviousToken = (status) => {
-  if (status.lastGroup) {
-    return status.lastGroup[status.lastGroup.length - 1];
-  }
-};
-const getHyperMarkMap = (hyperMarks) => {
-  const hyperMarkMap = {};
-  hyperMarks.forEach((mark) => {
-    hyperMarkMap[mark.startIndex] = mark;
-    if (mark.type !== MarkType.RAW) {
-      hyperMarkMap[mark.endIndex] = mark;
-    }
-  });
-  return hyperMarkMap;
-};
-const isShorthand = (str, status, index2, char) => {
-  if (SHORTHAND_CHARS.indexOf(char) < 0) {
-    return false;
-  }
-  if (!status.lastToken || status.lastToken.type !== CharType.WESTERN_LETTER) {
-    return false;
-  }
-  const nextChar = str[index2 + 1];
-  const nextType = checkCharType(nextChar);
-  if (nextType === CharType.WESTERN_LETTER || nextType === CharType.SPACE) {
-    if (!status.lastGroup) {
-      return true;
-    }
-    if (status.lastGroup.startValue !== SHORTHAND_PAIR_SET[char]) {
-      return true;
-    }
-  }
-  return false;
-};
-const getHyperContentType = (content) => {
-  if (content.match(/\n/)) {
-    return HyperTokenType.HYPER_CONTENT;
-  }
-  if (content.match(/^<code.*>.*<\/code.*>$/)) {
-    return HyperTokenType.CODE_CONTENT;
-  }
-  if (content.match(/^<.+>$/)) {
-    return HyperTokenType.HYPER_CONTENT;
-  }
-  return HyperTokenType.CODE_CONTENT;
-};
-const addError = (status, index2, message2) => {
-  status.errors.push({
+  return e.length - r;
+}, Md = (e) => {
+  if (e.lastGroup)
+    return e.lastGroup[e.lastGroup.length - 1];
+}, $d = (e) => {
+  const r = {};
+  return e.forEach((t) => {
+    r[t.startIndex] = t, t.type !== ae.RAW && (r[t.endIndex] = t);
+  }), r;
+}, Ud = (e, r, t, s) => {
+  if (nd.indexOf(s) < 0 || !r.lastToken || r.lastToken.type !== L.WESTERN_LETTER || e.length <= t + 1)
+    return !1;
+  const n = e[t + 1], i = Le(n);
+  return (i === L.WESTERN_LETTER || i === L.SPACE) && (!r.lastGroup || r.lastGroup.startValue !== id[s]);
+}, Vd = (e) => e.match(/\n/) ? j.HYPER_CONTENT : e.match(/^<code.*>.*<\/code.*>$/) ? j.CODE_CONTENT : e.match(/^<.+>$/) ? j.HYPER_CONTENT : j.CODE_CONTENT, Be = (e, r, t) => {
+  e.errors.push({
     name: "",
-    index: index2,
+    index: r,
     length: 0,
-    message: message2,
-    target: ValidationTarget.VALUE
+    message: t,
+    target: $.VALUE
   });
-};
-const handleErrors = (status) => {
-  const lastMark = status.lastMark;
-  if (lastMark && lastMark.type === MarkType.BRACKETS && !lastMark.endValue) {
-    addError(status, lastMark.startIndex, BRACKET_NOT_CLOSED);
-  }
-  if (status.markStack.length > 0) {
-    status.markStack.forEach((mark) => {
-      if (mark !== lastMark) {
-        addError(status, mark.startIndex, BRACKET_NOT_CLOSED);
+}, jd = (e) => {
+  const r = e.lastMark;
+  r && r.type === ae.BRACKETS && !r.endValue && Be(e, r.startIndex, pa), e.markStack.length > 0 && e.markStack.forEach((s) => {
+    s !== r && Be(e, s.startIndex, pa);
+  });
+  const t = e.lastGroup;
+  t && t.startValue && !t.endValue && Be(e, t.startIndex, va), e.groupStack.length > 0 && e.groupStack.forEach((s) => {
+    s !== t && s.startValue && !s.endValue && Be(e, s.startIndex, va);
+  });
+}, Wd = (e, r = []) => {
+  const t = _d(e, r), s = $d(r);
+  for (let n = 0; n < e.length; n++) {
+    const i = e[n], a = Le(i), o = s[n];
+    if (o)
+      Ke(t, n), delete s[n], o.type === ae.RAW ? (Nd(
+        t,
+        n,
+        e.substring(o.startIndex, o.endIndex)
+      ), n = o.endIndex - 1) : n === o.startIndex ? (ma(
+        t,
+        n,
+        o,
+        o.startValue,
+        W.LEFT
+      ), n += o.startValue.length - 1) : n === o.endIndex && (ma(
+        t,
+        n,
+        o,
+        o.endValue,
+        W.RIGHT
+      ), n += o.endValue.length - 1);
+    else if (a === L.SPACE) {
+      if (Ke(t, n), t.lastGroup) {
+        const c = Hd(e, n), l = e.substring(n, n + c);
+        if (t.lastGroup.length) {
+          const u = Md(t);
+          u && (u.spaceAfter = l);
+        } else
+          t.lastGroup.innerSpaceBefore = l;
+        c - 1 > 0 && (n += c - 1);
       }
-    });
+    } else
+      Ud(e, t, n, i) ? ms(t, i) : cd(a) ? Pd(n, i, a, t) : re(a) ? ga(n, i, a, t) : a === L.EMPTY || ga(n, i, L.WESTERN_LETTER, t);
   }
-  const lastGroup = status.lastGroup;
-  if (lastGroup && lastGroup.startValue && !lastGroup.endValue) {
-    addError(status, lastGroup.startIndex, QUOTE_NOT_CLOSED);
-  }
-  if (status.groupStack.length > 0) {
-    status.groupStack.forEach((group) => {
-      if (group !== lastGroup && group.startValue && !group.endValue) {
-        addError(status, group.startIndex, QUOTE_NOT_CLOSED);
-      }
-    });
-  }
-};
-const parse = (str, hyperMarks = []) => {
-  const status = initNewStatus(str, hyperMarks);
-  const hyperMarkMap = getHyperMarkMap(hyperMarks);
-  for (let i = 0; i < str.length; i++) {
-    const char = str[i];
-    const type = checkCharType(char);
-    const hyperMark = hyperMarkMap[i];
-    if (hyperMark) {
-      finalizeLastToken(status, i);
-      delete hyperMarkMap[i];
-      if (hyperMark.type === MarkType.RAW) {
-        addRawContent(
-          status,
-          i,
-          str.substring(hyperMark.startIndex, hyperMark.endIndex)
-        );
-        i = hyperMark.endIndex - 1;
-      } else {
-        if (i === hyperMark.startIndex) {
-          addHyperToken(
-            status,
-            i,
-            hyperMark,
-            hyperMark.startValue,
-            MarkSideType.LEFT
-          );
-          i += hyperMark.startValue.length - 1;
-        } else if (i === hyperMark.endIndex) {
-          addHyperToken(
-            status,
-            i,
-            hyperMark,
-            hyperMark.endValue,
-            MarkSideType.RIGHT
-          );
-          i += hyperMark.endValue.length - 1;
-        }
-      }
-    } else if (type === CharType.SPACE) {
-      finalizeLastToken(status, i);
-      if (status.lastGroup) {
-        const spaceLength = getConnectingSpaceLength(str, i);
-        const spaces = str.substring(i, i + spaceLength);
-        if (status.lastGroup.length) {
-          const lastToken = getPreviousToken(status);
-          if (lastToken) {
-            lastToken.spaceAfter = spaces;
-          }
-        } else {
-          status.lastGroup.innerSpaceBefore = spaces;
-        }
-        if (spaceLength - 1 > 0) {
-          i += spaceLength - 1;
-        }
-      }
-    } else if (isShorthand(str, status, i, char)) {
-      appendValue(status, char);
-    } else if (isPunctuationType(type)) {
-      handlePunctuation(i, char, type, status);
-    } else if (isLetterType(type)) {
-      handleLetter(i, char, type, status);
-    } else if (type === CharType.EMPTY)
-      ;
-    else {
-      handleLetter(i, char, CharType.WESTERN_LETTER, status);
-    }
-  }
-  finalizeLastToken(status, str.length);
-  handleErrors(status);
-  return {
-    tokens: status.tokens,
-    groups: status.groups,
-    marks: status.marks,
-    errors: status.errors
+  return Ke(t, e.length), jd(t), {
+    tokens: t.tokens,
+    groups: t.groups,
+    marks: t.marks,
+    errors: t.errors
   };
-};
-const toMutableToken = (token) => {
-  if (Array.isArray(token)) {
-    const mutableToken = token;
-    mutableToken.modifiedType = token.type;
-    mutableToken.modifiedValue = token.value;
-    mutableToken.modifiedSpaceAfter = token.spaceAfter;
-    mutableToken.modifiedStartValue = token.startValue;
-    mutableToken.modifiedEndValue = token.endValue;
-    mutableToken.modifiedInnerSpaceBefore = token.innerSpaceBefore;
-    mutableToken.validations = [];
-    token.forEach(toMutableToken);
-    return mutableToken;
+}, ys = (e) => {
+  if (Array.isArray(e)) {
+    const r = e;
+    return r.modifiedType = e.type, r.modifiedValue = e.value, r.modifiedSpaceAfter = e.spaceAfter, r.modifiedStartValue = e.startValue, r.modifiedEndValue = e.endValue, r.modifiedInnerSpaceBefore = e.innerSpaceBefore, r.validations = [], e.forEach(ys), r;
   } else {
-    const mutableToken = token;
-    mutableToken.modifiedType = token.type;
-    mutableToken.modifiedValue = token.value;
-    mutableToken.modifiedSpaceAfter = token.spaceAfter;
-    mutableToken.validations = [];
-    return mutableToken;
+    const r = e;
+    return r.modifiedType = e.type, r.modifiedValue = e.value, r.modifiedSpaceAfter = e.spaceAfter, r.validations = [], r;
   }
-};
-const toMutableMark = (mark) => {
-  const mutableMark = mark;
-  mutableMark.modifiedStartValue = mark.startValue;
-  mutableMark.modifiedEndValue = mark.endValue;
-  return mutableMark;
-};
-const toMutableResult = (result, options = {}) => {
-  if (!options.noSinglePair) {
-    result.errors.length = 0;
+}, zd = (e) => {
+  const r = e;
+  return r.modifiedStartValue = e.startValue, r.modifiedEndValue = e.endValue, r;
+}, Dd = (e, r = {}) => (r.noSinglePair || (e.errors.length = 0), ys(e.tokens), e.marks.forEach(zd), e), bs = (e, r) => {
+  for (let t = 0; t < e.length; t++) {
+    const s = e[t];
+    r(s, t, e), Array.isArray(s) && bs(s, r);
   }
-  toMutableToken(result.tokens);
-  result.marks.forEach(toMutableMark);
-  return result;
-};
-const travel = (group, handler) => {
-  for (let i = 0; i < group.length; i++) {
-    const token = group[i];
-    handler(token, i, group);
-    if (Array.isArray(token)) {
-      travel(token, handler);
-    }
-  }
-};
-const parsePosition = (position2) => {
-  var _a2, _b2;
+}, Gd = (e) => {
+  var r, t;
   return {
-    start: ((_a2 = position2 == null ? void 0 : position2.start) == null ? void 0 : _a2.offset) || 0,
-    end: ((_b2 = position2 == null ? void 0 : position2.end) == null ? void 0 : _b2.offset) || 0
+    start: ((r = e == null ? void 0 : e.start) == null ? void 0 : r.offset) || 0,
+    end: ((t = e == null ? void 0 : e.end) == null ? void 0 : t.offset) || 0
   };
-};
-const isParent = (node) => {
-  return node.children !== void 0;
-};
-const blockTypes = ["paragraph", "heading", "table-cell"];
-const isBlock = (node) => {
-  return blockTypes.indexOf(node.type) >= 0;
-};
-const inlineContentTypes = [
+}, As = (e) => e.children !== void 0, Kd = ["paragraph", "heading", "table-cell"], Qd = (e) => Kd.indexOf(e.type) >= 0, Yd = [
   "emphasis",
   "strong",
   "delete",
   "footnote",
   "link",
   "linkReference"
-];
-const isInlineContent = (node) => {
-  return inlineContentTypes.indexOf(node.type) >= 0;
-};
-const inlineRawTypes = [
+], Jd = (e) => Yd.indexOf(e.type) >= 0, Xd = [
   "inlineCode",
   "break",
   "image",
   "imageReference",
   "footnoteReference",
   "html"
-];
-const isInlineRaw = (node) => {
-  return inlineRawTypes.indexOf(node.type) >= 0;
-};
-const travelBlocks = (node, blocks) => {
-  if (isParent(node)) {
-    node.children.forEach((child) => {
-      if (child.type === "yaml") {
-        return;
-      }
-      if (isBlock(child)) {
-        const blockMark = {
-          block: child,
+], ws = (e) => Xd.indexOf(e.type) >= 0, Es = (e, r) => {
+  As(e) && e.children.forEach((t) => {
+    if (t.type !== "yaml")
+      if (Qd(t)) {
+        const s = {
+          block: t,
           inlineMarks: [],
           hyperMarks: [],
           value: ""
+          // to be initialzed
         };
-        blocks.push(blockMark);
-        travelInlines(child, blockMark);
-      } else {
-        travelBlocks(child, blocks);
-      }
-    });
-  }
-};
-const travelInlines = (node, blockMark) => {
-  if (isParent(node)) {
-    node.children.forEach((child) => {
-      if (isInlineContent(child)) {
-        blockMark.inlineMarks.push({ inline: child, raw: false });
-        travelInlines(child, blockMark);
-      }
-      if (isInlineRaw(child)) {
-        blockMark.inlineMarks.push({ inline: child, raw: true });
-      }
-    });
-  }
-};
-const processBlockMark = (blockMark, str) => {
-  const { block, inlineMarks } = blockMark;
-  if (!block.position) {
+        r.push(s), Ts(t, s);
+      } else
+        Es(t, r);
+  });
+}, Ts = (e, r) => {
+  As(e) && e.children.forEach((t) => {
+    Jd(t) && (r.inlineMarks.push({ inline: t, raw: !1 }), Ts(t, r)), ws(t) && r.inlineMarks.push({ inline: t, raw: !0 });
+  });
+}, Zd = (e, r) => {
+  const { block: t, inlineMarks: s } = e;
+  if (!t.position)
     return;
-  }
-  const offset = block.position.start.offset || 0;
-  const marks = [];
-  const unresolvedCodeMarks = [];
-  inlineMarks.forEach((inlineMark) => {
-    const { inline } = inlineMark;
-    if (!inline.position) {
+  const n = t.position.start.offset || 0, i = [], a = [];
+  s.forEach((o) => {
+    const { inline: c } = o;
+    if (!c.position)
       return;
-    }
-    const startOffset = inline.position.start.offset || 0;
-    const endOffset = inline.position.end.offset || 0;
-    if (isInlineRaw(inline)) {
-      const mark = {
-        type: MarkType.RAW,
-        meta: inline.type,
-        startIndex: startOffset - offset,
-        endIndex: endOffset - offset,
-        startValue: str.substring(startOffset, endOffset),
+    const l = c.position.start.offset || 0, u = c.position.end.offset || 0;
+    if (ws(c)) {
+      const f = {
+        type: ae.RAW,
+        // TODO: typeof RawMark.meta
+        meta: c.type,
+        startIndex: l - n,
+        endIndex: u - n,
+        startValue: r.substring(l, u),
         endValue: ""
       };
-      if (mark.startValue.match(/<code.*>/)) {
-        const rawMark = { ...mark, code: MarkSideType.LEFT };
-        unresolvedCodeMarks.push(rawMark);
-        marks.push(rawMark);
+      if (f.startValue.match(/<code.*>/)) {
+        const d = { ...f, code: W.LEFT };
+        a.push(d), i.push(d);
         return;
-      } else if (mark.startValue.match(/<\/code.*>/)) {
-        const rawMark = { ...mark, code: MarkSideType.RIGHT };
-        const leftCode = unresolvedCodeMarks.pop();
-        if (leftCode) {
-          leftCode.rightPair = rawMark;
-        }
-        marks.push(rawMark);
+      } else if (f.startValue.match(/<\/code.*>/)) {
+        const d = { ...f, code: W.RIGHT }, h = a.pop();
+        h && (h.rightPair = d), i.push(d);
         return;
       }
-      marks.push(mark);
+      i.push(f);
     } else {
-      const firstChild = inline.children[0];
-      const lastChild = inline.children[inline.children.length - 1];
-      if (!firstChild.position || !lastChild.position) {
+      const f = c.children[0], d = c.children[c.children.length - 1];
+      if (!f.position || !d.position)
         return;
-      }
-      const innerStartOffset = firstChild.position.start.offset || 0;
-      const innerEndOffset = lastChild.position.end.offset || 0;
-      const mark = {
-        type: MarkType.HYPER,
-        meta: inline.type,
-        startIndex: startOffset - offset,
-        startValue: str.substring(startOffset, innerStartOffset),
-        endIndex: innerEndOffset - offset,
-        endValue: str.substring(innerEndOffset, endOffset)
+      const h = f.position.start.offset || 0, m = d.position.end.offset || 0, y = {
+        type: ae.HYPER,
+        // TODO: typeof RawMark.meta
+        meta: c.type,
+        startIndex: l - n,
+        startValue: r.substring(l, h),
+        endIndex: m - n,
+        endValue: r.substring(m, u)
       };
-      marks.push(mark);
+      i.push(y);
     }
-  });
-  blockMark.value = str.substring(
-    block.position.start.offset || 0,
-    block.position.end.offset || 0
-  );
-  blockMark.hyperMarks = marks.map((mark) => {
-    if (isRawMark(mark)) {
-      if (mark.code === MarkSideType.RIGHT) {
+  }), e.value = r.substring(
+    t.position.start.offset || 0,
+    t.position.end.offset || 0
+  ), e.hyperMarks = i.map((o) => {
+    if (sd(o)) {
+      if (o.code === W.RIGHT)
         return;
-      }
-      if (mark.code === MarkSideType.LEFT) {
-        const { rightPair } = mark;
-        mark.startValue = str.substring(
-          mark.startIndex + offset,
-          mark.endIndex + offset
-        );
-        mark.endIndex = (rightPair == null ? void 0 : rightPair.endIndex) || 0;
-        mark.endValue = "";
-        delete mark.rightPair;
+      if (o.code === W.LEFT) {
+        const { rightPair: c } = o;
+        o.startValue = r.substring(
+          o.startIndex + n,
+          o.endIndex + n
+        ), o.endIndex = (c == null ? void 0 : c.endIndex) || 0, o.endValue = "", delete o.rightPair;
       }
     }
-    return mark;
+    return o;
   }).filter(Boolean);
-};
-const parser = (data) => {
-  const value = data.value;
-  const modifiedValue = data.modifiedValue;
-  const ignoredByParsers = data.ignoredByParsers;
-  const blockMarks = [];
-  const tree = unified_1().use(remarkParse).use(remarkFrontmatter).parse(modifiedValue);
-  travelBlocks(tree, blockMarks);
-  blockMarks.forEach((blockMark) => processBlockMark(blockMark, value));
-  data.blocks = blockMarks.map((b) => {
-    const position2 = parsePosition(b.block.position);
-    ignoredByParsers.forEach(({ index: index2, length, originValue: raw, meta }) => {
-      if (position2.start <= index2 && position2.end >= index2 + length) {
-        if (b.hyperMarks) {
-          b.hyperMarks.push({
-            type: MarkType.RAW,
-            meta,
-            startIndex: index2 - position2.start,
-            startValue: raw,
-            endIndex: index2 - position2.start + length,
-            endValue: ""
-          });
-        }
-      }
-    });
-    return {
-      value: b.value || "",
-      marks: b.hyperMarks || [],
-      ...position2
+}, eh = (e) => {
+  const r = e.value, t = e.modifiedValue, s = e.ignoredByParsers, n = [], i = Mo().use(Fu).use(td).parse(t);
+  return Es(i, n), n.forEach((a) => Zd(a, r)), e.blocks = n.map((a) => {
+    const o = Gd(a.block.position);
+    return s.forEach(({ index: c, length: l, originValue: u, meta: f }) => {
+      o.start <= c && o.end >= c + l && a.hyperMarks && a.hyperMarks.push({
+        type: ae.RAW,
+        meta: f,
+        startIndex: c - o.start,
+        startValue: u,
+        endIndex: c - o.start + l,
+        endValue: ""
+      });
+    }), {
+      value: a.value || "",
+      marks: a.hyperMarks || [],
+      ...o
     };
-  });
-  data.ignoredByParsers = [];
-  return data;
-};
-const CODE_SPACE_OUTSIDE = "\u6B64\u5904\u5185\u8054\u4EE3\u7801\u7684\u5916\u90E8\u9700\u8981\u4E00\u4E2A\u7A7A\u683C";
-const CODE_NOSPACE_OUTSIDE = "\u6B64\u5904\u5185\u8054\u4EE3\u7801\u7684\u5916\u90E8\u4E0D\u9700\u8981\u7A7A\u683C";
-const MARKDOWN_NOSPACE_INSIDE = "\u6B64\u5904 Markdown \u6807\u8BB0\u7684\u5185\u90E8\u4E0D\u9700\u8981\u7A7A\u683C";
-const PUNCTUATION_UNIFICATION = "\u6B64\u5904\u5B57\u7B26\u9700\u8981\u7EDF\u4E00";
-const PUNCTUATION_FULL_WIDTH = "\u6B64\u5904\u6807\u70B9\u7B26\u53F7\u9700\u8981\u4F7F\u7528\u5168\u89D2";
-const PUNCTUATION_HALF_WIDTH = "\u6B64\u5904\u6807\u70B9\u7B26\u53F7\u9700\u8981\u4F7F\u7528\u534A\u89D2";
-const PUNCTUATION_NOSPACE_BEFORE = "\u6B64\u5904\u6807\u70B9\u7B26\u53F7\u524D\u4E0D\u9700\u8981\u7A7A\u683C";
-const PUNCTUATION_NOSPACE_AFTER = "\u6B64\u5904\u6807\u70B9\u7B26\u53F7\u540E\u4E0D\u9700\u8981\u7A7A\u683C";
-const PUNCTUATION_SPACE_AFTER = "\u6B64\u5904\u6807\u70B9\u7B26\u53F7\u540E\u9700\u8981\u4E00\u4E2A\u7A7A\u683C";
-const BRACKET_NOSPACE_INSIDE = "\u6B64\u5904\u62EC\u53F7\u7684\u5185\u90E8\u4E0D\u9700\u8981\u7A7A\u683C";
-const BRACKET_NOSPACE_OUTSIDE = "\u6B64\u5904\u62EC\u53F7\u7684\u5916\u90E8\u4E0D\u9700\u8981\u7A7A\u683C";
-const BRACKET_SPACE_OUTSIDE = "\u6B64\u5904\u62EC\u53F7\u7684\u5916\u90E8\u9700\u8981\u4E00\u4E2A\u7A7A\u683C";
-const CONTENT_SPACE_HALF_WIDTH = "\u6B64\u5904\u534A\u89D2\u5185\u5BB9\u4E4B\u95F4\u9700\u8981\u4E00\u4E2A\u7A7A\u683C";
-const CONTENT_NOSPACE_FULL_WIDTH = "\u6B64\u5904\u5168\u89D2\u5185\u5BB9\u4E4B\u95F4\u4E0D\u9700\u8981\u7A7A\u683C";
-const CONTENT_SPACE_MIXED_WIDTH = "\u6B64\u5904\u4E2D\u82F1\u6587\u5185\u5BB9\u4E4B\u95F4\u9700\u8981\u4E00\u4E2A\u7A7A\u683C";
-const CONTENT_NOSPACE_MIXED_WIDTH = "\u6B64\u5904\u4E2D\u82F1\u6587\u5185\u5BB9\u4E4B\u95F4\u9700\u8981\u4E00\u4E2A\u7A7A\u683C";
-const QUOTE_NOSPACE_INSIDE = "\u6B64\u5904\u5F15\u53F7\u7684\u5185\u90E8\u4E0D\u9700\u8981\u7A7A\u683C";
-const QUOTE_NOSPACE_OUTSIDE = "\u6B64\u5904\u5F15\u53F7\u7684\u5916\u90E8\u4E0D\u9700\u8981\u7A7A\u683C";
-const QUOTE_SPACE_OUTSIDE = "\u6B64\u5904\u5F15\u53F7\u7684\u5916\u90E8\u9700\u8981\u4E00\u4E2A\u7A7A\u683C";
-const TRIM_SPACE = "\u6B64\u5904\u9700\u8981\u53BB\u9664\u5916\u90E8\u7A7A\u683C";
-const findTokenBefore = (group, token) => {
-  if (!token) {
+  }), e.ignoredByParsers = [], e;
+}, rh = "此处内联代码的外部需要一个空格", th = "此处内联代码的外部不需要空格", Ut = "此处 Markdown 标记的内部不需要空格", Vt = "此处字符需要统一", jt = "此处标点符号需要使用全角", Wt = "此处标点符号需要使用半角", nh = "此处标点符号前不需要空格", ih = "此处标点符号后不需要空格", ah = "此处标点符号后需要一个空格", Ta = "此处括号的内部不需要空格", Ie = "此处括号的外部不需要空格", zt = "此处括号的外部需要一个空格", sh = "此处半角内容之间需要一个空格", oh = "此处全角内容之间不需要空格", ch = "此处中英文内容之间需要一个空格", lh = "此处中英文内容之间需要一个空格", Dt = "此处引号的内部不需要空格", ze = "此处引号的外部不需要空格", or = "此处引号的外部需要一个空格", De = "此处需要去除外部空格", pe = (e, r) => {
+  if (!r)
     return;
-  }
-  const index2 = group.indexOf(token);
-  if (index2 < 0) {
+  const t = e.indexOf(r);
+  if (!(t < 0))
+    return e[t - 1];
+}, te = (e, r) => {
+  if (!r)
     return;
-  }
-  return group[index2 - 1];
-};
-const findTokenAfter = (group, token) => {
-  if (!token) {
+  const t = e.indexOf(r);
+  if (!(t < 0))
+    return e[t + 1];
+}, Sn = (e, r) => {
+  if (!r)
     return;
+  const t = pe(e, r);
+  if (t) {
+    if (wr(t.type) || Ue(t))
+      return Sn(e, t);
+    if (Tn(t.type))
+      return t;
   }
-  const index2 = group.indexOf(token);
-  if (index2 < 0) {
+}, xr = (e, r) => {
+  if (!r)
     return;
+  const t = te(e, r);
+  if (t) {
+    if (wr(t.type) || Ue(t))
+      return xr(e, t);
+    if (Tn(t.type))
+      return t;
   }
-  return group[index2 + 1];
-};
-const findNonCodeVisibleTokenBefore = (group, token) => {
-  if (!token) {
+}, Ze = (e, r) => {
+  if (!r)
     return;
+  const t = pe(e, r);
+  if (t) {
+    if (wr(t.type) || Ue(t))
+      return Ze(e, t);
+    if (us(t.type))
+      return t;
   }
-  const beforeToken = findTokenBefore(group, token);
-  if (!beforeToken) {
+}, $e = (e, r) => {
+  if (!r)
     return;
+  const t = te(e, r);
+  if (t) {
+    if (wr(t.type) || Ue(t))
+      return $e(e, t);
+    if (us(t.type))
+      return t;
   }
-  if (isInvisibleType(beforeToken.type) || getHtmlTagSide(beforeToken)) {
-    return findNonCodeVisibleTokenBefore(group, beforeToken);
+}, fh = (e) => e.type !== j.HYPER_CONTENT ? !1 : !!e.value.match(/^<.+>$/), Ue = (e) => {
+  if (fh(e) && !e.value.match(/^<code.*>.*<\/code.*>$/) && !e.value.match(/^<[^/].+\/\s*>$/)) {
+    if (e.value.match(/^<[^/].+>$/))
+      return W.LEFT;
+    if (e.value.match(/^<\/.+>$/))
+      return W.RIGHT;
   }
-  if (isNonCodeVisibleType(beforeToken.type)) {
-    return beforeToken;
-  }
-  return;
-};
-const findNonCodeVisibleTokenAfter = (group, token) => {
-  if (!token) {
-    return;
-  }
-  const afterToken = findTokenAfter(group, token);
-  if (!afterToken) {
-    return;
-  }
-  if (isInvisibleType(afterToken.type) || getHtmlTagSide(afterToken)) {
-    return findNonCodeVisibleTokenAfter(group, afterToken);
-  }
-  if (isNonCodeVisibleType(afterToken.type)) {
-    return afterToken;
-  }
-  return;
-};
-const findVisibleTokenBefore = (group, token) => {
-  if (!token) {
-    return;
-  }
-  const beforeToken = findTokenBefore(group, token);
-  if (!beforeToken) {
-    return;
-  }
-  if (isInvisibleType(beforeToken.type) || getHtmlTagSide(beforeToken)) {
-    return findVisibleTokenBefore(group, beforeToken);
-  }
-  if (isVisibleType(beforeToken.type)) {
-    return beforeToken;
-  }
-  return;
-};
-const findVisibleTokenAfter = (group, token) => {
-  if (!token) {
-    return;
-  }
-  const afterToken = findTokenAfter(group, token);
-  if (!afterToken) {
-    return;
-  }
-  if (isInvisibleType(afterToken.type) || getHtmlTagSide(afterToken)) {
-    return findVisibleTokenAfter(group, afterToken);
-  }
-  if (isVisibleType(afterToken.type)) {
-    return afterToken;
-  }
-  return;
-};
-const isHtmlTag = (token) => {
-  if (token.type !== HyperTokenType.HYPER_CONTENT) {
-    return false;
-  }
-  return !!token.value.match(/^<.+>$/);
-};
-const getHtmlTagSide = (token) => {
-  if (!isHtmlTag(token)) {
-    return;
-  }
-  if (token.value.match(/^<code.*>.*<\/code.*>$/)) {
-    return;
-  }
-  if (token.value.match(/^<[^/].+\/\s*>$/)) {
-    return;
-  }
-  if (token.value.match(/^<[^/].+>$/)) {
-    return MarkSideType.LEFT;
-  }
-  if (token.value.match(/^<\/.+>$/)) {
-    return MarkSideType.RIGHT;
-  }
-};
-const isWrapper = (token) => {
-  return token.type === HyperTokenType.HYPER_MARK || !!getHtmlTagSide(token);
-};
-const getWrapperSide = (token) => {
-  if (token.type === HyperTokenType.HYPER_MARK) {
-    return token.markSide;
-  }
-  return getHtmlTagSide(token);
-};
-const spreadHyperMarkSeq = (group, token, seq, isBackward) => {
-  if (isBackward) {
-    const tokenBefore = findTokenBefore(group, token);
-    if (tokenBefore && isWrapper(tokenBefore)) {
-      seq.unshift(tokenBefore);
-      spreadHyperMarkSeq(group, tokenBefore, seq, isBackward);
-    }
+}, ye = (e) => e.type === j.HYPER_MARK || !!Ue(e), Qe = (e) => e.type === j.HYPER_MARK ? e.markSide : Ue(e), vr = (e, r, t, s) => {
+  if (s) {
+    const n = pe(e, r);
+    n && ye(n) && (t.unshift(n), vr(e, n, t, s));
   } else {
-    const tokenAfter = findTokenAfter(group, token);
-    if (tokenAfter && isWrapper(tokenAfter)) {
-      seq.push(tokenAfter);
-      spreadHyperMarkSeq(group, tokenAfter, seq, isBackward);
-    }
+    const n = te(e, r);
+    n && ye(n) && (t.push(n), vr(e, n, t, s));
   }
-};
-const findConnectedWrappers = (group, token) => {
-  const seq = [token];
-  spreadHyperMarkSeq(group, token, seq, false);
-  spreadHyperMarkSeq(group, token, seq, true);
-  return seq;
-};
-const findSpaceHostInHyperMarkSeq = (group, hyperMarkSeq) => {
-  if (!hyperMarkSeq.length) {
+}, rn = (e, r) => {
+  const t = [r];
+  return vr(e, r, t, !1), vr(e, r, t, !0), t;
+}, uh = (e, r) => {
+  if (!r.length)
     return;
-  }
-  const firstMark = hyperMarkSeq[0];
-  const lastMark = hyperMarkSeq[hyperMarkSeq.length - 1];
-  const firstMarkSide = getWrapperSide(firstMark);
-  const lastMarkSide = getWrapperSide(lastMark);
-  const tokenBefore = findTokenBefore(group, firstMark);
-  if (!tokenBefore) {
+  const t = r[0], s = r[r.length - 1], n = Qe(t), i = Qe(s), a = pe(e, t);
+  if (!a || !n || !i)
     return;
-  }
-  if (!firstMarkSide || !lastMarkSide) {
+  if (n === i)
+    return n === W.LEFT ? a : s;
+  if (n === W.LEFT)
     return;
+  let o = a;
+  for (; o && o !== s; ) {
+    const c = te(e, o);
+    if (c && Qe(c) === W.LEFT)
+      return o;
+    o = c;
   }
-  if (firstMarkSide === lastMarkSide) {
-    if (firstMarkSide === MarkSideType.LEFT) {
-      return tokenBefore;
-    }
-    return lastMark;
-  }
-  if (firstMarkSide === MarkSideType.LEFT) {
-    return;
-  }
-  let target = tokenBefore;
-  while (target && target !== lastMark) {
-    const nextToken = findTokenAfter(group, target);
-    if (nextToken && getWrapperSide(nextToken) === MarkSideType.LEFT) {
-      return target;
-    }
-    target = nextToken;
-  }
-  return tokenBefore;
-};
-const findWrappersBetween = (group, before, after) => {
-  if (!before || !after) {
+  return a;
+}, Z = (e, r, t) => {
+  if (!r || !t)
     return {
       spaceHost: void 0,
       wrappers: [],
       tokens: []
     };
-  }
-  const firstMark = findTokenAfter(group, before);
-  const firstVisible = findVisibleTokenAfter(group, before);
-  if (!firstMark || firstVisible !== after) {
+  const s = te(e, r), n = $e(e, r);
+  if (!s || n !== t)
     return {
       spaceHost: void 0,
       wrappers: [],
       tokens: []
     };
-  }
-  if (firstMark === after) {
+  if (s === t)
     return {
-      spaceHost: before,
+      spaceHost: r,
       wrappers: [],
-      tokens: [before]
+      tokens: [r]
     };
-  }
-  const markSeq = findConnectedWrappers(group, firstMark);
-  const spaceHost = findSpaceHostInHyperMarkSeq(group, markSeq);
+  const i = rn(e, s);
   return {
-    spaceHost,
-    wrappers: markSeq,
-    tokens: [before, ...markSeq]
+    spaceHost: uh(e, i),
+    wrappers: i,
+    tokens: [r, ...i]
   };
-};
-const isHalfwidthPunctuationWithoutSpaceAround = (group, token) => {
-  const tokenBefore = findTokenBefore(group, token);
-  const tokenAfter = findTokenAfter(group, token);
-  if (isHalfwidthPunctuationType(token.type) && tokenBefore && tokenBefore.type === CharType.WESTERN_LETTER && tokenAfter && tokenAfter.type === CharType.WESTERN_LETTER) {
-    return !tokenBefore.spaceAfter && !token.spaceAfter;
+}, ks = (e, r) => {
+  const t = pe(e, r), s = te(e, r);
+  return be(r.type) && t && t.type === L.WESTERN_LETTER && s && s.type === L.WESTERN_LETTER ? !t.spaceAfter && !r.spaceAfter : !1;
+}, xs = (e, r) => {
+  if (be(r.type)) {
+    const t = pe(e, r), s = te(e, r);
+    if (t && be(t.type) && !t.spaceAfter || s && be(s.type) && !r.spaceAfter)
+      return !0;
   }
-  return false;
-};
-const isSuccessiveHalfwidthPunctuation = (group, token) => {
-  if (isHalfwidthPunctuationType(token.type)) {
-    const tokenBefore = findTokenBefore(group, token);
-    const tokenAfter = findTokenAfter(group, token);
-    if (tokenBefore && isHalfwidthPunctuationType(tokenBefore.type) && !tokenBefore.spaceAfter || tokenAfter && isHalfwidthPunctuationType(tokenAfter.type) && !token.spaceAfter) {
-      return true;
-    }
-  }
-  return false;
-};
-const createValidation = (token, target, message2, name2) => {
-  const validation = {
-    index: token.index,
-    length: token.length,
-    target,
-    name: name2,
-    message: message2
+  return !1;
+}, dh = (e, r, t, s) => {
+  const n = {
+    index: e.index,
+    length: e.length,
+    target: r,
+    name: s,
+    message: t
   };
-  if (target === ValidationTarget.START_VALUE) {
-    validation.index = token.startIndex;
-    validation.length = 0;
-  } else if (target === ValidationTarget.END_VALUE) {
-    validation.index = token.endIndex;
-    validation.length = 0;
-  } else if (target === ValidationTarget.INNER_SPACE_BEFORE) {
-    validation.index = token.startIndex;
-    validation.length = token.startValue.length;
-  }
-  return validation;
-};
-const setValidationOnTarget = (token, target, message2, name2) => {
-  const validation = createValidation(token, target, message2, name2);
-  removeValidationOnTarget(token, target);
-  token.validations.push(validation);
-};
-const removeValidationOnTarget = (token, target) => {
-  token.validations = token.validations.filter(
-    (validation) => validation.target !== target
+  return r === $.START_VALUE ? (n.index = e.startIndex, n.length = 0) : r === $.END_VALUE ? (n.index = e.endIndex, n.length = 0) : r === $.INNER_SPACE_BEFORE && (n.index = e.startIndex, n.length = e.startValue.length), n;
+}, Ss = (e, r, t, s) => {
+  const n = dh(e, r, t, s);
+  X(e, r), e.validations.push(n);
+}, X = (e, r) => {
+  e.validations = e.validations.filter(
+    (t) => t.target !== r
   );
-};
-const genChecker = (key, target) => {
-  return (token, value, message2) => {
-    if (token[key] !== value) {
-      token[key] = value;
-      setValidationOnTarget(token, target, message2, "");
-    }
-  };
-};
-const checkSpaceAfter = genChecker(
+}, Sr = (e, r) => (t, s, n) => {
+  t[e] !== s && (t[e] = s, Ss(t, r, n, ""));
+}, V = Sr(
   "modifiedSpaceAfter",
-  ValidationTarget.SPACE_AFTER
-);
-const checkStartValue = genChecker(
+  $.SPACE_AFTER
+), tn = Sr(
   "modifiedStartValue",
-  ValidationTarget.START_VALUE
-);
-const checkEndValue = genChecker(
+  $.START_VALUE
+), nn = Sr(
   "modifiedEndValue",
-  ValidationTarget.END_VALUE
-);
-const checkInnerSpaceBefore = genChecker(
+  $.END_VALUE
+), an = Sr(
   "modifiedInnerSpaceBefore",
-  ValidationTarget.INNER_SPACE_BEFORE
-);
-const checkValue = (token, value, type, message2) => {
-  if (token.modifiedValue === value) {
-    return;
-  }
-  token.modifiedValue = value;
-  if (type) {
-    token.modifiedType = type;
-  }
-  setValidationOnTarget(token, ValidationTarget.VALUE, message2, "");
-};
-const generateHandler$c = (options) => {
-  const trimSpaceOption = options == null ? void 0 : options.trimSpace;
-  return (token, index2, group) => {
-    if (!trimSpaceOption) {
-      return;
-    }
-    if (!group.startValue && index2 === 0) {
-      if (group.modifiedInnerSpaceBefore) {
-        checkInnerSpaceBefore(group, "", TRIM_SPACE);
-      }
-      if (isWrapper(token)) {
-        findConnectedWrappers(group, token).forEach(
-          (x) => checkSpaceAfter(x, "", TRIM_SPACE)
-        );
-      }
-      const lastToken = group[group.length - 1];
-      if (lastToken) {
-        if (isWrapper(lastToken)) {
-          const lastContentToken = findVisibleTokenBefore(group, token);
-          if (lastContentToken) {
-            findConnectedWrappers(group, lastToken).forEach(
-              (x) => checkSpaceAfter(x, "", TRIM_SPACE)
-            );
-            checkSpaceAfter(lastContentToken, "", TRIM_SPACE);
-          }
-        } else {
-          checkSpaceAfter(lastToken, "", TRIM_SPACE);
-        }
-      }
+  $.INNER_SPACE_BEFORE
+), sn = (e, r, t, s) => {
+  e.modifiedValue !== r && (e.modifiedValue = r, t && (e.modifiedType = t), Ss(e, $.VALUE, s, ""));
+}, hh = (e) => {
+  const r = e == null ? void 0 : e.trimSpace;
+  return (t, s, n) => {
+    if (r && !n.startValue && s === 0) {
+      n.modifiedInnerSpaceBefore && an(n, "", De), ye(t) && rn(n, t).forEach(
+        (a) => V(a, "", De)
+      );
+      const i = n[n.length - 1];
+      if (i)
+        if (ye(i)) {
+          const a = Ze(n, t);
+          a && (rn(n, i).forEach(
+            (o) => V(o, "", De)
+          ), V(a, "", De));
+        } else
+          V(i, "", De);
     }
   };
-};
-const widthPairList = [
-  [`,`, `\uFF0C`],
-  [`.`, `\u3002`],
-  [`;`, `\uFF1B`],
-  [`:`, `\uFF1A`],
-  [`?`, `\uFF1F`],
-  [`!`, `\uFF01`],
-  [`(`, `\uFF08`],
-  [`)`, `\uFF09`],
-  [`[`, `\uFF3B`],
-  [`]`, `\uFF3D`],
-  [`{`, `\uFF5B`],
-  [`}`, `\uFF5D`]
-];
-const widthSidePairList = [
-  [`"`, `\u201C`, `\u201D`],
-  [`'`, `\u2018`, `\u2019`]
-];
-const checkAdjusted = (token, adjusted) => {
-  if (adjusted.indexOf(token.modifiedValue) >= 0) {
-    token.modifiedType = getHalfwidthTokenType(token.type);
-  }
-};
-const parseOptions = (options) => {
-  const halfwidthOption = (options == null ? void 0 : options.halfwidthPunctuation) || "";
-  const fullwidthOption = (options == null ? void 0 : options.fullwidthPunctuation) || "";
-  const adjustedFullwidthOption = (options == null ? void 0 : options.adjustedFullwidthPunctuation) || "";
-  const halfwidthMap = {};
-  const fullwidthMap = {};
-  const fullwidthPairMap = {};
-  widthPairList.forEach(([halfwidth, fullwidth]) => {
-    if (halfwidthOption.indexOf(halfwidth) >= 0) {
-      halfwidthMap[fullwidth] = halfwidth;
-    }
-    if (fullwidthOption.indexOf(fullwidth) >= 0) {
-      fullwidthMap[halfwidth] = fullwidth;
-    }
-  });
-  widthSidePairList.forEach(([half, left2, right2]) => {
-    if (halfwidthOption.indexOf(half) >= 0) {
-      halfwidthMap[left2] = half;
-      halfwidthMap[right2] = half;
-    }
-    if (fullwidthOption.indexOf(left2) >= 0 || fullwidthOption.indexOf(right2) >= 0) {
-      fullwidthPairMap[half] = [left2, right2];
-    }
-  });
-  return {
-    halfwidthMap,
-    fullwidthMap,
-    fullwidthPairMap,
-    adjusted: adjustedFullwidthOption
+}, ph = [
+  [",", "，"],
+  [".", "。"],
+  [";", "；"],
+  [":", "："],
+  ["?", "？"],
+  ["!", "！"],
+  ["(", "（"],
+  [")", "）"],
+  ["[", "［"],
+  ["]", "］"],
+  ["{", "｛"],
+  ["}", "｝"]
+], vh = [
+  ['"', "“", "”"],
+  ["'", "‘", "’"]
+], gh = (e, r) => {
+  r.indexOf(e.modifiedValue) >= 0 && (e.modifiedType = os(e.type));
+}, mh = (e) => {
+  const r = (e == null ? void 0 : e.halfwidthPunctuation) || "", t = (e == null ? void 0 : e.fullwidthPunctuation) || "", s = (e == null ? void 0 : e.adjustedFullwidthPunctuation) || "", n = {}, i = {}, a = {};
+  return ph.forEach(([o, c]) => {
+    r.indexOf(o) >= 0 && (n[c] = o), t.indexOf(c) >= 0 && (i[o] = c);
+  }), vh.forEach(([o, c, l]) => {
+    r.indexOf(o) >= 0 && (n[c] = o, n[l] = o), (t.indexOf(c) >= 0 || t.indexOf(l) >= 0) && (a[o] = [c, l]);
+  }), {
+    halfwidthMap: n,
+    fullwidthMap: i,
+    fullwidthPairMap: a,
+    adjusted: s
   };
-};
-const generateHandler$b = (options) => {
-  const { halfwidthMap, fullwidthMap, fullwidthPairMap, adjusted } = parseOptions(options);
-  const handleHyperSpaceOption = (token, _, group) => {
-    if (!isSinglePunctuationType(token.type) && token.type !== HyperTokenType.BRACKET_MARK && token.type !== GroupTokenType.GROUP) {
+}, yh = (e) => {
+  const { halfwidthMap: r, fullwidthMap: t, fullwidthPairMap: s, adjusted: n } = mh(e);
+  return (a, o, c) => {
+    if (!Xt(a.type) && a.type !== j.BRACKET_MARK && a.type !== J.GROUP || ks(c, a) || xs(c, a))
       return;
-    }
-    if (isHalfwidthPunctuationWithoutSpaceAround(group, token)) {
-      return;
-    }
-    if (isSuccessiveHalfwidthPunctuation(group, token)) {
-      return;
-    }
-    if (isSinglePunctuationType(token.type) || token.type === HyperTokenType.BRACKET_MARK) {
-      const value = token.modifiedValue;
-      if (fullwidthMap[value]) {
-        checkValue(
-          token,
-          fullwidthMap[value],
-          getFullwidthTokenType(token.type),
-          PUNCTUATION_FULL_WIDTH
-        );
-        checkAdjusted(token, adjusted);
-      } else if (halfwidthMap[value]) {
-        checkValue(
-          token,
-          halfwidthMap[value],
-          getHalfwidthTokenType(token.type),
-          PUNCTUATION_HALF_WIDTH
-        );
-      }
-      return;
-    }
-    const startValue = token.modifiedStartValue;
-    const endValue = token.modifiedEndValue;
-    if (fullwidthPairMap[startValue]) {
-      checkStartValue(
-        token,
-        fullwidthPairMap[startValue][0],
-        PUNCTUATION_FULL_WIDTH
+    if (Xt(a.type) || a.type === j.BRACKET_MARK) {
+      const f = a.modifiedValue;
+      t[f] ? (sn(
+        a,
+        t[f],
+        od(a.type),
+        jt
+      ), gh(a, n)) : r[f] && sn(
+        a,
+        r[f],
+        os(a.type),
+        Wt
       );
-    } else if (halfwidthMap[startValue]) {
-      checkStartValue(
-        token,
-        halfwidthMap[startValue][0],
-        PUNCTUATION_HALF_WIDTH
-      );
+      return;
     }
-    if (fullwidthPairMap[endValue]) {
-      checkEndValue(
-        token,
-        fullwidthPairMap[endValue][1],
-        PUNCTUATION_FULL_WIDTH
-      );
-    } else if (halfwidthMap[endValue]) {
-      checkEndValue(token, halfwidthMap[endValue][1], PUNCTUATION_HALF_WIDTH);
-    }
+    const l = a.modifiedStartValue, u = a.modifiedEndValue;
+    s[l] ? tn(
+      a,
+      s[l][0],
+      jt
+    ) : r[l] && tn(
+      a,
+      r[l][0],
+      Wt
+    ), s[u] ? nn(
+      a,
+      s[u][1],
+      jt
+    ) : r[u] && nn(a, r[u][1], Wt);
   };
-  return handleHyperSpaceOption;
-};
-const defaultUnifiedMap = {
-  "\uFF1F\uFF1F": ["\u2047"],
-  "\uFF01\uFF01": ["\u203C"],
-  "\uFF1F\uFF01": ["\u2048"],
-  "\uFF01\uFF1F": ["\u2049"],
-  "/": ["/", "\uFF0F"],
-  "~": ["~", "\uFF5E"],
-  "\u2026": ["\u2026", "\u22EF"],
-  "\xB7": ["\u25CF", "\u2022", "\xB7", "\u2027", "\u30FB"]
-};
-const simplifiedUnifiedMap = {
-  "\u201C": ["\u300C"],
-  "\u201D": ["\u300D"],
-  "\u2018": ["\u300E"],
-  "\u2019": ["\u300F"]
-};
-const traditionalUnifiedMap = {
-  "\u300C": ["\u201C"],
-  "\u300D": ["\u201D"],
-  "\u300E": ["\u2018"],
-  "\u300F": ["\u2019"]
-};
-const revertUnifiedMap = (unifiedMap) => {
-  const result = {};
-  for (const key in unifiedMap) {
-    const value = unifiedMap[key];
-    value.forEach((v) => {
-      result[v] = key;
+}, Gt = {
+  // U+2047 DOUBLE QUESTION MARK, U+203C DOUBLE EXCLAMATION MARK
+  // U+2048 QUESTION EXCLAMATION MARK, U+2049 EXCLAMATION QUESTION MARK
+  "？？": ["⁇"],
+  "！！": ["‼"],
+  "？！": ["⁈"],
+  "！？": ["⁉"],
+  // U+002F SOLIDUS, U+FF0F FULLWIDTH SOLIDUS
+  "/": ["/", "／"],
+  // U+FF5E FULLWIDTH TILDE
+  "~": ["~", "～"],
+  // U+2026 HORIZONTAL ELLIPSIS, U+22EF MIDLINE HORIZONTAL ELLIPSIS
+  "…": ["…", "⋯"],
+  // U+25CF BLACK CIRCLE, U+2022 BULLET, U+00B7 MIDDLE DOT,
+  // U+2027 HYPHENATION POINT, U+30FB KATAKANA MIDDLE DOT
+  "·": ["●", "•", "·", "‧", "・"]
+}, bh = {
+  "“": ["「"],
+  "”": ["」"],
+  "‘": ["『"],
+  "’": ["』"]
+}, Ah = {
+  "「": ["“"],
+  "」": ["”"],
+  "『": ["‘"],
+  "』": ["’"]
+}, wh = (e) => {
+  const r = {};
+  for (const t in e)
+    e[t].forEach((n) => {
+      r[n] = t;
     });
-  }
-  return result;
-};
-const getRevertedUnifiedMap = (options) => {
-  const unifiedOption = options == null ? void 0 : options.unifiedPunctuation;
-  const langType = typeof unifiedOption === "string" ? unifiedOption : void 0;
-  const unifiedMap = {};
-  if (langType) {
-    Object.assign(unifiedMap, defaultUnifiedMap);
-    if (langType === "simplified") {
-      Object.assign(unifiedMap, simplifiedUnifiedMap);
-    } else if (langType === "traditional") {
-      Object.assign(unifiedMap, traditionalUnifiedMap);
-    }
-  } else if (typeof unifiedOption === "object") {
-    if (unifiedOption.default) {
-      Object.assign(unifiedMap, defaultUnifiedMap);
-    }
-    Object.entries(unifiedOption).forEach(([key, value]) => {
-      if (value === true) {
-        unifiedMap[key] = defaultUnifiedMap[key];
-      } else if (value === false) {
-        delete unifiedMap[key];
-      } else {
-        unifiedMap[key] = value;
-      }
-    });
-  }
-  return revertUnifiedMap(unifiedMap);
-};
-const generateHandler$a = (options) => {
-  const charMap = getRevertedUnifiedMap(options);
-  const handlerPunctuationUnified = (token) => {
-    if (token.type === GroupTokenType.GROUP) {
-      if (charMap[token.modifiedStartValue]) {
-        checkStartValue(
-          token,
-          charMap[token.modifiedStartValue],
-          PUNCTUATION_UNIFICATION
-        );
-      }
-      if (charMap[token.modifiedEndValue]) {
-        checkEndValue(
-          token,
-          charMap[token.modifiedEndValue],
-          PUNCTUATION_UNIFICATION
-        );
-      }
-      return;
-    } else {
-      if (charMap[token.modifiedValue]) {
-        checkValue(
-          token,
-          charMap[token.modifiedValue],
-          void 0,
-          PUNCTUATION_UNIFICATION
-        );
-      }
-    }
-  };
-  return handlerPunctuationUnified;
-};
-const reverseAbbrsIntoChars = (abbrs) => {
-  return abbrs.map((str) => str.split(".").reverse().slice(1));
-};
-const matchAbbr = (token, group, reversedAbbrChars) => {
-  const tokenBefore = findTokenBefore(group, token);
-  if (tokenBefore && !tokenBefore.spaceAfter) {
-    const matchedAbbrChars = reversedAbbrChars.filter(
-      (abbr) => abbr[0].toLowerCase() === tokenBefore.value.toLowerCase()
-    ).map((abbr) => abbr.slice(1));
-    if (matchedAbbrChars.length) {
-      const lastMatched = matchedAbbrChars[matchedAbbrChars.length - 1];
-      if (lastMatched.length) {
-        const tokenBeforeBefore = findTokenBefore(group, tokenBefore);
-        if (tokenBeforeBefore && !tokenBeforeBefore.spaceAfter && tokenBeforeBefore.value === ".") {
-          const result = matchAbbr(tokenBeforeBefore, group, matchedAbbrChars);
-          if (result) {
-            return true;
-          }
-        }
-      } else {
-        return true;
-      }
-    }
-  }
-  return false;
-};
-const generateHandler$9 = (options) => {
-  const reversedAbbrChars = reverseAbbrsIntoChars(options.skipAbbrs || []);
-  return (token, _, group) => {
-    if (token.value !== ".") {
-      return;
-    }
-    const tokenAfter = findTokenAfter(group, token);
-    if (tokenAfter && tokenAfter.type === CharType.WESTERN_LETTER && !token.spaceAfter) {
-      return;
-    }
-    if (matchAbbr(token, group, reversedAbbrChars)) {
-      token.modifiedValue = ".";
-      token.modifiedType = token.type;
-      removeValidationOnTarget(token, ValidationTarget.VALUE);
-    }
-  };
-};
-const generateHandler$8 = (options) => {
-  const noSpaceInsideMarkOption = options == null ? void 0 : options.noSpaceInsideHyperMark;
-  return (token, _, group) => {
-    if (!noSpaceInsideMarkOption) {
-      return;
-    }
-    const tokenAfter = findTokenAfter(group, token);
-    if (!tokenAfter) {
-      return;
-    }
-    if (!isWrapper(token) && !isWrapper(tokenAfter)) {
-      return;
-    }
-    const markSideBefore = getWrapperSide(token);
-    const markSideAfter = getWrapperSide(tokenAfter);
-    if (markSideBefore === markSideAfter) {
-      checkSpaceAfter(token, "", MARKDOWN_NOSPACE_INSIDE);
-    } else if (markSideBefore === MarkSideType.LEFT && !isWrapper(tokenAfter)) {
-      checkSpaceAfter(token, "", MARKDOWN_NOSPACE_INSIDE);
-    } else if (markSideAfter === MarkSideType.RIGHT && !isWrapper(token)) {
-      checkSpaceAfter(token, "", MARKDOWN_NOSPACE_INSIDE);
-    }
-  };
-};
-const generateHandler$7 = (options) => {
-  const needSpaceOption = options == null ? void 0 : options.spaceOutsideCode;
-  const spaceAfter = needSpaceOption ? " " : "";
-  const message2 = needSpaceOption ? CODE_SPACE_OUTSIDE : CODE_NOSPACE_OUTSIDE;
-  const handleHyperSpaceOption = (token, _, group) => {
-    if (typeof needSpaceOption === "undefined") {
-      return;
-    }
-    if (token.type !== HyperTokenType.CODE_CONTENT) {
-      return;
-    }
-    const contentTokenBefore = findVisibleTokenBefore(group, token);
-    const contentTokenAfter = findVisibleTokenAfter(group, token);
-    const { spaceHost: beforeSpaceHost } = findWrappersBetween(
-      group,
-      contentTokenBefore,
-      token
-    );
-    const { spaceHost: afterSpaceHost } = findWrappersBetween(
-      group,
-      token,
-      contentTokenAfter
-    );
-    if (contentTokenBefore && isLetterType(contentTokenBefore.type)) {
-      beforeSpaceHost && checkSpaceAfter(beforeSpaceHost, spaceAfter, message2);
-    }
-    if (contentTokenAfter && (isLetterType(contentTokenAfter.type) || contentTokenAfter.type === HyperTokenType.CODE_CONTENT)) {
-      afterSpaceHost && checkSpaceAfter(afterSpaceHost, spaceAfter, message2);
-    }
-  };
-  return handleHyperSpaceOption;
-};
-const generateHandler$6 = (options) => {
-  const onlyOneBetweenHalfwidthContentOption = options == null ? void 0 : options.spaceBetweenHalfwidthContent;
-  const noBetweenFullwidthContentOption = options == null ? void 0 : options.noSpaceBetweenFullwidthContent;
-  const betweenMixedwidthContentOption = options == null ? void 0 : options.spaceBetweenMixedwidthContent;
-  return (token, _, group) => {
-    if (!isLetterType(token.type)) {
-      return;
-    }
-    const contentTokenAfter = findVisibleTokenAfter(group, token);
-    if (!contentTokenAfter || !isLetterType(contentTokenAfter.type)) {
-      return;
-    }
-    const { spaceHost, tokens } = findWrappersBetween(
-      group,
-      token,
-      contentTokenAfter
-    );
-    if (!spaceHost) {
-      return;
-    }
-    if (contentTokenAfter.type === token.type) {
-      if (token.type === CharType.WESTERN_LETTER) {
-        if (!onlyOneBetweenHalfwidthContentOption) {
-          return;
-        }
-        if (tokens.length > 1 && tokens.filter((token2) => token2.spaceAfter).length === 0) {
-          return;
-        }
-      } else {
-        if (!noBetweenFullwidthContentOption) {
-          return;
-        }
-      }
-      const spaceAfter = token.type === CharType.WESTERN_LETTER ? " " : "";
-      const message2 = token.type === CharType.WESTERN_LETTER ? CONTENT_SPACE_HALF_WIDTH : CONTENT_NOSPACE_FULL_WIDTH;
-      checkSpaceAfter(spaceHost, spaceAfter, message2);
-    } else {
-      if (typeof betweenMixedwidthContentOption === "undefined") {
-        return;
-      }
-      const spaceAfter = betweenMixedwidthContentOption ? " " : "";
-      const message2 = betweenMixedwidthContentOption ? CONTENT_SPACE_MIXED_WIDTH : CONTENT_NOSPACE_MIXED_WIDTH;
-      checkSpaceAfter(spaceHost, spaceAfter, message2);
-    }
-  };
-};
-const generateHandler$5 = (options) => {
-  const noBeforePunctuationOption = options == null ? void 0 : options.noSpaceBeforePauseOrStop;
-  const oneAfterHalfWidthPunctuationOption = options == null ? void 0 : options.spaceAfterHalfwidthPauseOrStop;
-  const noAfterFullWidthPunctuationOption = options == null ? void 0 : options.noSpaceAfterFullwidthPauseOrStop;
-  return (token, _, group) => {
-    if (!isPauseOrStopType(token.type)) {
-      return;
-    }
-    if (isHalfwidthPunctuationWithoutSpaceAround(group, token)) {
-      return;
-    }
-    if (isSuccessiveHalfwidthPunctuation(group, token)) {
-      return;
-    }
-    if (noBeforePunctuationOption) {
-      const contentTokenBefore = findVisibleTokenBefore(group, token);
-      if (contentTokenBefore && (isLetterType(contentTokenBefore.type) || contentTokenBefore.type === GroupTokenType.GROUP || contentTokenBefore.type === HyperTokenType.BRACKET_MARK && contentTokenBefore.markSide === MarkSideType.RIGHT || contentTokenBefore.type === HyperTokenType.CODE_CONTENT)) {
-        const { spaceHost } = findWrappersBetween(
-          group,
-          contentTokenBefore,
-          token
-        );
-        if (spaceHost) {
-          checkSpaceAfter(spaceHost, "", PUNCTUATION_NOSPACE_BEFORE);
-        }
-      }
-    }
-    if (isFullwidthPunctuationType(token.modifiedType) && noAfterFullWidthPunctuationOption || isHalfwidthPunctuationType(token.modifiedType) && oneAfterHalfWidthPunctuationOption) {
-      const spaceAfter = isHalfwidthPunctuationType(token.modifiedType) ? " " : "";
-      const message2 = isHalfwidthPunctuationType(token.modifiedType) ? PUNCTUATION_SPACE_AFTER : PUNCTUATION_NOSPACE_AFTER;
-      const contentTokenAfter = findVisibleTokenAfter(group, token);
-      if (contentTokenAfter && (isLetterType(contentTokenAfter.type) || contentTokenAfter.type === GroupTokenType.GROUP || contentTokenAfter.type === HyperTokenType.BRACKET_MARK && contentTokenAfter.markSide === MarkSideType.LEFT || contentTokenAfter.type === HyperTokenType.CODE_CONTENT)) {
-        const { spaceHost } = findWrappersBetween(
-          group,
-          token,
-          contentTokenAfter
-        );
-        if (spaceHost) {
-          checkSpaceAfter(spaceHost, spaceAfter, message2);
-        }
-      }
-    }
-  };
-};
-const isFullWidth$1 = (char, adjusted) => {
-  return isFullwidthPair(char) && adjusted.indexOf(char) === -1;
-};
-const generateHandler$4 = (options) => {
-  const noSpaceInsideQuoteOption = options.noSpaceInsideQuotation;
-  const spaceOutsideHalfQuoteOption = options.spaceOutsideHalfwidthQuotation;
-  const noSpaceOutsideFullQuoteOption = options.noSpaceOutsideFullwidthQuotation;
-  const adjustedFullWidthOption = options.adjustedFullwidthPunctuation || "";
-  return (token, _, group) => {
-    if (token.type !== GroupTokenType.GROUP) {
-      return;
-    }
-    if (noSpaceInsideQuoteOption) {
-      const firstInsdieToken = token[0];
-      if (firstInsdieToken && firstInsdieToken.markSide !== MarkSideType.RIGHT) {
-        checkInnerSpaceBefore(token, "", QUOTE_NOSPACE_INSIDE);
-      }
-      const lastInsideToken = token[token.length - 1];
-      if (lastInsideToken && lastInsideToken.markSide !== MarkSideType.LEFT) {
-        checkSpaceAfter(lastInsideToken, "", QUOTE_NOSPACE_INSIDE);
-      }
-      if (!firstInsdieToken) {
-        checkInnerSpaceBefore(token, "", QUOTE_NOSPACE_INSIDE);
-      }
-    }
-    if (typeof spaceOutsideHalfQuoteOption !== "undefined" || noSpaceOutsideFullQuoteOption) {
-      const contentTokenAfter = findNonCodeVisibleTokenAfter(group, token);
-      if (contentTokenAfter && contentTokenAfter.type === GroupTokenType.GROUP) {
-        const { spaceHost } = findWrappersBetween(
-          group,
-          token,
-          contentTokenAfter
-        );
-        if (spaceHost) {
-          const fullWidth = isFullWidth$1(token.modifiedEndValue, adjustedFullWidthOption) || isFullWidth$1(
-            contentTokenAfter.modifiedStartValue,
-            adjustedFullWidthOption
-          );
-          if (fullWidth) {
-            if (noSpaceOutsideFullQuoteOption) {
-              checkSpaceAfter(spaceHost, "", QUOTE_SPACE_OUTSIDE);
-            }
-          } else {
-            if (typeof spaceOutsideHalfQuoteOption !== "undefined") {
-              const spaceAfter = spaceOutsideHalfQuoteOption ? " " : "";
-              const message2 = spaceOutsideHalfQuoteOption ? QUOTE_SPACE_OUTSIDE : QUOTE_NOSPACE_OUTSIDE;
-              checkSpaceAfter(spaceHost, spaceAfter, message2);
-            }
-          }
-        }
-      }
-      const contentTokenBefore = findNonCodeVisibleTokenBefore(group, token);
-      if (contentTokenBefore && (isLetterType(contentTokenBefore.type) || contentTokenBefore.type === HyperTokenType.CODE_CONTENT)) {
-        const { spaceHost } = findWrappersBetween(
-          group,
-          contentTokenBefore,
-          token
-        );
-        if (spaceHost) {
-          const fullWidth = isFullWidth$1(
-            token.modifiedStartValue,
-            adjustedFullWidthOption
-          );
-          if (fullWidth) {
-            if (noSpaceOutsideFullQuoteOption) {
-              checkSpaceAfter(spaceHost, "", QUOTE_NOSPACE_OUTSIDE);
-            }
-          } else {
-            if (typeof spaceOutsideHalfQuoteOption !== "undefined") {
-              const spaceAfter = spaceOutsideHalfQuoteOption ? " " : "";
-              const message2 = spaceOutsideHalfQuoteOption ? QUOTE_SPACE_OUTSIDE : QUOTE_NOSPACE_OUTSIDE;
-              checkSpaceAfter(spaceHost, spaceAfter, message2);
-            }
-          }
-        }
-      }
-      if (contentTokenAfter && (isLetterType(contentTokenAfter.type) || contentTokenAfter.type === HyperTokenType.CODE_CONTENT)) {
-        const { spaceHost } = findWrappersBetween(
-          group,
-          token,
-          contentTokenAfter
-        );
-        if (spaceHost) {
-          const fullWidth = isFullWidth$1(
-            token.modifiedEndValue,
-            adjustedFullWidthOption
-          );
-          if (fullWidth) {
-            if (noSpaceOutsideFullQuoteOption) {
-              checkSpaceAfter(spaceHost, "", QUOTE_NOSPACE_OUTSIDE);
-            }
-          } else {
-            if (typeof spaceOutsideHalfQuoteOption !== "undefined") {
-              const spaceAfter = spaceOutsideHalfQuoteOption ? " " : "";
-              const message2 = spaceOutsideHalfQuoteOption ? QUOTE_SPACE_OUTSIDE : QUOTE_NOSPACE_OUTSIDE;
-              checkSpaceAfter(spaceHost, spaceAfter, message2);
-            }
-          }
-        }
-      }
-    }
-  };
-};
-const isFullWidth = (char, adjusted) => {
-  return isFullwidthPair(char) && adjusted.indexOf(char) === -1;
-};
-const shouldSkip = (before, beforeTokenSeq, token, afterTokenSeq, after) => {
-  if (!before || !after) {
-    return false;
-  }
-  if (isFullwidthPair(token.value) || isFullwidthPair(token.modifiedValue)) {
-    return false;
-  }
-  if (beforeTokenSeq.filter((x) => x.spaceAfter).length || afterTokenSeq.filter((x) => x.spaceAfter).length) {
-    return false;
-  }
-  return (before.type === CharType.WESTERN_LETTER || before.value === "(" && token.value === ")") && (after.type === CharType.WESTERN_LETTER || token.value === "(" && after.value === ")");
-};
-const generateHandler$3 = (options) => {
-  const noInsideBracketOption = options.noSpaceInsideBracket;
-  const spaceOutsideHalfBracketOption = options.spaceOutsideHalfwidthBracket;
-  const noSpaceOutsideFullBracketOption = options.noSpaceOutsideFullwidthBracket;
-  const adjustedFullWidthOption = options.adjustedFullwidthPunctuation || "";
-  return (token, _, group) => {
-    if (token.type !== HyperTokenType.BRACKET_MARK) {
-      return;
-    }
-    if (noInsideBracketOption) {
-      if (token.markSide === MarkSideType.LEFT) {
-        const tokenAfter = findTokenAfter(group, token);
-        if (tokenAfter) {
-          checkSpaceAfter(token, "", BRACKET_NOSPACE_INSIDE);
-        }
-      } else {
-        const tokenBefore = findTokenBefore(group, token);
-        if (tokenBefore && tokenBefore.markSide !== MarkSideType.LEFT) {
-          checkSpaceAfter(tokenBefore, "", BRACKET_NOSPACE_INSIDE);
-        }
-      }
-    }
-    const contentTokenBefore = findVisibleTokenBefore(group, token);
-    const contentTokenAfter = findVisibleTokenAfter(group, token);
-    const { spaceHost: beforeSpaceHost, tokens: beforeTokenSeq } = findWrappersBetween(group, contentTokenBefore, token);
-    const { spaceHost: afterSpaceHost, tokens: afterTokenSeq } = findWrappersBetween(group, token, contentTokenAfter);
-    if (shouldSkip(
-      contentTokenBefore,
-      beforeTokenSeq,
-      token,
-      afterTokenSeq,
-      contentTokenAfter
-    )) {
-      return;
-    }
-    if (typeof spaceOutsideHalfBracketOption !== "undefined" || noSpaceOutsideFullBracketOption) {
-      const fullWidth = isFullWidth(
-        token.modifiedValue,
-        adjustedFullWidthOption
+  return r;
+}, Eh = (e) => {
+  const r = e == null ? void 0 : e.unifiedPunctuation, t = typeof r == "string" ? r : void 0, s = {};
+  return t ? (Object.assign(s, Gt), t === "simplified" ? Object.assign(s, bh) : t === "traditional" && Object.assign(s, Ah)) : typeof r == "object" && (r.default && Object.assign(s, Gt), Object.entries(r).forEach(([n, i]) => {
+    i === !0 ? s[n] = Gt[n] : i === !1 ? delete s[n] : s[n] = i;
+  })), wh(s);
+}, Th = (e) => {
+  const r = Eh(e);
+  return (s) => {
+    if (s.type === J.GROUP) {
+      r[s.modifiedStartValue] && tn(
+        s,
+        r[s.modifiedStartValue],
+        Vt
+      ), r[s.modifiedEndValue] && nn(
+        s,
+        r[s.modifiedEndValue],
+        Vt
       );
-      if (contentTokenAfter) {
-        if (token.markSide === MarkSideType.RIGHT && contentTokenAfter.markSide === MarkSideType.LEFT) {
-          if (afterSpaceHost) {
-            const hasFullWidth = fullWidth || isFullWidth(
-              contentTokenAfter.modifiedValue,
-              adjustedFullWidthOption
-            );
-            if (hasFullWidth) {
-              if (noSpaceOutsideFullBracketOption) {
-                checkSpaceAfter(token, "", BRACKET_NOSPACE_OUTSIDE);
-              }
-            } else {
-              if (afterTokenSeq.filter((x) => x.spaceAfter).length > 0) {
-                if (typeof spaceOutsideHalfBracketOption !== "undefined") {
-                  const spaceAfter = spaceOutsideHalfBracketOption ? " " : "";
-                  const message2 = spaceOutsideHalfBracketOption ? BRACKET_SPACE_OUTSIDE : BRACKET_NOSPACE_OUTSIDE;
-                  checkSpaceAfter(token, spaceAfter, message2);
-                }
-              }
-            }
-          }
-        }
-      }
-      if (token.markSide === MarkSideType.LEFT) {
-        if (contentTokenBefore && (isLetterType(contentTokenBefore.type) || contentTokenBefore.type === GroupTokenType.GROUP || contentTokenBefore.type === HyperTokenType.CODE_CONTENT)) {
-          if (beforeSpaceHost) {
-            if (fullWidth || contentTokenBefore.type === GroupTokenType.GROUP && isFullWidth(
-              contentTokenBefore.modifiedEndValue,
-              adjustedFullWidthOption
-            )) {
-              if (noSpaceOutsideFullBracketOption) {
-                checkSpaceAfter(beforeSpaceHost, "", BRACKET_NOSPACE_OUTSIDE);
-              }
-            } else {
-              if (typeof spaceOutsideHalfBracketOption !== "undefined") {
-                const spaceAfter = spaceOutsideHalfBracketOption ? " " : "";
-                const message2 = spaceOutsideHalfBracketOption ? BRACKET_SPACE_OUTSIDE : BRACKET_NOSPACE_OUTSIDE;
-                checkSpaceAfter(beforeSpaceHost, spaceAfter, message2);
-              }
-            }
-          }
-        }
-      } else {
-        if (contentTokenAfter && (isLetterType(contentTokenAfter.type) || contentTokenAfter.type === GroupTokenType.GROUP || contentTokenAfter.type === HyperTokenType.CODE_CONTENT)) {
-          if (afterSpaceHost) {
-            if (fullWidth || contentTokenAfter.type === GroupTokenType.GROUP && isFullWidth(
-              contentTokenAfter.modifiedStartValue,
-              adjustedFullWidthOption
-            )) {
-              if (noSpaceOutsideFullBracketOption) {
-                checkSpaceAfter(afterSpaceHost, "", BRACKET_NOSPACE_OUTSIDE);
-              }
-            } else {
-              if (typeof spaceOutsideHalfBracketOption !== "undefined") {
-                const spaceAfter = spaceOutsideHalfBracketOption ? " " : "";
-                const message2 = spaceOutsideHalfBracketOption ? BRACKET_SPACE_OUTSIDE : BRACKET_NOSPACE_OUTSIDE;
-                checkSpaceAfter(afterSpaceHost, spaceAfter, message2);
-              }
-            }
-          }
-        }
-      }
-    }
+      return;
+    } else
+      r[s.modifiedValue] && sn(
+        s,
+        r[s.modifiedValue],
+        void 0,
+        Vt
+      );
   };
-};
-const generateHandler$2 = (options) => {
-  return (token) => {
-    if (token.spaceAfter && token.spaceAfter.match(/\n/)) {
-      removeValidationOnTarget(token, ValidationTarget.SPACE_AFTER);
-      token.modifiedSpaceAfter = token.spaceAfter;
-    }
+}, kh = (e) => e.map((r) => r.split(".").reverse().slice(1)), Cs = (e, r, t) => {
+  const s = pe(r, e);
+  if (s && !s.spaceAfter) {
+    const n = t.filter(
+      (i) => i[0].toLowerCase() === s.value.toLowerCase()
+    ).map((i) => i.slice(1));
+    if (n.length)
+      if (n[n.length - 1].length) {
+        const a = pe(r, s);
+        if (a && !a.spaceAfter && a.value === "." && Cs(a, r, n))
+          return !0;
+      } else
+        return !0;
+  }
+  return !1;
+}, xh = (e) => {
+  const r = kh(e.skipAbbrs || []);
+  return (t, s, n) => {
+    if (t.value !== ".")
+      return;
+    const i = te(n, t);
+    i && i.type === L.WESTERN_LETTER && !t.spaceAfter || Cs(t, n, r) && (t.modifiedValue = ".", t.modifiedType = t.type, X(t, $.VALUE));
   };
-};
-const generateHandler$1 = (options) => {
-  const skippedZhUnits = (options == null ? void 0 : options.skipZhUnits) || "";
-  const matcherStr = skippedZhUnits.split("").filter((x) => checkCharType(x) === CharType.CJK_CHAR).join("");
-  const unitMatcher = new RegExp(`^[${matcherStr}]`);
-  return (token, _, group) => {
-    if (token.type === CharType.WESTERN_LETTER && token.value.match(/^\d+$/)) {
-      const tokenAfter = findNonCodeVisibleTokenAfter(group, token);
-      if (Array.isArray(tokenAfter))
-        return;
-      if (tokenAfter && tokenAfter.value.match(unitMatcher)) {
-        const { spaceHost: spaceHostAfter, tokens: tokenSeqAfter } = findWrappersBetween(group, token, tokenAfter);
-        const hasSpaceAfterOriginally = tokenSeqAfter.some((x) => x.spaceAfter);
-        if (hasSpaceAfterOriginally) {
-          return;
-        }
-        const tokenBefore = findNonCodeVisibleTokenBefore(group, token);
-        if (tokenBefore) {
-          const { spaceHost: spaceHostBefore, tokens: tokenSeqBefore } = findWrappersBetween(group, tokenBefore, token);
-          const hasSpaceBeforeOriginally = tokenSeqBefore.some(
-            (x) => x.spaceAfter
-          );
-          if (hasSpaceBeforeOriginally) {
+}, Sh = (e) => {
+  const r = e == null ? void 0 : e.noSpaceInsideHyperMark;
+  return (t, s, n) => {
+    if (!r)
+      return;
+    const i = te(n, t);
+    if (!i || !ye(t) && !ye(i))
+      return;
+    const a = Qe(t), o = Qe(i);
+    (a === o || a === W.LEFT && !ye(i) || o === W.RIGHT && !ye(t)) && V(t, "", Ut);
+  };
+}, Ch = (e) => {
+  const r = e == null ? void 0 : e.spaceOutsideCode, t = r ? " " : "", s = r ? rh : th;
+  return (i, a, o) => {
+    if (typeof r > "u" || i.type !== j.CODE_CONTENT)
+      return;
+    const c = Ze(o, i), l = $e(o, i), { spaceHost: u } = Z(
+      o,
+      c,
+      i
+    ), { spaceHost: f } = Z(
+      o,
+      i,
+      l
+    );
+    c && re(c.type) && u && V(u, t, s), l && (re(l.type) || l.type === j.CODE_CONTENT) && f && V(f, t, s);
+  };
+}, Oh = (e) => {
+  const r = e == null ? void 0 : e.spaceBetweenHalfwidthContent, t = e == null ? void 0 : e.noSpaceBetweenFullwidthContent, s = e == null ? void 0 : e.spaceBetweenMixedwidthContent;
+  return (n, i, a) => {
+    if (!re(n.type))
+      return;
+    const o = $e(a, n);
+    if (!o || !re(o.type))
+      return;
+    const { spaceHost: c, tokens: l } = Z(
+      a,
+      n,
+      o
+    );
+    if (c)
+      if (o.type === n.type) {
+        if (n.type === L.WESTERN_LETTER) {
+          if (!r || l.length > 1 && l.filter((d) => d.spaceAfter).length === 0)
             return;
-          }
-          if (spaceHostBefore) {
-            spaceHostBefore.modifiedSpaceAfter = "";
-            removeValidationOnTarget(
-              spaceHostBefore,
-              ValidationTarget.SPACE_AFTER
-            );
-          }
+        } else if (!t)
+          return;
+        const u = n.type === L.WESTERN_LETTER ? " " : "", f = n.type === L.WESTERN_LETTER ? sh : oh;
+        V(c, u, f);
+      } else {
+        if (typeof s > "u")
+          return;
+        V(c, s ? " " : "", s ? ch : lh);
+      }
+  };
+}, Rh = (e) => {
+  const r = e == null ? void 0 : e.noSpaceBeforePauseOrStop, t = e == null ? void 0 : e.spaceAfterHalfwidthPauseOrStop, s = e == null ? void 0 : e.noSpaceAfterFullwidthPauseOrStop;
+  return (n, i, a) => {
+    if (wn(n.type) && !ks(a, n) && !xs(a, n)) {
+      if (r) {
+        const o = Ze(a, n);
+        if (o && // content
+        (re(o.type) || // right-quotation
+        o.type === J.GROUP || // right-bracket
+        o.type === j.BRACKET_MARK && o.markSide === W.RIGHT || // code
+        o.type === j.CODE_CONTENT)) {
+          const { spaceHost: c } = Z(
+            a,
+            o,
+            n
+          );
+          c && V(c, "", nh);
         }
-        if (spaceHostAfter) {
-          spaceHostAfter.modifiedSpaceAfter = "";
-          removeValidationOnTarget(spaceHostAfter, ValidationTarget.SPACE_AFTER);
+      }
+      if (En(n.modifiedType) && s || be(n.modifiedType) && t) {
+        const o = be(n.modifiedType) ? " " : "", c = be(n.modifiedType) ? ah : ih, l = $e(a, n);
+        if (l && // content
+        (re(l.type) || // left-quotation
+        l.type === J.GROUP || // left-bracket
+        l.type === j.BRACKET_MARK && l.markSide === W.LEFT || // code
+        l.type === j.CODE_CONTENT)) {
+          const { spaceHost: u } = Z(
+            a,
+            n,
+            l
+          );
+          u && V(u, o, c);
         }
       }
     }
   };
-};
-const generateHandler = (options) => {
-  return (token, _, group) => {
-    if (token.value !== "&") {
-      return;
-    }
-    const tokenAfter = findTokenAfter(group, token);
-    if (!tokenAfter || tokenAfter.type !== CharType.WESTERN_LETTER || token.spaceAfter) {
-      return;
-    }
-    const thirdToken = findTokenAfter(group, tokenAfter);
-    if (!thirdToken || thirdToken.value !== ";" || tokenAfter.spaceAfter) {
-      return;
-    }
-    token.modifiedValue = token.value;
-    token.modifiedType = token.type;
-    token.modifiedSpaceAfter = token.spaceAfter;
-    removeValidationOnTarget(token, ValidationTarget.VALUE);
-    removeValidationOnTarget(token, ValidationTarget.SPACE_AFTER);
-    tokenAfter.modifiedValue = tokenAfter.value;
-    tokenAfter.modifiedType = tokenAfter.type;
-    tokenAfter.modifiedSpaceAfter = tokenAfter.spaceAfter;
-    removeValidationOnTarget(tokenAfter, ValidationTarget.VALUE);
-    removeValidationOnTarget(tokenAfter, ValidationTarget.SPACE_AFTER);
-    thirdToken.modifiedValue = thirdToken.value;
-    thirdToken.modifiedType = thirdToken.type;
-    removeValidationOnTarget(thirdToken, ValidationTarget.VALUE);
-    removeValidationOnTarget(thirdToken, ValidationTarget.SPACE_AFTER);
-    const nextToken = findNonCodeVisibleTokenAfter(group, thirdToken);
-    if (nextToken) {
-      const { spaceHost } = findWrappersBetween(group, thirdToken, nextToken);
-      if (spaceHost) {
-        spaceHost.modifiedSpaceAfter = spaceHost.spaceAfter;
-        removeValidationOnTarget(spaceHost, ValidationTarget.SPACE_AFTER);
+}, cr = (e, r) => hr(e) && r.indexOf(e) === -1, Ih = (e) => {
+  const r = e.noSpaceInsideQuotation, t = e.spaceOutsideHalfwidthQuotation, s = e.noSpaceOutsideFullwidthQuotation, n = e.adjustedFullwidthPunctuation || "";
+  return (i, a, o) => {
+    if (i.type === J.GROUP) {
+      if (r) {
+        const c = i[0];
+        c && c.markSide !== W.RIGHT && an(i, "", Dt);
+        const l = i[i.length - 1];
+        l && l.markSide !== W.LEFT && V(l, "", Dt), c || an(i, "", Dt);
+      }
+      if (typeof t < "u" || s) {
+        const c = xr(o, i);
+        if (c && c.type === J.GROUP) {
+          const { spaceHost: u } = Z(
+            o,
+            i,
+            c
+          );
+          u && (cr(i.modifiedEndValue, n) || cr(
+            c.modifiedStartValue,
+            n
+          ) ? s && V(u, "", or) : typeof t < "u" && V(u, t ? " " : "", t ? or : ze));
+        }
+        const l = Sn(o, i);
+        if (l && (re(l.type) || l.type === j.CODE_CONTENT)) {
+          const { spaceHost: u } = Z(
+            o,
+            l,
+            i
+          );
+          u && (cr(
+            i.modifiedStartValue,
+            n
+          ) ? s && V(u, "", ze) : typeof t < "u" && V(u, t ? " " : "", t ? or : ze));
+        }
+        if (c && (re(c.type) || c.type === j.CODE_CONTENT)) {
+          const { spaceHost: u } = Z(
+            o,
+            i,
+            c
+          );
+          u && (cr(
+            i.modifiedEndValue,
+            n
+          ) ? s && V(u, "", ze) : typeof t < "u" && V(u, t ? " " : "", t ? or : ze));
+        }
       }
     }
   };
-};
-const generateHandlers = (options) => {
-  return [
-    generateHandler$c(options),
-    generateHandler$b(options),
-    generateHandler$a(options),
-    generateHandler$9(options),
-    generateHandler$8(options),
-    generateHandler$7(options),
-    generateHandler$6(options),
-    generateHandler$5(options),
-    generateHandler$4(options),
-    generateHandler$3(options),
-    generateHandler$2(),
-    generateHandler$1(options),
-    generateHandler()
-  ];
-};
-const defaultConfig = {
-  noSinglePair: true,
-  halfwidthPunctuation: `()[]{}`,
-  fullwidthPunctuation: `\uFF0C\u3002\uFF1A\uFF1B\uFF1F\uFF01\u201C\u201D\u2018\u2019`,
-  adjustedFullwidthPunctuation: `\u201C\u201D\u2018\u2019`,
+}, lr = (e, r) => hr(e) && r.indexOf(e) === -1, Ph = (e, r, t, s, n) => !e || !n || hr(t.value) || hr(t.modifiedValue) || r.filter((i) => i.spaceAfter).length || s.filter((i) => i.spaceAfter).length ? !1 : (
+  // x(x
+  //  ^
+  (e.type === L.WESTERN_LETTER || // x()
+  //  ^
+  e.value === "(" && t.value === ")") && // x)x
+  //  ^
+  (n.type === L.WESTERN_LETTER || // ()x
+  //  ^
+  t.value === "(" && n.value === ")")
+), _h = (e) => {
+  const r = e.noSpaceInsideBracket, t = e.spaceOutsideHalfwidthBracket, s = e.noSpaceOutsideFullwidthBracket, n = e.adjustedFullwidthPunctuation || "";
+  return (i, a, o) => {
+    if (i.type !== j.BRACKET_MARK)
+      return;
+    if (r)
+      if (i.markSide === W.LEFT)
+        te(o, i) && V(i, "", Ta);
+      else {
+        const m = pe(o, i);
+        m && // dedupe
+        m.markSide !== W.LEFT && V(m, "", Ta);
+      }
+    const c = Ze(o, i), l = $e(o, i), { spaceHost: u, tokens: f } = Z(o, c, i), { spaceHost: d, tokens: h } = Z(o, i, l);
+    if (!Ph(
+      c,
+      f,
+      i,
+      h,
+      l
+    ) && (typeof t < "u" || s)) {
+      const m = lr(
+        i.modifiedValue,
+        n
+      );
+      l && i.markSide === W.RIGHT && l.markSide === W.LEFT && d && (m || lr(
+        l.modifiedValue,
+        n
+      ) ? s && V(i, "", Ie) : h.filter((p) => p.spaceAfter).length > 0 && typeof t < "u" && V(i, t ? " " : "", t ? zt : Ie)), i.markSide === W.LEFT ? c && (re(c.type) || c.type === J.GROUP || c.type === j.CODE_CONTENT) && u && (m || c.type === J.GROUP && lr(
+        c.modifiedEndValue,
+        n
+      ) ? s && V(u, "", Ie) : typeof t < "u" && V(u, t ? " " : "", t ? zt : Ie)) : l && (re(l.type) || l.type === J.GROUP || l.type === j.CODE_CONTENT) && d && (m || l.type === J.GROUP && lr(
+        l.modifiedStartValue,
+        n
+      ) ? s && V(d, "", Ie) : typeof t < "u" && V(d, t ? " " : "", t ? zt : Ie));
+    }
+  };
+}, Bh = (e) => (r) => {
+  r.spaceAfter && r.spaceAfter.match(/\n/) && (X(r, $.SPACE_AFTER), r.modifiedSpaceAfter = r.spaceAfter);
+}, Nh = (e) => {
+  const t = ((e == null ? void 0 : e.skipZhUnits) || "").split("").filter((n) => Le(n) === L.CJK_CHAR).join(""), s = new RegExp(`^[${t}]`);
+  return (n, i, a) => {
+    if (n.type === L.WESTERN_LETTER && n.value.match(/^\d+$/)) {
+      const o = xr(a, n);
+      if (Array.isArray(o))
+        return;
+      if (o && o.value.match(s)) {
+        const { spaceHost: c, tokens: l } = Z(a, n, o);
+        if (l.some((d) => d.spaceAfter))
+          return;
+        const f = Sn(a, n);
+        if (f) {
+          const { spaceHost: d, tokens: h } = Z(a, f, n);
+          if (h.some(
+            (y) => y.spaceAfter
+          ))
+            return;
+          d && (d.modifiedSpaceAfter = "", X(
+            d,
+            $.SPACE_AFTER
+          ));
+        }
+        c && (c.modifiedSpaceAfter = "", X(c, $.SPACE_AFTER));
+      }
+    }
+  };
+}, Fh = (e) => (r, t, s) => {
+  if (r.value !== "&")
+    return;
+  const n = te(s, r);
+  if (!n || n.type !== L.WESTERN_LETTER || r.spaceAfter)
+    return;
+  const i = te(s, n);
+  if (!i || i.value !== ";" || n.spaceAfter)
+    return;
+  r.modifiedValue = r.value, r.modifiedType = r.type, r.modifiedSpaceAfter = r.spaceAfter, X(r, $.VALUE), X(r, $.SPACE_AFTER), n.modifiedValue = n.value, n.modifiedType = n.type, n.modifiedSpaceAfter = n.spaceAfter, X(n, $.VALUE), X(n, $.SPACE_AFTER), i.modifiedValue = i.value, i.modifiedType = i.type, X(i, $.VALUE), X(i, $.SPACE_AFTER);
+  const a = xr(s, i);
+  if (a) {
+    const { spaceHost: o } = Z(s, i, a);
+    o && (o.modifiedSpaceAfter = o.spaceAfter, X(o, $.SPACE_AFTER));
+  }
+}, Os = (e) => e.some((r) => {
+  if (r.type === J.GROUP)
+    return Os(r);
+  if (ld(r.type))
+    return !r.value.match(/[‘’“”]/);
+}), Rs = (e) => {
+  e.forEach((r) => {
+    for (const t in $)
+      X(r, t);
+    r.modifiedSpaceAfter = r.spaceAfter, r.modifiedType = r.type, r.modifiedValue = r.value, r.type === J.GROUP && (r.modifiedInnerSpaceBefore = r.innerSpaceBefore, Rs(r));
+  });
+}, Lh = (e) => {
+  const r = e == null ? void 0 : e.skipPureWestern;
+  return (t, s, n) => {
+    r && !n.startValue && s === 0 && (Os(n) || Rs(n));
+  };
+}, qh = (e) => [
+  hh(e),
+  yh(e),
+  Th(e),
+  xh(e),
+  Sh(e),
+  Ch(e),
+  Oh(e),
+  Rh(e),
+  Ih(e),
+  _h(e),
+  Bh(),
+  Nh(e),
+  Fh(),
+  Lh(e)
+], Is = {
+  noSinglePair: !0,
+  halfwidthPunctuation: "()[]{}",
+  fullwidthPunctuation: "，。：；？！“”‘’",
+  adjustedFullwidthPunctuation: "“”‘’",
   unifiedPunctuation: "simplified",
-  spaceBetweenHalfwidthContent: true,
-  noSpaceBetweenFullwidthContent: true,
-  spaceBetweenMixedwidthContent: true,
-  noSpaceBeforePauseOrStop: true,
-  spaceAfterHalfwidthPauseOrStop: true,
-  noSpaceAfterFullwidthPauseOrStop: true,
-  spaceOutsideHalfwidthQuotation: true,
-  noSpaceOutsideFullwidthQuotation: true,
-  noSpaceInsideQuotation: true,
-  spaceOutsideHalfwidthBracket: true,
-  noSpaceOutsideFullwidthBracket: true,
-  noSpaceInsideBracket: true,
-  spaceOutsideCode: true,
-  noSpaceInsideHyperMark: true,
-  trimSpace: true,
-  skipZhUnits: `\u5E74\u6708\u65E5\u5929\u53F7\u65F6\u5206\u79D2`,
+  spaceBetweenHalfwidthContent: !0,
+  noSpaceBetweenFullwidthContent: !0,
+  spaceBetweenMixedwidthContent: !0,
+  noSpaceBeforePauseOrStop: !0,
+  spaceAfterHalfwidthPauseOrStop: !0,
+  noSpaceAfterFullwidthPauseOrStop: !0,
+  spaceOutsideHalfwidthQuotation: !0,
+  noSpaceOutsideFullwidthQuotation: !0,
+  noSpaceInsideQuotation: !0,
+  spaceOutsideHalfwidthBracket: !0,
+  noSpaceOutsideFullwidthBracket: !0,
+  noSpaceInsideBracket: !0,
+  spaceOutsideCode: !0,
+  noSpaceInsideHyperMark: !0,
+  trimSpace: !0,
+  skipZhUnits: "年月日天号时分秒",
   skipAbbrs: [
     "Mr.",
     "Mrs.",
@@ -9011,30 +4917,23 @@ const defaultConfig = {
     "i.e.",
     "e.g.",
     "a.k.a."
-  ]
-};
-const hyperParseInfo = [
-  { name: "ignore", value: parser$4 },
-  { name: "hexo", value: parser$3 },
-  { name: "vuepress", value: parser$2 },
-  { name: "markdown", value: parser }
-];
-const arrToMap = (arr) => arr.reduce((current, { name: name2, value }) => {
-  current[name2] = value;
-  return current;
-}, {});
-const hyperParseMap = arrToMap(hyperParseInfo);
-const matchCallArray = (calls, map) => calls.map((call) => {
-  switch (typeof call) {
+  ],
+  skipPureWestern: !0
+}, Cn = [
+  { name: "ignore", value: Hs },
+  { name: "hexo", value: $s },
+  { name: "vuepress", value: Us },
+  { name: "markdown", value: eh }
+], Hh = (e) => e.reduce((r, { name: t, value: s }) => (r[t] = s, r), {}), on = Hh(Cn), Mh = (e, r) => e.map((t) => {
+  switch (typeof t) {
     case "function":
-      return call;
+      return t;
     case "string":
-      return map[call];
+      return r[t];
     default:
       return null;
   }
-}).filter(Boolean);
-const DEPRECATED_OPTIONS = {
+}).filter(Boolean), ka = {
   halfWidthPunctuation: "halfwidthPunctuation",
   fullWidthPunctuation: "fullwidthPunctuation",
   adjustedFullWidthPunctuation: "adjustedFullwidthPunctuation",
@@ -9054,883 +4953,622 @@ const DEPRECATED_OPTIONS = {
   noSpaceOutsideFullBracket: "noSpaceOutsideFullwidthBracket",
   noSpaceInsideWrapper: "noSpaceInsideHyperMark",
   noSpaceInsideMark: "noSpaceInsideHyperMark"
-};
-const deprecateOptions = (ruleOption, logger) => {
-  var _a2;
-  for (const oldKey in DEPRECATED_OPTIONS) {
-    const newKey = DEPRECATED_OPTIONS[oldKey];
-    if (ruleOption[oldKey]) {
-      logger.warn(`[deprecate] ${oldKey} is deprecated, use ${newKey} instead`);
-      ruleOption[newKey] = (_a2 = ruleOption[newKey]) != null ? _a2 : ruleOption[oldKey];
-      delete ruleOption[oldKey];
-    }
+}, $h = (e, r) => {
+  for (const t in ka) {
+    const s = ka[t];
+    e[t] && (r.warn(`[deprecate] ${t} is deprecated, use ${s} instead`), e[s] = e[s] ?? e[t], delete e[t]);
   }
-};
-const normalizeOptions = (options) => {
-  var _a2, _b2;
-  const logger = (_a2 = options.logger) != null ? _a2 : env.defaultLogger;
-  const rules = (_b2 = options.rules) != null ? _b2 : {};
-  const preset = rules.preset === "default" ? defaultConfig : {};
-  deprecateOptions(rules, logger);
-  let hyperParse;
-  if (typeof options.hyperParse === "function") {
-    hyperParse = [options.hyperParse];
-  } else {
-    hyperParse = options.hyperParse || hyperParseInfo.map((item) => item.name);
-  }
-  const normoalizedOptions = {
-    logger,
-    ignoredCases: options.ignoredCases || [],
-    rules: { ...preset, ...rules },
-    hyperParse: matchCallArray(
-      hyperParse,
-      hyperParseMap
+}, Uh = (e) => {
+  const r = e.logger ?? ke.defaultLogger, t = e.rules ?? {}, s = t.preset === "default" ? Is : {};
+  $h(t, r);
+  let n;
+  return typeof e.hyperParse == "function" ? n = [e.hyperParse] : n = e.hyperParse || Cn.map((a) => a.name), {
+    logger: r,
+    ignoredCases: e.ignoredCases || [],
+    rules: { ...s, ...t },
+    hyperParse: Mh(
+      n,
+      on
     )
   };
-  return normoalizedOptions;
-};
-const normalizeConfig = (config, logger = env.defaultLogger) => {
-  const options = {
-    logger,
+}, Vh = (e, r = ke.defaultLogger) => {
+  const t = {
+    logger: r,
     rules: {},
     hyperParse: [],
     ignoredCases: []
   };
-  let hyperParse = [];
-  if (config.preset === "default") {
-    options.rules = { ...defaultConfig };
-    hyperParse = hyperParseInfo.map((item) => item.name);
-  }
-  if (config.rules) {
-    options.rules = { ...options.rules, ...config.rules };
-  }
-  if (Array.isArray(config.hyperParsers)) {
-    hyperParse = config.hyperParsers;
-  }
-  hyperParse.forEach((x) => {
-    if (!hyperParseMap[x]) {
-      logger.log(`The hyper parser ${x} is invalid.`);
+  let s = [];
+  return e.preset === "default" && (t.rules = { ...Is }, s = Cn.map((n) => n.name)), e.rules && (t.rules = { ...t.rules, ...e.rules }), Array.isArray(e.hyperParsers) && (s = e.hyperParsers), s.forEach((n) => {
+    if (!on[n]) {
+      r.log(`The hyper parser ${n} is invalid.`);
       return;
     }
-    options.hyperParse.push(hyperParseMap[x]);
-  });
-  if (config.ignores) {
-    config.ignores.forEach((x) => {
-      const ignoredCase = parseIngoredCase(x);
-      if (ignoredCase) {
-        options.ignoredCases.push(ignoredCase);
-      } else {
-        logger.log(`The format of ignore case: "${x}" is invalid.`);
-      }
-    });
-  }
-  return options;
-};
-const findIgnoredMarks = (str, ignoredCases = [], logger = env.defaultLogger) => {
-  const marks = [];
-  ignoredCases.forEach(({ prefix, textStart, textEnd, suffix }) => {
-    const start = (prefix || "") + textStart;
-    const end = (textEnd || "") + (suffix || "");
-    const startOffset = prefix ? prefix.length : 0;
-    const endOffset = suffix ? suffix.length : 0;
-    const findNextMatch = (currentIndex) => {
-      const startIndex = str.substring(currentIndex).indexOf(start);
-      if (startIndex === -1) {
+    t.hyperParse.push(on[n]);
+  }), e.caseIgnores && e.caseIgnores.forEach((n) => {
+    const i = Ia(n);
+    i ? t.ignoredCases.push(i) : r.log(`The format of ignore case: "${n}" is invalid.`);
+  }), t;
+}, jh = (e, r = [], t = ke.defaultLogger) => {
+  const s = [];
+  return r.forEach(({ prefix: n, textStart: i, textEnd: a, suffix: o }) => {
+    const c = (n || "") + i, l = (a || "") + (o || ""), u = n ? n.length : 0, f = o ? o.length : 0, d = (h) => {
+      const m = e.substring(h).indexOf(c);
+      if (m === -1)
         return;
-      }
-      const possibleStart = currentIndex + startIndex + startOffset;
-      const nextPossibleCurrentIndex = possibleStart + textStart.length;
-      if (!end) {
-        marks.push({
-          start: possibleStart,
-          end: nextPossibleCurrentIndex
-        });
-        findNextMatch(nextPossibleCurrentIndex);
-      } else {
-        const endIndex = str.substring(nextPossibleCurrentIndex).indexOf(end);
-        const possibleEnd = nextPossibleCurrentIndex + endIndex + (textEnd || "").length;
-        if (endIndex === -1) {
+      const y = h + m + u, p = y + i.length;
+      if (!l)
+        s.push({
+          start: y,
+          end: p
+        }), d(p);
+      else {
+        const v = e.substring(p).indexOf(l), g = p + v + (a || "").length;
+        if (v === -1)
           return;
-        } else {
-          marks.push({
-            start: possibleStart,
-            end: possibleEnd
-          });
-          findNextMatch(possibleEnd + endOffset);
-        }
+        s.push({
+          start: y,
+          end: g
+        }), d(g + f);
       }
     };
-    findNextMatch(0);
-  });
-  return marks.sort((a, b) => a.start - b.start);
-};
-const isInRange = (start, end, mark) => {
-  return start <= mark.end && end >= mark.start;
-};
-const isIgnored = (token, marks = []) => {
-  const result = {
-    ignored: false,
-    [ValidationTarget.VALUE]: false,
-    [ValidationTarget.SPACE_AFTER]: false,
-    [ValidationTarget.START_VALUE]: false,
-    [ValidationTarget.END_VALUE]: false,
-    [ValidationTarget.INNER_SPACE_BEFORE]: false
+    d(0);
+  }), s.sort((n, i) => n.start - i.start);
+}, Pe = (e, r, t) => e <= t.end && r >= t.start, xa = (e, r = []) => {
+  const t = {
+    ignored: !1,
+    [$.VALUE]: !1,
+    [$.SPACE_AFTER]: !1,
+    [$.START_VALUE]: !1,
+    [$.END_VALUE]: !1,
+    [$.INNER_SPACE_BEFORE]: !1
   };
-  marks.forEach((mark) => {
-    if (Array.isArray(token)) {
+  return r.forEach((s) => {
+    if (Array.isArray(e)) {
       const {
-        index: index2,
-        startValue,
-        innerSpaceBefore,
-        endIndex = 0,
-        endValue,
-        spaceAfter
-      } = token;
-      if (isInRange(index2, index2 + (startValue || "").length, mark)) {
-        result[ValidationTarget.SPACE_AFTER] = result.ignored = true;
-      }
-      if (isInRange(
-        index2 + (startValue || "").length,
-        index2 + (startValue || "").length + (innerSpaceBefore || "").length,
-        mark
-      )) {
-        result[ValidationTarget.INNER_SPACE_BEFORE] = result.ignored = true;
-      }
-      if (isInRange(endIndex, endIndex + (endValue || "").length, mark)) {
-        result[ValidationTarget.END_VALUE] = result.ignored = true;
-      }
-      if (isInRange(
-        endIndex + (endValue || "").length,
-        endIndex + (endValue || "").length + (spaceAfter || "").length,
-        mark
-      )) {
-        result[ValidationTarget.SPACE_AFTER] = result.ignored = true;
-      }
+        index: n,
+        startValue: i,
+        innerSpaceBefore: a,
+        endIndex: o = 0,
+        endValue: c,
+        spaceAfter: l
+      } = e;
+      Pe(n, n + (i || "").length, s) && (t[$.SPACE_AFTER] = t.ignored = !0), Pe(
+        n + (i || "").length,
+        n + (i || "").length + (a || "").length,
+        s
+      ) && (t[$.INNER_SPACE_BEFORE] = t.ignored = !0), Pe(o, o + (c || "").length, s) && (t[$.END_VALUE] = t.ignored = !0), Pe(
+        o + (c || "").length,
+        o + (c || "").length + (l || "").length,
+        s
+      ) && (t[$.SPACE_AFTER] = t.ignored = !0);
     } else {
-      const { index: index2, value, spaceAfter } = token;
-      if (isInRange(index2, index2 + (value || "").length, mark)) {
-        result[ValidationTarget.VALUE] = result.ignored = true;
-      }
-      if (isInRange(
-        index2 + (value || "").length,
-        index2 + (value || "").length + (spaceAfter || "").length,
-        mark
-      )) {
-        result[ValidationTarget.SPACE_AFTER] = result.ignored = true;
-      }
+      const { index: n, value: i, spaceAfter: a } = e;
+      Pe(n, n + (i || "").length, s) && (t[$.VALUE] = t.ignored = !0), Pe(
+        n + (i || "").length,
+        n + (i || "").length + (a || "").length,
+        s
+      ) && (t[$.SPACE_AFTER] = t.ignored = !0);
     }
+  }), t;
+}, Sa = (e, r = 0, t, s = [], n = []) => {
+  e.validations.forEach((i) => {
+    const a = { ...i, index: i.index + r };
+    t[i.target] ? n.push(a) : s.push(a);
   });
-  return result;
-};
-const recordValidations = (token, offset = 0, ignoredFlags, validations = [], ignoredValidations = []) => {
-  token.validations.forEach((v) => {
-    const validationWithOffset = { ...v, index: v.index + offset };
-    if (!ignoredFlags[v.target]) {
-      validations.push(validationWithOffset);
-    } else {
-      ignoredValidations.push(validationWithOffset);
-    }
-  });
-};
-const join = (tokens, offset = 0, ignoredMarks = [], ignoredTokens = [], validations = [], ignoredValidations = [], isChild) => {
-  const ignoredFlags = isIgnored(tokens, ignoredMarks);
-  if (!isChild && ignoredFlags.ignored) {
-    ignoredTokens.push(tokens);
-  }
-  if (!isChild) {
-    recordValidations(
-      tokens,
-      offset,
-      ignoredFlags,
-      validations,
-      ignoredValidations
-    );
-  }
-  if (ignoredFlags[ValidationTarget.START_VALUE]) {
-    tokens.ignoredStartValue = tokens.modifiedStartValue;
-    tokens.modifiedStartValue = tokens.startValue;
-  }
-  if (ignoredFlags[ValidationTarget.INNER_SPACE_BEFORE]) {
-    tokens.ignoredInnerSpaceBefore = tokens.modifiedInnerSpaceBefore;
-    tokens.modifiedInnerSpaceBefore = tokens.innerSpaceBefore;
-  }
-  if (ignoredFlags[ValidationTarget.END_VALUE]) {
-    tokens.ignoredEndValue = tokens.modifiedEndValue;
-    tokens.modifiedEndValue = tokens.endValue;
-  }
-  if (ignoredFlags[ValidationTarget.SPACE_AFTER]) {
-    tokens.ignoredSpaceAfter = tokens.modifiedSpaceAfter;
-    tokens.modifiedSpaceAfter = tokens.spaceAfter;
-  }
-  return [
-    tokens.modifiedStartValue,
-    tokens.modifiedInnerSpaceBefore,
-    ...tokens.map((token) => {
-      const subIgnoredFlags = isIgnored(token, ignoredMarks);
-      if (subIgnoredFlags.ignored) {
-        ignoredTokens.push(token);
-      }
-      recordValidations(
-        token,
-        offset,
-        subIgnoredFlags,
-        validations,
-        ignoredValidations
-      );
-      if (!Array.isArray(token)) {
-        if (subIgnoredFlags[ValidationTarget.VALUE]) {
-          token.ignoredValue = token.modifiedValue;
-          token.modifiedValue = token.value;
-        }
-        if (subIgnoredFlags[ValidationTarget.SPACE_AFTER]) {
-          token.ignoredSpaceAfter = token.modifiedSpaceAfter;
-          token.modifiedSpaceAfter = token.spaceAfter;
-        }
-        return [token.modifiedValue, token.modifiedSpaceAfter].filter(Boolean).join("");
-      }
-      return join(
-        token,
-        offset,
-        ignoredMarks,
-        ignoredTokens,
-        validations,
-        ignoredValidations,
-        true
-      );
+}, Ps = (e, r = 0, t = [], s = [], n = [], i = [], a) => {
+  const o = xa(e, t);
+  return !a && o.ignored && s.push(e), a || Sa(
+    e,
+    r,
+    o,
+    n,
+    i
+  ), o[$.START_VALUE] && (e.ignoredStartValue = e.modifiedStartValue, e.modifiedStartValue = e.startValue), o[$.INNER_SPACE_BEFORE] && (e.ignoredInnerSpaceBefore = e.modifiedInnerSpaceBefore, e.modifiedInnerSpaceBefore = e.innerSpaceBefore), o[$.END_VALUE] && (e.ignoredEndValue = e.modifiedEndValue, e.modifiedEndValue = e.endValue), o[$.SPACE_AFTER] && (e.ignoredSpaceAfter = e.modifiedSpaceAfter, e.modifiedSpaceAfter = e.spaceAfter), [
+    e.modifiedStartValue,
+    e.modifiedInnerSpaceBefore,
+    ...e.map((c) => {
+      const l = xa(c, t);
+      return l.ignored && s.push(c), Sa(
+        c,
+        r,
+        l,
+        n,
+        i
+      ), Array.isArray(c) ? Ps(
+        c,
+        r,
+        t,
+        s,
+        n,
+        i,
+        !0
+      ) : (l[$.VALUE] && (c.ignoredValue = c.modifiedValue, c.modifiedValue = c.value), l[$.SPACE_AFTER] && (c.ignoredSpaceAfter = c.modifiedSpaceAfter, c.modifiedSpaceAfter = c.spaceAfter), [c.modifiedValue, c.modifiedSpaceAfter].filter(Boolean).join(""));
     }),
-    tokens.modifiedEndValue,
-    tokens.modifiedSpaceAfter
+    e.modifiedEndValue,
+    e.modifiedSpaceAfter
   ].filter(Boolean).join("");
-};
-const replaceBlocks = (str, blocks) => {
-  if (blocks.length === 0) {
+}, Wh = (e, r) => {
+  if (r.length === 0)
     return {
-      value: str,
-      pieces: [{ value: str, start: 0, end: str.length, nonBlock: true }]
+      value: e,
+      pieces: [{ value: e, start: 0, end: e.length, nonBlock: !0 }]
     };
-  }
-  const pieces = blocks.reduce((pieces2, block, index2) => {
-    const { start, end } = block;
-    const lastPiece = pieces2[pieces2.length - 1];
-    const nextStart = lastPiece ? lastPiece.end : 0;
-    if (nextStart < start) {
-      const nonBlockPiece = {
-        nonBlock: true,
-        start: nextStart,
-        end: start,
+  const t = r.reduce((n, i, a) => {
+    const { start: o, end: c } = i, l = n[n.length - 1], u = l ? l.end : 0;
+    if (u < o) {
+      const f = {
+        nonBlock: !0,
+        start: u,
+        end: o,
         value: ""
       };
-      nonBlockPiece.value = str.substring(
-        nonBlockPiece.start,
-        nonBlockPiece.end
-      );
-      pieces2.push(nonBlockPiece);
+      f.value = e.substring(
+        f.start,
+        f.end
+      ), n.push(f);
     }
-    pieces2.push(block);
-    if (index2 === blocks.length - 1 && end !== str.length) {
-      const nonBlockPiece = {
-        nonBlock: true,
-        start: end,
-        end: str.length,
+    if (n.push(i), a === r.length - 1 && c !== e.length) {
+      const f = {
+        nonBlock: !0,
+        start: c,
+        end: e.length,
         value: ""
       };
-      nonBlockPiece.value = str.substring(
-        nonBlockPiece.start,
-        nonBlockPiece.end
-      );
-      pieces2.push(nonBlockPiece);
+      f.value = e.substring(
+        f.start,
+        f.end
+      ), n.push(f);
     }
-    return pieces2;
+    return n;
   }, []);
-  const value = pieces.map(({ value: value2 }) => value2).join("");
-  return { value, pieces };
-};
-const run = (str, options = {}) => {
-  const normalizedOptions = normalizeOptions(options);
-  return lint(str, normalizedOptions);
-};
-const runWithConfig = (str, config) => {
-  const normalizedOptions = normalizeConfig(config);
-  return lint(str, normalizedOptions);
-};
-const lint = (str, normalizedOptions) => {
-  const disabledMatcher = /<!--\s*zhlint\s*disabled\s*-->/g;
-  if (str.match(disabledMatcher)) {
-    return { origin: str, result: str, validations: [], disabled: true };
-  }
-  const { logger, ignoredCases, rules, hyperParse } = normalizedOptions;
-  const status = {
-    value: str,
-    modifiedValue: str,
-    ignoredByRules: ignoredCases,
+  return { value: t.map(({ value: n }) => n).join(""), pieces: t };
+}, ap = (e, r = {}) => {
+  const t = Uh(r);
+  return _s(e, t);
+}, sp = (e, r) => {
+  const t = Vh(r);
+  return _s(e, t);
+}, _s = (e, r) => {
+  const t = /<!--\s*zhlint\s*disabled\s*-->/g;
+  if (e.match(t))
+    return { origin: e, result: e, validations: [], disabled: !0 };
+  const { logger: s, ignoredCases: n, rules: i, hyperParse: a } = r, o = {
+    value: e,
+    modifiedValue: e,
+    ignoredByRules: n,
     ignoredByParsers: [],
     blocks: [
       {
-        value: str,
+        value: e,
         marks: [],
         start: 0,
-        end: str.length - 1
+        end: e.length - 1
       }
     ]
-  };
-  const ignoredTokens = [];
-  const parserErrors = [];
-  const ruleErrors = [];
-  const ignoredRuleErrors = [];
-  const parsedStatus = hyperParse.reduce(
-    (current, parse22) => parse22(current),
-    status
-  );
-  const ruleHandlers = generateHandlers(rules);
-  const modifiedBlocks = parsedStatus.blocks.map(
-    ({ value, marks, start, end }) => {
-      let lastValue = value;
-      const result2 = toMutableResult(parse(value, marks), rules);
-      parserErrors.push(...result2.errors);
-      const ignoredMarks = findIgnoredMarks(
-        value,
-        status.ignoredByRules,
-        logger
+  }, c = [], l = [], u = [], f = [], d = a.reduce(
+    (v, g) => g(v),
+    o
+  ), h = qh(i), m = d.blocks.map(
+    ({ value: v, marks: g, start: b, end: E }) => {
+      let A = v;
+      const T = Dd(Wd(v, g), i);
+      l.push(...T.errors);
+      const k = jh(
+        v,
+        o.ignoredByRules,
+        s
       );
-      ruleHandlers.forEach((rule) => {
-        travel(result2.tokens, rule);
-      });
-      lastValue = join(
-        result2.tokens,
-        start,
-        ignoredMarks,
-        ignoredTokens,
-        ruleErrors,
-        ignoredRuleErrors
-      );
-      return {
-        ...result2,
-        start,
-        end,
-        value: lastValue,
-        originValue: value
+      return h.forEach((O) => {
+        bs(T.tokens, O);
+      }), A = Ps(
+        T.tokens,
+        b,
+        k,
+        c,
+        u,
+        f
+      ), {
+        ...T,
+        start: b,
+        end: E,
+        value: A,
+        originValue: v
       };
     }
-  );
-  const result = replaceBlocks(str, modifiedBlocks);
-  const debugInfo = {
-    pieces: result.pieces,
-    blocks: modifiedBlocks,
-    ignoredCases: parsedStatus.ignoredByRules,
-    ignoredByParsers: parsedStatus.ignoredByParsers,
-    ignoredTokens,
-    parserErrors,
-    ruleErrors,
-    ignoredRuleErrors
+  ), y = Wh(e, m), p = {
+    pieces: y.pieces,
+    blocks: m,
+    ignoredCases: d.ignoredByRules,
+    ignoredByParsers: d.ignoredByParsers,
+    ignoredTokens: c,
+    parserErrors: l,
+    ruleErrors: u,
+    ignoredRuleErrors: f
   };
   return {
-    origin: str,
-    result: result.value,
-    validations: [...parserErrors, ...ruleErrors],
-    __debug__: debugInfo
+    origin: e,
+    result: y.value,
+    validations: [...l, ...u],
+    __debug__: p
   };
 };
-function assertPath(path) {
-  if (typeof path !== "string") {
-    throw new TypeError("Path must be a string. Received " + JSON.stringify(path));
+function zh(e) {
+  return e && e.__esModule && Object.prototype.hasOwnProperty.call(e, "default") ? e.default : e;
+}
+var Bs = { exports: {} }, z = Bs.exports = {}, le, fe;
+function cn() {
+  throw new Error("setTimeout has not been defined");
+}
+function ln() {
+  throw new Error("clearTimeout has not been defined");
+}
+(function() {
+  try {
+    typeof setTimeout == "function" ? le = setTimeout : le = cn;
+  } catch {
+    le = cn;
+  }
+  try {
+    typeof clearTimeout == "function" ? fe = clearTimeout : fe = ln;
+  } catch {
+    fe = ln;
+  }
+})();
+function Ns(e) {
+  if (le === setTimeout)
+    return setTimeout(e, 0);
+  if ((le === cn || !le) && setTimeout)
+    return le = setTimeout, setTimeout(e, 0);
+  try {
+    return le(e, 0);
+  } catch {
+    try {
+      return le.call(null, e, 0);
+    } catch {
+      return le.call(this, e, 0);
+    }
   }
 }
-function normalizeStringPosix(path, allowAboveRoot) {
-  var res2 = "";
-  var lastSegmentLength = 0;
-  var lastSlash = -1;
-  var dots = 0;
-  var code;
-  for (var i = 0; i <= path.length; ++i) {
-    if (i < path.length)
-      code = path.charCodeAt(i);
-    else if (code === 47)
-      break;
-    else
-      code = 47;
-    if (code === 47) {
-      if (lastSlash === i - 1 || dots === 1)
-        ;
-      else if (lastSlash !== i - 1 && dots === 2) {
-        if (res2.length < 2 || lastSegmentLength !== 2 || res2.charCodeAt(res2.length - 1) !== 46 || res2.charCodeAt(res2.length - 2) !== 46) {
-          if (res2.length > 2) {
-            var lastSlashIndex = res2.lastIndexOf("/");
-            if (lastSlashIndex !== res2.length - 1) {
-              if (lastSlashIndex === -1) {
-                res2 = "";
-                lastSegmentLength = 0;
-              } else {
-                res2 = res2.slice(0, lastSlashIndex);
-                lastSegmentLength = res2.length - 1 - res2.lastIndexOf("/");
+function Dh(e) {
+  if (fe === clearTimeout)
+    return clearTimeout(e);
+  if ((fe === ln || !fe) && clearTimeout)
+    return fe = clearTimeout, clearTimeout(e);
+  try {
+    return fe(e);
+  } catch {
+    try {
+      return fe.call(null, e);
+    } catch {
+      return fe.call(this, e);
+    }
+  }
+}
+var de = [], Ne = !1, xe, dr = -1;
+function Gh() {
+  !Ne || !xe || (Ne = !1, xe.length ? de = xe.concat(de) : dr = -1, de.length && Fs());
+}
+function Fs() {
+  if (!Ne) {
+    var e = Ns(Gh);
+    Ne = !0;
+    for (var r = de.length; r; ) {
+      for (xe = de, de = []; ++dr < r; )
+        xe && xe[dr].run();
+      dr = -1, r = de.length;
+    }
+    xe = null, Ne = !1, Dh(e);
+  }
+}
+z.nextTick = function(e) {
+  var r = new Array(arguments.length - 1);
+  if (arguments.length > 1)
+    for (var t = 1; t < arguments.length; t++)
+      r[t - 1] = arguments[t];
+  de.push(new Ls(e, r)), de.length === 1 && !Ne && Ns(Fs);
+};
+function Ls(e, r) {
+  this.fun = e, this.array = r;
+}
+Ls.prototype.run = function() {
+  this.fun.apply(null, this.array);
+};
+z.title = "browser";
+z.browser = !0;
+z.env = {};
+z.argv = [];
+z.version = "";
+z.versions = {};
+function ve() {
+}
+z.on = ve;
+z.addListener = ve;
+z.once = ve;
+z.off = ve;
+z.removeListener = ve;
+z.removeAllListeners = ve;
+z.emit = ve;
+z.prependListener = ve;
+z.prependOnceListener = ve;
+z.listeners = function(e) {
+  return [];
+};
+z.binding = function(e) {
+  throw new Error("process.binding is not supported");
+};
+z.cwd = function() {
+  return "/";
+};
+z.chdir = function(e) {
+  throw new Error("process.chdir is not supported");
+};
+z.umask = function() {
+  return 0;
+};
+var Kh = Bs.exports;
+const Qh = /* @__PURE__ */ zh(Kh);
+function ce(e) {
+  if (typeof e != "string")
+    throw new TypeError("Path must be a string. Received " + JSON.stringify(e));
+}
+function Ca(e, r) {
+  for (var t = "", s = 0, n = -1, i = 0, a, o = 0; o <= e.length; ++o) {
+    if (o < e.length)
+      a = e.charCodeAt(o);
+    else {
+      if (a === 47)
+        break;
+      a = 47;
+    }
+    if (a === 47) {
+      if (!(n === o - 1 || i === 1))
+        if (n !== o - 1 && i === 2) {
+          if (t.length < 2 || s !== 2 || t.charCodeAt(t.length - 1) !== 46 || t.charCodeAt(t.length - 2) !== 46) {
+            if (t.length > 2) {
+              var c = t.lastIndexOf("/");
+              if (c !== t.length - 1) {
+                c === -1 ? (t = "", s = 0) : (t = t.slice(0, c), s = t.length - 1 - t.lastIndexOf("/")), n = o, i = 0;
+                continue;
               }
-              lastSlash = i;
-              dots = 0;
+            } else if (t.length === 2 || t.length === 1) {
+              t = "", s = 0, n = o, i = 0;
               continue;
             }
-          } else if (res2.length === 2 || res2.length === 1) {
-            res2 = "";
-            lastSegmentLength = 0;
-            lastSlash = i;
-            dots = 0;
-            continue;
           }
-        }
-        if (allowAboveRoot) {
-          if (res2.length > 0)
-            res2 += "/..";
-          else
-            res2 = "..";
-          lastSegmentLength = 2;
-        }
-      } else {
-        if (res2.length > 0)
-          res2 += "/" + path.slice(lastSlash + 1, i);
-        else
-          res2 = path.slice(lastSlash + 1, i);
-        lastSegmentLength = i - lastSlash - 1;
-      }
-      lastSlash = i;
-      dots = 0;
-    } else if (code === 46 && dots !== -1) {
-      ++dots;
-    } else {
-      dots = -1;
-    }
+          r && (t.length > 0 ? t += "/.." : t = "..", s = 2);
+        } else
+          t.length > 0 ? t += "/" + e.slice(n + 1, o) : t = e.slice(n + 1, o), s = o - n - 1;
+      n = o, i = 0;
+    } else
+      a === 46 && i !== -1 ? ++i : i = -1;
   }
-  return res2;
+  return t;
 }
-function _format(sep, pathObject) {
-  var dir = pathObject.dir || pathObject.root;
-  var base = pathObject.base || (pathObject.name || "") + (pathObject.ext || "");
-  if (!dir) {
-    return base;
-  }
-  if (dir === pathObject.root) {
-    return dir + base;
-  }
-  return dir + sep + base;
+function Yh(e, r) {
+  var t = r.dir || r.root, s = r.base || (r.name || "") + (r.ext || "");
+  return t ? t === r.root ? t + s : t + e + s : s;
 }
-var posix = {
-  resolve: function resolve() {
-    var resolvedPath = "";
-    var resolvedAbsolute = false;
-    var cwd2;
-    for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
-      var path;
-      if (i >= 0)
-        path = arguments[i];
-      else {
-        if (cwd2 === void 0)
-          cwd2 = process.cwd();
-        path = cwd2;
-      }
-      assertPath(path);
-      if (path.length === 0) {
-        continue;
-      }
-      resolvedPath = path + "/" + resolvedPath;
-      resolvedAbsolute = path.charCodeAt(0) === 47;
+var Fe = {
+  // path.resolve([from ...], to)
+  resolve: function() {
+    for (var r = "", t = !1, s, n = arguments.length - 1; n >= -1 && !t; n--) {
+      var i;
+      n >= 0 ? i = arguments[n] : (s === void 0 && (s = Qh.cwd()), i = s), ce(i), i.length !== 0 && (r = i + "/" + r, t = i.charCodeAt(0) === 47);
     }
-    resolvedPath = normalizeStringPosix(resolvedPath, !resolvedAbsolute);
-    if (resolvedAbsolute) {
-      if (resolvedPath.length > 0)
-        return "/" + resolvedPath;
-      else
-        return "/";
-    } else if (resolvedPath.length > 0) {
-      return resolvedPath;
-    } else {
+    return r = Ca(r, !t), t ? r.length > 0 ? "/" + r : "/" : r.length > 0 ? r : ".";
+  },
+  normalize: function(r) {
+    if (ce(r), r.length === 0)
       return ".";
-    }
+    var t = r.charCodeAt(0) === 47, s = r.charCodeAt(r.length - 1) === 47;
+    return r = Ca(r, !t), r.length === 0 && !t && (r = "."), r.length > 0 && s && (r += "/"), t ? "/" + r : r;
   },
-  normalize: function normalize2(path) {
-    assertPath(path);
-    if (path.length === 0)
-      return ".";
-    var isAbsolute2 = path.charCodeAt(0) === 47;
-    var trailingSeparator = path.charCodeAt(path.length - 1) === 47;
-    path = normalizeStringPosix(path, !isAbsolute2);
-    if (path.length === 0 && !isAbsolute2)
-      path = ".";
-    if (path.length > 0 && trailingSeparator)
-      path += "/";
-    if (isAbsolute2)
-      return "/" + path;
-    return path;
+  isAbsolute: function(r) {
+    return ce(r), r.length > 0 && r.charCodeAt(0) === 47;
   },
-  isAbsolute: function isAbsolute(path) {
-    assertPath(path);
-    return path.length > 0 && path.charCodeAt(0) === 47;
-  },
-  join: function join2() {
+  join: function() {
     if (arguments.length === 0)
       return ".";
-    var joined;
-    for (var i = 0; i < arguments.length; ++i) {
-      var arg = arguments[i];
-      assertPath(arg);
-      if (arg.length > 0) {
-        if (joined === void 0)
-          joined = arg;
-        else
-          joined += "/" + arg;
-      }
+    for (var r, t = 0; t < arguments.length; ++t) {
+      var s = arguments[t];
+      ce(s), s.length > 0 && (r === void 0 ? r = s : r += "/" + s);
     }
-    if (joined === void 0)
-      return ".";
-    return posix.normalize(joined);
+    return r === void 0 ? "." : Fe.normalize(r);
   },
-  relative: function relative(from, to) {
-    assertPath(from);
-    assertPath(to);
-    if (from === to)
+  relative: function(r, t) {
+    if (ce(r), ce(t), r === t || (r = Fe.resolve(r), t = Fe.resolve(t), r === t))
       return "";
-    from = posix.resolve(from);
-    to = posix.resolve(to);
-    if (from === to)
-      return "";
-    var fromStart = 1;
-    for (; fromStart < from.length; ++fromStart) {
-      if (from.charCodeAt(fromStart) !== 47)
-        break;
-    }
-    var fromEnd = from.length;
-    var fromLen = fromEnd - fromStart;
-    var toStart = 1;
-    for (; toStart < to.length; ++toStart) {
-      if (to.charCodeAt(toStart) !== 47)
-        break;
-    }
-    var toEnd = to.length;
-    var toLen = toEnd - toStart;
-    var length = fromLen < toLen ? fromLen : toLen;
-    var lastCommonSep = -1;
-    var i = 0;
-    for (; i <= length; ++i) {
-      if (i === length) {
-        if (toLen > length) {
-          if (to.charCodeAt(toStart + i) === 47) {
-            return to.slice(toStart + i + 1);
-          } else if (i === 0) {
-            return to.slice(toStart + i);
-          }
-        } else if (fromLen > length) {
-          if (from.charCodeAt(fromStart + i) === 47) {
-            lastCommonSep = i;
-          } else if (i === 0) {
-            lastCommonSep = 0;
-          }
-        }
+    for (var s = 1; s < r.length && r.charCodeAt(s) === 47; ++s)
+      ;
+    for (var n = r.length, i = n - s, a = 1; a < t.length && t.charCodeAt(a) === 47; ++a)
+      ;
+    for (var o = t.length, c = o - a, l = i < c ? i : c, u = -1, f = 0; f <= l; ++f) {
+      if (f === l) {
+        if (c > l) {
+          if (t.charCodeAt(a + f) === 47)
+            return t.slice(a + f + 1);
+          if (f === 0)
+            return t.slice(a + f);
+        } else
+          i > l && (r.charCodeAt(s + f) === 47 ? u = f : f === 0 && (u = 0));
         break;
       }
-      var fromCode2 = from.charCodeAt(fromStart + i);
-      var toCode = to.charCodeAt(toStart + i);
-      if (fromCode2 !== toCode)
+      var d = r.charCodeAt(s + f), h = t.charCodeAt(a + f);
+      if (d !== h)
         break;
-      else if (fromCode2 === 47)
-        lastCommonSep = i;
+      d === 47 && (u = f);
     }
-    var out = "";
-    for (i = fromStart + lastCommonSep + 1; i <= fromEnd; ++i) {
-      if (i === fromEnd || from.charCodeAt(i) === 47) {
-        if (out.length === 0)
-          out += "..";
-        else
-          out += "/..";
-      }
-    }
-    if (out.length > 0)
-      return out + to.slice(toStart + lastCommonSep);
-    else {
-      toStart += lastCommonSep;
-      if (to.charCodeAt(toStart) === 47)
-        ++toStart;
-      return to.slice(toStart);
-    }
+    var m = "";
+    for (f = s + u + 1; f <= n; ++f)
+      (f === n || r.charCodeAt(f) === 47) && (m.length === 0 ? m += ".." : m += "/..");
+    return m.length > 0 ? m + t.slice(a + u) : (a += u, t.charCodeAt(a) === 47 && ++a, t.slice(a));
   },
-  _makeLong: function _makeLong(path) {
-    return path;
+  _makeLong: function(r) {
+    return r;
   },
-  dirname: function dirname2(path) {
-    assertPath(path);
-    if (path.length === 0)
+  dirname: function(r) {
+    if (ce(r), r.length === 0)
       return ".";
-    var code = path.charCodeAt(0);
-    var hasRoot = code === 47;
-    var end = -1;
-    var matchedSlash = true;
-    for (var i = path.length - 1; i >= 1; --i) {
-      code = path.charCodeAt(i);
-      if (code === 47) {
-        if (!matchedSlash) {
-          end = i;
+    for (var t = r.charCodeAt(0), s = t === 47, n = -1, i = !0, a = r.length - 1; a >= 1; --a)
+      if (t = r.charCodeAt(a), t === 47) {
+        if (!i) {
+          n = a;
           break;
         }
-      } else {
-        matchedSlash = false;
-      }
-    }
-    if (end === -1)
-      return hasRoot ? "/" : ".";
-    if (hasRoot && end === 1)
-      return "//";
-    return path.slice(0, end);
+      } else
+        i = !1;
+    return n === -1 ? s ? "/" : "." : s && n === 1 ? "//" : r.slice(0, n);
   },
-  basename: function basename2(path, ext) {
-    if (ext !== void 0 && typeof ext !== "string")
+  basename: function(r, t) {
+    if (t !== void 0 && typeof t != "string")
       throw new TypeError('"ext" argument must be a string');
-    assertPath(path);
-    var start = 0;
-    var end = -1;
-    var matchedSlash = true;
-    var i;
-    if (ext !== void 0 && ext.length > 0 && ext.length <= path.length) {
-      if (ext.length === path.length && ext === path)
+    ce(r);
+    var s = 0, n = -1, i = !0, a;
+    if (t !== void 0 && t.length > 0 && t.length <= r.length) {
+      if (t.length === r.length && t === r)
         return "";
-      var extIdx = ext.length - 1;
-      var firstNonSlashEnd = -1;
-      for (i = path.length - 1; i >= 0; --i) {
-        var code = path.charCodeAt(i);
-        if (code === 47) {
-          if (!matchedSlash) {
-            start = i + 1;
+      var o = t.length - 1, c = -1;
+      for (a = r.length - 1; a >= 0; --a) {
+        var l = r.charCodeAt(a);
+        if (l === 47) {
+          if (!i) {
+            s = a + 1;
             break;
           }
-        } else {
-          if (firstNonSlashEnd === -1) {
-            matchedSlash = false;
-            firstNonSlashEnd = i + 1;
-          }
-          if (extIdx >= 0) {
-            if (code === ext.charCodeAt(extIdx)) {
-              if (--extIdx === -1) {
-                end = i;
-              }
-            } else {
-              extIdx = -1;
-              end = firstNonSlashEnd;
-            }
-          }
-        }
+        } else
+          c === -1 && (i = !1, c = a + 1), o >= 0 && (l === t.charCodeAt(o) ? --o === -1 && (n = a) : (o = -1, n = c));
       }
-      if (start === end)
-        end = firstNonSlashEnd;
-      else if (end === -1)
-        end = path.length;
-      return path.slice(start, end);
+      return s === n ? n = c : n === -1 && (n = r.length), r.slice(s, n);
     } else {
-      for (i = path.length - 1; i >= 0; --i) {
-        if (path.charCodeAt(i) === 47) {
-          if (!matchedSlash) {
-            start = i + 1;
+      for (a = r.length - 1; a >= 0; --a)
+        if (r.charCodeAt(a) === 47) {
+          if (!i) {
+            s = a + 1;
             break;
           }
-        } else if (end === -1) {
-          matchedSlash = false;
-          end = i + 1;
-        }
-      }
-      if (end === -1)
-        return "";
-      return path.slice(start, end);
+        } else
+          n === -1 && (i = !1, n = a + 1);
+      return n === -1 ? "" : r.slice(s, n);
     }
   },
-  extname: function extname2(path) {
-    assertPath(path);
-    var startDot = -1;
-    var startPart = 0;
-    var end = -1;
-    var matchedSlash = true;
-    var preDotState = 0;
-    for (var i = path.length - 1; i >= 0; --i) {
-      var code = path.charCodeAt(i);
-      if (code === 47) {
-        if (!matchedSlash) {
-          startPart = i + 1;
+  extname: function(r) {
+    ce(r);
+    for (var t = -1, s = 0, n = -1, i = !0, a = 0, o = r.length - 1; o >= 0; --o) {
+      var c = r.charCodeAt(o);
+      if (c === 47) {
+        if (!i) {
+          s = o + 1;
           break;
         }
         continue;
       }
-      if (end === -1) {
-        matchedSlash = false;
-        end = i + 1;
-      }
-      if (code === 46) {
-        if (startDot === -1)
-          startDot = i;
-        else if (preDotState !== 1)
-          preDotState = 1;
-      } else if (startDot !== -1) {
-        preDotState = -1;
-      }
+      n === -1 && (i = !1, n = o + 1), c === 46 ? t === -1 ? t = o : a !== 1 && (a = 1) : t !== -1 && (a = -1);
     }
-    if (startDot === -1 || end === -1 || preDotState === 0 || preDotState === 1 && startDot === end - 1 && startDot === startPart + 1) {
-      return "";
-    }
-    return path.slice(startDot, end);
+    return t === -1 || n === -1 || // We saw a non-dot character immediately before the dot
+    a === 0 || // The (right-most) trimmed path component is exactly '..'
+    a === 1 && t === n - 1 && t === s + 1 ? "" : r.slice(t, n);
   },
-  format: function format2(pathObject) {
-    if (pathObject === null || typeof pathObject !== "object") {
-      throw new TypeError('The "pathObject" argument must be of type Object. Received type ' + typeof pathObject);
-    }
-    return _format("/", pathObject);
+  format: function(r) {
+    if (r === null || typeof r != "object")
+      throw new TypeError('The "pathObject" argument must be of type Object. Received type ' + typeof r);
+    return Yh("/", r);
   },
-  parse: function parse2(path) {
-    assertPath(path);
-    var ret = { root: "", dir: "", base: "", ext: "", name: "" };
-    if (path.length === 0)
-      return ret;
-    var code = path.charCodeAt(0);
-    var isAbsolute2 = code === 47;
-    var start;
-    if (isAbsolute2) {
-      ret.root = "/";
-      start = 1;
-    } else {
-      start = 0;
-    }
-    var startDot = -1;
-    var startPart = 0;
-    var end = -1;
-    var matchedSlash = true;
-    var i = path.length - 1;
-    var preDotState = 0;
-    for (; i >= start; --i) {
-      code = path.charCodeAt(i);
-      if (code === 47) {
-        if (!matchedSlash) {
-          startPart = i + 1;
+  parse: function(r) {
+    ce(r);
+    var t = { root: "", dir: "", base: "", ext: "", name: "" };
+    if (r.length === 0)
+      return t;
+    var s = r.charCodeAt(0), n = s === 47, i;
+    n ? (t.root = "/", i = 1) : i = 0;
+    for (var a = -1, o = 0, c = -1, l = !0, u = r.length - 1, f = 0; u >= i; --u) {
+      if (s = r.charCodeAt(u), s === 47) {
+        if (!l) {
+          o = u + 1;
           break;
         }
         continue;
       }
-      if (end === -1) {
-        matchedSlash = false;
-        end = i + 1;
-      }
-      if (code === 46) {
-        if (startDot === -1)
-          startDot = i;
-        else if (preDotState !== 1)
-          preDotState = 1;
-      } else if (startDot !== -1) {
-        preDotState = -1;
-      }
+      c === -1 && (l = !1, c = u + 1), s === 46 ? a === -1 ? a = u : f !== 1 && (f = 1) : a !== -1 && (f = -1);
     }
-    if (startDot === -1 || end === -1 || preDotState === 0 || preDotState === 1 && startDot === end - 1 && startDot === startPart + 1) {
-      if (end !== -1) {
-        if (startPart === 0 && isAbsolute2)
-          ret.base = ret.name = path.slice(1, end);
-        else
-          ret.base = ret.name = path.slice(startPart, end);
-      }
-    } else {
-      if (startPart === 0 && isAbsolute2) {
-        ret.name = path.slice(1, startDot);
-        ret.base = path.slice(1, end);
-      } else {
-        ret.name = path.slice(startPart, startDot);
-        ret.base = path.slice(startPart, end);
-      }
-      ret.ext = path.slice(startDot, end);
-    }
-    if (startPart > 0)
-      ret.dir = path.slice(0, startPart - 1);
-    else if (isAbsolute2)
-      ret.dir = "/";
-    return ret;
+    return a === -1 || c === -1 || // We saw a non-dot character immediately before the dot
+    f === 0 || // The (right-most) trimmed path component is exactly '..'
+    f === 1 && a === c - 1 && a === o + 1 ? c !== -1 && (o === 0 && n ? t.base = t.name = r.slice(1, c) : t.base = t.name = r.slice(o, c)) : (o === 0 && n ? (t.name = r.slice(1, a), t.base = r.slice(1, c)) : (t.name = r.slice(o, a), t.base = r.slice(o, c)), t.ext = r.slice(a, c)), o > 0 ? t.dir = r.slice(0, o - 1) : n && (t.dir = "/"), t;
   },
   sep: "/",
   delimiter: ":",
   win32: null,
   posix: null
 };
-posix.posix = posix;
-var pathBrowserify = posix;
-var empty = null;
-var empty_1 = empty;
-const resolvePath = (dir, config, ignore, logger = env.defaultLogger) => {
-  const result = {
+Fe.posix = Fe;
+var fr = Fe, Jh = null, Se = Jh;
+const Xh = ".zhlintrc", Zh = ".zhlintignore", ep = ".zhlintcaseignore", rp = (e, r, t, s, n = ke.defaultLogger) => {
+  const i = {
     config: void 0,
-    ignore: void 0
+    fileIgnore: void 0,
+    caseIgnore: void 0
   };
-  dir = pathBrowserify.resolve(dir != null ? dir : ".");
-  if (!empty_1.existsSync(dir)) {
-    logger.log(`"${dir}" does not exist.`);
-    return result;
-  }
-  config = pathBrowserify.resolve(dir, config != null ? config : ".zhlintrc");
-  if (empty_1.existsSync(config)) {
-    result.config = config;
-  } else {
-    logger.log(
-      `Config file "${config}" does not exist. Will proceed as default.`
-    );
-  }
-  ignore = pathBrowserify.resolve(dir, ignore != null ? ignore : ".zhlintignore");
-  if (empty_1.existsSync(ignore)) {
-    result.ignore = ignore;
-  } else {
-    logger.log(
-      `Global ignored cases file "${ignore}" does not exist. Will proceed as none.`
-    );
-  }
-  return result;
-};
-const readJSONSync = (filepath) => {
-  const output = empty_1.readFileSync(filepath, { encoding: "utf8" });
-  return JSON.parse(output);
-};
-const resolveConfig = (normalizedConfigPath, normalizedIgnorePath, logger = env.defaultLogger) => {
-  const result = {
+  return e = fr.resolve(e ?? "."), Se.existsSync(e) ? (r = fr.resolve(e, r ?? Xh), Se.existsSync(r) ? i.config = r : n.log(
+    `Config file "${r}" does not exist. Will proceed as default.`
+  ), t = fr.resolve(e, t ?? Zh), Se.existsSync(t) ? i.fileIgnore = t : n.log(
+    `Global ignored cases file "${t}" does not exist. Will proceed as none.`
+  ), s = fr.resolve(e, s ?? ep), Se.existsSync(s) ? i.caseIgnore = s : n.log(
+    `Global ignored cases file "${s}" does not exist. Will proceed as none.`
+  ), i) : (n.log(`"${e}" does not exist.`), i);
+}, tp = (e) => {
+  const r = Se.readFileSync(e, { encoding: "utf8" });
+  return JSON.parse(r);
+}, np = (e, r, t, s = ke.defaultLogger) => {
+  const n = {
     preset: "default"
   };
-  if (normalizedConfigPath) {
+  if (e)
     try {
-      const config = readJSONSync(normalizedConfigPath);
-      if (typeof config.preset === "string") {
-        result.preset = config.preset;
-      }
-      if (typeof config.rules === "object") {
-        result.rules = config.rules;
-      }
-      if (Array.isArray(config.hyperParsers)) {
-        result.hyperParsers = config.hyperParsers;
-      }
-      if (Array.isArray(config.ignores)) {
-        result.ignores = config.ignores;
-      }
-    } catch (error) {
-      logger.log(
-        `Failed to read "${normalizedConfigPath}": ${error.message}`
+      const i = tp(e);
+      typeof i.preset == "string" && (n.preset = i.preset), typeof i.rules == "object" && (n.rules = i.rules), Array.isArray(i.hyperParsers) && (n.hyperParsers = i.hyperParsers), Array.isArray(i.fileIgnores) && (n.fileIgnores = i.fileIgnores), Array.isArray(i.caseIgnores) && (n.caseIgnores = i.caseIgnores);
+    } catch (i) {
+      s.log(
+        `Failed to read "${e}": ${i.message}`
       );
     }
-  }
-  if (normalizedIgnorePath) {
+  if (r)
     try {
-      const ignores = empty_1.readFileSync(normalizedIgnorePath, { encoding: "utf8" });
-      ignores.split(/\n/).map((x) => x.trim()).forEach((x) => {
-        if (!x) {
-          return;
-        }
-        if (!result.ignores) {
-          result.ignores = [];
-        }
-        if (result.ignores.indexOf(x) === -1) {
-          result.ignores.push(x);
-        }
+      Se.readFileSync(r, { encoding: "utf8" }).split(/\n/).map((a) => a.trim()).forEach((a) => {
+        a && (n.fileIgnores || (n.fileIgnores = []), n.fileIgnores.indexOf(a) === -1 && n.fileIgnores.push(a));
       });
-    } catch (error) {
-      logger.log(
-        `Failed to read "${normalizedIgnorePath}": ${error.message}`
+    } catch (i) {
+      s.log(
+        `Failed to read "${r}": ${i.message}`
       );
     }
-  }
-  return result;
+  if (t)
+    try {
+      Se.readFileSync(t, { encoding: "utf8" }).split(/\n/).map((a) => a.trim()).forEach((a) => {
+        a && (n.caseIgnores || (n.caseIgnores = []), n.caseIgnores.indexOf(a) === -1 && n.caseIgnores.push(a));
+      });
+    } catch (i) {
+      s.log(
+        `Failed to read "${t}": ${i.message}`
+      );
+    }
+  return n;
+}, op = (e, r, t, s, n = ke.defaultLogger) => {
+  const {
+    config: i,
+    fileIgnore: a,
+    caseIgnore: o
+  } = rp(e, r, t, s, n);
+  return np(
+    i,
+    a,
+    o,
+    n
+  );
 };
-const readRc = (dir, config, ignore, logger = env.defaultLogger) => {
-  const { config: normalizedConfigPath, ignore: normalizedIgnorePath } = resolvePath(dir, config, ignore, logger);
-  return resolveConfig(normalizedConfigPath, normalizedIgnorePath, logger);
+export {
+  op as readRc,
+  ip as report,
+  ap as run,
+  sp as runWithConfig
 };
-export { readRc, report, run, runWithConfig };
 //# sourceMappingURL=zhlint.es.js.map

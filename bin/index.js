@@ -3,6 +3,7 @@
 const fs = require('fs')
 const minimist = require('minimist')
 const glob = require('glob')
+const gitignore = require('ignore')
 const { readRc, runWithConfig, report } = require('../')
 
 const helpMessage = `
@@ -24,7 +25,11 @@ Config arguments:
     .zhlintrc by default
 
   --ignore <filepath>
+  --file-ignore <filepath>
     .zhlintignore by default
+  
+  --case-ignore <filepath>
+    .zhlintcaseignore by default
 
   --dir    <path>
     current directory by default
@@ -69,11 +74,14 @@ const main = () => {
     const [filePattern] = [...argv._]
     const configDir = argv.dir
     const configPath = argv.config
-    const ignorePath = argv.ignore
-    const config = readRc(configDir, configPath, ignorePath)
+    const fileIgnorePath = argv.ignore || argv['file-ignore']
+    const caseIgnorePath = argv['case-ignore']
+    const config = readRc(configDir, configPath, fileIgnorePath, caseIgnorePath)
+    const fileIgnore = gitignore().add(config.fileIgnores)
+    const fileIgnoreFilter = fileIgnore.createFilter()
     try {
       const files = glob.sync(filePattern)
-      const resultList = files.map((file) => {
+      const resultList = files.filter(fileIgnoreFilter).map((file) => {
         console.log(`[start] ${file}`)
         const origin = fs.readFileSync(file, { encoding: 'utf8' })
         const { result, validations } = runWithConfig(origin, config)

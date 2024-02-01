@@ -157,8 +157,8 @@ export const normalizeConfig = (
   })
 
   // ignored cases
-  if (config.ignores) {
-    config.ignores.forEach((x) => {
+  if (config.caseIgnores) {
+    config.caseIgnores.forEach((x) => {
       const ignoredCase = parseIngoredCase(x)
       if (ignoredCase) {
         options.ignoredCases.push(ignoredCase)

@@ -99,8 +99,8 @@ describe('parser with markdown', () => {
 
 describe('markdown lint', () => {
   test('[md] single paragraph', () => {
-    expect(getOutput('X[ xxx ](xxx)X`hello`world')).toBe(
-      'X [xxx](xxx) X `hello` world'
+    expect(getOutput('中文 X[ xxx ](xxx)X`hello`world')).toBe(
+      '中文 X [xxx](xxx) X `hello` world'
     )
   })
   test('[md] frontmatter', () => {
@@ -129,11 +129,11 @@ describe('markdown lint', () => {
   test('[md] raw content', () => {
     // {% raw %}<div id="app" class="demo">...</div>{% raw %}
     expect(
-      getOutput('{% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}')
-    ).toBe('{% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}')
+      getOutput('中文 {% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}')
+    ).toBe('中文 {% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}')
   })
   test('[md] empty lines', () => {
-    expect(getOutput('a\n\nb\n\nc')).toBe('a\n\nb\n\nc')
+    expect(getOutput('中文 a\n\nb\n\nc')).toBe('中文 a\n\nb\n\nc')
   })
   test('[md] inline code', () => {
     expect(getOutput(`改进 \`<todo-item>\` 组件`)).toBe(

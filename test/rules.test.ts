@@ -10,7 +10,7 @@ import {
   PUNCTUATION_FULL_WIDTH,
   PUNCTUATION_NOSPACE_BEFORE,
   PUNCTUATION_UNIFICATION,
-  QUOTE_NOSPACE_INSIDE
+  QUOTATION_NOSPACE_INSIDE
 } from '../src/rules/messages'
 
 import { getOutput, lint, options } from './prepare'
@@ -210,6 +210,9 @@ describe('lint by rules', () => {
           }
         ]
       })
+
+      // unify other common punctuations
+      expect(getOutput('中●文', options)).toBe('中·文')
     })
     test('traditional', () => {
       const options: Options = {
@@ -223,6 +226,27 @@ describe('lint by rules', () => {
       ).toBe(
         '老師說：「你們要記住國父說的『青年要立志做大事，不要做大官』這句話。」'
       )
+
+      // unify other common punctuations
+      expect(getOutput('中●文', options)).toBe('中·文')
+    })
+    test('specified other common punctuations', () => {
+      expect(getOutput('中●文', {
+        rules: {
+          unifiedPunctuation: {
+            default: false
+          }
+        }
+      })).toBe('中●文')
+
+      expect(getOutput('中●文', {
+        rules: {
+          unifiedPunctuation: {
+            default: false,
+            '·': ['●', '•', '·', '‧', '・'],
+          }
+        }
+      })).toBe('中·文')
     })
   })
   describe('[space-content] the space between content', () => {
@@ -314,7 +338,7 @@ describe('lint by rules', () => {
       expect(getOutput('一。 “ 二 ” 。 三', options)).toBe('一。“ 二 ” 。三')
     })
   })
-  describe('[space-quote] the space around quotations', () => {
+  describe('[space-quotation] the space around quotations', () => {
     test('no space inside', () => {
       const options: Options = {
         rules: {
@@ -327,12 +351,12 @@ describe('lint by rules', () => {
           {
             index: 5,
             target: ValidationTarget.INNER_SPACE_BEFORE,
-            message: QUOTE_NOSPACE_INSIDE
+            message: QUOTATION_NOSPACE_INSIDE
           },
           {
             index: 9,
             target: ValidationTarget.SPACE_AFTER,
-            message: QUOTE_NOSPACE_INSIDE
+            message: QUOTATION_NOSPACE_INSIDE
           }
         ]
       })
@@ -347,7 +371,6 @@ describe('lint by rules', () => {
       expect(getOutput('foo " bar " baz', options)).toBe('foo " bar " baz')
       expect(getOutput('foo “ bar ” baz', options)).toBe('foo “ bar ” baz')
 
-      // TODO: no space besides content?
       expect(getOutput('一 " 二 " 三', options)).toBe('一 " 二 " 三')
     })
     test('no space outside half quotation', () => {
@@ -369,6 +392,17 @@ describe('lint by rules', () => {
       expect(getOutput('一 “ 二 ” 三', options)).toBe('一“ 二 ”三')
       expect(getOutput('foo “ bar ” baz', options)).toBe('foo“ bar ”baz')
       expect(getOutput('一 “ 二 ” 三', options)).toBe('一“ 二 ”三')
+    })
+    test('with adjustedFullWidthOption option', () => {
+      const options: Options = {
+        rules: {
+          noSpaceOutsideFullwidthQuotation: true,
+          adjustedFullwidthPunctuation: `“”‘’`
+        }
+      }
+      expect(getOutput('一 “ 二 ” 三', options)).toBe('一 “ 二 ” 三')
+      expect(getOutput('foo “ bar ” baz', options)).toBe('foo “ bar ” baz')
+      expect(getOutput('一 “ 二 ” 三', options)).toBe('一 “ 二 ” 三')
     })
   })
   describe('[space-bracket] the space around brackets', () => {
@@ -398,28 +432,83 @@ describe('lint by rules', () => {
       expect(getOutput('foo （bar） baz', options)).toBe('foo （bar） baz')
       expect(getOutput('foo （ bar ） baz', options)).toBe('foo （bar） baz')
     })
-    test('one space outside', () => {
+    test('one space outside halfwidth bracket', () => {
       const options: Options = {
-        rules: { spaceOutsideHalfwidthBracket: true }
+        rules: {
+          spaceOutsideHalfwidthBracket: true,
+        }
       }
       expect(getOutput('foo ( bar ) baz', options)).toBe('foo ( bar ) baz')
+      expect(getOutput('\'foo\'(bar)\'baz\'', options)).toBe('\'foo\' (bar) \'baz\'')
 
       // skip content x bracket x content without space
       expect(getOutput('foo(bar)baz', options)).toBe('foo(bar)baz')
     })
-    test('one space outside', () => {
+    test('one space outside fullwidth bracket', () => {
       const options: Options = {
         rules: { noSpaceOutsideFullwidthBracket: true }
       }
       // expect(getOutput('foo（bar）baz', options)).toBe('foo（bar）baz')
       expect(getOutput('foo （ bar ） baz', options)).toBe('foo（ bar ）baz')
     })
-    test('no space outside', () => {
+    test('no space outside halfwidth bracket', () => {
       const options: Options = {
         rules: { spaceOutsideHalfwidthBracket: false }
       }
       expect(getOutput('foo(bar)baz', options)).toBe('foo(bar)baz')
       expect(getOutput('foo ( bar ) baz', options)).toBe('foo( bar )baz')
+    })
+    test('with adjustedFullWidthOption option', () => {
+      const options: Options = {
+        rules: {
+          spaceOutsideHalfwidthBracket: true,
+          adjustedFullwidthPunctuation: `‘’“”`
+        }
+      }
+      expect(getOutput('‘foo’(bar)‘baz’', options)).toBe('‘foo’ (bar) ‘baz’')
+    })
+  })
+  describe('[skip-pure-western] skip the content with full of western letters and punctuations', () => {
+    test('skip pure western', () => {
+      const options: Options = {
+        rules: {
+          skipPureWestern: true,
+          halfwidthPunctuation: `()[]{}`,
+          fullwidthPunctuation: `，。：；？！“”‘’`,
+          adjustedFullwidthPunctuation: `“”‘’`,
+          unifiedPunctuation: 'simplified',
+        }
+      }
+      expect(lint('foo,bar,baz', options)).toEqual({
+        output: 'foo,bar,baz',
+        warnings: []
+      })
+    })
+    test('handle mixed content', () => {
+      const options: Options = {
+        rules: {
+          skipPureWestern: true,
+          halfwidthPunctuation: `()[]{}`,
+          fullwidthPunctuation: `，。：；？！“”‘’`,
+          adjustedFullwidthPunctuation: `“”‘’`,
+          unifiedPunctuation: 'simplified',
+        }
+      }
+      expect(lint('中文,bar,中文', options)).toEqual({
+        output: '中文，bar，中文',
+        warnings: [
+          {
+            index: 3,
+            target: ValidationTarget.VALUE,
+            message: PUNCTUATION_FULL_WIDTH
+          },
+          {
+            index: 7,
+            target: ValidationTarget.VALUE,
+            message: PUNCTUATION_FULL_WIDTH
+          }
+        ]
+      })
     })
   })
 })

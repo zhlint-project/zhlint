@@ -14,12 +14,12 @@
  *   - non-left-bracket x right-bracket
  * - spaceOutsideHalfBracket:
  *   - right-half-bracket x left-half-bracket
- *   - right-half-bracket x content/left-quote/code
- *   - content/right-quote/code x left-half-bracket
+ *   - right-half-bracket x content/left-quotation/code
+ *   - content/right-quotation/code x left-half-bracket
  * - noSpaceOutsideFullBracket:
  *   - right-full-bracket x left-full-bracket
- *   - right-full-bracket x content/left-quote/code
- *   - content/right-quote/code x left-full-bracket
+ *   - right-full-bracket x content/left-quotation/code
+ *   - content/right-quotation/code x left-full-bracket
  */
 
 import {
@@ -187,8 +187,8 @@ const generateHandler = (options: Options): Handler => {
         }
       }
 
-      // 2.2 content/right-quote/code x left-bracket
-      // 2.3 right-racket x content/left-quote/code
+      // 2.2 content/right-quotation/code x left-bracket
+      // 2.3 right-racket x content/left-quotation/code
       if (token.markSide === MarkSideType.LEFT) {
         if (
           contentTokenBefore &&
@@ -197,8 +197,8 @@ const generateHandler = (options: Options): Handler => {
             contentTokenBefore.type === HyperTokenType.CODE_CONTENT)
         ) {
           if (beforeSpaceHost) {
-            // 2.2.1 content/right-quote/code x left-full-bracket
-            // 2.2.2 content/right-quote/code x left-half-bracket
+            // 2.2.1 content/right-quotation/code x left-full-bracket
+            // 2.2.2 content/right-quotation/code x left-half-bracket
             if (
               fullWidth ||
               (contentTokenBefore.type === GroupTokenType.GROUP &&
@@ -229,8 +229,8 @@ const generateHandler = (options: Options): Handler => {
             contentTokenAfter.type === HyperTokenType.CODE_CONTENT)
         ) {
           if (afterSpaceHost) {
-            // 2.3.1 right-full-bracket x content/left-quote/code
-            // 2.4.2 right-half-bracket x content/left-quote/code
+            // 2.3.1 right-full-bracket x content/left-quotation/code
+            // 2.4.2 right-half-bracket x content/left-quotation/code
             if (
               fullWidth ||
               (contentTokenAfter.type === GroupTokenType.GROUP &&

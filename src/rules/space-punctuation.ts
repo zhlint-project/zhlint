@@ -18,11 +18,11 @@
  *
  * Details:
  * - noSpaceBeforePunctuation:
- *   content/right-quote/right-bracket/code x punctuation
+ *   content/right-quotation/right-bracket/code x punctuation
  * - spaceAfterHalfWidthPunctuation:
- *   half x content/left-quote/left-bracket/code
+ *   half x content/left-quotation/left-bracket/code
  * - noSpaceAfterFullWidthPunctuation:
- *   full x content/left-quote/left-bracket/code
+ *   full x content/left-quotation/left-bracket/code
  *
  * - skip half-width punctuations between half-width content without space
  * - skip successive multiple half-width punctuations
