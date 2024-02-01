@@ -294,9 +294,9 @@ If you want to ignore the whole file, you can also add this HTML comment:
 
 _Almost the rules come from the past translation experiences in [W3C Requirements for Chinese Text Layout](https://www.w3.org/International/clreq/), [W3C HTML Chinese interest group](https://www.w3.org/html/ig/zh/wiki/Main_Page) and [Vue.js Chinese docsite](https://github.com/vuejs/cn.vuejs.org/wiki)._
 
-_... and this part might be controversial. So if you don't feel well at some point, we definitely would love to know and improve. Opening an [issue](https://github.com/zhling-project/zhlint/issues) is always welcome. Then we could discuss about the possible better option or decision._
+_... and this part might be controversial. So if you don't feel well at some point, we definitely would love to know and improve. Opening an [issue](https://github.com/zhlint-project/zhlint/issues) is always welcome. Then we could discuss about the possible better option or decision._
 
-```ts
+````ts
 type RuleOptions = {
   /* PRESET */
 
@@ -416,7 +416,7 @@ type RuleOptions = {
   // e.g. `文字， 文字` -> `文字，文字`
   noSpaceAfterFullwidthPauseOrStop?: boolean
 
-  /* SPACES AROUND QUOTES */
+  /* SPACES AROUND QUOTATIONS */
 
   // default preset: `true`
   // - `true`: one space
@@ -479,8 +479,13 @@ type RuleOptions = {
   // default `true`
   // e.g. ` 文字 ` -> `文字`
   trimSpace?: boolean
+
+  /* SKIP PURE WESTERN SENTENCES */
+
+  // default `true`
+  skipPureWestern?: boolean
 }
-```
+````
 
 ## More information
 
