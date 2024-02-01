@@ -40,47 +40,47 @@ zhlint --help
 
 ![](./docs/screenshot-cli.png)
 
-#### Advanced usage
+#### 高阶用法
 
-zhlint also supports rc and ignore config files for custom rules:
+zhlint 还支持 rc 和 ignore 配置文件：
 
 ```bash
-# .zhlintrc by default
+# 默认为 .zhlintrc
 zhlint --config <filepath>
 
-# .zhlintignore by default
+# 默认为 .zhlintignore
 zhlint --ignore <filepath>
 zhlint --file-ignore <filepath>
 
-# .zhlintcaseignore by default
+# 默认为 .zhlintcaseignore
 zhlint --case-ignore <filepath>
 
-# current directory by default
+# 默认为 current directory
 zhlint --dir <path>
 ```
 
-In the config file, you can write a JSON like:
+在 rc 配置文件中，您可以写一个 JSON，例如：
 
 ```json
 {
   "preset": "default",
   "rules": {
-    "adjustedFullWidthPunctuation": ""
+    "adjustedFullwidthPunctuation": ""
   }
 }
 ```
 
-For more details, see [supported rules](#supported-rules).
+关于更多细节，请参见[支持的规则](#支持的规则)。
 
-In the file-ignore file, you can write some lines to ignore files in [.gitignore syntax](https://git-scm.com/docs/gitignore#_pattern_format):
+在 file-ignore 文件中，您可以写多行内容来忽略相应的文件，其语法遵循 [.gitignore 语法](https://git-scm.com/docs/gitignore#_pattern_format)：
 
-In the case-ignore file, you can write some lines of ignored cases like:
+在 case-ignore 文件中，您可以写多行内容来忽略一些特例，例如：
 
 ```txt
 ( , )
 ```
 
-For more details, see [setup ignored cases](#setup-ignored-cases).
+关于更多细节：请参见[设置被忽略的特例](#设置被忽略的特例)。
 
 ### 作为 Node.js 包
 
@@ -116,24 +116,24 @@ Invalid files:
 Found 2 errors.
 ```
 
-#### Advanced usage
+#### 高阶用法
 
-zhlint also supports rc and ignore config files for custom rules:
+zhlint 还支持 rc 和 ignore 配置文件：
 
 ```js
 const { readRc, runWithConfig } = require('zhlint')
 
 const value = '自动在中文和English之间加入空格'
 
-const dir = '...' // the target directory path
-const configPath = '...' // the config file path
-const fileIgnorePath = '...' // the file-ignore file path
-const caseIgnorePath = '...' // the case-ignore file path
+const dir = '...' // 目标文件所在的目录
+const configPath = '...' // rc 配置文件路径
+const fileIgnorePath = '...' // file-ignore 文件路径
+const caseIgnorePath = '...' // case-ignore 文件路径
 
 const config = readRc(dir, configPath, fileIgnorePath, caseIgnorePath)
 const output = runWithConfig(value, config)
 
-// ... further actions
+// ... 后续操作
 ```
 
 ### 作为一个单独的包
@@ -144,18 +144,18 @@ const output = runWithConfig(value, config)
 
 ## API
 
-- `run(str: string, options?: Options): Result`：格式化某个文件。
+- `run(str: string, options?: Options): Result`：格式化某个文件内容。
   - 参数：
     - `str`：需要格式化的文本内容。
     - `options`：一些配置选项。
   - 返回值：
-    - 针对输入的单个字符串的处理结果。其包好了修复格式之后的文本内容 `value` 以及所有 `validation` 的校验信息。
-- `report(results: Result[], logger?: Console): void`：为每个文件打印校验报告。
+    - 针对输入的单个字符串的处理结果。其包好了修复格式之后的文本内容 `value` 以及所有 `validation` 的格式化信息。
+- `report(results: Result[], logger?: Console): void`：为每个文件打印格式化报告。
   - 参数：
     - `results`：所有格式化结果的数组。
     - `logger`：日志处理器实例，默认是 Node.js/浏览器中的 `console`。
-- `readRc: (dir: string, config: string, ignore: string, logger?: Console) => Config`: Read config from rc file(s). For rc (run command).
-- `runWithConfig(str: string, config: Config): Result`: Lint a certain file with rc config. For rc (run command).
+- `readRc: (dir: string, config: string, fileIgnore: string, caseIgnore: string, logger?: Console) => Config`：读取配置文件信息。
+- `runWithConfig(str: string, config: Config): Result`：通过配置信息格式化特定内容。
 
 ### 选项
 
@@ -179,23 +179,23 @@ type Options = {
 
 ### RC Config
 
-- `preset`: `string` (optional)
-- `rules`: `RuleOptions` without the `preset` field. (optional)
-- `hyperParsers`: `string[]` (optional)
-- `caseIgnores`: `string[]` and the priority is lower than `.zhlintcaseignore`. (optional)
+- `preset`: `string` (可选项)
+- `rules`: `RuleOptions` 但不包括 `preset` 字段。(可选项)
+- `hyperParsers`: `string[]` (可选项)
+- `caseIgnores`: `string[]` 该优先级低于 `.zhlintcaseignore`。(可选项)
 
 ### 输出格式
 
 ```ts
 type Result = {
-  // the basic info and availability of the file
+  // 基本信息和文件的可用性
   file?: string
   disabled: boolean
 
-  // the original content of the file
+  // 原始的文本内容
   origin: string
 
-  // all the error messages
+  // 所有错误信息
   validations: Validation[]
 }
 
@@ -210,31 +210,29 @@ type Validation = {
   - `file`：文件名。这是一个可选的字段，只在 CLI 中适用。
   - `origin`：原始的文本内容。
   - `result`：最终修复格式的文本内容。
-  - `validations`：所有校验信息。
+  - `validations`：所有格式化信息。
 - `Validation`
   - `index`：输入的字符串中目标片段所在的索引值。
   - `length`：输入的字符串中目标片段的长度。
-  - `message`：对该校验信息的自然语言描述。
-
-### Advanced usage
+  - `message`：对该格式化信息的自然语言描述。
 
 ## 特性
 
 ### Markdown 语法支持
 
-We support lint your text content in Markdown syntax by default. For example:
+我们默认支持格式化 Markdown 语法的文本内容。例如：
 
 ```js
 run('自动在_中文_和**English**之间加入空格')
 ```
 
-It will analyse the Markdown syntax first and extract the pure text content and do the lint job. After that the fixed pure text content could be replaced back to the raw Markdown string and returned as the output `value` in result.
+这将首先分析 Markdown 语法并提取纯文本内容，然后执行格式化操作。修复后的纯文本内容可以复原为 Markdown 格式字符串，并作为结果中的输出 `value` 返回。
 
 ### [Hexo tag](https://hexo.io/docs/tag-plugins) 语法支持
 
-Specially, we support [Hexo tags syntax](https://hexo.io/docs/tag-plugins) just because when we use Hexo to build Vue.js website, the markdown source files more or less include special tags like that so got the unpredictable result.
+特别地，我们支持 [Hexo tag 语法](https://hexo.io/docs/tag-plugins)。这是因为当我们使用 Hexo 构建 Vue.js 网站时，Markdown 源文件中可能包含一些特殊的标签从而得到不可预测的格式化结果。
 
-As a result, we additionally skip the Hexo-style tags by default. For example:
+因此，我们会默认跳过 Hexo 风格的标签。例如：
 
 ```js
 run('现在过滤器只能用在插入文本中 (`{% raw %}{{ }}{% endraw %}` tags)。')
@@ -242,7 +240,7 @@ run('现在过滤器只能用在插入文本中 (`{% raw %}{{ }}{% endraw %}` ta
 
 ### 设置被忽略的特例
 
-In some real cases we have special text contents not follow the rules by reason. So we could ues `ignoredCases` option to config that. For example we'd like to keep the spaces inside a pair of brackets, which is invalid by default. Then we could write one more line of HTML comment anywhere inside the file:
+在一些特殊的情况下，我们可能会有一些特殊的文本内容不遵循规则。因此，我们可以使用 `ignoredCases` 选项来配置。例如，我们想要保留括号内的空格，这在默认情况下是格式不正确的。不过我们可以在文件的任何地方写一行 HTML 注释：
 
 ```md
 <!-- the good case -->
@@ -263,7 +261,7 @@ vm.$on( event, callback )
 run(str, { ignoredCases: { textStart: '( ', textEnd: ' )' } })
 ```
 
-If you want to ignore the whole file, you can also add this HTML comment:
+如果你想要忽略整个文件，你也可以添加这个 HTML 注释：
 
 ```md
 <!-- zhlint disabled -->
@@ -472,6 +470,6 @@ type RuleOptions = {
 }
 ````
 
-## More information
+## 更多信息
 
-zhlint is now open sourced on [GitHub](https://github.com/zhlint-project/zhlint) and [issues](https://github.com/zhlint-project/zhlint/issues) welcome.
+zhlint 是一个开源项目，目前源代码在 [GitHub](https://github.com/zhlint-project/zhlint) 上，也欢迎大家来提交 [issue](https://github.com/zhlint-project/zhlint/issues)。
