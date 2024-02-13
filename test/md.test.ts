@@ -66,14 +66,15 @@ describe('parser with markdown', () => {
         endIndex: 32,
         endValue: '_'
       },
-      {
-        type: 'hyper',
-        meta: 'delete',
-        startIndex: 34,
-        startValue: '~~',
-        endIndex: 39,
-        endValue: '~~'
-      },
+      // TODO: this is an invalid mark in the latest remark parser
+      // {
+      //   type: 'hyper',
+      //   meta: 'delete',
+      //   startIndex: 34,
+      //   startContent: '~~',
+      //   endIndex: 39,
+      //   endContent: '~~'
+      // },
       {
         type: 'hyper',
         meta: 'emphasis',
