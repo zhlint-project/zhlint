@@ -34,14 +34,12 @@ type InlineContentType =
   | Ast.Emphasis
   | Ast.Strong
   | Ast.Delete
-  | Ast.Footnote
   | Ast.Link
   | Ast.LinkReference
 const inlineContentTypes: string[] = [
   'emphasis',
   'strong',
   'delete',
-  'footnote',
   'link',
   'linkReference'
 ]
@@ -55,13 +53,13 @@ type InlineRawType =
   | Ast.Image
   | Ast.ImageReference
   | Ast.FootnoteDefinition
-  | Ast.HTML
+  | Ast.Html
 const inlineRawTypes: string[] = [
   'inlineCode',
   'break',
   'image',
   'imageReference',
-  'footnoteReference',
+  'footnoteDefinition',
   'html'
 ]
 const isInlineRaw = (node: Node): node is InlineRawType => {
