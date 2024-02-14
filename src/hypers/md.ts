@@ -1,5 +1,6 @@
 import { unified } from 'unified'
 import markdown from 'remark-parse'
+import gfm from 'remark-gfm'
 import frontmatter from 'remark-frontmatter'
 import * as Ast from 'mdast'
 import { Node, Position } from 'unist'
@@ -226,6 +227,7 @@ const parser = (data: ParsedStatus): ParsedStatus => {
 
   const tree: Ast.Root = unified()
     .use(markdown)
+    .use(gfm)
     .use(frontmatter)
     .parse(modifiedValue) as Ast.Root
 
