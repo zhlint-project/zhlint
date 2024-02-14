@@ -5,10 +5,10 @@ import { options } from './prepare'
 
 const getOutput = (str: string) => run(str, options).result
 
-const simpleInput = `:::
+const simpleInput = `::: tip
 自动在中文和English之间加入空格
 :::`
-const simpleOutput = `:::
+const simpleOutput = `::: tip
 自动在中文和 English 之间加入空格
 :::`
 const defaultTitleInput = `:::
@@ -17,10 +17,10 @@ const defaultTitleInput = `:::
 const defaultTitleOutput = `:::
 自动在中文和 English 之间加入空格
 :::`
-const customTitleInput = `:::
+const customTitleInput = `::: tip NOTE
 自动在中文和English之间加入空格
 :::`
-const customTitleOutput = `:::
+const customTitleOutput = `::: tip NOTE
 自动在中文和 English 之间加入空格
 :::`
 

@@ -23,6 +23,7 @@ const lint = () => {
   })
   output.value = 'Report:\n\n' + outputValues.join('\n')
   data.value = result
+  globalThis.__result__ = result
 }
 
 const resize = () => {

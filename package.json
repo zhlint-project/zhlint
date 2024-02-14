@@ -5,6 +5,7 @@
   "bin": {
     "zhlint": "./bin/index.js"
   },
+  "type": "module",
   "main": "./lib/index.js",
   "unpkg": "./dist/zhlint.umd.js",
   "jsdelivr": "./dist/zhlint.umd.js",
@@ -20,6 +21,7 @@
   ],
   "scripts": {
     "dev": "vitest",
+    "debug": "vitest todo.test.ts",
     "dev:ui": "vitest --ui",
     "build": "pnpm run build:node && pnpm run build:browser",
     "build:node": "tsc --project tsconfig-build.json",
@@ -55,31 +57,30 @@
   },
   "homepage": "https://github.com/zhlint-project/zhlint#readme",
   "devDependencies": {
-    "@types/mdast": "^3.0.15",
-    "@types/node": "^20.11.5",
-    "@types/react": "^17.0.75",
-    "@types/unist": "^2.0.10",
-    "@typescript-eslint/eslint-plugin": "^6.19.0",
-    "@typescript-eslint/parser": "^6.19.0",
-    "@vitest/ui": "^1.2.1",
+    "@types/mdast": "^4.0.3",
+    "@types/node": "^20.11.17",
+    "@types/unist": "^3.0.2",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vitest/ui": "^1.2.2",
     "eslint": "^8.56.0",
-    "mdast-util-to-markdown": "^1.5.0",
+    "mdast-util-to-markdown": "^2.1.0",
     "node-stdlib-browser": "^1.2.0",
-    "prettier": "^3.2.4",
+    "prettier": "^3.2.5",
     "typescript": "^5.3.3",
-    "vite": "^5.0.12",
+    "vite": "^5.1.1",
     "vite-plugin-node-polyfills": "^0.19.0",
-    "vitepress": "1.0.0-rc.39"
+    "vitepress": "1.0.0-rc.39",
+    "vitest": "^1.2.2"
   },
   "dependencies": {
-    "chalk": "^4.0.0",
+    "chalk": "^5.3.0",
     "glob": "^10.3.10",
-    "ignore": "^5.3.0",
+    "ignore": "^5.3.1",
     "minimist": "^1.2.8",
-    "remark-frontmatter": "^1.3.3",
-    "remark-parse": "^7.0.2",
-    "unified": "^8.4.2",
-    "vitest": "^1.2.1",
-    "vue": "^3.4.15"
+    "remark-custom-container": "^1.3.1",
+    "remark-frontmatter": "^4.0.1",
+    "remark-parse": "^10.0.0",
+    "unified": "^10.0.0"
   }
 }
