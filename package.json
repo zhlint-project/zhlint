@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "dev": "vitest",
-    "debug": "vitest todo.test.ts",
+    "debug": "vitest debug.test.ts",
     "dev:ui": "vitest --ui",
     "build": "pnpm run build:node && pnpm run build:browser",
     "build:node": "tsc --project tsconfig-build.json",
