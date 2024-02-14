@@ -279,6 +279,15 @@ describe('markdown lint', () => {
       'foo\n\n> `components/icons/IconBox.vue`\n> `components/icons/IconCalendar.vue`\n> `components/icons/IconEnvelope.vue`\n\nbar'
     )
   })
+  test('[md] spaces in blockquotes', () => {
+    expect(
+      getOutput(
+        `> [Live Demo ](https://vue-hn.herokuapp.com/)\n> 注：如果在一段时间内没有人访问过该网站，则需要一些加载时间。\n>`
+      )
+    ).toBe(
+      `> [Live Demo](https://vue-hn.herokuapp.com/)\n> 注：如果在一段时间内没有人访问过该网站，则需要一些加载时间。\n>`
+      )
+  })
   test('[md] infinite findMarkSeq bug', () => {
     expect(getOutput('注意**局部注册的组件在其子组件中*不可用***。')).toBe(
       '注意**局部注册的组件在其子组件中*不可用***。'
