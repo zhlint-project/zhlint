@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-const fs = require('fs')
-const minimist = require('minimist')
-const glob = require('glob')
-const gitignore = require('ignore')
-const { readRc, runWithConfig, report } = require('../')
+import fs from 'fs'
+import minimist from 'minimist'
+import * as glob from 'glob'
+import gitignore from 'ignore'
+import { readRc, runWithConfig, report } from '../lib/index.js'
 
 const helpMessage = `
 This is zhlint!
