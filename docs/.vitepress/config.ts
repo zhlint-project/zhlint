@@ -16,7 +16,8 @@ export default {
       }
     ],
     editLink: {
-      pattern: 'https://github.com/zhlint-project/zhlint/edit/master/docs/:path',
+      pattern:
+        'https://github.com/zhlint-project/zhlint/edit/master/docs/:path',
       text: 'Help us improve this page!'
     }
   }

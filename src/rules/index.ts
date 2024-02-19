@@ -41,7 +41,7 @@ const generateHandlers = (options: Options): Handler[] => {
     genZhUnitsHandler(options),
     genHtmlEntityHandler(options),
 
-    genSkipPureWesternHandler(options),
+    genSkipPureWesternHandler(options)
   ]
 }
 
@@ -79,7 +79,7 @@ export const defaultConfig: Options = {
     'e.g.',
     'a.k.a.'
   ],
-  skipPureWestern: true,
+  skipPureWestern: true
 }
 
 export default generateHandlers

@@ -16,12 +16,10 @@ import {
   isFullwidthType
 } from '../parser'
 import { ValidationTarget } from '../report'
-import {
-  Options, removeValidationOnTarget
-} from './util'
+import { Options, removeValidationOnTarget } from './util'
 
 const findNonWestern = (group: MutableGroupToken): boolean => {
-  return group.some(token => {
+  return group.some((token) => {
     if (token.type === GroupTokenType.GROUP) {
       return findNonWestern(token)
     }
@@ -35,7 +33,7 @@ const findNonWestern = (group: MutableGroupToken): boolean => {
 }
 
 const resetValidation = (group: MutableGroupToken): void => {
-  group.forEach(token => {
+  group.forEach((token) => {
     for (const target in ValidationTarget) {
       removeValidationOnTarget(token, target as ValidationTarget)
     }

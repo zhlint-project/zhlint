@@ -169,8 +169,8 @@ We are figuring out all the requirements by several options below:
 
 **For the width/choices of punctuations/brackets/quotations**
 
-- `` halfwidthPunctuation: string? = `()[]{}`  ``
-- `` fullwidthPunctuation: string? = `，。：；？！“”‘’`  ``
+- ``halfwidthPunctuation: string? = `()[]{}` ``
+- ``fullwidthPunctuation: string? = `，。：；？！“”‘’` ``
 - `` adjustedFullwidthPunctuation: string? = `“”‘’` ``
 - `unifiedPunctuation: "simplified" (default) | "traditional" | Record<string, boolean | string[]> & { default: boolean } | undefined`
 
@@ -184,7 +184,7 @@ The option `adjustedFullWidthPunctuation` defines which fullwidth punctuations z
   - Type: `true | false | undefined`
   - Default: `true`
   - Examples:
-    - `` xxx `foo` xxx ``
+    - ``xxx `foo` xxx``
     - `xxx <code>foo</code> xxx`
   - Values:
     - `true`: keep one space outside (default)

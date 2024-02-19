@@ -75,7 +75,10 @@ onMounted(() => {
   border-radius: 8px;
   color: var(--vp-c-text-code);
   background-color: var(--vp-c-bg-mute);
-  transition: background-color 0.5s, color 0.5s, border-color 0.5s;
+  transition:
+    background-color 0.5s,
+    color 0.5s,
+    border-color 0.5s;
 }
 .container textarea:hover {
   border-color: var(--vp-c-brand);

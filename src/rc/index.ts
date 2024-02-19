@@ -28,7 +28,7 @@ const resolvePath = (
   const result: PathResult = {
     config: undefined,
     fileIgnore: undefined,
-    caseIgnore: undefined,
+    caseIgnore: undefined
   }
 
   dir = resolve(dir ?? '.')
@@ -118,7 +118,9 @@ const resolveConfig = (
 
   if (normalizedFileIgnorePath) {
     try {
-      const fileIgnores = readFileSync(normalizedFileIgnorePath, { encoding: 'utf8' })
+      const fileIgnores = readFileSync(normalizedFileIgnorePath, {
+        encoding: 'utf8'
+      })
       fileIgnores
         .split(/\n/)
         .map((x) => x.trim())
@@ -142,7 +144,9 @@ const resolveConfig = (
 
   if (normalizedCaseIgnorePath) {
     try {
-      const caseIgnores = readFileSync(normalizedCaseIgnorePath, { encoding: 'utf8' })
+      const caseIgnores = readFileSync(normalizedCaseIgnorePath, {
+        encoding: 'utf8'
+      })
       caseIgnores
         .split(/\n/)
         .map((x) => x.trim())

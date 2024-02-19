@@ -16,7 +16,7 @@ describe.skip('debug', () => {
     console.log({
       origin,
       result,
-      pieces,
+      pieces
     })
     blocks?.forEach((block) => {
       console.log(block.tokens)

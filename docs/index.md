@@ -358,7 +358,10 @@ type RuleOptions = {
   //  '·': false, // not unify any of these characters
   // }
   // ```
-  unifiedPunctuation?: 'traditional' | 'simplified' | Record<string, boolean | string[]> & { default: boolean }
+  unifiedPunctuation?:
+    | 'traditional'
+    | 'simplified'
+    | (Record<string, boolean | string[]> & { default: boolean })
 
   // Special case: skip `fullWidthPunctuation` for abbreviations.
   // default preset:

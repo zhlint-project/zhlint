@@ -129,7 +129,9 @@ describe('markdown lint', () => {
   test('[md] raw content', () => {
     // {% raw %}<div id="app" class="demo">...</div>{% raw %}
     expect(
-      getOutput('中文 {% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}')
+      getOutput(
+        '中文 {% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}'
+      )
     ).toBe('中文 {% raw %}\n<div id="app" class="demo">...</div>\n{% raw %}')
   })
   test('[md] empty lines', () => {
@@ -285,7 +287,7 @@ describe('markdown lint', () => {
       )
     ).toBe(
       `> [Live Demo](https://vue-hn.herokuapp.com/)\n> 注：如果在一段时间内没有人访问过该网站，则需要一些加载时间。\n>`
-      )
+    )
   })
   test('[md] infinite findMarkSeq bug', () => {
     expect(getOutput('注意**局部注册的组件在其子组件中*不可用***。')).toBe(

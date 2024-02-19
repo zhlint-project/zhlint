@@ -233,22 +233,26 @@ describe('lint by rules', () => {
       expect(getOutput('中●文', options)).toBe('中·文')
     })
     test('specified other common punctuations', () => {
-      expect(getOutput('中●文', {
-        rules: {
-          unifiedPunctuation: {
-            default: false
+      expect(
+        getOutput('中●文', {
+          rules: {
+            unifiedPunctuation: {
+              default: false
+            }
           }
-        }
-      })).toBe('中●文')
+        })
+      ).toBe('中●文')
 
-      expect(getOutput('中●文', {
-        rules: {
-          unifiedPunctuation: {
-            default: false,
-            '·': ['●', '•', '·', '‧', '・'],
+      expect(
+        getOutput('中●文', {
+          rules: {
+            unifiedPunctuation: {
+              default: false,
+              '·': ['●', '•', '·', '‧', '・']
+            }
           }
-        }
-      })).toBe('中·文')
+        })
+      ).toBe('中·文')
     })
   })
   describe('[space-content] the space between content', () => {
@@ -437,11 +441,11 @@ describe('lint by rules', () => {
     test('one space outside halfwidth bracket', () => {
       const options: Options = {
         rules: {
-          spaceOutsideHalfwidthBracket: true,
+          spaceOutsideHalfwidthBracket: true
         }
       }
       expect(getOutput('foo ( bar ) baz', options)).toBe('foo ( bar ) baz')
-      expect(getOutput('\'foo\'(bar)\'baz\'', options)).toBe('\'foo\' (bar) \'baz\'')
+      expect(getOutput("'foo'(bar)'baz'", options)).toBe("'foo' (bar) 'baz'")
 
       // skip content x bracket x content without space
       expect(getOutput('foo(bar)baz', options)).toBe('foo(bar)baz')
@@ -478,7 +482,7 @@ describe('lint by rules', () => {
           halfwidthPunctuation: `()[]{}`,
           fullwidthPunctuation: `，。：；？！“”‘’`,
           adjustedFullwidthPunctuation: `“”‘’`,
-          unifiedPunctuation: 'simplified',
+          unifiedPunctuation: 'simplified'
         }
       }
       expect(lint('foo,bar,baz', options)).toEqual({
@@ -493,7 +497,7 @@ describe('lint by rules', () => {
           halfwidthPunctuation: `()[]{}`,
           fullwidthPunctuation: `，。：；？！“”‘’`,
           adjustedFullwidthPunctuation: `“”‘’`,
-          unifiedPunctuation: 'simplified',
+          unifiedPunctuation: 'simplified'
         }
       }
       expect(lint('中文,bar,中文', options)).toEqual({
