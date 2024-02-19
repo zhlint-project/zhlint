@@ -1,6 +1,5 @@
 <script>
 import { ref, onMounted } from 'vue'
-import { run, report } from './zhlint.es'
 let timer
 </script>
 
@@ -14,7 +13,9 @@ const data = ref()
 
 const rows = ref(10)
 
-const lint = () => {
+const lint = async () => {
+  const { run, report } = await import('./zhlint.es')
+
   const result = run(input.value, { rules: { preset: 'default' } })
   const outputValues = []
   report([result], {

@@ -10,4 +10,6 @@ import PlaygroundCore from './PlaygroundCore.vue'
 
 # Playground
 
-<PlaygroundCore />
+<ClientOnly>
+  <PlaygroundCore />
+</ClientOnly>
