@@ -1,5 +1,5 @@
-import type { IgnoredCase } from '../ignore'
-import type { Mark, MutableParseResult } from '../parser'
+import type { IgnoredCase } from '../ignore.js'
+import type { Mark, MutableParseResult } from '../parser/index.js'
 
 export type ParserIgnoredCase = {
   name: string

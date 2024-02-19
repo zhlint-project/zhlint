@@ -27,14 +27,14 @@ import {
   findTokenAfter,
   isWrapper,
   getWrapperSide
-} from './util'
+} from './util.js'
 import {
   Handler,
   MarkSideType,
   MutableGroupToken,
   MutableToken
-} from '../parser'
-import { MARKDOWN_NOSPACE_INSIDE } from './messages'
+} from '../parser/index.js'
+import { MARKDOWN_NOSPACE_INSIDE } from './messages.js'
 
 const generateHandler = (options: Options): Handler => {
   const noSpaceInsideMarkOption = options?.noSpaceInsideHyperMark

@@ -1,4 +1,4 @@
-import { ParsedStatus } from './types'
+import { ParsedStatus } from './types.js'
 
 // {% x y %}z{% endx %}
 // \{\% ([^ ]+?) [^\%]*?\%\}    ([^ ]+?)        [^\%]*?

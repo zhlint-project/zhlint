@@ -25,15 +25,15 @@ import {
   findVisibleTokenAfter,
   findVisibleTokenBefore,
   findWrappersBetween
-} from './util'
+} from './util.js'
 import {
   Handler,
   isLetterType,
   MutableGroupToken,
   MutableToken,
   HyperTokenType
-} from '../parser'
-import { CODE_NOSPACE_OUTSIDE, CODE_SPACE_OUTSIDE } from './messages'
+} from '../parser/index.js'
+import { CODE_NOSPACE_OUTSIDE, CODE_SPACE_OUTSIDE } from './messages.js'
 
 const generateHandler = (options: Options): Handler => {
   const needSpaceOption = options?.spaceOutsideCode

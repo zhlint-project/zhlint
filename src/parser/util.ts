@@ -1,11 +1,11 @@
-import { ValidationTarget } from '../report'
-import { checkCharType } from './char'
+import { ValidationTarget } from '../report.js'
+import { checkCharType } from './char.js'
 import {
   BRACKET_NOT_CLOSED,
   BRACKET_NOT_OPEN,
   QUOTATION_NOT_CLOSED,
   QUOTATION_NOT_OPEN
-} from './messages'
+} from './messages.js'
 import {
   CharType,
   SHORTHAND_CHARS,
@@ -26,8 +26,8 @@ import {
   SinglePunctuationType,
   isBracketType,
   isQuotationType
-} from './types'
-import { ParseStatus } from './parse'
+} from './types.js'
+import { ParseStatus } from './parse.js'
 
 export const handlePunctuation = (
   i: number,

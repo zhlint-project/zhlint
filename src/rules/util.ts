@@ -1,4 +1,4 @@
-import { Validation, ValidationTarget } from '../report'
+import { Validation, ValidationTarget } from '../report.js'
 import {
   MarkSideType,
   MutableGroupToken as GroupToken,
@@ -10,7 +10,7 @@ import {
   TokenType,
   CharType,
   isHalfwidthPunctuationType
-} from '../parser'
+} from '../parser/index.js'
 
 // options
 

@@ -1,5 +1,5 @@
-import { IgnoredCase } from '../ignore'
-import { ParsedStatus } from './types'
+import { IgnoredCase } from '../ignore.js'
+import { ParsedStatus } from './types.js'
 
 const ignoredCaseMatcher =
   /^(?:(?<prefix>.+?)-,)?(?<textStart>.+?)(?:,(?<textEnd>.+?))?(?:,-(?<suffix>.+?))?$/

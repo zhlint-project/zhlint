@@ -35,19 +35,19 @@ import {
   isLetterType,
   MutableGroupToken,
   MutableToken
-} from '../parser'
+} from '../parser/index.js'
 import {
   checkSpaceAfter,
   findVisibleTokenAfter,
   findWrappersBetween,
   Options
-} from './util'
+} from './util.js'
 import {
   CONTENT_NOSPACE_FULL_WIDTH,
   CONTENT_NOSPACE_MIXED_WIDTH,
   CONTENT_SPACE_HALF_WIDTH,
   CONTENT_SPACE_MIXED_WIDTH
-} from './messages'
+} from './messages.js'
 
 const generateHandler = (options: Options): Handler => {
   const onlyOneBetweenHalfwidthContentOption =

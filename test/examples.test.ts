@@ -2,8 +2,8 @@ import { describe, test, expect } from 'vitest'
 
 import fs from 'fs'
 import path from 'path'
-import run from '../src/run'
-import { options } from './prepare'
+import run from '../src/run.js'
+import { options } from './prepare.js'
 
 const parsePosition = (str, index) => {
   const rows = str.split('\n')

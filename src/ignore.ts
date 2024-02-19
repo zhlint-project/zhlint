@@ -1,4 +1,4 @@
-import { env } from './report'
+import { env } from './report.js'
 
 // Ref: https://github.com/WICG/ScrollToTextFragment
 export type IgnoredCase = {

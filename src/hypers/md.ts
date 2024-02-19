@@ -4,8 +4,14 @@ import gfm from 'remark-gfm'
 import frontmatter from 'remark-frontmatter'
 import * as Ast from 'mdast'
 import { Node, Position } from 'unist'
-import { isRawMark, Mark, MarkSideType, MarkType, RawMark } from '../parser'
-import { Block, ParsedStatus } from './types'
+import {
+  isRawMark,
+  Mark,
+  MarkSideType,
+  MarkType,
+  RawMark
+} from '../parser/index.js'
+import { Block, ParsedStatus } from './types.js'
 
 // Position related
 

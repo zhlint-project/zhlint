@@ -2,7 +2,7 @@ import { describe, test } from 'vitest'
 
 import fs from 'fs'
 import path from 'path'
-import run from '../src/run'
+import run from '../src/run.js'
 
 describe.skip('debug', () => {
   test('ignore HTML comment', () => {

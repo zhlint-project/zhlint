@@ -14,9 +14,9 @@ import {
   MutableToken,
   GroupTokenType,
   isFullwidthType
-} from '../parser'
-import { ValidationTarget } from '../report'
-import { Options, removeValidationOnTarget } from './util'
+} from '../parser/index.js'
+import { ValidationTarget } from '../report.js'
+import { Options, removeValidationOnTarget } from './util.js'
 
 const findNonWestern = (group: MutableGroupToken): boolean => {
   return group.some((token) => {

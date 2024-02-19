@@ -1,6 +1,6 @@
-import run, { Options } from '../src/run'
-import { ValidationTarget } from '../src/report'
-import { defaultConfig } from '../src/rules'
+import run, { Options } from '../src/run.js'
+import { ValidationTarget } from '../src/report.js'
+import { defaultConfig } from '../src/rules/index.js'
 
 type Warning = {
   index: number

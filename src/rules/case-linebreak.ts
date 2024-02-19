@@ -7,9 +7,9 @@
 
 // TODO: better blockquote and indentation handling in markdown
 
-import { Handler, MutableToken } from '../parser'
-import { ValidationTarget } from '../report'
-import { Options, removeValidationOnTarget } from './util'
+import { Handler, MutableToken } from '../parser/index.js'
+import { ValidationTarget } from '../report.js'
+import { Options, removeValidationOnTarget } from './util.js'
 
 const generateHandler = (options: Options): Handler => {
   // do nothing

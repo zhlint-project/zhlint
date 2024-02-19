@@ -1,6 +1,6 @@
-import { ParsedStatus } from './hypers/types'
-import { IgnoredCase } from './ignore'
-import { Options as RuleOptions } from './rules/util'
+import { ParsedStatus } from './hypers/types.js'
+import { IgnoredCase } from './ignore.js'
+import { Options as RuleOptions } from './rules/util.js'
 
 export type Options = {
   logger?: Console
@@ -18,15 +18,15 @@ export type NormalizedOptions = {
   ignoredCases: IgnoredCase[]
 }
 
-import ignore, { parseIngoredCase } from './hypers/ignore'
-import hexo from './hypers/hexo'
-import vuepress from './hypers/vuepress'
-import md from './hypers/md'
+import ignore, { parseIngoredCase } from './hypers/ignore.js'
+import hexo from './hypers/hexo.js'
+import vuepress from './hypers/vuepress.js'
+import md from './hypers/md.js'
 
-import { defaultConfig as defaultRules } from './rules'
+import { defaultConfig as defaultRules } from './rules/index.js'
 
-import { env } from './report'
-import { Config } from './rc'
+import { env } from './report.js'
+import { Config } from './rc/index.js'
 
 const hyperParseInfo = [
   { name: 'ignore', value: ignore },

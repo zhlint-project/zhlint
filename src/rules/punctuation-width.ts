@@ -22,8 +22,8 @@ import {
   isSinglePunctuationType,
   getFullwidthTokenType,
   getHalfwidthTokenType
-} from '../parser'
-import { PUNCTUATION_FULL_WIDTH, PUNCTUATION_HALF_WIDTH } from './messages'
+} from '../parser/index.js'
+import { PUNCTUATION_FULL_WIDTH, PUNCTUATION_HALF_WIDTH } from './messages.js'
 import {
   checkValue,
   checkEndValue,
@@ -31,7 +31,7 @@ import {
   isHalfwidthPunctuationWithoutSpaceAround,
   isSuccessiveHalfwidthPunctuation,
   Options
-} from './util'
+} from './util.js'
 
 type WidthPairList = Array<[halfwidth: string, fullwidth: string]>
 type WidthSidePairList = Array<

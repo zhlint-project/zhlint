@@ -1,4 +1,4 @@
-import type { ParsedBlock } from './hypers/types'
+import type { ParsedBlock } from './hypers/types.js'
 
 export type Piece = ParsedBlock | NonBlock
 

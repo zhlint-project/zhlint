@@ -1,4 +1,4 @@
-import { CharType } from './types'
+import { CharType } from './types.js'
 
 /**
  * NOTE:

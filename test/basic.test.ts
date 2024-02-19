@@ -8,9 +8,9 @@ import {
   parse,
   travel,
   toMutableResult
-} from '../src/parser'
-import join from '../src/join'
-import findIgnoredMarks from '../src/ignore'
+} from '../src/parser/index.js'
+import join from '../src/join.js'
+import findIgnoredMarks from '../src/ignore.js'
 
 const purify = (arr) =>
   arr.map((item) => (Array.isArray(item) ? purify(item) : item))

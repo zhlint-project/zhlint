@@ -11,15 +11,15 @@ import {
   Handler,
   MutableGroupToken,
   MutableToken
-} from '../parser'
-import { ValidationTarget } from '../report'
+} from '../parser/index.js'
+import { ValidationTarget } from '../report.js'
 import {
   findWrappersBetween,
   findNonCodeVisibleTokenAfter,
   findNonCodeVisibleTokenBefore,
   Options,
   removeValidationOnTarget
-} from './util'
+} from './util.js'
 
 const defaultSkippedZhUnits = `年月日天号时分秒`
 

@@ -1,9 +1,9 @@
 import { describe, test, expect } from 'vitest'
 
-import run from '../src/run'
-import markdownParser from '../src/hypers/md'
-import { ParsedStatus } from '../src/hypers/types'
-import { options } from './prepare'
+import run from '../src/run.js'
+import markdownParser from '../src/hypers/md.js'
+import { ParsedStatus } from '../src/hypers/types.js'
+import { options } from './prepare.js'
 
 const getOutput = (str: string) => run(str, options).result
 

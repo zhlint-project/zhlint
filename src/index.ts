@@ -1,13 +1,13 @@
-export { run, runWithConfig } from './run'
-export { report } from './report'
-export { readRc } from './rc'
+export { run, runWithConfig } from './run.js'
+export { report } from './report.js'
+export { readRc } from './rc/index.js'
 
-export type { Result } from './run'
-export type { Options } from './options'
-export type { Config } from './rc'
-export type { Validation, ValidationTarget } from './report'
-export type { IgnoredCase } from './ignore'
-export type { ParsedStatus, Block, ParserIgnoredCase } from './hypers/types'
+export type { Result } from './run.js'
+export type { Options } from './options.js'
+export type { Config } from './rc/index.js'
+export type { Validation, ValidationTarget } from './report.js'
+export type { IgnoredCase } from './ignore.js'
+export type { ParsedStatus, Block, ParserIgnoredCase } from './hypers/types.js'
 export type {
   Handler,
   Token,
@@ -17,4 +17,4 @@ export type {
   SingleTokenType,
   Mark,
   MarkType
-} from './parser'
+} from './parser/index.js'

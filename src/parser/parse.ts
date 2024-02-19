@@ -1,5 +1,5 @@
-import { Validation } from '../report'
-import { checkCharType } from './char'
+import { Validation } from '../report.js'
+import { checkCharType } from './char.js'
 import {
   CharType,
   isLetterType,
@@ -14,7 +14,7 @@ import {
   MutableToken,
   Token,
   GroupToken
-} from './types'
+} from './types.js'
 import {
   handleLetter,
   handlePunctuation,
@@ -28,8 +28,8 @@ import {
   initNewStatus,
   isShorthand,
   handleErrors
-} from './util'
-import { Options as RuleOptions } from '../rules/util'
+} from './util.js'
+import { Options as RuleOptions } from '../rules/util.js'
 
 export type ParseStatus = {
   lastToken?: Token

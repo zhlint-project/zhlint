@@ -1,9 +1,9 @@
-import { Options } from '../options'
+import { Options } from '../options.js'
 
 import { resolve } from 'path'
 import fs from 'fs'
 
-import { env } from '../report'
+import { env } from '../report.js'
 
 // to walk around https://github.com/davidmyersdev/vite-plugin-node-polyfills/issues/82
 const { existsSync, readFileSync } = fs || {}
