@@ -1,9 +1,9 @@
-import { IgnoredMark } from './ignore'
-import { Validation, ValidationTarget } from './report'
+import { IgnoredMark } from './ignore.js'
+import { Validation, ValidationTarget } from './report.js'
 import {
   MutableGroupToken as GroupToken,
   MutableToken as Token
-} from './parser'
+} from './parser/index.js'
 
 const isInRange = (start: number, end: number, mark: IgnoredMark) => {
   return start <= mark.end && end >= mark.start

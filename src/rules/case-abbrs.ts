@@ -7,14 +7,19 @@
  * - the point is rever the trailing dot
  */
 
-import { CharType, Handler, MutableGroupToken, MutableToken } from '../parser'
-import { ValidationTarget } from '../report'
+import {
+  CharType,
+  Handler,
+  MutableGroupToken,
+  MutableToken
+} from '../parser/index.js'
+import { ValidationTarget } from '../report.js'
 import {
   findTokenAfter,
   findTokenBefore,
   Options,
   removeValidationOnTarget
-} from './util'
+} from './util.js'
 
 const defaultSkippedAbbrs = [
   'Mr.',

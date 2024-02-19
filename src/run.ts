@@ -2,21 +2,21 @@ import type {
   ParsedBlock,
   ParsedStatus,
   ParserIgnoredCase
-} from './hypers/types'
-import type { Validation } from './report'
-import type { NormalizedOptions, Options } from './options'
-import type { Config } from './rc'
-import type { IgnoredCase } from './ignore'
-import type { Piece } from './replace-block'
+} from './hypers/types.js'
+import type { Validation } from './report.js'
+import type { NormalizedOptions, Options } from './options.js'
+import type { Config } from './rc/index.js'
+import type { IgnoredCase } from './ignore.js'
+import type { Piece } from './replace-block.js'
 
-import { normalizeOptions, normalizeConfig } from './options'
-import { MutableToken, parse, toMutableResult, travel } from './parser'
-import generateHandlers from './rules'
-import findIgnoredMarks from './ignore'
-import join from './join'
-import replaceBlocks from './replace-block'
+import { normalizeOptions, normalizeConfig } from './options.js'
+import { MutableToken, parse, toMutableResult, travel } from './parser/index.js'
+import generateHandlers from './rules/index.js'
+import findIgnoredMarks from './ignore.js'
+import join from './join.js'
+import replaceBlocks from './replace-block.js'
 
-export type { Options } from './options'
+export type { Options } from './options.js'
 
 export type DebugInfo = {
   pieces: Piece[]

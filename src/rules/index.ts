@@ -1,25 +1,25 @@
-import { Handler } from '../parser'
-import { Options } from './util'
+import { Handler } from '../parser/index.js'
+import { Options } from './util.js'
 
-import genSpaceTrimGenerateHandler from './space-trim'
+import genSpaceTrimGenerateHandler from './space-trim.js'
 
-import genPunctuationWidthHandler from './punctuation-width'
-import genPunctuationUnificationHandler from './punctuation-unification'
+import genPunctuationWidthHandler from './punctuation-width.js'
+import genPunctuationUnificationHandler from './punctuation-unification.js'
 
-import genAbbrsHandler from './case-abbrs'
+import genAbbrsHandler from './case-abbrs.js'
 
-import genSpaceOfHyperMarkHandler from './space-hyper-mark'
-import genSpaceOfCodeHandler from './space-code'
-import genSpaceOfLetterHandler from './space-letter'
-import genSpaceOfPunctuationHandler from './space-punctuation'
-import genSpaceOfQuotationHandler from './space-quotation'
-import genSpaceOfBracketHandler from './space-bracket'
+import genSpaceOfHyperMarkHandler from './space-hyper-mark.js'
+import genSpaceOfCodeHandler from './space-code.js'
+import genSpaceOfLetterHandler from './space-letter.js'
+import genSpaceOfPunctuationHandler from './space-punctuation.js'
+import genSpaceOfQuotationHandler from './space-quotation.js'
+import genSpaceOfBracketHandler from './space-bracket.js'
 
-import genLinebreakHandler from './case-linebreak'
-import genZhUnitsHandler from './case-zh-units'
-import genHtmlEntityHandler from './case-html-entity'
+import genLinebreakHandler from './case-linebreak.js'
+import genZhUnitsHandler from './case-zh-units.js'
+import genHtmlEntityHandler from './case-html-entity.js'
 
-import genSkipPureWesternHandler from './case-pure-western'
+import genSkipPureWesternHandler from './case-pure-western.js'
 
 const generateHandlers = (options: Options): Handler[] => {
   return [

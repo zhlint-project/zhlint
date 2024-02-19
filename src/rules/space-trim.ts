@@ -7,8 +7,8 @@
  * - trimSpace: boolean | undefined
  */
 
-import { Handler, MutableGroupToken, MutableToken } from '../parser'
-import { TRIM_SPACE } from './messages'
+import { Handler, MutableGroupToken, MutableToken } from '../parser/index.js'
+import { TRIM_SPACE } from './messages.js'
 import {
   checkInnerSpaceBefore,
   checkSpaceAfter,
@@ -16,7 +16,7 @@ import {
   findConnectedWrappers,
   isWrapper,
   Options
-} from './util'
+} from './util.js'
 
 const generateHandler = (options: Options): Handler => {
   const trimSpaceOption = options?.trimSpace

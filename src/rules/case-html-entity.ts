@@ -7,15 +7,20 @@
  * - to match `&<half-width-content>;`
  */
 
-import { CharType, Handler, MutableGroupToken, MutableToken } from '../parser'
-import { ValidationTarget } from '../report'
+import {
+  CharType,
+  Handler,
+  MutableGroupToken,
+  MutableToken
+} from '../parser/index.js'
+import { ValidationTarget } from '../report.js'
 import {
   findWrappersBetween,
   findNonCodeVisibleTokenAfter,
   findTokenAfter,
   Options,
   removeValidationOnTarget
-} from './util'
+} from './util.js'
 
 const generateHandler = (options: Options): Handler => {
   options

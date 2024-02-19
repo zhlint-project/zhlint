@@ -32,7 +32,7 @@ import {
   MutableGroupToken,
   MutableToken,
   HyperTokenType
-} from '../parser'
+} from '../parser/index.js'
 import {
   checkInnerSpaceBefore,
   checkSpaceAfter,
@@ -40,12 +40,12 @@ import {
   findNonCodeVisibleTokenAfter,
   findNonCodeVisibleTokenBefore,
   Options
-} from './util'
+} from './util.js'
 import {
   QUOTATION_NOSPACE_INSIDE,
   QUOTATION_NOSPACE_OUTSIDE,
   QUOTATION_SPACE_OUTSIDE
-} from './messages'
+} from './messages.js'
 
 const isFullWidth = (char: string, adjusted: string): boolean => {
   return isFullwidthPair(char) && adjusted.indexOf(char) === -1

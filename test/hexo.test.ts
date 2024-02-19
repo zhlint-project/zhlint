@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest'
 
-import run from '../src/run'
-import { options } from './prepare'
+import run from '../src/run.js'
+import { options } from './prepare.js'
 
 const getOutput = (str: string) => run(str, options).result
 

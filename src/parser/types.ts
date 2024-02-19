@@ -9,7 +9,7 @@
  * - Tokens
  */
 
-import { Validation } from '../report'
+import { Validation } from '../report.js'
 
 // Char
 

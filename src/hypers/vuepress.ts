@@ -1,4 +1,4 @@
-import { ParsedStatus } from './types'
+import { ParsedStatus } from './types.js'
 
 // TODO: ::: tips 提示...
 //

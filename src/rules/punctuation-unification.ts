@@ -8,9 +8,9 @@
  * - unifiedPunctuation: "traditional" | "simplified" | Record<string, boolean | string[]> & { default: boolean }
  */
 
-import { GroupTokenType, Handler, MutableToken } from '../parser'
-import { PUNCTUATION_UNIFICATION } from './messages'
-import { checkEndValue, checkStartValue, checkValue, Options } from './util'
+import { GroupTokenType, Handler, MutableToken } from '../parser/index.js'
+import { PUNCTUATION_UNIFICATION } from './messages.js'
+import { checkEndValue, checkStartValue, checkValue, Options } from './util.js'
 
 const defaultUnifiedMap: Record<string, string[]> = {
   // U+2047 DOUBLE QUESTION MARK, U+203C DOUBLE EXCLAMATION MARK

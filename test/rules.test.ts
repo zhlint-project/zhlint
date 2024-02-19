@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest'
 
-import { Options } from '../src/run'
-import { ValidationTarget } from '../src/report'
+import { Options } from '../src/run.js'
+import { ValidationTarget } from '../src/report.js'
 import {
   BRACKET_NOSPACE_INSIDE,
   CODE_SPACE_OUTSIDE,
@@ -11,9 +11,9 @@ import {
   PUNCTUATION_NOSPACE_BEFORE,
   PUNCTUATION_UNIFICATION,
   QUOTATION_NOSPACE_INSIDE
-} from '../src/rules/messages'
+} from '../src/rules/messages.js'
 
-import { getOutput, lint, options } from './prepare'
+import { getOutput, lint, options } from './prepare.js'
 
 describe('lint by rules', () => {
   // NOTE: the side spaces won't be recognized in latest remark parser

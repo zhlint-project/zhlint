@@ -4,7 +4,7 @@ import {
   checkCharType,
   isFullwidthPunctuationType,
   isHalfwidthPunctuationType
-} from './parser'
+} from './parser/index.js'
 
 export const env: {
   stdout: NodeJS.WritableStream

@@ -39,7 +39,7 @@ import {
   HyperTokenType,
   isFullwidthPunctuationType,
   isHalfwidthPunctuationType
-} from '../parser'
+} from '../parser/index.js'
 import {
   checkSpaceAfter,
   findVisibleTokenAfter,
@@ -48,12 +48,12 @@ import {
   isHalfwidthPunctuationWithoutSpaceAround,
   isSuccessiveHalfwidthPunctuation,
   Options
-} from './util'
+} from './util.js'
 import {
   PUNCTUATION_NOSPACE_AFTER,
   PUNCTUATION_NOSPACE_BEFORE,
   PUNCTUATION_SPACE_AFTER
-} from './messages'
+} from './messages.js'
 
 const generateHandler = (options: Options): Handler => {
   const noBeforePunctuationOption = options?.noSpaceBeforePauseOrStop

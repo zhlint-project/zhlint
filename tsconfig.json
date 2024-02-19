@@ -2,8 +2,8 @@
   "compilerOptions": {
     "lib": ["es2017"],
     "target": "es2017",
-    "module": "ES6",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "strictNullChecks": true,
     "skipLibCheck": true
