@@ -6,7 +6,7 @@ import fs from 'fs'
 import { env } from '../report'
 
 // to walk around https://github.com/davidmyersdev/vite-plugin-node-polyfills/issues/82
-const { existsSync, readFileSync } = fs
+const { existsSync, readFileSync } = fs || {}
 
 type PathResult = {
   config: string | undefined
