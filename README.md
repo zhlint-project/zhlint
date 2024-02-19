@@ -144,18 +144,18 @@ You could find a JavaScript file `dist/zhlint.js` as a standalone version. To us
 
 ## API
 
--   `run(str: string, options?: Options): Result`: Lint a certain content.
-    -   parameters:
-        -   `str`: The text content you want to lint.
-        -   `options`: Some options to config.
-    -   returns:
-        -   The result of a single piece of input string. It contains fixed text content as `value` and the infor of all `validations`.
--   `report(results: Result[], logger?: Console): void`: Print out the validation reports for each file.
-    -   parameters:
-        -   `results`: An array for all linted results.
-        -   `logger`: The logger instance, by default it's `console` in Node.js/browser.
--   `readRc: (dir: string, config: string, fileIgnore: string, caseIgnore: string, logger?: Console) => Config`: Read config from rc & ignore file(s).
--   `runWithConfig(str: string, config: Config): Result`: Lint a certain content with rc config.
+- `run(str: string, options?: Options): Result`: Lint a certain content.
+  - parameters:
+    - `str`: The text content you want to lint.
+    - `options`: Some options to config.
+  - returns:
+    - The result of a single piece of input string. It contains fixed text content as `value` and the infor of all `validations`.
+- `report(results: Result[], logger?: Console): void`: Print out the validation reports for each file.
+  - parameters:
+    - `results`: An array for all linted results.
+    - `logger`: The logger instance, by default it's `console` in Node.js/browser.
+- `readRc: (dir: string, config: string, fileIgnore: string, caseIgnore: string, logger?: Console) => Config`: Read config from rc & ignore file(s).
+- `runWithConfig(str: string, config: Config): Result`: Lint a certain content with rc config.
 
 ### Options
 
@@ -170,19 +170,19 @@ type Options = {
 }
 ```
 
--   `rules`: customize the linting config. It could be `undefined` which means linting nothing. It could be `{ preset: 'default' }` which just uses the default config. For more details of `RuleOptions`, please see [supported rules](#supported-rules)
--   `hyperParse`: customize the hyper parser by their names. It could be `undefined` which means just use default [ignored cases parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/ignore.js), [Markdown parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/md.js) and the [Hexo tags parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/hexo.js).
--   `ignoredCases`: provide exception cases which you would like to skip.
-    -   `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
-        -   Just follows a certain format `[prefix-,]textStart[,textEnd][,-suffix]` inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
--   `logger`: same to the parameter in `report(...)`.
+- `rules`: customize the linting config. It could be `undefined` which means linting nothing. It could be `{ preset: 'default' }` which just uses the default config. For more details of `RuleOptions`, please see [supported rules](#supported-rules)
+- `hyperParse`: customize the hyper parser by their names. It could be `undefined` which means just use default [ignored cases parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/ignore.js), [Markdown parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/md.js) and the [Hexo tags parser](https://github.com/zhlint-project/zhlint/tree/master/src/hypers/hexo.js).
+- `ignoredCases`: provide exception cases which you would like to skip.
+  - `IgnoredCase`: `{ prefix?, textStart, textEnd?, suffix? }`
+    - Just follows a certain format `[prefix-,]textStart[,textEnd][,-suffix]` inspired from [W3C Scroll To Text Fragment Proposal](https://github.com/WICG/ScrollToTextFragment).
+- `logger`: same to the parameter in `report(...)`.
 
 ### RC Config
 
--   `preset`: `string` (optional)
--   `rules`: `RuleOptions` without the `preset` field. (optional)
--   `hyperParsers`: `string[]` (optional)
--   `caseIgnores`: `string[]` and the priority is lower than `.zhlintcaseignore`. (optional)
+- `preset`: `string` (optional)
+- `rules`: `RuleOptions` without the `preset` field. (optional)
+- `hyperParsers`: `string[]` (optional)
+- `caseIgnores`: `string[]` and the priority is lower than `.zhlintcaseignore`. (optional)
 
 ### Output
 
@@ -206,15 +206,15 @@ type Validation = {
 }
 ```
 
--   `Result`
-    -   `file`: The file name. It's an optional field which is only used in CLI.
-    -   `origin`: the original text content.
-    -   `result`: the finally fixed text content.
-    -   `validations`: All the validation information.
--   `Validation`
-    -   `index`: The index of the target token in the input string.
-    -   `length`: The length of the target token in the input string.
-    -   `message`: The description of this validation in natural language.
+- `Result`
+  - `file`: The file name. It's an optional field which is only used in CLI.
+  - `origin`: the original text content.
+  - `result`: the finally fixed text content.
+  - `validations`: All the validation information.
+- `Validation`
+  - `index`: The index of the target token in the input string.
+  - `length`: The length of the target token in the input string.
+  - `message`: The description of this validation in natural language.
 
 ## Features
 
@@ -272,9 +272,9 @@ If you want to ignore the whole file, you can also add this HTML comment:
 
 ## Supported preproccessors (hyper parsers)
 
--   `ignore`: find all ignored pieces by the HTML comment `<!-- zhlint ignore: ... -->`
--   `hexo`: find all Hexo tags to avoid them being parsed.
--   `markdown`: parse by markdown syntax and find all block-level texts and inline-level marks.
+- `ignore`: find all ignored pieces by the HTML comment `<!-- zhlint ignore: ... -->`
+- `hexo`: find all Hexo tags to avoid them being parsed.
+- `markdown`: parse by markdown syntax and find all block-level texts and inline-level marks.
 
 ## Supported rules
 
@@ -346,7 +346,10 @@ type RuleOptions = {
   //  '·': false, // not unify any of these characters
   // }
   // ```
-  unifiedPunctuation?: 'traditional' | 'simplified' | Record<string, boolean | string[]> & { default: boolean }
+  unifiedPunctuation?:
+    | 'traditional'
+    | 'simplified'
+    | (Record<string, boolean | string[]> & { default: boolean })
 
   // Special case: skip `fullWidthPunctuation` for abbreviations.
   // default preset:

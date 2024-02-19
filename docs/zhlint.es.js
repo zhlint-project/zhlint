@@ -8209,7 +8209,9 @@ const { existsSync: At, readFileSync: Dn } = {}, uh = ".zhlintrc", ah = ".zhlint
     }
   if (n)
     try {
-      Dn(n, { encoding: "utf8" }).split(/\n/).map((u) => u.trim()).forEach((u) => {
+      Dn(n, {
+        encoding: "utf8"
+      }).split(/\n/).map((u) => u.trim()).forEach((u) => {
         u && (r.fileIgnores || (r.fileIgnores = []), r.fileIgnores.indexOf(u) === -1 && r.fileIgnores.push(u));
       });
     } catch (l) {
@@ -8219,7 +8221,9 @@ const { existsSync: At, readFileSync: Dn } = {}, uh = ".zhlintrc", ah = ".zhlint
     }
   if (t)
     try {
-      Dn(t, { encoding: "utf8" }).split(/\n/).map((u) => u.trim()).forEach((u) => {
+      Dn(t, {
+        encoding: "utf8"
+      }).split(/\n/).map((u) => u.trim()).forEach((u) => {
         u && (r.caseIgnores || (r.caseIgnores = []), r.caseIgnores.indexOf(u) === -1 && r.caseIgnores.push(u));
       });
     } catch (l) {

@@ -39,7 +39,8 @@
     "docs:readme": "node scripts/gen-readme.mjs",
     "docs:build": "vitepress build docs",
     "docs:serve": "vitepress serve docs",
-    "docs:deploy": "./deploy.sh"
+    "docs:deploy": "./deploy.sh",
+    "prepublish": "pnpm run build && pnpm run docs:runtime && pnpm run docs:readme"
   },
   "repository": {
     "type": "git",
