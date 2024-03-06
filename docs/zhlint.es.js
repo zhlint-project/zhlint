@@ -811,7 +811,7 @@ function gr(e, n, t) {
 function nu(e) {
   return !!(e && typeof e == "object");
 }
-function ie(e, n, t, i) {
+function re(e, n, t, i) {
   const r = e.length;
   let l = 0, u;
   if (n < 0 ? n = -n > r ? 0 : r + n : n = n > r ? r : n, t = t > 0 ? t : 0, i.length < 1e4)
@@ -821,7 +821,7 @@ function ie(e, n, t, i) {
       u = i.slice(l, l + 1e4), u.unshift(n, 0), e.splice(...u), l += 1e4, n += 1e4;
 }
 function ue(e, n) {
-  return e.length > 0 ? (ie(e, e.length, 0, n), e) : n;
+  return e.length > 0 ? (re(e, e.length, 0, n), e) : n;
 }
 const mr = {}.hasOwnProperty;
 function di(e) {
@@ -853,7 +853,7 @@ function iu(e, n) {
   const i = [];
   for (; ++t < n.length; )
     (n[t].add === "after" ? e : i).push(n[t]);
-  ie(e, 0, 0, i);
+  re(e, 0, 0, i);
 }
 const lu = /[!-\/:-@\[-`\{-~\xA1\xA7\xAB\xB6\xB7\xBB\xBF\u037E\u0387\u055A-\u055F\u0589\u058A\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0609\u060A\u060C\u060D\u061B\u061D-\u061F\u066A-\u066D\u06D4\u0700-\u070D\u07F7-\u07F9\u0830-\u083E\u085E\u0964\u0965\u0970\u09FD\u0A76\u0AF0\u0C77\u0C84\u0DF4\u0E4F\u0E5A\u0E5B\u0F04-\u0F12\u0F14\u0F3A-\u0F3D\u0F85\u0FD0-\u0FD4\u0FD9\u0FDA\u104A-\u104F\u10FB\u1360-\u1368\u1400\u166E\u169B\u169C\u16EB-\u16ED\u1735\u1736\u17D4-\u17D6\u17D8-\u17DA\u1800-\u180A\u1944\u1945\u1A1E\u1A1F\u1AA0-\u1AA6\u1AA8-\u1AAD\u1B5A-\u1B60\u1B7D\u1B7E\u1BFC-\u1BFF\u1C3B-\u1C3F\u1C7E\u1C7F\u1CC0-\u1CC7\u1CD3\u2010-\u2027\u2030-\u2043\u2045-\u2051\u2053-\u205E\u207D\u207E\u208D\u208E\u2308-\u230B\u2329\u232A\u2768-\u2775\u27C5\u27C6\u27E6-\u27EF\u2983-\u2998\u29D8-\u29DB\u29FC\u29FD\u2CF9-\u2CFC\u2CFE\u2CFF\u2D70\u2E00-\u2E2E\u2E30-\u2E4F\u2E52-\u2E5D\u3001-\u3003\u3008-\u3011\u3014-\u301F\u3030\u303D\u30A0\u30FB\uA4FE\uA4FF\uA60D-\uA60F\uA673\uA67E\uA6F2-\uA6F7\uA874-\uA877\uA8CE\uA8CF\uA8F8-\uA8FA\uA8FC\uA92E\uA92F\uA95F\uA9C1-\uA9CD\uA9DE\uA9DF\uAA5C-\uAA5F\uAADE\uAADF\uAAF0\uAAF1\uABEB\uFD3E\uFD3F\uFE10-\uFE19\uFE30-\uFE52\uFE54-\uFE61\uFE63\uFE68\uFE6A\uFE6B\uFF01-\uFF03\uFF05-\uFF0A\uFF0C-\uFF0F\uFF1A\uFF1B\uFF1F\uFF20\uFF3B-\uFF3D\uFF3F\uFF5B\uFF5D\uFF5F-\uFF65]/, X = Le(/[A-Za-z]/), ne = Le(/[\dA-Za-z]/), uu = Le(/[#-'*+\--9=?A-Z^-~]/);
 function Ft(e) {
@@ -961,7 +961,7 @@ function hu(e) {
       let S = O;
       for (; S < n.events.length; )
         n.events[S][1].end = Object.assign({}, k), S++;
-      return ie(
+      return re(
         n.events,
         _ + 1,
         0,
@@ -1042,7 +1042,7 @@ function hu(e) {
         }
       for (b(i), k = S; k < n.events.length; )
         n.events[k][1].end = Object.assign({}, E), k++;
-      ie(
+      re(
         n.events,
         L + 1,
         0,
@@ -1140,7 +1140,7 @@ function du(e, n) {
           ]), e[t][1].end.offset - e[t][1].start.offset ? (f = 2, c = ue(c, [
             ["enter", e[t][1], n],
             ["exit", e[t][1], n]
-          ])) : f = 0, ie(e, i - 1, t - i + 3, c), t = i + c.length - f - 2;
+          ])) : f = 0, re(e, i - 1, t - i + 3, c), t = i + c.length - f - 2;
           break;
         }
     }
@@ -1496,7 +1496,7 @@ function bi(e) {
     else if (i[1]._container) {
       for (l = t, r = void 0; l-- && (u = e[l], u[1].type === "lineEnding" || u[1].type === "lineEndingBlank"); )
         u[0] === "enter" && (r && (e[r][1].type = "lineEndingBlank"), u[1].type = "lineEnding", r = l);
-      r && (i[1].end = Object.assign({}, e[r][1].start), a = e.slice(r, t), a.unshift(i), ie(e, r, t - r + 1, a));
+      r && (i[1].end = Object.assign({}, e[r][1].start), a = e.slice(r, t), a.unshift(i), re(e, r, t - r + 1, a));
     }
   }
   return !c;
@@ -1517,7 +1517,7 @@ function Bu(e, n) {
     a[p][0] === "exit" && a[p - 1][0] === "enter" && a[p][1].type === a[p - 1][1].type && a[p][1].start.line !== a[p][1].end.line && (y = p + 1, x.push(y), h._tokenizer = void 0, h.previous = void 0, h = h.next);
   for (u.events = [], h ? (h._tokenizer = void 0, h.previous = void 0) : x.pop(), p = x.length; p--; ) {
     const b = a.slice(x[p], x[p + 1]), C = l.pop();
-    s.unshift([C, C + b.length - 1]), ie(e, C, 2, b);
+    s.unshift([C, C + b.length - 1]), re(e, C, 2, b);
   }
   for (p = -1; ++p < s.length; )
     c[d + s[p][0]] = d + s[p][1], d += s[p][1] - s[p][0] - 1;
@@ -1765,7 +1765,7 @@ function qu(e, n) {
     start: e[i][1].start,
     end: e[t][1].end,
     contentType: "text"
-  }, ie(e, i, t - i + 1, [
+  }, re(e, i, t - i + 1, [
     ["enter", r, n],
     ["enter", l, n],
     ["exit", l, n],
@@ -2167,7 +2167,7 @@ function sa(e, n) {
     e[u - 2],
     e[u - 1],
     ["exit", c, n]
-  ]), a = ue(a, e.slice(u + 1)), a = ue(a, [["exit", s, n]]), ie(e, l, e.length, a), e;
+  ]), a = ue(a, e.slice(u + 1)), a = ue(a, [["exit", s, n]]), re(e, l, e.length, a), e;
 }
 function oa(e, n, t) {
   const i = this;
@@ -2776,7 +2776,7 @@ function La(e, n, t) {
     }
   }
   function L(F, I) {
-    F.resolveAll && !l.includes(F) && l.push(F), F.resolve && ie(
+    F.resolveAll && !l.includes(F) && l.push(F), F.resolve && re(
       c.events,
       I,
       c.events.length - I,
@@ -4029,17 +4029,17 @@ function Es(e) {
               ["exit", u[c][1], a],
               ["enter", o, a]
             ], h = a.parser.constructs.insideSpan.null;
-            h && ie(
+            h && re(
               p,
               p.length,
               0,
               Bt(h, u.slice(c + 1, s), a)
-            ), ie(p, p.length, 0, [
+            ), re(p, p.length, 0, [
               ["exit", o, a],
               ["enter", u[s][1], a],
               ["exit", u[s][1], a],
               ["exit", f, a]
-            ]), ie(u, c - 1, s - c + 3, p), s = c + p.length - 2;
+            ]), re(u, c - 1, s - c + 3, p), s = c + p.length - 2;
             break;
           }
       }
@@ -7064,7 +7064,7 @@ ${w}
     a = s;
   }
   return u;
-}, le = (e, n, t) => {
+}, ie = (e, n, t) => {
   if (!n || !t)
     return {
       spaceHost: void 0,
@@ -7111,8 +7111,8 @@ ${w}
   return n === D.START_VALUE ? (r.index = e.startIndex, r.length = 0) : n === D.END_VALUE ? (r.index = e.endIndex, r.length = 0) : n === D.INNER_SPACE_BEFORE && (r.index = e.startIndex, r.length = e.startValue.length), r;
 }, ol = (e, n, t, i) => {
   const r = wf(e, n, t, i);
-  re(e, n), e.validations.push(r);
-}, re = (e, n) => {
+  le(e, n), e.validations.push(r);
+}, le = (e, n) => {
   e.validations = e.validations.filter(
     (t) => t.target !== n
   );
@@ -7296,7 +7296,7 @@ ${w}
     if (t.value !== ".")
       return;
     const l = se(r, t);
-    l && l.type === R.WESTERN_LETTER && !t.spaceAfter || cl(t, r, n) && (t.modifiedValue = ".", t.modifiedType = t.type, re(t, D.VALUE));
+    l && l.type === R.WESTERN_LETTER && !t.spaceAfter || cl(t, r, n) && (t.modifiedValue = ".", t.modifiedType = t.type, le(t, D.VALUE));
   };
 }, vf = (e) => {
   const n = e == null ? void 0 : e.noSpaceInsideHyperMark;
@@ -7314,11 +7314,11 @@ ${w}
   return (l, u, a) => {
     if (typeof n > "u" || l.type !== $.CODE_CONTENT)
       return;
-    const s = gt(a, l), c = Ze(a, l), { spaceHost: f } = le(
+    const s = gt(a, l), c = Ze(a, l), { spaceHost: f } = ie(
       a,
       s,
       l
-    ), { spaceHost: o } = le(
+    ), { spaceHost: o } = ie(
       a,
       l,
       c
@@ -7333,7 +7333,7 @@ ${w}
     const a = Ze(u, r);
     if (!a || !ae(a.type))
       return;
-    const { spaceHost: s, tokens: c } = le(
+    const { spaceHost: s, tokens: c } = ie(
       u,
       r,
       a
@@ -7364,7 +7364,7 @@ ${w}
         a.type === ee.GROUP || // right-bracket
         a.type === $.BRACKET_MARK && a.markSide === q.RIGHT || // code
         a.type === $.CODE_CONTENT)) {
-          const { spaceHost: s } = le(
+          const { spaceHost: s } = ie(
             u,
             a,
             r
@@ -7379,7 +7379,7 @@ ${w}
         c.type === ee.GROUP || // left-bracket
         c.type === $.BRACKET_MARK && c.markSide === q.LEFT || // code
         c.type === $.CODE_CONTENT)) {
-          const { spaceHost: f } = le(
+          const { spaceHost: f } = ie(
             u,
             r,
             c
@@ -7402,7 +7402,7 @@ ${w}
       if (typeof t < "u" || i) {
         const s = Nt(a, l);
         if (s && s.type === ee.GROUP) {
-          const { spaceHost: f } = le(
+          const { spaceHost: f } = ie(
             a,
             l,
             s
@@ -7414,7 +7414,7 @@ ${w}
         }
         const c = Gn(a, l);
         if (c && (ae(c.type) || c.type === $.CODE_CONTENT)) {
-          const { spaceHost: f } = le(
+          const { spaceHost: f } = ie(
             a,
             c,
             l
@@ -7425,7 +7425,7 @@ ${w}
           ) ? i && V(f, "", rt) : typeof t < "u" && V(f, t ? " " : "", t ? xt : rt));
         }
         if (s && (ae(s.type) || s.type === $.CODE_CONTENT)) {
-          const { spaceHost: f } = le(
+          const { spaceHost: f } = ie(
             a,
             l,
             s
@@ -7461,7 +7461,7 @@ ${w}
         d && // dedupe
         d.markSide !== q.LEFT && V(d, "", ti);
       }
-    const s = gt(a, l), c = Ze(a, l), { spaceHost: f, tokens: o } = le(a, s, l), { spaceHost: p, tokens: h } = le(a, l, c);
+    const s = gt(a, l), c = Ze(a, l), { spaceHost: f, tokens: o } = ie(a, s, l), { spaceHost: p, tokens: h } = ie(a, l, c);
     if (!Hf(
       s,
       o,
@@ -7486,7 +7486,7 @@ ${w}
     }
   };
 }, jf = (e) => (n) => {
-  n.spaceAfter && n.spaceAfter.match(/\n/) && (re(n, D.SPACE_AFTER), n.modifiedSpaceAfter = n.spaceAfter);
+  n.spaceAfter && n.spaceAfter.match(/\n/) && (le(n, D.SPACE_AFTER), n.modifiedSpaceAfter = n.spaceAfter);
 }, Uf = (e) => {
   const t = ((e == null ? void 0 : e.skipZhUnits) || "").split("").filter((r) => Ye(r) === R.CJK_CHAR).join(""), i = new RegExp(`^[${t}]`);
   return (r, l, u) => {
@@ -7495,22 +7495,22 @@ ${w}
       if (Array.isArray(a))
         return;
       if (a && a.value.match(i)) {
-        const { spaceHost: s, tokens: c } = le(u, r, a);
+        const { spaceHost: s, tokens: c } = ie(u, r, a);
         if (c.some((p) => p.spaceAfter))
           return;
         const o = Gn(u, r);
         if (o) {
-          const { spaceHost: p, tokens: h } = le(u, o, r);
+          const { spaceHost: p, tokens: h } = ie(u, o, r);
           if (h.some(
             (y) => y.spaceAfter
           ))
             return;
-          p && (p.modifiedSpaceAfter = "", re(
+          p && (p.modifiedSpaceAfter = "", le(
             p,
             D.SPACE_AFTER
           ));
         }
-        s && (s.modifiedSpaceAfter = "", re(s, D.SPACE_AFTER));
+        s && (s.modifiedSpaceAfter = "", le(s, D.SPACE_AFTER));
       }
     }
   };
@@ -7523,11 +7523,11 @@ ${w}
   const l = se(i, r);
   if (!l || l.value !== ";" || r.spaceAfter)
     return;
-  n.modifiedValue = n.value, n.modifiedType = n.type, n.modifiedSpaceAfter = n.spaceAfter, re(n, D.VALUE), re(n, D.SPACE_AFTER), r.modifiedValue = r.value, r.modifiedType = r.type, r.modifiedSpaceAfter = r.spaceAfter, re(r, D.VALUE), re(r, D.SPACE_AFTER), l.modifiedValue = l.value, l.modifiedType = l.type, re(l, D.VALUE), re(l, D.SPACE_AFTER);
+  n.modifiedValue = n.value, n.modifiedType = n.type, n.modifiedSpaceAfter = n.spaceAfter, le(n, D.VALUE), le(n, D.SPACE_AFTER), r.modifiedValue = r.value, r.modifiedType = r.type, r.modifiedSpaceAfter = r.spaceAfter, le(r, D.VALUE), le(r, D.SPACE_AFTER), l.modifiedValue = l.value, l.modifiedType = l.type, le(l, D.VALUE), le(l, D.SPACE_AFTER);
   const u = Nt(i, l);
   if (u) {
-    const { spaceHost: a } = le(i, l, u);
-    a && (a.modifiedSpaceAfter = a.spaceAfter, re(a, D.SPACE_AFTER));
+    const { spaceHost: a } = ie(i, l, u);
+    a && (a.modifiedSpaceAfter = a.spaceAfter, le(a, D.SPACE_AFTER));
   }
 }, fl = (e) => e.some((n) => {
   if (n.type === ee.GROUP)
@@ -7535,10 +7535,8 @@ ${w}
   if (gc(n.type))
     return !n.value.match(/[‘’“”]/);
 }), hl = (e) => {
-  e.forEach((n) => {
-    for (const t in D)
-      re(n, t);
-    n.modifiedSpaceAfter = n.spaceAfter, n.modifiedType = n.type, n.modifiedValue = n.value, n.type === ee.GROUP && (n.modifiedInnerSpaceBefore = n.innerSpaceBefore, hl(n));
+  e.modifiedSpaceAfter = e.spaceAfter, e.modifiedInnerSpaceBefore = e.innerSpaceBefore, e.modifiedStartValue = e.startValue, e.modifiedEndValue = e.endValue, e.validations.length = 0, e.forEach((n) => {
+    n.validations.length = 0, n.modifiedSpaceAfter = n.spaceAfter, n.type === ee.GROUP ? hl(n) : (n.modifiedType = n.type, n.modifiedValue = n.value);
   });
 }, $f = (e) => {
   const n = e == null ? void 0 : e.skipPureWestern;
