@@ -33,16 +33,19 @@ const findNonWestern = (group: MutableGroupToken): boolean => {
 }
 
 const resetValidation = (group: MutableGroupToken): void => {
+  group.modifiedSpaceAfter = group.spaceAfter
+  group.modifiedInnerSpaceBefore = group.innerSpaceBefore
+  group.modifiedStartValue = group.startValue
+  group.modifiedEndValue = group.endValue
+  group.validations.length = 0
   group.forEach((token) => {
-    for (const target in ValidationTarget) {
-      removeValidationOnTarget(token, target as ValidationTarget)
-    }
+    token.validations.length = 0
     token.modifiedSpaceAfter = token.spaceAfter
-    token.modifiedType = token.type
-    token.modifiedValue = token.value
     if (token.type === GroupTokenType.GROUP) {
-      token.modifiedInnerSpaceBefore = token.innerSpaceBefore
       resetValidation(token)
+    } else {
+      token.modifiedType = token.type
+      token.modifiedValue = token.value
     }
   })
 }
