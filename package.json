@@ -20,6 +20,7 @@
     "README.md"
   ],
   "scripts": {
+    "prepare": "pnpm run build",
     "dev": "vitest",
     "debug": "vitest debug.test.ts",
     "dev:ui": "vitest --ui",
