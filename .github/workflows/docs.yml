@@ -18,7 +18,7 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - run: |
-          pnpm install
+          pnpm install --frozen-lockfile
           pnpm run docs:build
           cd docs/.vitepress/dist
           git init
