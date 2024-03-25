@@ -60,7 +60,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style>
 .container {
   display: flex;
   flex-direction: column;
@@ -71,10 +71,10 @@ onMounted(() => {
   padding: 10px 15px;
   font-family: monospace;
   font-size: 1rem;
-  border: 1px solid var(--vp-c-divider-light);
+  border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
-  color: var(--vp-c-text-code);
-  background-color: var(--vp-c-bg-mute);
+  color: var(--vp-c-text-1);
+  background-color: var(--vp-c-bg-alt);
   transition:
     background-color 0.5s,
     color 0.5s,
@@ -83,18 +83,9 @@ onMounted(() => {
 .container textarea:hover {
   border-color: var(--vp-c-brand);
 }
-.container button {
-  padding: 10px 15px;
-  font-size: 1rem;
-  border: 1px solid var(--vp-c-divider-light);
-  border-radius: 8px;
-  color: var(--vp-c-brand);
-}
-.container button:hover {
-  border-color: var(--vp-c-brand);
-}
 .container pre {
   margin: 0;
+  white-space: pre-wrap;
   padding: 10px 15px;
   border: 1px solid transparent;
   border-radius: 8px;

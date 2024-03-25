@@ -29,14 +29,14 @@ watch(data, () => {
     <h2>Inspector</h2>
     <div>
       <h3>Origin</h3>
-      <pre><template v-for="piece in data.__debug__.pieces"
+      <pre class="linting-content"><template v-for="piece in data.__debug__.pieces"
         ><NonBlock v-if="'nonBlock' in piece" :data="piece"
         /><Block v-else :data="piece" /></template
       ></pre>
     </div>
     <div>
       <h3>Formatted</h3>
-      <pre><template v-for="piece in data.__debug__.pieces"
+      <pre class="linting-content"><template v-for="piece in data.__debug__.pieces"
         ><NonBlock v-if="'nonBlock' in piece" :data="piece"
         /><Block v-else :data="piece" modified /></template
       ></pre>
@@ -46,8 +46,14 @@ watch(data, () => {
   </div>
 </template>
 
-<style scoped>
+<style>
 #inspector {
   color: var(--vp-custom-block-details-text);
+}
+html #inspector .linting-content {
+  background-color: transparent;
+}
+html.dark #inspector .linting-content {
+  background-color: #EEE;
 }
 </style>
