@@ -1,0 +1,1 @@
+import{_ as e,c as i,o as t,a2 as s}from"./chunks/framework.DiTk29EN.js";const g=JSON.parse('{"title":"Design","description":"","frontmatter":{},"headers":[],"relativePath":"design.md","filePath":"design.md"}'),l={name:"design.md"},a=s("",92),n=[a];function o(d,r,c,p,h,u){return t(),i("div",null,n)}const f=e(l,[["render",o]]);export{g as __pageData,f as default};
