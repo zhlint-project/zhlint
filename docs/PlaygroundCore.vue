@@ -51,7 +51,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container">
+  <div id="playground-core" class="container">
     <textarea v-model="input" :rows="rows" @input="inputUpdate"></textarea>
     <!-- <button @click="format">Format</button> -->
     <pre>{{ output }}</pre>
@@ -61,13 +61,13 @@ onMounted(() => {
 </template>
 
 <style>
-.container {
+#playground-core {
   display: flex;
   flex-direction: column;
   padding: 20px 0;
   gap: 20px;
 }
-.container textarea {
+#playground-core textarea {
   padding: 10px 15px;
   font-family: monospace;
   font-size: 1rem;
@@ -80,10 +80,10 @@ onMounted(() => {
     color 0.5s,
     border-color 0.5s;
 }
-.container textarea:hover {
+#playground-core textarea:hover {
   border-color: var(--vp-c-brand);
 }
-.container pre {
+#playground-core pre {
   margin: 0;
   white-space: pre-wrap;
   padding: 10px 15px;
