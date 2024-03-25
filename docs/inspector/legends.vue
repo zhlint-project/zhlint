@@ -19,4 +19,7 @@
   height: 1em;
   vertical-align: text-bottom;
 }
+pre {
+  background-color: transparent !important;
+}
 </style>

@@ -35,7 +35,7 @@
     "test:tsc": "tsc --noEmit",
     "test:vitest": "vitest run",
     "coverage": "vitest run --coverage",
-    "docs": "vitepress dev docs",
+    "docs:dev": "vitepress dev docs",
     "docs:runtime": "cp dist/zhlint.es.js* docs/",
     "docs:readme": "node scripts/gen-readme.mjs",
     "docs:build": "vitepress build docs",
