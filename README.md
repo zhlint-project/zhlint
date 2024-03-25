@@ -1,4 +1,4 @@
-# ![logo](docs/logo.svg) zhlint
+# ![logo](docs/zhlint.svg) zhlint
 
 A linting tool for Chinese text content.
 

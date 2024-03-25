@@ -3,6 +3,9 @@ export default {
   title: 'zhlint',
   titleTemplate: false,
   description: 'A linting tool for Chinese text content.',
+  head: [
+    ['link', { rel: 'icon', href: '/zhlint.svg' }]
+  ],
 
   themeConfig: {
     nav: [

@@ -16,7 +16,7 @@
     "bin/*",
     "lib/*",
     "docs/*.png",
-    "docs/logo.svg",
+    "docs/public/zhlint.svg",
     "README.md"
   ],
   "scripts": {
