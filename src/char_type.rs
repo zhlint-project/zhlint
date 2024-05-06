@@ -1,6 +1,20 @@
 use regex::Regex;
 
-#[derive(Debug, PartialEq)]
+/**
+ * NOTE:
+ * - U+FE41 PRESENTATION FORM FOR VERTICAL LEFT CORNER BRACKET -> U+300C LEFT CORNER BRACKET, etc.
+ * - U+2E3A TWO-EM DASH, U+2014 EM DASH x2
+ * - U+2026 HORIZONTAL ELLIPSIS, U+22EF MIDLINE HORIZONTAL ELLIPSIS
+ * - U+25CF BLACK CIRCLE (emphasis dots), U+2022 BULLET (emphasis dots), U+00B7 MIDDLE DOT (interpuncts),
+ *   U+2027 HYPHENATION POINT, U+2022 BULLET, U+30FB KATAKANA MIDDLE DOT
+ *
+ * Decoration marks:
+ * - emphasis dots: U+25CF BLACK CIRCLE, U+2022 BULLET
+ * - book title marks: U+FE4F WAVY LOW LINE
+ * - proper noun marks: U+FF3F FULLWIDTH LOW LINE
+ */
+
+ #[derive(Debug, PartialEq)]
 pub enum CharType {
     Space,
     WesternLetter,
@@ -63,7 +77,18 @@ fn is_match(c: char, pattern: &str) -> bool {
     re.is_match(&c.to_string())
 }
 
-#[allow(dead_code)]
+/**
+ * Check whether the character is full-width or half-width,
+ * content or punctuation, or empty, or space, or emoji etc.
+ * Refs:
+ * - https://unicode.org/charts/
+ * - https://jrgraphix.net/research/unicode.php
+ * - https://mathiasbynens.be/notes/javascript-unicode
+ * - https://stackoverflow.com/a/21113538
+ * - https://www.w3.org/International/clreq/#categories_and_usage_of_punctuation_marks
+ */
+
+ #[allow(dead_code)]
 pub fn get_char_type(c: char) -> CharType {
     // space
     if is_match(c, "\\s") {
