@@ -16,32 +16,32 @@ use regex::Regex;
  * - proper noun marks: U+FF3F FULLWIDTH LOW LINE
  */
 
- #[derive(Debug, PartialEq)]
+ #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum CharType {
-    Space,
+    Space = 0x20,
 
-    WesternLetter,
-    CjkChar,
+    WesternLetter = 0x21,
+    CjkChar = 0x22,
 
     // periods, commas, secondary commas, colons, semicolons, exclamation marks, question marks, etc.
-    HalfwidthPauseOrStop,
-    FullwidthPauseOrStop,
+    HalfwidthPauseOrStop = 0x23,
+    FullwidthPauseOrStop = 0x24,
 
     // single, double, corner, white corner
     // + book title marks
     // left x right
-    HalfwidthQuotation,
-    FullwidthQuotation,
+    HalfwidthQuotation = 0x25,
+    FullwidthQuotation = 0x26,
 
     // parentheses
-    HalfwidthBracket,
-    FullwidthBracket,
+    HalfwidthBracket = 0x27,
+    FullwidthBracket = 0x28,
 
     // dashes, ellipsis, connector marks, interpuncts, proper noun marks, solidi, etc.
-    HalfwidthOtherPunctuation,
-    FullwidthOtherPunctuation,
+    HalfwidthOtherPunctuation = 0x29,
+    FullwidthOtherPunctuation = 0x2A,
 
-    Unknown,
+    Unknown = 0x2B,
 }
 
 const HALFWIDTH_PAUSE_OR_STOP: [char; 6] = [
@@ -295,23 +295,23 @@ pub enum MarkType {
     /**
      * Brackets
      */
-    Brackets,
+    Brackets = 0x30,
     /**
      * Inline Markdown marks
      */
-    Hyper,
+    Hyper = 0x31,
     /**
      * - \`xxx\`
      * - &lt;code&gt;xxx&lt;/code&gt;
      * - Hexo/VuePress container
      * - Other html code
      */
-    Raw,
+    Raw = 0x32,
 }
 
 pub enum MarkSideType {
-    Left,
-    Right,
+    Left = 0x40,
+    Right = 0x41,
 }
 
 #[allow(dead_code)]
@@ -355,31 +355,37 @@ pub struct MutRawMark {
 
 // Token type
 
+#[derive(Clone, Copy)]
 pub enum LetterType {
     WesternLetter = CharType::WesternLetter as isize,
     CjkChar = CharType::CjkChar as isize,
 }
 
+#[derive(Clone, Copy)]
 pub enum PauseOrStopType {
     HalfwidthPauseOrStop = CharType::HalfwidthPauseOrStop as isize,
     FullwidthPauseOrStop = CharType::FullwidthPauseOrStop as isize,
 }
 
+#[derive(Clone, Copy)]
 pub enum QuotationType {
     HalfwidthQuotation = CharType::HalfwidthQuotation as isize,
     FullwidthQuotation = CharType::FullwidthQuotation as isize,
 }
 
+#[derive(Clone, Copy)]
 pub enum BracketType {
     HalfwidthBracket = CharType::HalfwidthBracket as isize,
     FullwidthBracket = CharType::FullwidthBracket as isize,
 }
 
+#[derive(Clone, Copy)]
 pub enum OtherPunctuationType {
     HalfwidthOtherPunctuation = CharType::HalfwidthOtherPunctuation as isize,
     FullwidthOtherPunctuation = CharType::FullwidthOtherPunctuation as isize,
 }
 
+#[derive(Clone, Copy)]
 pub enum SinglePunctuationType {
     PauseOrStopType(PauseOrStopType),
     OtherPunctuationType(OtherPunctuationType),
@@ -389,7 +395,7 @@ pub enum PunctuationType {
     SinglePunctuationType(SinglePunctuationType),
     BracketType(BracketType),
 }
-
+#[derive(Clone, Copy)]
 pub enum NormalContentTokenType {
     LetterType(LetterType),
     SinglePunctuationType(SinglePunctuationType),
@@ -424,52 +430,57 @@ pub enum FullwidthTokenType {
 /**
  * TODO: paired html tags should be hyper mark
  */
+#[derive(Copy, Clone)]
 pub enum HyperTokenType {
     /**
      * Brackets
      */
-    BracketMark,
+    BracketMark = 0x50,
     /**
      * Inline Markdown marks
      */
-    HyperMark,
+    HyperMark = 0x51,
 
     /**
      * - \`xxx\`
      * - &lt;code&gt;xxx&lt;/code&gt;
      */
-    CodeContent,
+    CodeContent = 0x52,
     /**
      * - Hexo/VuePress container
      * - Other html code
      */
-    HyperContent,
+    HyperContent = 0x53,
 
     /**
      * Unpaired brackets/quotations
      */
-    Unmatched,
+    Unmatched = 0x54,
     /**
      * For indeterminate tokens
      */
-    Indeterminate,
+    Indeterminate = 0x55,
 }
 
+#[derive(Copy, Clone)]
 pub enum GroupTokenType {
-    Group,
+    Group = 0x60,
 }
 
+#[derive(Clone, Copy)]
 pub enum SingleTokenType {
     NormalContentTokenType(NormalContentTokenType),
     HyperTokenType(HyperTokenType),
 }
 
+#[derive(Clone, Copy)]
 pub enum TokenType {
     SingleTokenType(SingleTokenType),
     GroupTokenType(GroupTokenType),
 }
 
 #[repr(isize)]
+#[derive(Clone, Copy)]
 pub enum NonTokenCharType {
     Space = CharType::Space as isize,
     Unknown = CharType::Unknown as isize,
@@ -477,6 +488,7 @@ pub enum NonTokenCharType {
     QuotationType(QuotationType),
 }
 
+#[derive(Clone, Copy)]
 pub enum GeneralType {
     TokenType(TokenType),
     NonTokenCharType(NonTokenCharType),
@@ -597,23 +609,23 @@ pub fn get_fullwidth_token_type(token_type: TokenType) -> TokenType {
 }
 
 #[repr(isize)]
-enum NonCodeVisibleTokenType {
+pub enum NonCodeVisibleTokenType {
     BracketMark = HyperTokenType::BracketMark as isize,
     Group = GroupTokenType::Group as isize,
     NormalContentTokenType(NormalContentTokenType),
 }
 
 #[repr(isize)]
-enum VisibleTokenType {
+pub enum VisibleTokenType {
     CodeContent = HyperTokenType::CodeContent as isize,
     NonCodeVisibleTokenType(NonCodeVisibleTokenType),
 }
 
-enum InvisibleTokenType {
+pub enum InvisibleTokenType {
     HyperMark = HyperTokenType::HyperMark as isize,
 }
 
-enum VisibilityUnknownTokenType {
+pub enum VisibilityUnknownTokenType {
     HyperContent = HyperTokenType::HyperContent as isize,
 }
 
@@ -852,11 +864,13 @@ pub struct MutCommonToken {
     // TODO: validations: Validation[]
 }
 
+#[allow(dead_code)]
 pub struct SingleToken {
     token: CommonToken,
     token_type: SingleTokenType,
 }
 
+#[allow(dead_code)]
 pub struct MutSingleToken {
     token: MutCommonToken,
     token_type: SingleTokenType,
@@ -864,6 +878,7 @@ pub struct MutSingleToken {
     ignored_token_type: SingleTokenType,
 }
 
+#[allow(dead_code)]
 pub struct GroupToken {
     token: CommonToken,
     pair: Pair,
@@ -872,6 +887,7 @@ pub struct GroupToken {
     // TODO: Array<Token>
 }
 
+#[allow(dead_code)]
 pub struct MutGroupToken {
     token: MutCommonToken,
     pair: MutPair,
