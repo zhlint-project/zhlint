@@ -101,8 +101,6 @@ fn is_match(c: char, pattern: &str) -> bool {
  * - https://stackoverflow.com/a/21113538
  * - https://www.w3.org/International/clreq/#categories_and_usage_of_punctuation_marks
  */
-
- #[allow(dead_code)]
 pub fn get_char_type(c: char) -> CharType {
     // space
     if is_match(c, "\\s") {
@@ -246,11 +244,11 @@ mod tests {
 
 // Char
 
-const LEFT_BRACKET: [char; 7] = ['(', '[', '{', '（', '〔', '［', '｛'];
-const RIGHT_BRACKET: [char; 7] = [')', ']', '}', '）', '〕', '］', '｝'];
-const LEFT_QUOTATION: [char; 8] = ['“', '‘', '《', '〈', '『', '「', '【', '〖'];
-const RIGHT_QUOTATION: [char; 8] = ['”', '’', '》', '〉', '』', '」', '】', '〗'];
-const NEUTRAL_QUOTATION: [char; 2] = ['"', '\''];
+pub const LEFT_BRACKET: [char; 7] = ['(', '[', '{', '（', '〔', '［', '｛'];
+pub const RIGHT_BRACKET: [char; 7] = [')', ']', '}', '）', '〕', '］', '｝'];
+pub const LEFT_QUOTATION: [char; 8] = ['“', '‘', '《', '〈', '『', '「', '【', '〖'];
+pub const RIGHT_QUOTATION: [char; 8] = ['”', '’', '》', '〉', '』', '」', '】', '〗'];
+pub const NEUTRAL_QUOTATION: [char; 2] = ['"', '\''];
 
 // TODO: hashmap
 // const SHORTHAND_PAIR: HashMap<char, char> = [
@@ -271,6 +269,7 @@ pub fn is_fullwidth_pair(c: char) -> bool {
 
 // Reusable
 
+#[allow(dead_code)]
 pub struct Pair {
     start_index: usize,
     start_value: String,
@@ -278,6 +277,7 @@ pub struct Pair {
     end_value: String,
 }
 
+#[allow(dead_code)]
 pub struct MutPair {
     modified_start_value: String,
     ignored_start_value: String,
@@ -287,9 +287,25 @@ pub struct MutPair {
 
 // Mark
 
+/**
+ * Marks are hyper info, including content and wrappers.
+ * They are categorized by parsers, not by usage.
+ */
 pub enum MarkType {
+    /**
+     * Brackets
+     */
     Brackets,
+    /**
+     * Inline Markdown marks
+     */
     Hyper,
+    /**
+     * - \`xxx\`
+     * - &lt;code&gt;xxx&lt;/code&gt;
+     * - Hexo/VuePress container
+     * - Other html code
+     */
     Raw,
 }
 
@@ -298,99 +314,144 @@ pub enum MarkSideType {
     Right,
 }
 
+#[allow(dead_code)]
 pub struct Mark {
     pair: Pair,
     mark_type: MarkType,
-    meta: Option<String>,
+    meta: Option<String>, // TODO: AST type enum
 }
 
 // TODO: recursive struct
 
+#[allow(dead_code)]
 pub struct RawLeftMark {
     mark: Mark,
-    code: MarkSideType,
+    code: MarkSideType, // TODO: double check
     right_pair: Option<RawRightMark>
 }
 
+#[allow(dead_code)]
 pub struct RawRightMark {
     mark: Mark,
-    code: MarkSideType,
+    code: MarkSideType, // TODO: double check
 }
 
+pub enum RawMark {
+    RawLeftMark(RawLeftMark),
+    RawRightMark(RawRightMark),
+}
+
+#[allow(dead_code)]
 pub struct MutableMark {
     mark: Mark,
     pair: MutPair,
 }
 
+#[allow(dead_code)]
 pub struct MutRawMark {
-    raw_mark: RawLeftMark,
+    raw_mark: RawMark,
     pair: MutPair,
 }
 
 // Token type
 
-pub fn is_letter(c: char) -> bool {
-    get_char_type(c) == CharType::WesternLetter || get_char_type(c) == CharType::CjkChar
+pub enum LetterType {
+    WesternLetter = CharType::WesternLetter as isize,
+    CjkChar = CharType::CjkChar as isize,
 }
 
-pub fn is_pause_or_stop(c: char) -> bool {
-    get_char_type(c) == CharType::HalfwidthPauseOrStop || get_char_type(c) == CharType::FullwidthPauseOrStop
+pub enum PauseOrStopType {
+    HalfwidthPauseOrStop = CharType::HalfwidthPauseOrStop as isize,
+    FullwidthPauseOrStop = CharType::FullwidthPauseOrStop as isize,
 }
 
-pub fn is_quotation(c: char) -> bool {
-    get_char_type(c) == CharType::HalfwidthQuotation || get_char_type(c) == CharType::FullwidthQuotation
+pub enum QuotationType {
+    HalfwidthQuotation = CharType::HalfwidthQuotation as isize,
+    FullwidthQuotation = CharType::FullwidthQuotation as isize,
 }
 
-pub fn is_bracket(c: char) -> bool {
-    get_char_type(c) == CharType::HalfwidthBracket || get_char_type(c) == CharType::FullwidthBracket
+pub enum BracketType {
+    HalfwidthBracket = CharType::HalfwidthBracket as isize,
+    FullwidthBracket = CharType::FullwidthBracket as isize,
 }
 
-pub fn is_other_punctuation(c: char) -> bool {
-    get_char_type(c) == CharType::HalfwidthOtherPunctuation || get_char_type(c) == CharType::FullwidthOtherPunctuation
+pub enum OtherPunctuationType {
+    HalfwidthOtherPunctuation = CharType::HalfwidthOtherPunctuation as isize,
+    FullwidthOtherPunctuation = CharType::FullwidthOtherPunctuation as isize,
 }
 
-pub fn is_single_punctuation(c: char) -> bool {
-    is_pause_or_stop(c) || is_other_punctuation(c)
+pub enum SinglePunctuationType {
+    PauseOrStopType(PauseOrStopType),
+    OtherPunctuationType(OtherPunctuationType),
 }
 
-pub fn is_punctuation(c: char) -> bool {
-    is_single_punctuation(c) || is_bracket(c)
+pub enum PunctuationType {
+    SinglePunctuationType(SinglePunctuationType),
+    BracketType(BracketType),
 }
 
-pub fn is_normal_content_token(c: char) -> bool {
-    is_letter(c) || is_single_punctuation(c)
+pub enum NormalContentTokenType {
+    LetterType(LetterType),
+    SinglePunctuationType(SinglePunctuationType),
 }
 
-pub fn is_halfwidth_punctuation(c: char) -> bool {
-    let char_type = get_char_type(c);
-    char_type == CharType::HalfwidthPauseOrStop ||
-    char_type == CharType::HalfwidthBracket ||
-    char_type == CharType::HalfwidthQuotation ||
-    char_type == CharType::HalfwidthOtherPunctuation
+pub enum HalfwidthPunctuationType {
+    HalfwidthPauseOrStop = CharType::HalfwidthPauseOrStop as isize,
+    HalfwidthBracket = CharType::HalfwidthBracket as isize,
+    HalfwidthQuotation = CharType::HalfwidthQuotation as isize,
+    HalfwidthOtherPunctuation = CharType::HalfwidthOtherPunctuation as isize,
 }
 
-pub fn is_fullwidth_punctuation(c: char) -> bool {
-    let char_type = get_char_type(c);
-    char_type == CharType::FullwidthPauseOrStop ||
-    char_type == CharType::FullwidthBracket ||
-    char_type == CharType::FullwidthQuotation ||
-    char_type == CharType::FullwidthOtherPunctuation
+pub enum FullwidthPunctuationType {
+    FullwidthPauseOrStop = CharType::FullwidthPauseOrStop as isize,
+    FullwidthBracket = CharType::FullwidthBracket as isize,
+    FullwidthQuotation = CharType::FullwidthQuotation as isize,
+    FullwidthOtherPunctuation = CharType::FullwidthOtherPunctuation as isize,
 }
 
-pub fn is_halfwidth_token(c: char) -> bool {
-    get_char_type(c) == CharType::WesternLetter || is_halfwidth_punctuation(c)
+#[repr(isize)]
+pub enum HalfwidthTokenType {
+    WesternLetter = CharType::WesternLetter as isize,
+    HalfwidthPunctuationType(HalfwidthPunctuationType),
 }
 
-pub fn is_fullwidth_token(c: char) -> bool {
-    get_char_type(c) == CharType::CjkChar || is_fullwidth_punctuation(c)
+#[repr(isize)]
+pub enum FullwidthTokenType {
+    CjkChar = CharType::CjkChar as isize,
+    FullwidthPunctuationType(FullwidthPunctuationType),
 }
 
+/**
+ * TODO: paired html tags should be hyper mark
+ */
 pub enum HyperTokenType {
+    /**
+     * Brackets
+     */
     BracketMark,
+    /**
+     * Inline Markdown marks
+     */
     HyperMark,
+
+    /**
+     * - \`xxx\`
+     * - &lt;code&gt;xxx&lt;/code&gt;
+     */
     CodeContent,
+    /**
+     * - Hexo/VuePress container
+     * - Other html code
+     */
     HyperContent,
+
+    /**
+     * Unpaired brackets/quotations
+     */
     Unmatched,
+    /**
+     * For indeterminate tokens
+     */
     Indeterminate,
 }
 
@@ -398,44 +459,378 @@ pub enum GroupTokenType {
     Group,
 }
 
-// TODO: single token = normal content token | hyper token
-// TODO: token = single token | group token
-
-pub fn is_non_token(c: char) -> bool {
-    let char_type = get_char_type(c);
-    char_type == CharType::Space ||
-    char_type == CharType::Unknown ||
-    is_bracket(c) ||
-    is_quotation(c)
+pub enum SingleTokenType {
+    NormalContentTokenType(NormalContentTokenType),
+    HyperTokenType(HyperTokenType),
 }
 
-// TODO: general = token | non token
+pub enum TokenType {
+    SingleTokenType(SingleTokenType),
+    GroupTokenType(GroupTokenType),
+}
 
-// TODO: char type -> token
-pub fn get_halfwidth_token_type(char_type: CharType) -> CharType {
-    match char_type {
-        CharType::CjkChar => CharType::WesternLetter,
-        CharType::FullwidthPauseOrStop => CharType::HalfwidthPauseOrStop,
-        CharType::FullwidthOtherPunctuation => CharType::HalfwidthOtherPunctuation,
-        _ => char_type,
+#[repr(isize)]
+pub enum NonTokenCharType {
+    Space = CharType::Space as isize,
+    Unknown = CharType::Unknown as isize,
+    BracketType(BracketType),
+    QuotationType(QuotationType),
+}
+
+pub enum GeneralType {
+    TokenType(TokenType),
+    NonTokenCharType(NonTokenCharType),
+}
+
+// pub fn is_non_token(c: char) -> bool {
+//     let char_type = get_char_type(c);
+//     char_type == CharType::Space ||
+//     char_type == CharType::Unknown ||
+//     is_bracket(c) ||
+//     is_quotation(c)
+// }
+
+pub fn get_halfwidth_token_type(token_type: TokenType) -> TokenType {
+    match token_type {
+        TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::LetterType(
+                    LetterType::CjkChar
+                )
+            )
+        ) => TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::LetterType(
+                    LetterType::WesternLetter
+                )
+            )
+        ),
+        TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::PauseOrStopType(
+                        PauseOrStopType::FullwidthPauseOrStop
+                    )
+                )
+            )
+        ) => TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::PauseOrStopType(
+                        PauseOrStopType::HalfwidthPauseOrStop
+                    )
+                )
+            )
+        ),
+        TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::OtherPunctuationType(
+                        OtherPunctuationType::FullwidthOtherPunctuation
+                    )
+                )
+            )
+        ) => TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::OtherPunctuationType(
+                        OtherPunctuationType::HalfwidthOtherPunctuation
+                    )
+                )
+            )
+        ),
+        _ => token_type,
     }
 }
-pub fn get_fullwidth_token_type(char_type: CharType) -> CharType {
-    match char_type {
-        CharType::WesternLetter => CharType::CjkChar,
-        CharType::HalfwidthPauseOrStop => CharType::FullwidthPauseOrStop,
-        CharType::HalfwidthOtherPunctuation => CharType::FullwidthOtherPunctuation,
-        _ => char_type,
+
+pub fn get_fullwidth_token_type(token_type: TokenType) -> TokenType {
+    match token_type {
+        TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::LetterType(
+                    LetterType::WesternLetter
+                )
+            )
+        ) => TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::LetterType(
+                    LetterType::CjkChar
+                )
+            )
+        ),
+        TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::PauseOrStopType(
+                        PauseOrStopType::HalfwidthPauseOrStop
+                    )
+                )
+            )
+        ) => TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::PauseOrStopType(
+                        PauseOrStopType::FullwidthPauseOrStop
+                    )
+                )
+            )
+        ),
+        TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::OtherPunctuationType(
+                        OtherPunctuationType::HalfwidthOtherPunctuation
+                    )
+                )
+            )
+        ) => TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::OtherPunctuationType(
+                        OtherPunctuationType::FullwidthOtherPunctuation
+                    )
+                )
+            )
+        ),
+        _ => token_type,
     }
 }
 
-// TODO: non code visible token
-// TODO: visible token
-// TODO: invisible token
-// TODO: visibility unknown token
+#[repr(isize)]
+enum NonCodeVisibleTokenType {
+    BracketMark = HyperTokenType::BracketMark as isize,
+    Group = GroupTokenType::Group as isize,
+    NormalContentTokenType(NormalContentTokenType),
+}
+
+#[repr(isize)]
+enum VisibleTokenType {
+    CodeContent = HyperTokenType::CodeContent as isize,
+    NonCodeVisibleTokenType(NonCodeVisibleTokenType),
+}
+
+enum InvisibleTokenType {
+    HyperMark = HyperTokenType::HyperMark as isize,
+}
+
+enum VisibilityUnknownTokenType {
+    HyperContent = HyperTokenType::HyperContent as isize,
+}
+
+pub fn is_letter_type(t: GeneralType) -> bool {
+    match t {
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::LetterType(_)
+            )
+        )) => true,
+        _ => false,
+    }
+}
+
+pub fn is_pause_or_stop_type(t: GeneralType) -> bool {
+    match t {
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::PauseOrStopType(_)
+                )
+            )
+        )) => true,
+        _ => false,
+    }
+}
+
+pub fn is_quotation_type(t: GeneralType) -> bool {
+    match t {
+        GeneralType::NonTokenCharType(NonTokenCharType::QuotationType(_)) => true,
+        _ => false,
+    }
+}
+
+pub fn is_bracket_type(t: GeneralType) -> bool {
+    match t {
+        GeneralType::NonTokenCharType(NonTokenCharType::BracketType(_)) => true,
+        _ => false,
+    }
+}
+
+pub fn is_other_punctuation_type(t: GeneralType) -> bool {
+    match t {
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::OtherPunctuationType(_)
+                )
+            )
+        )) => true,
+        _ => false,
+    }
+}
+
+pub fn is_single_punctuation_type(t: GeneralType) -> bool {
+    match t {
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(_)
+            )
+        )) => true,
+        _ => false,
+    }
+}
+
+pub fn is_punctuation_type(t: GeneralType) -> bool {
+    is_pause_or_stop_type(t) || is_other_punctuation_type(t) || is_bracket_type(t) || is_quotation_type(t)
+}
+
+pub fn is_halfwidth_punctuation_type(t: GeneralType) -> bool {
+    match t {
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::PauseOrStopType(
+                        PauseOrStopType::HalfwidthPauseOrStop
+                    )
+                )
+            )
+        )) => true,
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::OtherPunctuationType(
+                        OtherPunctuationType::HalfwidthOtherPunctuation
+                    )
+                )
+            )
+        )) => true,
+        GeneralType::NonTokenCharType(NonTokenCharType::BracketType(
+            BracketType::HalfwidthBracket
+        )) => true,
+        GeneralType::NonTokenCharType(NonTokenCharType::QuotationType(
+            QuotationType::HalfwidthQuotation
+        )) => true,
+        _ => false,
+    }
+}
+
+pub fn is_fullwidth_punctuation_type(t: GeneralType) -> bool {
+    match t {
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::PauseOrStopType(
+                        PauseOrStopType::FullwidthPauseOrStop
+                    )
+                )
+            )
+        )) => true,
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::SinglePunctuationType(
+                    SinglePunctuationType::OtherPunctuationType(
+                        OtherPunctuationType::FullwidthOtherPunctuation
+                    )
+                )
+            )
+        )) => true,
+        GeneralType::NonTokenCharType(NonTokenCharType::BracketType(
+            BracketType::FullwidthBracket
+        )) => true,
+        GeneralType::NonTokenCharType(NonTokenCharType::QuotationType(
+            QuotationType::FullwidthQuotation
+        )) => true,
+        _ => false,
+    }
+}
+
+pub fn is_halfwidth_type(t: GeneralType) -> bool {
+    if is_halfwidth_punctuation_type(t) {
+        return true;
+    }
+    match t {
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::LetterType(
+                    LetterType::WesternLetter
+                )
+            )
+        )) => true,
+        _ => false,
+    }
+}
+
+pub fn is_fullwidth_type(t: GeneralType) -> bool {
+    if is_fullwidth_punctuation_type(t) {
+        return true;
+    }
+    match t {
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::NormalContentTokenType(
+                NormalContentTokenType::LetterType(
+                    LetterType::CjkChar
+                )
+            )
+        )) => true,
+        _ => false,
+    }
+}
+
+pub fn is_non_code_visible_type(t: GeneralType) -> bool {
+    if is_letter_type(t) || is_single_punctuation_type(t) {
+        return true;
+    }
+    match t {
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::HyperTokenType(
+                HyperTokenType::BracketMark
+            )
+        )) => true,
+        GeneralType::TokenType(TokenType::GroupTokenType(
+            GroupTokenType::Group
+        )) => true,
+        _ => false,
+    }
+}
+
+pub fn is_visible_type(t: GeneralType) -> bool {
+    if is_non_code_visible_type(t) {
+        return true;
+    }
+    match t {
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::HyperTokenType(
+                HyperTokenType::CodeContent
+            )
+        )) => true,
+        _ => false,
+    }
+}
+
+pub fn is_invisible_type(t: GeneralType) -> bool {
+    match t {
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::HyperTokenType(
+                HyperTokenType::HyperMark
+            )
+        )) => true,
+        _ => false,
+    }
+}
+
+pub fn is_visibility_unknown_type(t: GeneralType) -> bool {
+    match t {
+        GeneralType::TokenType(TokenType::SingleTokenType(
+            SingleTokenType::HyperTokenType(
+                HyperTokenType::HyperContent
+            )
+        )) => true,
+        _ => false,
+    }
+}
 
 // Token
 
+#[allow(dead_code)]
 pub struct CommonToken {
     index: usize,
     length: usize,
@@ -447,6 +842,7 @@ pub struct CommonToken {
     mark_side: Option<MarkSideType>,
 }
 
+#[allow(dead_code)]
 pub struct MutCommonToken {
     token: CommonToken,
     modified_value: String,
@@ -456,5 +852,42 @@ pub struct MutCommonToken {
     // TODO: validations: Validation[]
 }
 
-// TODO: SingleToken, MutSingleToken, GroupToken, MutGroupToken
-// TODO: Token, MutToken
+pub struct SingleToken {
+    token: CommonToken,
+    token_type: SingleTokenType,
+}
+
+pub struct MutSingleToken {
+    token: MutCommonToken,
+    token_type: SingleTokenType,
+    modified_token_type: SingleTokenType,
+    ignored_token_type: SingleTokenType,
+}
+
+pub struct GroupToken {
+    token: CommonToken,
+    pair: Pair,
+    token_type: GroupTokenType,
+    inner_space_before: String,
+    // TODO: Array<Token>
+}
+
+pub struct MutGroupToken {
+    token: MutCommonToken,
+    pair: MutPair,
+    token_type: GroupTokenType,
+    modified_token_type: GroupTokenType,
+    ignored_token_type: GroupTokenType,
+    modified_inner_space_before: String,
+    ignored_inner_space_before: String,
+}
+
+pub enum Token {
+    SingleToken(SingleToken),
+    GroupToken(GroupToken),
+}
+
+pub enum MutToken {
+    MutSingleToken(MutSingleToken),
+    MutGroupToken(MutGroupToken),
+}
