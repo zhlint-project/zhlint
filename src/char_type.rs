@@ -1,4 +1,6 @@
 use regex::Regex;
+// use core::iter::Map;
+// use std::collections::HashMap;
 
 /**
  * NOTE:
@@ -17,16 +19,28 @@ use regex::Regex;
  #[derive(Debug, PartialEq)]
 pub enum CharType {
     Space,
+
     WesternLetter,
     CjkChar,
+
+    // periods, commas, secondary commas, colons, semicolons, exclamation marks, question marks, etc.
     HalfwidthPauseOrStop,
     FullwidthPauseOrStop,
+
+    // single, double, corner, white corner
+    // + book title marks
+    // left x right
     HalfwidthQuotation,
     FullwidthQuotation,
+
+    // parentheses
     HalfwidthBracket,
     FullwidthBracket,
+
+    // dashes, ellipsis, connector marks, interpuncts, proper noun marks, solidi, etc.
     HalfwidthOtherPunctuation,
     FullwidthOtherPunctuation,
+
     Unknown,
 }
 
@@ -229,3 +243,218 @@ mod tests {
         assert_eq!(get_char_type('’'), CharType::FullwidthQuotation);
     }
 }
+
+// Char
+
+const LEFT_BRACKET: [char; 7] = ['(', '[', '{', '（', '〔', '［', '｛'];
+const RIGHT_BRACKET: [char; 7] = [')', ']', '}', '）', '〕', '］', '｝'];
+const LEFT_QUOTATION: [char; 8] = ['“', '‘', '《', '〈', '『', '「', '【', '〖'];
+const RIGHT_QUOTATION: [char; 8] = ['”', '’', '》', '〉', '』', '」', '】', '〗'];
+const NEUTRAL_QUOTATION: [char; 2] = ['"', '\''];
+
+// TODO: hashmap
+// const SHORTHAND_PAIR: HashMap<char, char> = [
+//     ('’', '‘'),
+//     ('\'', '\''),
+// ].iter().cloned().collect();
+
+const FULLWIDTH_PAIRS: [char; 24] = [
+    '“', '”', '‘', '’',
+    '（', '）', '〔', '〕', '［', '］', '｛', '｝',
+    '《', '》', '〈', '〉',
+    '『', '』', '「', '」', '【', '】', '〖', '〗',
+];
+
+pub fn is_fullwidth_pair(c: char) -> bool {
+    FULLWIDTH_PAIRS.contains(&c)
+}
+
+// Reusable
+
+pub struct Pair {
+    start_index: usize,
+    start_value: String,
+    end_index: usize,
+    end_value: String,
+}
+
+pub struct MutPair {
+    modified_start_value: String,
+    ignored_start_value: String,
+    modified_end_value: String,
+    ignored_end_value: String,
+}
+
+// Mark
+
+pub enum MarkType {
+    Brackets,
+    Hyper,
+    Raw,
+}
+
+pub enum MarkSideType {
+    Left,
+    Right,
+}
+
+pub struct Mark {
+    pair: Pair,
+    mark_type: MarkType,
+    meta: Option<String>,
+}
+
+// TODO: recursive struct
+
+pub struct RawLeftMark {
+    mark: Mark,
+    code: MarkSideType,
+    right_pair: Option<RawRightMark>
+}
+
+pub struct RawRightMark {
+    mark: Mark,
+    code: MarkSideType,
+}
+
+pub struct MutableMark {
+    mark: Mark,
+    pair: MutPair,
+}
+
+pub struct MutRawMark {
+    raw_mark: RawLeftMark,
+    pair: MutPair,
+}
+
+// Token type
+
+pub fn is_letter(c: char) -> bool {
+    get_char_type(c) == CharType::WesternLetter || get_char_type(c) == CharType::CjkChar
+}
+
+pub fn is_pause_or_stop(c: char) -> bool {
+    get_char_type(c) == CharType::HalfwidthPauseOrStop || get_char_type(c) == CharType::FullwidthPauseOrStop
+}
+
+pub fn is_quotation(c: char) -> bool {
+    get_char_type(c) == CharType::HalfwidthQuotation || get_char_type(c) == CharType::FullwidthQuotation
+}
+
+pub fn is_bracket(c: char) -> bool {
+    get_char_type(c) == CharType::HalfwidthBracket || get_char_type(c) == CharType::FullwidthBracket
+}
+
+pub fn is_other_punctuation(c: char) -> bool {
+    get_char_type(c) == CharType::HalfwidthOtherPunctuation || get_char_type(c) == CharType::FullwidthOtherPunctuation
+}
+
+pub fn is_single_punctuation(c: char) -> bool {
+    is_pause_or_stop(c) || is_other_punctuation(c)
+}
+
+pub fn is_punctuation(c: char) -> bool {
+    is_single_punctuation(c) || is_bracket(c)
+}
+
+pub fn is_normal_content_token(c: char) -> bool {
+    is_letter(c) || is_single_punctuation(c)
+}
+
+pub fn is_halfwidth_punctuation(c: char) -> bool {
+    let char_type = get_char_type(c);
+    char_type == CharType::HalfwidthPauseOrStop ||
+    char_type == CharType::HalfwidthBracket ||
+    char_type == CharType::HalfwidthQuotation ||
+    char_type == CharType::HalfwidthOtherPunctuation
+}
+
+pub fn is_fullwidth_punctuation(c: char) -> bool {
+    let char_type = get_char_type(c);
+    char_type == CharType::FullwidthPauseOrStop ||
+    char_type == CharType::FullwidthBracket ||
+    char_type == CharType::FullwidthQuotation ||
+    char_type == CharType::FullwidthOtherPunctuation
+}
+
+pub fn is_halfwidth_token(c: char) -> bool {
+    get_char_type(c) == CharType::WesternLetter || is_halfwidth_punctuation(c)
+}
+
+pub fn is_fullwidth_token(c: char) -> bool {
+    get_char_type(c) == CharType::CjkChar || is_fullwidth_punctuation(c)
+}
+
+pub enum HyperTokenType {
+    BracketMark,
+    HyperMark,
+    CodeContent,
+    HyperContent,
+    Unmatched,
+    Indeterminate,
+}
+
+pub enum GroupTokenType {
+    Group,
+}
+
+// TODO: single token = normal content token | hyper token
+// TODO: token = single token | group token
+
+pub fn is_non_token(c: char) -> bool {
+    let char_type = get_char_type(c);
+    char_type == CharType::Space ||
+    char_type == CharType::Unknown ||
+    is_bracket(c) ||
+    is_quotation(c)
+}
+
+// TODO: general = token | non token
+
+// TODO: char type -> token
+pub fn get_halfwidth_token_type(char_type: CharType) -> CharType {
+    match char_type {
+        CharType::CjkChar => CharType::WesternLetter,
+        CharType::FullwidthPauseOrStop => CharType::HalfwidthPauseOrStop,
+        CharType::FullwidthOtherPunctuation => CharType::HalfwidthOtherPunctuation,
+        _ => char_type,
+    }
+}
+pub fn get_fullwidth_token_type(char_type: CharType) -> CharType {
+    match char_type {
+        CharType::WesternLetter => CharType::CjkChar,
+        CharType::HalfwidthPauseOrStop => CharType::FullwidthPauseOrStop,
+        CharType::HalfwidthOtherPunctuation => CharType::FullwidthOtherPunctuation,
+        _ => char_type,
+    }
+}
+
+// TODO: non code visible token
+// TODO: visible token
+// TODO: invisible token
+// TODO: visibility unknown token
+
+// Token
+
+pub struct CommonToken {
+    index: usize,
+    length: usize,
+
+    value: String,
+    space_after: String,
+
+    mark: Option<Mark>,
+    mark_side: Option<MarkSideType>,
+}
+
+pub struct MutCommonToken {
+    token: CommonToken,
+    modified_value: String,
+    ignored_value: String,
+    modified_space_after: String,
+    ignored_space_after: String,
+    // TODO: validations: Validation[]
+}
+
+// TODO: SingleToken, MutSingleToken, GroupToken, MutGroupToken
+// TODO: Token, MutToken
