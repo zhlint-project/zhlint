@@ -1,18 +1,22 @@
 use std::{rc::Rc, usize::MAX};
 
 use crate::{
-  char_type::get_char_type,
+  char_type::{
+    get_char_type,
+    CharType
+  },
   token_type::{
     CommonToken,
     GroupToken,
-    GroupTokenType,
     Mark,
     MarkType,
     MutGroupToken,
     MutableMark,
+    NewTokenType,
     Pair,
     Token
-  }
+  },
+  general_type::TypeTrait
 };
 
 pub struct ParseStatus {
@@ -27,21 +31,21 @@ pub struct ParseStatus {
   pub mark_stack: Vec<Rc<Mark>>,
   pub group_stack: Vec<Rc<GroupToken>>,
 
-  pub errors: Vec<String>, // TODO: Validation
+  pub errors: Vec<Rc<String>>, // TODO: Validation
 }
 
 pub struct ParseResult {
-  pub tokens: GroupToken,
-  pub groups: Vec<GroupToken>,
-  pub marks: Vec<Mark>,
-  pub errors: Vec<String>, // TODO: Validation
+  pub tokens: Rc<GroupToken>,
+  pub groups: Vec<Rc<GroupToken>>,
+  pub marks: Vec<Rc<Mark>>,
+  pub errors: Vec<Rc<String>>, // TODO: Validation
 }
 
 pub struct MutableParseResult {
   pub tokens: MutGroupToken,
   pub groups: Vec<MutGroupToken>,
   pub marks: Vec<MutableMark>,
-  pub errors: Vec<String>, // TODO: Validation
+  pub errors: Vec<Rc<String>>, // TODO: Validation
 }
 
 fn create_status(str: &str) -> ParseStatus {
@@ -60,7 +64,7 @@ fn create_status(str: &str) -> ParseStatus {
       end_index: str.len(),
       end_value: String::from(""),
     },
-    token_type: GroupTokenType::Group,
+    token_type: NewTokenType::Group,
     inner_space_before: String::from(""),
     children: vec![],
   };
@@ -117,8 +121,11 @@ fn create_mark(
 #[allow(dead_code)]
 fn add_bracket_token() {}
 
-#[allow(dead_code)]
-fn finalize_last_token() {}
+#[allow(dead_code, unused_variables)]
+fn finalize_last_token(
+  status: &ParseStatus,
+  index: usize
+) {}
 
 #[allow(dead_code)]
 fn finalize_current_token() {}
@@ -168,29 +175,47 @@ fn get_space_length() {}
 #[allow(dead_code)]
 fn get_prev_token() {}
 
-#[allow(dead_code)]
-fn is_shorthand() {}
+#[allow(dead_code, unused_variables)]
+fn is_shorthand(
+  str: &str,
+  status: &ParseStatus,
+  i: usize,
+  c: char
+) -> bool {
+  return false;
+}
 
 #[allow(dead_code)]
 fn get_hyper_content_type() {}
 
 pub fn parse(str: &str) {
   let status = create_status(str);
-  // for each char
-  for c in str.chars() {
-    // get_char_type
+  for (i, c) in str.chars().enumerate() {
     let char_type = get_char_type(c);
     // if char_type is hyper!
-    // if char_type is space
-    // if char_type is shorthand
-    // if char_type is punctuation
-    // if char_type is letter
-    // if char_type is empty
-    // else
+    if char_type == CharType::Space {
+      //
+    } else if is_shorthand(str, &status, i, c) {
+      //
+    } else if char_type.is_punctuation() {
+      //
+    } else if char_type.is_letter() {
+      //
+    } else {
+      //
+    }
   }
-  // finalize last token
+
+  finalize_last_token(&status, str.len());
+
   // handle errors!
-  // return
+
+  // return ParseResult {
+  //     tokens: Rc::new(),
+  //     groups: Vec::new(),
+  //     marks: Vec::new(),
+  //     errors: Vec::new(),
+  // };
 }
 
 pub fn to_mutalbe_parse_result() {
