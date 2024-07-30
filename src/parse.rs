@@ -12,7 +12,7 @@ use crate::{
     MarkType,
     MutGroupToken,
     MutableMark,
-    NewTokenType,
+    TokenType,
     Pair,
     Token
   },
@@ -64,7 +64,7 @@ fn create_status(str: &str) -> ParseStatus {
       end_index: str.len(),
       end_value: String::from(""),
     },
-    token_type: NewTokenType::Group,
+    token_type: TokenType::Group,
     inner_space_before: String::from(""),
     children: vec![],
   };

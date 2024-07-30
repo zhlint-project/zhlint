@@ -76,12 +76,11 @@ pub enum RawMark {
     RawRightMark(RawRightMark),
 }
 
+#[allow(dead_code)]
 pub struct MutRawMark {
     raw_mark: RawMark,
     pair: MutPair,
 }
-
-//// Token types
 
 /// Hyper token types
 
@@ -119,11 +118,23 @@ pub enum HyperTokenType {
     Indeterminate = 0x55,
 }
 
-/// Top-level token types
+/// Token Types
 
-/// Token type utils for width
+pub enum TokenType {
+    WesternLetter,
+    CjkChar,
+    HalfwidthPauseOrStop,
+    FullwidthPauseOrStop,
+    HalfwidthOtherPunctuation,
+    FullwidthOtherPunctuation,
+    Group,
+    BracketMark,
+    HyperMark,
+    CodeContent,
+    HyperContent,
+}
 
-//// Tokens
+/// Tokens
 
 pub struct CommonToken {
     pub index: usize,
@@ -147,20 +158,20 @@ pub struct MutCommonToken {
 
 pub struct SingleToken {
     pub token: CommonToken,
-    pub token_type: NewTokenType,
+    pub token_type: TokenType,
 }
 
 pub struct MutSingleToken {
     pub token: MutCommonToken,
-    pub token_type: NewTokenType,
-    pub modified_token_type: NewTokenType,
-    pub ignored_token_type: NewTokenType,
+    pub token_type: TokenType,
+    pub modified_token_type: TokenType,
+    pub ignored_token_type: TokenType,
 }
 
 pub struct GroupToken {
     pub token: CommonToken,
     pub pair: Pair,
-    pub token_type: NewTokenType,
+    pub token_type: TokenType,
     pub inner_space_before: String,
     pub children: Vec<Token>,
 }
@@ -168,9 +179,9 @@ pub struct GroupToken {
 pub struct MutGroupToken {
     pub token: MutCommonToken,
     pub pair: MutPair,
-    pub token_type: NewTokenType,
-    pub modified_token_type: NewTokenType,
-    pub ignored_token_type: NewTokenType,
+    pub token_type: TokenType,
+    pub modified_token_type: TokenType,
+    pub ignored_token_type: TokenType,
     pub modified_inner_space_before: String,
     pub ignored_inner_space_before: String,
 }
@@ -183,20 +194,4 @@ pub enum Token {
 pub enum MutToken {
     MutSingleToken(MutSingleToken),
     MutGroupToken(MutGroupToken),
-}
-
-//// New Token Types
-
-pub enum NewTokenType {
-    WesternLetter,
-    CjkChar,
-    HalfwidthPauseOrStop,
-    FullwidthPauseOrStop,
-    HalfwidthOtherPunctuation,
-    FullwidthOtherPunctuation,
-    Group,
-    BracketMark,
-    HyperMark,
-    CodeContent,
-    HyperContent,
 }

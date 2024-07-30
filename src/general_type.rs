@@ -1,13 +1,13 @@
-use crate::{char_type::CharType, token_type::NewTokenType};
+use crate::{char_type::CharType, token_type::TokenType};
 
-pub fn char_type_to_token_type(char_type: CharType) -> Option<NewTokenType> {
+pub fn char_type_to_token_type(char_type: CharType) -> Option<TokenType> {
     match char_type {
-        CharType::WesternLetter => Some(NewTokenType::WesternLetter),
-        CharType::CjkChar => Some(NewTokenType::CjkChar),
-        CharType::HalfwidthPauseOrStop => Some(NewTokenType::HalfwidthPauseOrStop),
-        CharType::FullwidthPauseOrStop => Some(NewTokenType::FullwidthPauseOrStop),
-        CharType::HalfwidthOtherPunctuation => Some(NewTokenType::HalfwidthOtherPunctuation),
-        CharType::FullwidthOtherPunctuation => Some(NewTokenType::FullwidthOtherPunctuation),
+        CharType::WesternLetter => Some(TokenType::WesternLetter),
+        CharType::CjkChar => Some(TokenType::CjkChar),
+        CharType::HalfwidthPauseOrStop => Some(TokenType::HalfwidthPauseOrStop),
+        CharType::FullwidthPauseOrStop => Some(TokenType::FullwidthPauseOrStop),
+        CharType::HalfwidthOtherPunctuation => Some(TokenType::HalfwidthOtherPunctuation),
+        CharType::FullwidthOtherPunctuation => Some(TokenType::FullwidthOtherPunctuation),
         _ => None,
     }
 }
@@ -170,19 +170,19 @@ impl TypeTrait for CharType {
 
 }
 
-impl TypeTrait for NewTokenType {
+impl TypeTrait for TokenType {
     fn is_letter(&self) -> bool {
         match self {
-            NewTokenType::WesternLetter => true,
-            NewTokenType::CjkChar => true,
+            TokenType::WesternLetter => true,
+            TokenType::CjkChar => true,
             _ => false,
         }
     }
 
     fn is_pause_or_stop(&self) -> bool {
         match self {
-            NewTokenType::HalfwidthPauseOrStop => true,
-            NewTokenType::FullwidthPauseOrStop => true,
+            TokenType::HalfwidthPauseOrStop => true,
+            TokenType::FullwidthPauseOrStop => true,
             _ => false,
         }
     }
@@ -197,62 +197,62 @@ impl TypeTrait for NewTokenType {
 
     fn is_other_punctuation(&self) -> bool {
         match self {
-            NewTokenType::HalfwidthOtherPunctuation => true,
-            NewTokenType::FullwidthOtherPunctuation => true,
+            TokenType::HalfwidthOtherPunctuation => true,
+            TokenType::FullwidthOtherPunctuation => true,
             _ => false,
         }
     }
 
     fn is_single_punctuation(&self) -> bool {
         match self {
-            NewTokenType::HalfwidthPauseOrStop => true,
-            NewTokenType::FullwidthPauseOrStop => true,
-            NewTokenType::HalfwidthOtherPunctuation => true,
-            NewTokenType::FullwidthOtherPunctuation => true,
+            TokenType::HalfwidthPauseOrStop => true,
+            TokenType::FullwidthPauseOrStop => true,
+            TokenType::HalfwidthOtherPunctuation => true,
+            TokenType::FullwidthOtherPunctuation => true,
             _ => false,
         }
     }
 
     fn is_punctuation(&self) -> bool {
         match self {
-            NewTokenType::HalfwidthPauseOrStop => true,
-            NewTokenType::FullwidthPauseOrStop => true,
-            NewTokenType::HalfwidthOtherPunctuation => true,
-            NewTokenType::FullwidthOtherPunctuation => true,
+            TokenType::HalfwidthPauseOrStop => true,
+            TokenType::FullwidthPauseOrStop => true,
+            TokenType::HalfwidthOtherPunctuation => true,
+            TokenType::FullwidthOtherPunctuation => true,
             _ => false,
         }
     }
 
     fn is_halfwidth_punctuation(&self) -> bool {
         match self {
-            NewTokenType::HalfwidthPauseOrStop => true,
-            NewTokenType::HalfwidthOtherPunctuation => true,
+            TokenType::HalfwidthPauseOrStop => true,
+            TokenType::HalfwidthOtherPunctuation => true,
             _ => false,
         }
     }
 
     fn is_fullwidth_punctuation(&self) -> bool {
         match self {
-            NewTokenType::FullwidthPauseOrStop => true,
-            NewTokenType::FullwidthOtherPunctuation => true,
+            TokenType::FullwidthPauseOrStop => true,
+            TokenType::FullwidthOtherPunctuation => true,
             _ => false,
         }
     }
 
     fn is_halfwidth(&self) -> bool {
         match self {
-            NewTokenType::WesternLetter => true,
-            NewTokenType::HalfwidthPauseOrStop => true,
-            NewTokenType::HalfwidthOtherPunctuation => true,
+            TokenType::WesternLetter => true,
+            TokenType::HalfwidthPauseOrStop => true,
+            TokenType::HalfwidthOtherPunctuation => true,
             _ => false,
         }
     }
 
     fn is_fullwidth(&self) -> bool {
         match self {
-            NewTokenType::CjkChar => true,
-            NewTokenType::FullwidthPauseOrStop => true,
-            NewTokenType::FullwidthOtherPunctuation => true,
+            TokenType::CjkChar => true,
+            TokenType::FullwidthPauseOrStop => true,
+            TokenType::FullwidthOtherPunctuation => true,
             _ => false,
         }
     }
@@ -269,31 +269,31 @@ impl TypeTrait for NewTokenType {
             return true;
         }
         match self {
-            NewTokenType::BracketMark => true,
-            NewTokenType::HyperMark => true,
-            NewTokenType::CodeContent => true,
-            NewTokenType::HyperContent => true,
+            TokenType::BracketMark => true,
+            TokenType::HyperMark => true,
+            TokenType::CodeContent => true,
+            TokenType::HyperContent => true,
             _ => false,
         }
     }
 
     fn is_group(&self) -> bool {
         match self {
-            NewTokenType::Group => true,
+            TokenType::Group => true,
             _ => false,
         }
     }
 
     fn is_non_code_visible(&self) -> bool {
         match self {
-            NewTokenType::WesternLetter => true,
-            NewTokenType::CjkChar => true,
-            NewTokenType::HalfwidthPauseOrStop => true,
-            NewTokenType::FullwidthPauseOrStop => true,
-            NewTokenType::HalfwidthOtherPunctuation => true,
-            NewTokenType::FullwidthOtherPunctuation => true,
-            NewTokenType::BracketMark => true,
-            NewTokenType::Group => true,
+            TokenType::WesternLetter => true,
+            TokenType::CjkChar => true,
+            TokenType::HalfwidthPauseOrStop => true,
+            TokenType::FullwidthPauseOrStop => true,
+            TokenType::HalfwidthOtherPunctuation => true,
+            TokenType::FullwidthOtherPunctuation => true,
+            TokenType::BracketMark => true,
+            TokenType::Group => true,
             _ => false,
         }
     }
@@ -303,21 +303,21 @@ impl TypeTrait for NewTokenType {
             return true;
         }
         match self {
-            NewTokenType::CodeContent => true,
+            TokenType::CodeContent => true,
             _ => false,
         }
     }
 
     fn is_invisible(&self) -> bool {
         match self {
-            NewTokenType::HyperMark => true,
+            TokenType::HyperMark => true,
             _ => false,
         }
     }
 
     fn is_visibility_unknown(&self) -> bool {
         match self {
-            NewTokenType::HyperContent => true,
+            TokenType::HyperContent => true,
             _ => false,
         }
     }
