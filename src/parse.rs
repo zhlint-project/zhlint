@@ -16,7 +16,7 @@ use crate::{
     Pair,
     Token
   },
-  general_type::TypeTrait
+  type_trait::TypeTrait
 };
 
 pub struct ParseStatus {
