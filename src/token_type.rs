@@ -6,18 +6,18 @@ use crate::char_type::CharType;
 
 #[allow(dead_code)]
 pub struct Pair {
-    start_index: usize,
-    start_value: String,
-    end_index: usize,
-    end_value: String,
+    pub start_index: usize,
+    pub start_value: String,
+    pub end_index: usize,
+    pub end_value: String,
 }
 
 #[allow(dead_code)]
 pub struct MutPair {
-    modified_start_value: String,
-    ignored_start_value: String,
-    modified_end_value: String,
-    ignored_end_value: String,
+    pub modified_start_value: String,
+    pub ignored_start_value: String,
+    pub modified_end_value: String,
+    pub ignored_end_value: String,
 }
 
 /// Marks
@@ -51,32 +51,32 @@ pub enum MarkSideType {
 
 #[allow(dead_code)]
 pub struct Mark {
-    pair: Pair,
-    mark_type: MarkType,
-    meta: Option<String>, // TODO: AST type enum
+    pub pair: Pair,
+    pub mark_type: MarkType,
+    pub meta: Option<String>, // TODO: AST type enum
 }
 
 // TODO: recursive struct
 
 #[allow(dead_code)]
 pub struct MutableMark {
-    mark: Mark,
-    pair: MutPair,
+    pub mark: Mark,
+    pub pair: MutPair,
 }
 
 /// Raw marks
 
 #[allow(dead_code)]
 pub struct RawLeftMark {
-    mark: Mark,
-    code: MarkSideType, // TODO: double check
-    right_pair: Option<RawRightMark>
+    pub mark: Mark,
+    pub code: MarkSideType, // TODO: double check
+    pub right_pair: Option<RawRightMark>
 }
 
 #[allow(dead_code)]
 pub struct RawRightMark {
-    mark: Mark,
-    code: MarkSideType, // TODO: double check
+    pub mark: Mark,
+    pub code: MarkSideType, // TODO: double check
 }
 
 pub enum RawMark {
@@ -360,58 +360,58 @@ pub fn get_fullwidth_token_type(token_type: TokenType) -> TokenType {
 
 #[allow(dead_code)]
 pub struct CommonToken {
-    index: usize,
-    length: usize,
+    pub index: usize,
+    pub length: usize,
 
-    value: String,
-    space_after: String,
+    pub value: String,
+    pub space_after: String,
 
-    mark: Option<Mark>,
-    mark_side: Option<MarkSideType>,
+    pub mark: Option<Mark>,
+    pub mark_side: Option<MarkSideType>,
 }
 
 #[allow(dead_code)]
 pub struct MutCommonToken {
-    token: CommonToken,
-    modified_value: String,
-    ignored_value: String,
-    modified_space_after: String,
-    ignored_space_after: String,
+    pub token: CommonToken,
+    pub modified_value: String,
+    pub ignored_value: String,
+    pub modified_space_after: String,
+    pub ignored_space_after: String,
     // TODO: validations: Validation[]
 }
 
 #[allow(dead_code)]
 pub struct SingleToken {
-    token: CommonToken,
-    token_type: SingleTokenType,
+    pub token: CommonToken,
+    pub token_type: SingleTokenType,
 }
 
 #[allow(dead_code)]
 pub struct MutSingleToken {
-    token: MutCommonToken,
-    token_type: SingleTokenType,
-    modified_token_type: SingleTokenType,
-    ignored_token_type: SingleTokenType,
+    pub token: MutCommonToken,
+    pub token_type: SingleTokenType,
+    pub modified_token_type: SingleTokenType,
+    pub ignored_token_type: SingleTokenType,
 }
 
 #[allow(dead_code)]
 pub struct GroupToken {
-    token: CommonToken,
-    pair: Pair,
-    token_type: GroupTokenType,
-    inner_space_before: String,
-    // TODO: Array<Token>
+    pub token: CommonToken,
+    pub pair: Pair,
+    pub token_type: GroupTokenType,
+    pub inner_space_before: String,
+    pub children: Vec<Token>,
 }
 
 #[allow(dead_code)]
 pub struct MutGroupToken {
-    token: MutCommonToken,
-    pair: MutPair,
-    token_type: GroupTokenType,
-    modified_token_type: GroupTokenType,
-    ignored_token_type: GroupTokenType,
-    modified_inner_space_before: String,
-    ignored_inner_space_before: String,
+    pub token: MutCommonToken,
+    pub pair: MutPair,
+    pub token_type: GroupTokenType,
+    pub modified_token_type: GroupTokenType,
+    pub ignored_token_type: GroupTokenType,
+    pub modified_inner_space_before: String,
+    pub ignored_inner_space_before: String,
 }
 
 pub enum Token {
