@@ -1,4 +1,4 @@
-use std::{rc::Rc, usize::MAX};
+use std::{cell::RefCell, rc::Rc, usize::MAX};
 
 use crate::{
   char_type::{
@@ -20,32 +20,32 @@ use crate::{
 };
 
 pub struct ParseStatus {
-  pub last_token: Option<Rc<Token>>,
-  pub last_group: Option<Rc<GroupToken>>,
-  pub last_mark: Option<Rc<Mark>>,
+  pub last_token: Option<Rc<RefCell<Token>>>,
+  pub last_group: Option<Rc<RefCell<GroupToken>>>,
+  pub last_mark: Option<Rc<RefCell<Mark>>>,
 
-  pub tokens: Rc<GroupToken>,
-  pub marks: Vec<Rc<Mark>>,
-  pub groups: Vec<Rc<GroupToken>>,
+  pub tokens: Rc<RefCell<GroupToken>>,
+  pub marks: Vec<Rc<RefCell<Mark>>>,
+  pub groups: Vec<Rc<RefCell<GroupToken>>>,
 
-  pub mark_stack: Vec<Rc<Mark>>,
-  pub group_stack: Vec<Rc<GroupToken>>,
+  pub mark_stack: Vec<Rc<RefCell<Mark>>>,
+  pub group_stack: Vec<Rc<RefCell<GroupToken>>>,
 
-  pub errors: Vec<Rc<String>>, // TODO: Validation
+  pub errors: Vec<Rc<RefCell<String>>>, // TODO: Validation
 }
 
 pub struct ParseResult {
-  pub tokens: Rc<GroupToken>,
-  pub groups: Vec<Rc<GroupToken>>,
-  pub marks: Vec<Rc<Mark>>,
-  pub errors: Vec<Rc<String>>, // TODO: Validation
+  pub tokens: Rc<RefCell<GroupToken>>,
+  pub groups: Vec<Rc<RefCell<GroupToken>>>,
+  pub marks: Vec<Rc<RefCell<Mark>>>,
+  pub errors: Vec<Rc<RefCell<String>>>, // TODO: Validation
 }
 
 pub struct MutableParseResult {
-  pub tokens: MutGroupToken,
-  pub groups: Vec<MutGroupToken>,
-  pub marks: Vec<MutableMark>,
-  pub errors: Vec<Rc<String>>, // TODO: Validation
+  pub tokens: Rc<RefCell<MutGroupToken>>,
+  pub groups: Vec<Rc<RefCell<MutGroupToken>>>,
+  pub marks: Vec<Rc<RefCell<MutableMark>>>,
+  pub errors: Vec<Rc<RefCell<String>>>, // TODO: Validation
 }
 
 fn create_status(str: &str) -> ParseStatus {
@@ -68,13 +68,13 @@ fn create_status(str: &str) -> ParseStatus {
     inner_space_before: String::from(""),
     children: vec![],
   };
-  let tokens_clone = Rc::new(tokens);
+  let tokens_rc = Rc::new(RefCell::new(tokens));
   ParseStatus {
     last_token: None,
-    last_group: Some(Rc::clone(&tokens_clone)),
+    last_group: Some(Rc::clone(&tokens_rc)),
     last_mark: None,
   
-    tokens: Rc::clone(&tokens_clone),
+    tokens: Rc::clone(&tokens_rc),
     marks: vec![],
     groups: vec![],
   
@@ -91,7 +91,7 @@ fn create_mark(
   index: usize,
   c: char,
   t: MarkType
-) -> Rc<Mark> {
+) -> Rc<RefCell<Mark>> {
   if status.last_mark.is_some() {
     status.mark_stack.push(
       status.last_mark.unwrap()
@@ -108,14 +108,10 @@ fn create_mark(
     mark_type: t,
     meta: None,
   };
-  let mark_clone = Rc::new(mark);
-  status.marks.push(
-    Rc::clone(&mark_clone)
-  );
-  status.last_mark = Some(
-    Rc::clone(&mark_clone)
-  );
-  return mark_clone;
+  let mark_rc = Rc::new(RefCell::new(mark));
+  status.marks.push(mark_rc.clone());
+  status.last_mark = Some(mark_rc.clone());
+  return mark_rc;
 }
 
 #[allow(dead_code)]
@@ -188,7 +184,7 @@ fn is_shorthand(
 #[allow(dead_code)]
 fn get_hyper_content_type() {}
 
-pub fn parse(str: &str) {
+pub fn parse(str: &str) -> ParseResult {
   let status = create_status(str);
   for (i, c) in str.chars().enumerate() {
     let char_type = get_char_type(c);
@@ -210,12 +206,12 @@ pub fn parse(str: &str) {
 
   // handle errors!
 
-  // return ParseResult {
-  //     tokens: Rc::new(),
-  //     groups: Vec::new(),
-  //     marks: Vec::new(),
-  //     errors: Vec::new(),
-  // };
+  return ParseResult {
+      tokens: status.tokens,
+      groups: status.groups,
+      marks: status.marks,
+      errors: status.errors,
+  };
 }
 
 pub fn to_mutalbe_parse_result() {

@@ -1,5 +1,7 @@
 //// Reusables
 
+use std::{cell::RefCell, rc::Rc};
+
 /// Pairs
 
 pub struct Pair {
@@ -51,8 +53,6 @@ pub struct Mark {
     pub meta: Option<String>, // TODO: AST type enum
 }
 
-// TODO: recursive struct
-
 pub struct MutableMark {
     pub mark: Mark,
     pub pair: MutPair,
@@ -60,20 +60,10 @@ pub struct MutableMark {
 
 /// Raw marks
 
-pub struct RawLeftMark {
+pub struct RawMark {
     pub mark: Mark,
     pub code: MarkSideType, // TODO: double check
-    pub right_pair: Option<RawRightMark>
-}
-
-pub struct RawRightMark {
-    pub mark: Mark,
-    pub code: MarkSideType, // TODO: double check
-}
-
-pub enum RawMark {
-    RawLeftMark(RawLeftMark),
-    RawRightMark(RawRightMark),
+    pub right_pair: Option<Box<RawMark>>
 }
 
 #[allow(dead_code)]
@@ -143,7 +133,7 @@ pub struct CommonToken {
     pub value: String,
     pub space_after: String,
 
-    pub mark: Option<Mark>,
+    pub mark: Option<Rc<RefCell<Mark>>>,
     pub mark_side: Option<MarkSideType>,
 }
 
