@@ -232,11 +232,75 @@ pub fn foo() {
   println!("s_fn_foo: {:?}", s_fn_foo);
   println!("----------------");
 
-  /* complex example */
+  /* complex example 1 */
 
   let mut a = 1;
   let b = &mut a;
   *b = 2;
   println!("a: {}", a);
+
+  /* complex example 2 */
+
+  #[allow(dead_code)]
+  #[derive(Debug)]
+  enum Node {
+    Branch { name: String },
+    Leaf { name: String },
+  }
+  fn test_match(node: &Rc<RefCell<Node>>) {
+    let mut borror_mut_node = RefCell::borrow_mut(node);
+    match *borror_mut_node {
+      Node::Branch { ref mut name } => name.push_str("b"),
+      Node::Leaf { ref mut name } => name.push_str("l"),
+    }
+  }
+  fn test_match2(node: &Rc<RefCell<Node>>) {
+    match &mut *node.borrow_mut() {
+      Node::Branch { ref mut name } => name.push_str("b"),
+      Node::Leaf { ref mut name } => name.push_str("l"),
+    }
+  }
+  fn test_match3(node: &Rc<RefCell<Node>>) {
+    match &mut *node.borrow_mut() {
+      Node::Branch { name } => name.push_str("b"),
+      Node::Leaf { name } => name.push_str("l"),
+    }
+  }
+  let node = Node::Branch { name: String::from("test-") };
+  let node = Rc::new(RefCell::new(node));
+  test_match(&node);
+  test_match2(&node);
+  test_match3(&node);
+  println!("node: {:?}", node);
+
+  #[allow(dead_code)]
+  #[derive(Debug)]
+  struct Example3Foo {
+    a: i32,
+    b: i32,
+  }
+  #[allow(dead_code)]
+  #[derive(Debug)]
+  struct Example3Bar {
+    a: i32,
+    b: i32,
+    c: i32,
+  }
+  #[allow(dead_code)]
+  #[derive(Debug)]
+  enum Example3X {
+    Foo(Example3Foo),
+    Bar(Example3Bar),
+  }
+  let example3_x = Example3X::Foo(Example3Foo { a: 1, b: 2 });
+  let example3_x = Rc::new(RefCell::new(example3_x));
+  fn test_example3_x(example3_x: &Rc<RefCell<Example3X>>) {
+    match &mut *example3_x.borrow_mut() {
+      Example3X::Foo(foo) => foo.a = 3,
+      Example3X::Bar(bar) => bar.a = 4,
+    }
+  }
+  test_example3_x(&example3_x);
+  println!("example3_x: {:?}", example3_x);
 }
 
