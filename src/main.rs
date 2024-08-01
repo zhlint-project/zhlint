@@ -9,7 +9,7 @@ pub mod parse_util;
 pub mod learn_borrow;
 
 fn main() {
-    let a = get_char_type(' ');
-    println!("Hello, world! {:?}", a);
-    foo();
+  let a = get_char_type(' ');
+  println!("Hello, world! {:?}", a);
+  foo();
 }

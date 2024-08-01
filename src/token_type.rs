@@ -5,17 +5,17 @@ use std::{cell::RefCell, rc::Rc};
 /// Pairs
 
 pub struct Pair {
-    pub start_index: usize,
-    pub start_value: String,
-    pub end_index: usize,
-    pub end_value: String,
+  pub start_index: usize,
+  pub start_value: String,
+  pub end_index: usize,
+  pub end_value: String,
 }
 
 pub struct MutPair {
-    pub modified_start_value: String,
-    pub ignored_start_value: String,
-    pub modified_end_value: String,
-    pub ignored_end_value: String,
+  pub modified_start_value: String,
+  pub ignored_start_value: String,
+  pub modified_end_value: String,
+  pub ignored_end_value: String,
 }
 
 /// Marks
@@ -25,51 +25,51 @@ pub struct MutPair {
  * They are categorized by parsers, not by usage.
  */
 pub enum MarkType {
-    /**
-     * Brackets
-     */
-    Brackets = 0x30,
-    /**
-     * Inline Markdown marks
-     */
-    Hyper = 0x31,
-    /**
-     * - \`xxx\`
-     * - &lt;code&gt;xxx&lt;/code&gt;
-     * - Hexo/VuePress container
-     * - Other html code
-     */
-    Raw = 0x32,
+  /**
+   * Brackets
+   */
+  Brackets = 0x30,
+  /**
+   * Inline Markdown marks
+   */
+  Hyper = 0x31,
+  /**
+   * - \`xxx\`
+   * - &lt;code&gt;xxx&lt;/code&gt;
+   * - Hexo/VuePress container
+   * - Other html code
+   */
+  Raw = 0x32,
 }
 
 pub enum MarkSideType {
-    Left = 0x40,
-    Right = 0x41,
+  Left = 0x40,
+  Right = 0x41,
 }
 
 pub struct Mark {
-    pub pair: Pair,
-    pub mark_type: MarkType,
-    pub meta: Option<String>, // TODO: AST type enum
+  pub pair: Pair,
+  pub mark_type: MarkType,
+  pub meta: Option<String>, // TODO: AST type enum
 }
 
 pub struct MutableMark {
-    pub mark: Mark,
-    pub pair: MutPair,
+  pub mark: Mark,
+  pub pair: MutPair,
 }
 
 /// Raw marks
 
 pub struct RawMark {
-    pub mark: Mark,
-    pub code: MarkSideType, // TODO: double check
-    pub right_pair: Option<Box<RawMark>>
+  pub mark: Mark,
+  pub code: MarkSideType, // TODO: double check
+  pub right_pair: Option<Box<RawMark>>
 }
 
 #[allow(dead_code)]
 pub struct MutRawMark {
-    raw_mark: RawMark,
-    pair: MutPair,
+  raw_mark: RawMark,
+  pair: MutPair,
 }
 
 /// Hyper token types
@@ -78,110 +78,110 @@ pub struct MutRawMark {
  * TODO: paired html tags should be hyper mark
  */
 pub enum HyperTokenType {
-    /**
-     * Brackets
-     */
-    BracketMark = 0x50,
-    /**
-     * Inline Markdown marks
-     */
-    HyperMark = 0x51,
+  /**
+   * Brackets
+   */
+  BracketMark = 0x50,
+  /**
+   * Inline Markdown marks
+   */
+  HyperMark = 0x51,
 
-    /**
-     * - \`xxx\`
-     * - &lt;code&gt;xxx&lt;/code&gt;
-     */
-    CodeContent = 0x52,
-    /**
-     * - Hexo/VuePress container
-     * - Other html code
-     */
-    HyperContent = 0x53,
+  /**
+   * - \`xxx\`
+   * - &lt;code&gt;xxx&lt;/code&gt;
+   */
+  CodeContent = 0x52,
+  /**
+   * - Hexo/VuePress container
+   * - Other html code
+   */
+  HyperContent = 0x53,
 
-    /**
-     * Unpaired brackets/quotations
-     */
-    Unmatched = 0x54,
-    /**
-     * For indeterminate tokens
-     */
-    Indeterminate = 0x55,
+  /**
+   * Unpaired brackets/quotations
+   */
+  Unmatched = 0x54,
+  /**
+   * For indeterminate tokens
+   */
+  Indeterminate = 0x55,
 }
 
 /// Token Types
 
 pub enum TokenType {
-    WesternLetter,
-    CjkChar,
-    HalfwidthPauseOrStop,
-    FullwidthPauseOrStop,
-    HalfwidthOtherPunctuation,
-    FullwidthOtherPunctuation,
-    Group,
-    BracketMark,
-    HyperMark,
-    CodeContent,
-    HyperContent,
+  WesternLetter,
+  CjkChar,
+  HalfwidthPauseOrStop,
+  FullwidthPauseOrStop,
+  HalfwidthOtherPunctuation,
+  FullwidthOtherPunctuation,
+  Group,
+  BracketMark,
+  HyperMark,
+  CodeContent,
+  HyperContent,
 }
 
 /// Tokens
 
 pub struct CommonToken {
-    pub index: usize,
-    pub length: usize,
+  pub index: usize,
+  pub length: usize,
 
-    pub value: String,
-    pub space_after: String,
+  pub value: String,
+  pub space_after: String,
 
-    pub mark: Option<Rc<RefCell<Mark>>>,
-    pub mark_side: Option<MarkSideType>,
+  pub mark: Option<Rc<RefCell<Mark>>>,
+  pub mark_side: Option<MarkSideType>,
 }
 
 pub struct MutCommonToken {
-    pub token: CommonToken,
-    pub modified_value: String,
-    pub ignored_value: String,
-    pub modified_space_after: String,
-    pub ignored_space_after: String,
-    // TODO: validations: Validation[]
+  pub token: CommonToken,
+  pub modified_value: String,
+  pub ignored_value: String,
+  pub modified_space_after: String,
+  pub ignored_space_after: String,
+  // TODO: validations: Validation[]
 }
 
 pub struct SingleToken {
-    pub token: CommonToken,
-    pub token_type: TokenType,
+  pub token: CommonToken,
+  pub token_type: TokenType,
 }
 
 pub struct MutSingleToken {
-    pub token: MutCommonToken,
-    pub token_type: TokenType,
-    pub modified_token_type: TokenType,
-    pub ignored_token_type: TokenType,
+  pub token: MutCommonToken,
+  pub token_type: TokenType,
+  pub modified_token_type: TokenType,
+  pub ignored_token_type: TokenType,
 }
 
 pub struct GroupToken {
-    pub token: CommonToken,
-    pub pair: Pair,
-    pub token_type: TokenType,
-    pub inner_space_before: String,
-    pub children: Vec<Token>,
+  pub token: CommonToken,
+  pub pair: Pair,
+  pub token_type: TokenType,
+  pub inner_space_before: String,
+  pub children: Vec<Token>,
 }
 
 pub struct MutGroupToken {
-    pub token: MutCommonToken,
-    pub pair: MutPair,
-    pub token_type: TokenType,
-    pub modified_token_type: TokenType,
-    pub ignored_token_type: TokenType,
-    pub modified_inner_space_before: String,
-    pub ignored_inner_space_before: String,
+  pub token: MutCommonToken,
+  pub pair: MutPair,
+  pub token_type: TokenType,
+  pub modified_token_type: TokenType,
+  pub ignored_token_type: TokenType,
+  pub modified_inner_space_before: String,
+  pub ignored_inner_space_before: String,
 }
 
 pub enum Token {
-    SingleToken(SingleToken),
-    GroupToken(GroupToken),
+  SingleToken(SingleToken),
+  GroupToken(GroupToken),
 }
 
 pub enum MutToken {
-    MutSingleToken(MutSingleToken),
-    MutGroupToken(MutGroupToken),
+  MutSingleToken(MutSingleToken),
+  MutGroupToken(MutGroupToken),
 }

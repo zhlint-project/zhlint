@@ -58,10 +58,10 @@ pub fn parse(str: &str) -> ParseResult {
   // handle errors!
 
   return ParseResult {
-      tokens: status.tokens,
-      groups: status.groups,
-      marks: status.marks,
-      errors: status.errors,
+    tokens: status.tokens,
+    groups: status.groups,
+    marks: status.marks,
+    errors: status.errors,
   };
 }
 
