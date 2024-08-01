@@ -5,6 +5,7 @@ pub mod char_type;
 pub mod token_type;
 pub mod type_trait;
 pub mod parse;
+pub mod parse_util;
 pub mod learn_borrow;
 
 fn main() {
