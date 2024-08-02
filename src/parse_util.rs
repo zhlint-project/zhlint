@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use regex::Regex;
 
 use crate::{
-  char_type::{get_char_type, CharType, LEFT_BRACKET, RIGHT_BRACKET, SHORTHAND},
+  char_type::{get_char_type, CharType, LEFT_BRACKET, LEFT_QUOTATION, NEUTRAL_QUOTATION, RIGHT_BRACKET, SHORTHAND},
   token_type::{
     CommonToken, GroupTokenExtra, HyperTokenType, Mark, MarkSideType, MarkType, MutToken, Token, TokenExtraType, TokenType
   }, type_trait::{char_type_to_token_type, TypeTrait},
@@ -210,7 +210,30 @@ pub fn handle_punctuation(
         // TODO: add_error(status, i, "")
       }
     }
+    return;
   }
+
+  if char_type.is_quotation() {
+    if NEUTRAL_QUOTATION.contains(&c) {
+      if status.last_group.is_some() {
+        finalize_current_group(status, index, c);
+      } else {
+        init_group(status, index, c);
+      }
+    } else if LEFT_QUOTATION.contains(&c) {
+      init_group(status, index, c);
+    } else if RIGHT_BRACKET.contains(&c) {
+      if status.last_group.is_some() {
+        finalize_current_group(status, index, c);
+      } else {
+        add_unmatched_token(status, index, c);
+        // TODO: add_error(status, i, "")
+      }
+    }
+    return;
+  }
+
+  add_sinple_punctuation_token(status, index, c, char_type_to_token_type(char_type).unwrap());
 }
 
 // TODO:
@@ -305,7 +328,7 @@ pub fn init_group(
   status.groups.push(new_group_rc);
 }
 
-pub fn finalize_group(
+pub fn finalize_current_group(
   status: &mut ParseStatus,
   index: usize,
   c: char
