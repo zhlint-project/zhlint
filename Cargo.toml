@@ -1,7 +1,11 @@
 [package]
-name = "zhlint-rust"
-version = "0.1.0"
+name = "zhlint"
+version = "0.0.1"
+authors = ["Zhao Jinjiang <zhaojinjiang@me.com>"]
 edition = "2021"
+description = "A linting tool for Chinese text content."
+readme = "README.md"
+license-file = "LICENSE.txt"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -9,3 +13,12 @@ edition = "2021"
 regex = "1.10.4"
 unicode-width = "0.1.12"
 lazy_static = "1.5.0"
+clap = { version = "4.4", features = ["derive"] }
+
+[lib]
+name = "zhlint"
+path = "src/parse.rs"
+
+[[bin]]
+name = "zhlint"
+path = "src/main.rs"

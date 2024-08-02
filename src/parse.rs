@@ -4,6 +4,11 @@ use crate::{
   }, parse_util::*, token_type::TokenExtraType, type_trait::TypeTrait
 };
 
+pub mod char_type;
+pub mod token_type;
+pub mod type_trait;
+pub mod parse_util;
+
 pub fn parse(str: &str) -> ParseResult {
   let mut status = create_status(str);
 
