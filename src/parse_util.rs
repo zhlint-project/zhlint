@@ -3,10 +3,10 @@ use std::{cell::RefCell, rc::Rc};
 use regex::Regex;
 
 use crate::{
-  char_type::{get_char_type, CharType, SHORTHAND},
+  char_type::{get_char_type, CharType, LEFT_BRACKET, RIGHT_BRACKET, SHORTHAND},
   token_type::{
     CommonToken, GroupTokenExtra, HyperTokenType, Mark, MarkSideType, MarkType, MutToken, Token, TokenExtraType, TokenType
-  }, type_trait::char_type_to_token_type,
+  }, type_trait::{char_type_to_token_type, TypeTrait},
 };
 
 pub struct ParseStatus {
@@ -76,12 +76,12 @@ pub fn create_status(str: &str) -> ParseStatus {
 }
 
 pub fn init_mark(
-  mut status: ParseStatus,
+  status: &mut ParseStatus,
   t: MarkType
 ) {
   if status.last_mark.is_some() {
     status.mark_stack.push(
-      status.last_mark.unwrap()
+      status.last_mark.clone().unwrap()
     );
     status.last_mark = None;
   }
@@ -188,13 +188,29 @@ pub fn handle_letter(
   }
 }
 
-#[allow(unused_variables)]
 pub fn handle_punctuation(
   index: usize,
   c: char,
   char_type: CharType,
   status: &mut ParseStatus
-) {}
+) {
+  finalize_last_token(status, index);
+
+  if char_type.is_bracket() {
+    if LEFT_BRACKET.contains(&c) {
+      init_mark(status, MarkType::Brackets);
+      add_bracket_token(status, index, c, MarkSideType::Left);
+    } else if RIGHT_BRACKET.contains(&c) {
+      if status.last_mark.is_some() {
+        add_bracket_token(status, index, c, MarkSideType::Right);
+        finalize_current_mark(status);
+      } else {
+        add_unmatched_token(status, index, c)
+        // TODO: add_error(status, i, "")
+      }
+    }
+  }
+}
 
 // TODO:
 pub fn mark_to_token() {}
