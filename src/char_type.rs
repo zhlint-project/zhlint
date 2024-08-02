@@ -1,6 +1,7 @@
+use std::collections::HashMap;
+
+use lazy_static::lazy_static;
 use regex::Regex;
-// use core::iter::Map;
-// use std::collections::HashMap;
 
 /**
  * NOTE:
@@ -259,11 +260,12 @@ pub const NEUTRAL_QUOTATION: [char; 2] = ['"', '\''];
 
 pub const SHORTHAND: [char; 2] = ['’', '\''];
 
-// TODO: hashmap
-// const SHORTHAND_PAIR: HashMap<char, char> = [
-//   ('’', '‘'),
-//   ('\'', '\''),
-// ].iter().cloned().collect();
+lazy_static! {
+  pub static ref SHORTHAND_PAIR: HashMap<char, char> = [
+    ('’', '‘'),
+    ('\'', '\''),
+  ].iter().cloned().collect();
+}
 
 const FULLWIDTH_PAIRS: [char; 24] = [
   '“', '”', '‘', '’',

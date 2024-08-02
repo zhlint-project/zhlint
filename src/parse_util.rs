@@ -3,10 +3,9 @@ use std::{cell::RefCell, rc::Rc};
 use regex::Regex;
 
 use crate::{
-  char_type::{get_char_type, CharType, LEFT_BRACKET, LEFT_QUOTATION, NEUTRAL_QUOTATION, RIGHT_BRACKET, SHORTHAND},
-  token_type::{
-    CommonToken, GroupTokenExtra, HyperTokenType, Mark, MarkSideType, MarkType, MutToken, Token, TokenExtraType, TokenType
-  }, type_trait::{char_type_to_token_type, TypeTrait},
+  char_type::{get_char_type, CharType, LEFT_BRACKET, LEFT_QUOTATION, NEUTRAL_QUOTATION, RIGHT_BRACKET, SHORTHAND, SHORTHAND_PAIR},
+  token_type::{CommonToken, GroupTokenExtra, HyperTokenType, Mark, MarkSideType, MarkType, MutToken, Token, TokenExtraType, TokenType},
+  type_trait::{char_type_to_token_type, TypeTrait},
 };
 
 pub struct ParseStatus {
@@ -449,7 +448,7 @@ pub fn is_shorthand(
     }
     let last_group = status.last_group.as_ref().unwrap().borrow();
     if let TokenExtraType::Group(extra) = &last_group.extra {
-      if extra.start_value != "‘" { // TODO: shorthand_pair_set
+      if SHORTHAND_PAIR.contains_key(&extra.start_value.chars().nth(0).unwrap()) {
         return true;
       }
     }
