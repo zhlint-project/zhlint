@@ -53,11 +53,11 @@ pub fn parse(str: &str) -> ParseResult {
     } else if is_shorthand(str, &status, i, c) {
       append_value(&status, c);
     } else if char_type.is_punctuation() {
-      handle_punctuation(i, c, char_type, &status)
+      handle_punctuation(i, c, char_type, &mut status)
     } else if char_type.is_letter() {
-      handle_letter(i, c, char_type, &status);
+      handle_letter(i, c, char_type, &mut status);
     } else {
-      handle_letter(i, c, char_type, &status);
+      handle_letter(i, c, char_type, &mut status);
     }
   }
 

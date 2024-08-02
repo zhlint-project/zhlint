@@ -80,6 +80,7 @@ pub enum HyperTokenType {
 
 /// Token Types
 
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum TokenType {
   WesternLetter,
   CjkChar,

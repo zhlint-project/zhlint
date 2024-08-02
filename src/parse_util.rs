@@ -6,7 +6,7 @@ use crate::{
   char_type::{get_char_type, CharType},
   token_type::{
     CommonToken, GroupTokenExtra, HyperTokenType, Mark, MarkSideType, MarkType, MutToken, Token, TokenExtraType, TokenType
-  },
+  }, type_trait::char_type_to_token_type,
 };
 
 pub struct ParseStatus {
@@ -167,20 +167,33 @@ pub fn finalize_current_mark(
   }
 }
 
-#[allow(unused_variables)]
 pub fn handle_letter(
   index: usize,
   c: char,
   char_type: CharType,
-  status: &ParseStatus
-) {}
+  status: &mut ParseStatus
+) {
+  if let Some(token_type) = char_type_to_token_type(char_type) {
+    let last_token = status.last_token.as_ref();
+    if last_token.is_some() {
+      if last_token.unwrap().borrow().base.token_type == token_type {
+        append_value(status, c);
+      } else {
+        finalize_last_token(status, index);
+        init_content(status, index, c, token_type);
+      }
+    } else {
+      init_content(status, index, c, token_type);
+    }
+  }
+}
 
 #[allow(unused_variables)]
 pub fn handle_punctuation(
   index: usize,
   c: char,
   char_type: CharType,
-  status: &ParseStatus
+  status: &mut ParseStatus
 ) {}
 
 // TODO:
