@@ -24,6 +24,7 @@ pub struct ParseStatus {
   pub errors: Vec<Rc<RefCell<String>>>, // TODO: Validation
 }
 
+#[derive(Debug)]
 pub struct ParseResult {
   pub tokens: Rc<RefCell<Token>>,
   pub groups: Vec<Rc<RefCell<Token>>>,

@@ -8,6 +8,7 @@ use std::{cell::RefCell, rc::Rc};
  * Marks are hyper info, including content and wrappers.
  * They are categorized by parsers, not by usage.
  */
+#[derive(Debug)]
 pub enum MarkType {
   /**
    * Brackets
@@ -26,11 +27,13 @@ pub enum MarkType {
   Raw = 0x32,
 }
 
+#[derive(Debug)]
 pub enum MarkSideType {
   Left = 0x40,
   Right = 0x41,
 }
 
+#[derive(Debug)]
 pub struct Mark {
   pub mark_type: MarkType,
   pub meta: Option<String>, // TODO: AST type enum
@@ -80,7 +83,7 @@ pub enum HyperTokenType {
 
 /// Token Types
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum TokenType {
   WesternLetter,
   CjkChar,
@@ -98,6 +101,7 @@ pub enum TokenType {
 
 /// Tokens
 
+#[derive(Debug)]
 pub struct CommonToken {
   pub token_type: TokenType,
 
@@ -111,6 +115,7 @@ pub struct CommonToken {
   pub mark_side: Option<MarkSideType>,
 }
 
+#[derive(Debug)]
 pub struct GroupTokenExtra<T> {
   pub start_index: usize,
   pub start_value: String,
@@ -120,11 +125,13 @@ pub struct GroupTokenExtra<T> {
   pub children: Vec<T>,
 }
 
+#[derive(Debug)]
 pub enum TokenExtraType {
   Single,
   Group(GroupTokenExtra<Rc<RefCell<Token>>>),
 }
 
+#[derive(Debug)]
 pub struct Token {
   pub base: CommonToken,
   pub extra: TokenExtraType,

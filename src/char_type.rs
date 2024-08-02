@@ -206,6 +206,13 @@ pub fn get_char_type(c: char) -> CharType {
   return CharType::Unknown;
 }
 
+pub fn get_unicode_substring(s: &str, start: usize, len: usize) -> &str {
+  let mut char_indices = s.char_indices();
+  let start_byte = char_indices.nth(start).map(|(i, _)| i).unwrap_or(s.len());
+  let end_byte = char_indices.nth(len - 1).map(|(i, _)| i).unwrap_or(s.len());
+  &s[start_byte..end_byte]
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;

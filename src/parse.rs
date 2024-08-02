@@ -1,7 +1,6 @@
 use crate::{
   char_type::{
-    get_char_type,
-    CharType
+    get_char_type, get_unicode_substring, CharType
   }, parse_util::*, token_type::TokenExtraType, type_trait::TypeTrait
 };
 
@@ -25,7 +24,7 @@ pub fn parse(str: &str) -> ParseResult {
       let last_group = status.last_group.as_ref();
       if last_group.is_some() {
         let space_len = get_space_length(str, i);
-        let spaces = &str[i..i + space_len];
+        let spaces = get_unicode_substring(str, i, space_len);
         match last_group.unwrap().borrow().extra {
           TokenExtraType::Group(ref extra) => {
             if extra.children.len() > 0 {
