@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use regex::Regex;
 
 use crate::{
-  char_type::{get_char_type, CharType},
+  char_type::{get_char_type, CharType, SHORTHAND},
   token_type::{
     CommonToken, GroupTokenExtra, HyperTokenType, Mark, MarkSideType, MarkType, MutToken, Token, TokenExtraType, TokenType
   }, type_trait::char_type_to_token_type,
@@ -383,14 +383,38 @@ pub fn get_prev_token(
   return None;
 }
 
-#[allow(unused_variables)]
 pub fn is_shorthand(
   str: &str,
   status: &ParseStatus,
   i: usize,
   c: char
 ) -> bool {
-  return false;
+  if !SHORTHAND.contains(&c) {
+    return false;
+  }
+  if status.last_token.is_none() {
+    return false;
+  }
+  if status.last_token.as_ref().unwrap().borrow().base.token_type != TokenType::WesternLetter {
+    return false;
+  }
+  if i + 1 >= str.len() {
+    return false;
+  }
+  let next_char = str.chars().nth(i + 1).unwrap();
+  let next_char_type = get_char_type(next_char);
+  if next_char_type == CharType::WesternLetter || next_char_type == CharType::Space {
+    if status.last_group.is_none() {
+      return true;
+    }
+    let last_group = status.last_group.as_ref().unwrap().borrow();
+    if let TokenExtraType::Group(extra) = &last_group.extra {
+      if extra.start_value != "‘" { // TODO: shorthand_pair_set
+        return true;
+      }
+    }
+  }
+  return true;
 }
 
 pub fn get_hyper_content_type(

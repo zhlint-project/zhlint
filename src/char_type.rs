@@ -250,6 +250,8 @@ pub const LEFT_QUOTATION: [char; 8] = ['“', '‘', '《', '〈', '『', '「',
 pub const RIGHT_QUOTATION: [char; 8] = ['”', '’', '》', '〉', '』', '」', '】', '〗'];
 pub const NEUTRAL_QUOTATION: [char; 2] = ['"', '\''];
 
+pub const SHORTHAND: [char; 2] = ['’', '\''];
+
 // TODO: hashmap
 // const SHORTHAND_PAIR: HashMap<char, char> = [
 //   ('’', '‘'),
