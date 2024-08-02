@@ -167,10 +167,3 @@ pub fn is_shorthand(
 }
 
 pub fn get_hyper_content_type() {}
-
-pub fn temp_add_spaces(
-  token: &Rc<RefCell<Token>>,
-  spaces: &str
-) {
-  token.borrow_mut().base.space_after = String::from(spaces);
-}

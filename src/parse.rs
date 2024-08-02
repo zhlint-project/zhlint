@@ -32,7 +32,7 @@ pub fn parse(str: &str) -> ParseResult {
               let last_token = get_prev_token(&status);
               if last_token.is_some() {
                 let last_token_value = last_token.unwrap();
-                temp_add_spaces(last_token_value, spaces);
+                last_token_value.borrow_mut().base.space_after = String::from(spaces);
               }
             } else {
               let last_group_value = last_group.unwrap();
