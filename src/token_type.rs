@@ -90,6 +90,7 @@ pub enum TokenType {
   Group,
   BracketMark,
   HyperMark,
+  UnmatchedMark, // TODO: adapt other type trait logics
   CodeContent,
   HyperContent,
 }
@@ -120,7 +121,7 @@ pub struct GroupTokenExtra<T> {
 
 pub enum TokenExtraType {
   Single,
-  Group(GroupTokenExtra<Token>),
+  Group(GroupTokenExtra<Rc<RefCell<Token>>>),
 }
 
 pub struct Token {
@@ -150,7 +151,7 @@ pub struct MutGroupTokenExtra {
 
 pub enum MutTokenExtraType {
   Single(MutTokenExtra),
-  Group(GroupTokenExtra<MutToken>, MutGroupTokenExtra),
+  Group(GroupTokenExtra<Rc<RefCell<MutToken>>>, MutGroupTokenExtra),
 }
 
 pub struct MutToken {

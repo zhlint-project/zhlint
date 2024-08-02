@@ -6,7 +6,7 @@ use crate::{
 };
 
 pub fn parse(str: &str) -> ParseResult {
-  let status = create_status(str);
+  let mut status = create_status(str);
 
   let mut last_index = 0;
   for (i, c) in str.chars().enumerate() {
@@ -21,7 +21,7 @@ pub fn parse(str: &str) -> ParseResult {
 
     // if char_type is hyper!
     if char_type == CharType::Space {
-      finalize_last_token(&status, i);
+      finalize_last_token(&mut status, i);
       let last_group = status.last_group.as_ref();
       if last_group.is_some() {
         let space_len = get_space_length(str, i);
@@ -61,7 +61,7 @@ pub fn parse(str: &str) -> ParseResult {
     }
   }
 
-  finalize_last_token(&status, str.len());
+  finalize_last_token(&mut status, str.len());
 
   // handle errors!
 
