@@ -2,22 +2,6 @@
 
 use std::{cell::RefCell, rc::Rc};
 
-/// Pairs
-
-pub struct Pair {
-  pub start_index: usize,
-  pub start_value: String,
-  pub end_index: usize,
-  pub end_value: String,
-}
-
-pub struct MutPair {
-  pub modified_start_value: String,
-  pub ignored_start_value: String,
-  pub modified_end_value: String,
-  pub ignored_end_value: String,
-}
-
 /// Marks
 
 /**
@@ -48,28 +32,14 @@ pub enum MarkSideType {
 }
 
 pub struct Mark {
-  pub pair: Pair,
   pub mark_type: MarkType,
   pub meta: Option<String>, // TODO: AST type enum
 }
-
-pub struct MutableMark {
-  pub mark: Mark,
-  pub pair: MutPair,
-}
-
-/// Raw marks
 
 pub struct RawMark {
   pub mark: Mark,
   pub code: MarkSideType, // TODO: double check
   pub right_pair: Option<Box<RawMark>>
-}
-
-#[allow(dead_code)]
-pub struct MutRawMark {
-  raw_mark: RawMark,
-  pair: MutPair,
 }
 
 /// Hyper token types
@@ -127,6 +97,8 @@ pub enum TokenType {
 /// Tokens
 
 pub struct CommonToken {
+  pub token_type: TokenType,
+
   pub index: usize,
   pub length: usize,
 
@@ -137,51 +109,51 @@ pub struct CommonToken {
   pub mark_side: Option<MarkSideType>,
 }
 
-pub struct MutCommonToken {
-  pub token: CommonToken,
-  pub modified_value: String,
-  pub ignored_value: String,
-  pub modified_space_after: String,
-  pub ignored_space_after: String,
-  // TODO: validations: Validation[]
-}
-
-pub struct SingleToken {
-  pub token: CommonToken,
-  pub token_type: TokenType,
-}
-
-pub struct MutSingleToken {
-  pub token: MutCommonToken,
-  pub token_type: TokenType,
-  pub modified_token_type: TokenType,
-  pub ignored_token_type: TokenType,
-}
-
-pub struct GroupToken {
-  pub token: CommonToken,
-  pub pair: Pair,
-  pub token_type: TokenType,
+pub struct GroupTokenExtra<T> {
+  pub start_index: usize,
+  pub start_value: String,
+  pub end_index: usize,
+  pub end_value: String,
   pub inner_space_before: String,
-  pub children: Vec<Token>,
+  pub children: Vec<T>,
 }
 
-pub struct MutGroupToken {
-  pub token: MutCommonToken,
-  pub pair: MutPair,
-  pub token_type: TokenType,
+pub enum TokenExtraType {
+  Single,
+  Group(GroupTokenExtra<Token>),
+}
+
+pub struct Token {
+  pub base: CommonToken,
+  pub extra: TokenExtraType,
+}
+
+pub struct MutTokenExtra {
   pub modified_token_type: TokenType,
-  pub ignored_token_type: TokenType,
+  pub ignored_token_type: bool,
+  pub modified_value: String,
+  pub ignored_value: bool,
+  pub modified_space_after: String,
+  pub ignored_space_after: bool,
+}
+
+pub struct MutGroupTokenExtra {
+  pub modified_start_value: String,
+  pub ignored_start_value: bool,
+  pub modified_end_value: String,
+  pub ignored_end_value: bool,
+  pub modified_token_type: TokenType,
+  pub ignored_token_type: bool,
   pub modified_inner_space_before: String,
   pub ignored_inner_space_before: String,
 }
 
-pub enum Token {
-  SingleToken(SingleToken),
-  GroupToken(GroupToken),
+pub enum MutTokenExtraType {
+  Single(MutTokenExtra),
+  Group(GroupTokenExtra<MutToken>, MutGroupTokenExtra),
 }
 
-pub enum MutToken {
-  MutSingleToken(MutSingleToken),
-  MutGroupToken(MutGroupToken),
+pub struct MutToken {
+  pub token: CommonToken,
+  pub extra: MutTokenExtraType,
 }

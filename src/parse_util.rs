@@ -1,52 +1,45 @@
-use std::{cell::RefCell, rc::Rc, usize::MAX};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{
   char_type::CharType,
   token_type::{
-    CommonToken,
-    GroupToken,
-    Mark,
-    MarkType,
-    MutGroupToken,
-    MutableMark,
-    TokenType,
-    Pair,
-    Token
+    CommonToken, Mark, MarkType, GroupTokenExtra, MutToken, Token, TokenExtraType, TokenType
   },
 };
 
 pub struct ParseStatus {
   pub last_token: Option<Rc<RefCell<Token>>>,
-  pub last_group: Option<Rc<RefCell<GroupToken>>>,
+  pub last_group: Option<Rc<RefCell<Token>>>,
   pub last_mark: Option<Rc<RefCell<Mark>>>,
 
-  pub tokens: Rc<RefCell<GroupToken>>,
+  pub tokens: Rc<RefCell<Token>>,
   pub marks: Vec<Rc<RefCell<Mark>>>,
-  pub groups: Vec<Rc<RefCell<GroupToken>>>,
+  pub groups: Vec<Rc<RefCell<Token>>>,
 
   pub mark_stack: Vec<Rc<RefCell<Mark>>>,
-  pub group_stack: Vec<Rc<RefCell<GroupToken>>>,
+  pub group_stack: Vec<Rc<RefCell<Token>>>,
 
   pub errors: Vec<Rc<RefCell<String>>>, // TODO: Validation
 }
 
 pub struct ParseResult {
-  pub tokens: Rc<RefCell<GroupToken>>,
-  pub groups: Vec<Rc<RefCell<GroupToken>>>,
+  pub tokens: Rc<RefCell<Token>>,
+  pub groups: Vec<Rc<RefCell<Token>>>,
   pub marks: Vec<Rc<RefCell<Mark>>>,
   pub errors: Vec<Rc<RefCell<String>>>, // TODO: Validation
 }
 
 pub struct MutableParseResult {
-  pub tokens: Rc<RefCell<MutGroupToken>>,
-  pub groups: Vec<Rc<RefCell<MutGroupToken>>>,
-  pub marks: Vec<Rc<RefCell<MutableMark>>>,
+  pub tokens: Rc<RefCell<MutToken>>,
+  pub groups: Vec<Rc<RefCell<MutToken>>>,
+  pub marks: Vec<Rc<RefCell<Mark>>>,
   pub errors: Vec<Rc<RefCell<String>>>, // TODO: Validation
 }
 
 pub fn create_status(str: &str) -> ParseStatus {
-  let tokens: GroupToken = GroupToken {
-    token: CommonToken {
+  let tokens = Token {
+    base: CommonToken {
+      token_type: TokenType::Group,
       index: 0,
       length: str.len(),
       value: str.to_string(),
@@ -54,15 +47,14 @@ pub fn create_status(str: &str) -> ParseStatus {
       mark: None,
       mark_side: None,
     },
-    pair: Pair {
+    extra: TokenExtraType::Group(GroupTokenExtra {
       start_index: 0,
       start_value: String::from(""),
       end_index: str.len(),
       end_value: String::from(""),
-    },
-    token_type: TokenType::Group,
-    inner_space_before: String::from(""),
-    children: vec![],
+      inner_space_before: String::from(""),
+      children: vec![],
+    }),
   };
   let tokens_rc = Rc::new(RefCell::new(tokens));
   ParseStatus {
@@ -83,8 +75,6 @@ pub fn create_status(str: &str) -> ParseStatus {
 
 pub fn create_mark(
   mut status: ParseStatus,
-  index: usize,
-  c: char,
   t: MarkType
 ) -> Rc<RefCell<Mark>> {
   if status.last_mark.is_some() {
@@ -94,12 +84,6 @@ pub fn create_mark(
     status.last_mark = None;
   }
   let mark: Mark = Mark {
-    pair: Pair {
-      start_index: index,
-      start_value: c.to_string(),
-      end_index: MAX,
-      end_value: String::from(""),
-    },
     mark_type: t,
     meta: None,
   };
@@ -188,12 +172,5 @@ pub fn temp_add_spaces(
   token: &Rc<RefCell<Token>>,
   spaces: &str
 ) {
-  match &mut *token.borrow_mut() {
-    Token::SingleToken(single_token) => {
-      single_token.token.space_after = String::from(spaces);
-    },
-    Token::GroupToken(group_token) => {
-      group_token.token.space_after = String::from(spaces);
-    },
-  }
+  token.borrow_mut().base.space_after = String::from(spaces);
 }

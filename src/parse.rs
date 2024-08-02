@@ -2,9 +2,7 @@ use crate::{
   char_type::{
     get_char_type,
     CharType
-  },
-  parse_util::*,
-  type_trait::TypeTrait
+  }, parse_util::*, token_type::TokenExtraType, type_trait::TypeTrait
 };
 
 pub fn parse(str: &str) -> ParseResult {
@@ -28,15 +26,25 @@ pub fn parse(str: &str) -> ParseResult {
       if last_group.is_some() {
         let space_len = get_space_length(str, i);
         let spaces = &str[i..i + space_len];
-        if last_group.unwrap().borrow().children.len() > 0 {
-          let last_token = get_prev_token(&status);
-          if last_token.is_some() {
-            let last_token_value = last_token.unwrap();
-            temp_add_spaces(last_token_value, spaces);
-          }
-        } else {
-          let last_group_value = last_group.unwrap();
-          last_group_value.borrow_mut().inner_space_before = String::from(spaces);
+        match last_group.unwrap().borrow().extra {
+          TokenExtraType::Group(ref extra) => {
+            if extra.children.len() > 0 {
+              let last_token = get_prev_token(&status);
+              if last_token.is_some() {
+                let last_token_value = last_token.unwrap();
+                temp_add_spaces(last_token_value, spaces);
+              }
+            } else {
+              let last_group_value = last_group.unwrap();
+              match last_group_value.borrow_mut().extra {
+                TokenExtraType::Group(ref mut extra) => {
+                  extra.inner_space_before = String::from(spaces);
+                },
+                _ => {}
+              }
+            }
+          },
+          _ => {}
         }
         if space_len > 1 {
           last_index = i + space_len - 1;
