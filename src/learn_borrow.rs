@@ -232,6 +232,35 @@ pub fn foo() {
   println!("s_fn_foo: {:?}", s_fn_foo);
   println!("----------------");
 
+  /* generic types and traits */
+
+  struct TFoo<T, U> {
+    x: i32,
+    y: T,
+    z: U,
+  }
+  struct TGroup {
+    a: i32,
+    b: i32,
+  }
+  let mut t_foo = TFoo { x: 1, y: TGroup { a: 2, b: 3 }, z: 4 };
+  let mut t_foo_2 = TFoo { x: 1, y: (), z: () };
+  fn t_mut_foo<T, U>(t: &mut TFoo<T, U>) {
+    t.x = 4;
+  }
+  fn t_mut_foo_2<T>(t: &mut TFoo<TGroup, T>) {
+    t.x = 4;
+    t.y = TGroup { a: 5, b: 6 };
+  }
+  t_mut_foo(&mut t_foo);
+  t_mut_foo(&mut t_foo_2);
+  t_mut_foo_2(&mut t_foo);
+  println!("t_foo: {:?}", t_foo.x);
+  println!("t_foo: {:?}", t_foo.y.a);
+  println!("t_foo: {:?}", t_foo.y.b);
+  println!("t_foo: {:?}", t_foo.z);
+  println!("----------------");
+
   /* complex example 1 */
 
   let mut a = 1;
