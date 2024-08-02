@@ -1,9 +1,11 @@
 use std::{cell::RefCell, rc::Rc};
 
+use regex::Regex;
+
 use crate::{
-  char_type::CharType,
+  char_type::{get_char_type, CharType},
   token_type::{
-    CommonToken, GroupTokenExtra, Mark, MarkSideType, MarkType, MutToken, Token, TokenExtraType, TokenType
+    CommonToken, GroupTokenExtra, HyperTokenType, Mark, MarkSideType, MarkType, MutToken, Token, TokenExtraType, TokenType
   },
 };
 
@@ -233,7 +235,6 @@ pub fn add_unmatched_token(
   finalize_current_token(status, token_rc);
 }
 
-#[allow(unused_variables)]
 pub fn init_group(
   status: &mut ParseStatus,
   index: usize,
@@ -274,24 +275,99 @@ pub fn init_group(
   status.groups.push(new_group_rc);
 }
 
-pub fn finalize_group() {}
+pub fn finalize_group(
+  status: &mut ParseStatus,
+  index: usize,
+  c: char
+) {
+  let last_group = status.last_group.as_ref();
+  if last_group.is_some() {
+    let last_group_value = last_group.unwrap();
+    {
+      let mut last_group_value_borrowed = last_group_value.borrow_mut();
+      match last_group_value_borrowed.extra {
+        TokenExtraType::Group(ref mut extra) => {
+          extra.end_index = index;
+          extra.end_value = c.to_string();
+        },
+        _ => {}
+      }
+    }
+  }
+  if status.group_stack.len() > 0 {
+    let prev_group = status.group_stack.pop().unwrap();
+    status.last_group = Some(prev_group);
+  } else {
+    status.last_group = None;
+  }
+}
 
-pub fn init_content() {}
+pub fn init_content(
+  status: &mut ParseStatus,
+  index: usize,
+  c: char,
+  token_type: TokenType
+) {
+  let token = Token {
+    base: CommonToken {
+      token_type,
+      index,
+      length: 1,
+      value: c.to_string(),
+      space_after: String::from(""),
+      mark: None,
+      mark_side: None,
+    },
+    extra: TokenExtraType::Single,
+  };
+  let token_rc = Rc::new(RefCell::new(token));
+  status.last_token = Some(Rc::clone(&token_rc));
+}
 
-#[allow(unused_variables)]
 pub fn append_value(
   status: &ParseStatus,
   c: char
-) {}
-
-#[allow(unused_variables, dead_code)]
-pub fn get_space_length(str: &str, i: usize) -> usize {
-  1
+) {
+  let last_token = status.last_token.as_ref();
+  if last_token.is_some() {
+    let last_token_value = last_token.unwrap();
+    let mut last_token_value_borrowed = last_token_value.borrow_mut();
+    last_token_value_borrowed.base.value.push(c);
+    last_token_value_borrowed.base.length += 1;
+  }
 }
 
-#[allow(unused_variables)]
-pub fn get_prev_token(status: &ParseStatus) -> Option<&Rc<RefCell<Token>>> {
-  None
+pub fn get_space_length(
+  str: &str,
+  i: usize
+) -> usize {
+  let mut space_length = 0;
+  let mut j = i;
+  while j < str.len() {
+    let c = str.chars().nth(j).unwrap();
+    if get_char_type(c) == CharType::Space {
+      space_length += 1;
+    } else {
+      break;
+    }
+    j += 1;
+  }
+  space_length
+}
+
+pub fn get_prev_token(
+  status: &ParseStatus
+) -> Option<Rc<RefCell<Token>>> {
+  // https://users.rust-lang.org/t/fail-to-return-something-with-an-enum-in-rc-refcell-due-to-cannot-return-value-referencing-local-variable/115389
+  if let Some(items) = &status.last_group {
+    let items = items.borrow();
+    if let TokenExtraType::Group(extra) = &items.extra {
+      if let Some(last_child) = extra.children.last() {
+        return Some(last_child.clone());
+      }
+    }
+  }
+  return None;
 }
 
 #[allow(unused_variables)]
@@ -304,4 +380,17 @@ pub fn is_shorthand(
   return false;
 }
 
-pub fn get_hyper_content_type() {}
+pub fn get_hyper_content_type(
+  str: &str
+) -> HyperTokenType {
+  if Regex::new("\n").unwrap().is_match(str) {
+    return HyperTokenType::HyperContent;
+  }
+  if Regex::new("^<code.*>.*<\\/code.*>$").unwrap().is_match(str) {
+    return HyperTokenType::CodeContent;
+  }
+  if Regex::new("^<.+>$").unwrap().is_match(str) {
+    return HyperTokenType::HyperContent;
+  }
+  return HyperTokenType::CodeContent;
+}
