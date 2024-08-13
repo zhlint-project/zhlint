@@ -1,7 +1,5 @@
 //// Reusables
 
-use std::{cell::RefCell, rc::Rc};
-
 /// Marks
 
 /**
@@ -97,20 +95,6 @@ pub enum TokenType {
 /// Tokens
 
 #[derive(Debug)]
-pub struct CommonToken {
-  pub token_type: TokenType,
-
-  pub index: usize,
-  pub length: usize,
-
-  pub value: String,
-  pub space_after: String,
-
-  pub mark: Option<Rc<RefCell<Mark>>>,
-  pub mark_side: Option<MarkSideType>,
-}
-
-#[derive(Debug)]
 pub struct NewCommonToken {
   // pub id: usize,
   // pub parent_id: usize,
@@ -137,21 +121,9 @@ pub struct GroupTokenExtra<T> {
 }
 
 #[derive(Debug)]
-pub enum TokenExtraType {
-  Single,
-  Group(GroupTokenExtra<Rc<RefCell<Token>>>),
-}
-
-#[derive(Debug)]
 pub enum NewTokenExtraType {
   Single,
   Group(GroupTokenExtra<NewToken>),
-}
-
-#[derive(Debug)]
-pub struct Token {
-  pub base: CommonToken,
-  pub extra: TokenExtraType,
 }
 
 #[derive(Debug)]
@@ -183,21 +155,9 @@ pub struct MutGroupTokenExtra {
 }
 
 #[derive(Debug)]
-pub enum MutTokenExtraType {
-  Single(MutTokenExtra),
-  Group(GroupTokenExtra<Rc<RefCell<MutToken>>>, MutGroupTokenExtra),
-}
-
-#[derive(Debug)]
 pub enum NewMutTokenExtraType {
   Single(MutTokenExtra),
   Group(GroupTokenExtra<NewMutToken>, MutGroupTokenExtra),
-}
-
-#[derive(Debug)]
-pub struct MutToken {
-  pub token: CommonToken,
-  pub extra: MutTokenExtraType,
 }
 
 #[derive(Debug)]

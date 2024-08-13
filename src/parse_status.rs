@@ -1,4 +1,8 @@
-use crate::{char_type::{get_char_type, CharType, LEFT_BRACKET, LEFT_QUOTATION, NEUTRAL_QUOTATION, RIGHT_QUOTATION, SHORTHAND, SHORTHAND_PAIR}, token_type::{GroupTokenExtra, Mark, MarkSideType, MarkType, NewCommonToken, NewMutToken, NewToken, NewTokenExtraType, TokenType}, type_trait::{char_type_to_token_type, TypeTrait}};
+use crate::{
+  char_type::{get_char_type, CharType, LEFT_BRACKET, LEFT_QUOTATION, NEUTRAL_QUOTATION, RIGHT_QUOTATION, SHORTHAND, SHORTHAND_PAIR},
+  token_type::{GroupTokenExtra, Mark, MarkSideType, MarkType, NewCommonToken, NewMutToken, NewToken, NewTokenExtraType, TokenType},
+  type_trait::{char_type_to_token_type, TypeTrait}
+};
 
 type NewTokenPath = Vec<usize>;
 
