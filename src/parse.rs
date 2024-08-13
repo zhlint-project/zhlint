@@ -2,15 +2,15 @@ pub mod char_type;
 pub mod token_type;
 pub mod type_trait;
 pub mod parse_util;
-pub mod parse_status;
+pub mod parse_context;
 
 use char_type::{get_char_type, get_unicode_substring, CharType};
 use type_trait::TypeTrait;
 use parse_util::get_space_length;
-use parse_status::{ParseResult, ParseStatus};
+use parse_context::{ParseResult, ParseContext};
 
 pub fn parse(str: &str) -> ParseResult {
-  let mut status = ParseStatus::new(str);
+  let mut context = ParseContext::new(str);
 
   let mut last_index = 0;
   for (i, c) in str.chars().enumerate() {
@@ -27,30 +27,42 @@ pub fn parse(str: &str) -> ParseResult {
     if char_type == CharType::Space {
       let space_len = get_space_length(str, i);
       let spaces = get_unicode_substring(str, i, space_len);
-      status.handle_spaces(spaces);
+      context.handle_spaces(spaces);
       if space_len > 1 {
         last_index = i + space_len - 1;
       }
-    } else if status.is_shorthand(c, str.chars().nth(i + 1)) {
-      status.append_content(c);
+    } else if context.is_shorthand(c, str.chars().nth(i + 1)) {
+      context.append_content(c);
     } else if char_type.is_punctuation() {
-      status.handle_punctuation(i, c, char_type);
+      context.handle_punctuation(i, c, char_type);
     } else if char_type.is_letter() {
-      status.handle_letter(i, c, char_type);
+      context.handle_letter(i, c, char_type);
     } else {
-      status.handle_letter(i, c, char_type);
+      context.handle_letter(i, c, char_type);
     }
   }
 
   // handle errors!
 
   return ParseResult {
-    root: status.root,
-    errors: status.errors,
+    root: context.root,
+    errors: context.errors,
   };
 }
 
-pub fn to_mutalbe_parse_result() {
-  // to_mutable_token
-  // to_mutable_mark
+pub fn to_mut_parse_result() {
+  // to_mut_token
+  // to_mut_mark
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_parse() {
+    let str = "中文，English 中文";
+    let result = parse(str);
+    println!("{:?}", result);
+  }
 }

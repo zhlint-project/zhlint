@@ -7,14 +7,14 @@ use crate::{
 type TokenPath = Vec<usize>;
 
 #[derive(Debug)]
-pub struct ParseStatus {
+pub struct ParseContext {
   pub root: Token,
   pub last_group_path: TokenPath,
   pub unresolved_marks_count: usize,
   pub errors: Vec<String>, // TODO: Validation
 }
 
-impl ParseStatus {
+impl ParseContext {
   pub fn new(str: &str) -> Self {
     let root = Token {
       base: CommonToken {
@@ -36,7 +36,7 @@ impl ParseStatus {
         children: vec![],
       }),
     };
-    ParseStatus {
+    ParseContext {
       root,
       last_group_path: vec![],
       unresolved_marks_count: 0,
@@ -303,7 +303,7 @@ pub struct ParseResult {
 }
 
 #[derive(Debug)]
-pub struct MutableParseResult {
+pub struct MutParseResult {
   pub root: MutToken,
   pub errors: Vec<String>, // TODO: Validation
 }

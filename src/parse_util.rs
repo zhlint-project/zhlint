@@ -5,15 +5,6 @@ use crate::{
   token_type::HyperTokenType,
 };
 
-// TODO:
-pub fn mark_to_token() {}
-
-// TODO:
-pub fn add_hyper_token() {}
-
-// TODO:
-pub fn add_raw_content() {}
-
 pub fn get_space_length(
   str: &str,
   i: usize

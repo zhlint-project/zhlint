@@ -25,15 +25,3 @@ fn main() {
     }
   };
 }
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn test_parse() {
-    let str = "中文，English 中文";
-    let result = parse(str);
-    println!("{:?}", result);
-  }
-}
