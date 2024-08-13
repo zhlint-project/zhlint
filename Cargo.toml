@@ -1,6 +1,6 @@
 [package]
 name = "zhlint"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Zhao Jinjiang <zhaojinjiang@me.com>"]
 edition = "2021"
 description = "A linting tool for Chinese text content."
