@@ -1,4 +1,4 @@
-use crate::{char_type::{CharType, LEFT_BRACKET, LEFT_QUOTATION, NEUTRAL_QUOTATION, RIGHT_QUOTATION}, token_type::{GroupTokenExtra, Mark, MarkSideType, MarkType, NewCommonToken, NewMutToken, NewToken, NewTokenExtraType, TokenType}, type_trait::{char_type_to_token_type, TypeTrait}};
+use crate::{char_type::{get_char_type, CharType, LEFT_BRACKET, LEFT_QUOTATION, NEUTRAL_QUOTATION, RIGHT_QUOTATION, SHORTHAND, SHORTHAND_PAIR}, token_type::{GroupTokenExtra, Mark, MarkSideType, MarkType, NewCommonToken, NewMutToken, NewToken, NewTokenExtraType, TokenType}, type_trait::{char_type_to_token_type, TypeTrait}};
 
 type NewTokenPath = Vec<usize>;
 
@@ -9,8 +9,6 @@ pub struct NewParseStatus {
   pub unresolved_marks_count: usize,
   pub errors: Vec<String>, // TODO: Validation
 }
-
-// TODO: add mark, resolve mark, add group, add token, resolve group, resolve token
 
 impl NewParseStatus {
   pub fn new(str: &str) -> Self {
@@ -42,9 +40,6 @@ impl NewParseStatus {
     }  
   }
   pub fn get_last_token(&mut self) -> Option<&mut NewToken> {
-    if self.last_group_path.len() == 0 {
-      return None;
-    }
     let mut last_group = &mut self.root;
     for i in &self.last_group_path {
       match last_group.extra {
@@ -72,9 +67,9 @@ impl NewParseStatus {
       match current.extra {
         NewTokenExtraType::Group(ref mut extra) => {
           if i < &extra.children.len() {
-          current = &mut extra.children[*i];
+            current = &mut extra.children[*i];
           } else {
-          return None;
+            return None;
           }
         },
         _ => return None,
@@ -199,6 +194,35 @@ impl NewParseStatus {
       }
     }
     self.last_group_path.pop();
+  }
+
+  pub fn is_shorthand(&mut self, c: char, next_c: Option<char>) -> bool {
+    if !SHORTHAND.contains(&c) {
+      return false;
+    }
+    let last_token = self.get_last_token();
+    if last_token.is_none() {
+      return false;
+    }
+    if last_token.unwrap().base.token_type != TokenType::WesternLetter {
+      return false;
+    }
+    if next_c.is_none() {
+      return false;
+    }
+    let next_char_type = get_char_type(next_c.unwrap());
+    if next_char_type == CharType::WesternLetter || next_char_type == CharType::Space {
+      let last_group = self.get_last_group();
+      if last_group.is_none() {
+        return true;
+      }
+      if let NewTokenExtraType::Group(extra) = &last_group.unwrap().extra {
+        if SHORTHAND_PAIR.contains_key(&extra.start_value.chars().nth(0).unwrap()) {
+          return true;
+        }
+      }
+    }
+    return true;
   }
 
   pub fn handle_letter(&mut self, index: usize, c: char, char_type: CharType) {
