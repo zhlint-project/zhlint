@@ -95,7 +95,7 @@ pub enum TokenType {
 /// Tokens
 
 #[derive(Debug)]
-pub struct NewCommonToken {
+pub struct CommonToken {
   // pub id: usize,
   // pub parent_id: usize,
 
@@ -121,15 +121,15 @@ pub struct GroupTokenExtra<T> {
 }
 
 #[derive(Debug)]
-pub enum NewTokenExtraType {
+pub enum TokenExtraType {
   Single,
-  Group(GroupTokenExtra<NewToken>),
+  Group(GroupTokenExtra<Token>),
 }
 
 #[derive(Debug)]
-pub struct NewToken {
-  pub base: NewCommonToken,
-  pub extra: NewTokenExtraType,
+pub struct Token {
+  pub base: CommonToken,
+  pub extra: TokenExtraType,
 }
 
 #[derive(Debug)]
@@ -155,13 +155,13 @@ pub struct MutGroupTokenExtra {
 }
 
 #[derive(Debug)]
-pub enum NewMutTokenExtraType {
+pub enum MutTokenExtraType {
   Single(MutTokenExtra),
-  Group(GroupTokenExtra<NewMutToken>, MutGroupTokenExtra),
+  Group(GroupTokenExtra<MutToken>, MutGroupTokenExtra),
 }
 
 #[derive(Debug)]
-pub struct NewMutToken {
-  pub token: NewCommonToken,
-  pub extra: NewMutTokenExtraType,
+pub struct MutToken {
+  pub token: CommonToken,
+  pub extra: MutTokenExtraType,
 }

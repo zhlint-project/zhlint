@@ -7,10 +7,10 @@ pub mod parse_status;
 use char_type::{get_char_type, get_unicode_substring, CharType};
 use type_trait::TypeTrait;
 use parse_util::get_space_length;
-use parse_status::{NewParseResult, NewParseStatus};
+use parse_status::{ParseResult, ParseStatus};
 
-pub fn parse(str: &str) -> NewParseResult {
-  let mut status = NewParseStatus::new(str);
+pub fn parse(str: &str) -> ParseResult {
+  let mut status = ParseStatus::new(str);
 
   let mut last_index = 0;
   for (i, c) in str.chars().enumerate() {
@@ -44,7 +44,7 @@ pub fn parse(str: &str) -> NewParseResult {
 
   // handle errors!
 
-  return NewParseResult {
+  return ParseResult {
     root: status.root,
     errors: status.errors,
   };

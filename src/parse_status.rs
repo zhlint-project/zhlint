@@ -1,23 +1,23 @@
 use crate::{
   char_type::{get_char_type, CharType, LEFT_BRACKET, LEFT_QUOTATION, NEUTRAL_QUOTATION, RIGHT_QUOTATION, SHORTHAND, SHORTHAND_PAIR},
-  token_type::{GroupTokenExtra, Mark, MarkSideType, MarkType, NewCommonToken, NewMutToken, NewToken, NewTokenExtraType, TokenType},
+  token_type::{GroupTokenExtra, Mark, MarkSideType, MarkType, CommonToken, MutToken, Token, TokenExtraType, TokenType},
   type_trait::{char_type_to_token_type, TypeTrait}
 };
 
-type NewTokenPath = Vec<usize>;
+type TokenPath = Vec<usize>;
 
 #[derive(Debug)]
-pub struct NewParseStatus {
-  pub root: NewToken,
-  pub last_group_path: NewTokenPath,
+pub struct ParseStatus {
+  pub root: Token,
+  pub last_group_path: TokenPath,
   pub unresolved_marks_count: usize,
   pub errors: Vec<String>, // TODO: Validation
 }
 
-impl NewParseStatus {
+impl ParseStatus {
   pub fn new(str: &str) -> Self {
-    let root = NewToken {
-      base: NewCommonToken {
+    let root = Token {
+      base: CommonToken {
         // id: 0,
         // parent_id: usize::MAX,
         token_type: TokenType::Group,
@@ -27,7 +27,7 @@ impl NewParseStatus {
         space_after: String::from(""),
         mark: None,
       },
-      extra: NewTokenExtraType::Group(GroupTokenExtra {
+      extra: TokenExtraType::Group(GroupTokenExtra {
         start_index: 0,
         start_value: String::from(""),
         end_index: str.len(),
@@ -36,18 +36,18 @@ impl NewParseStatus {
         children: vec![],
       }),
     };
-    NewParseStatus {
+    ParseStatus {
       root,
       last_group_path: vec![],
       unresolved_marks_count: 0,
       errors: vec![],
     }  
   }
-  pub fn get_last_token(&mut self) -> Option<&mut NewToken> {
+  pub fn get_last_token(&mut self) -> Option<&mut Token> {
     let mut last_group = &mut self.root;
     for i in &self.last_group_path {
       match last_group.extra {
-        NewTokenExtraType::Group(ref mut extra) => {
+        TokenExtraType::Group(ref mut extra) => {
           if i < &extra.children.len() {
             last_group = &mut extra.children[*i];
           } else {
@@ -57,19 +57,19 @@ impl NewParseStatus {
         _ => return None,
       }
     }
-    if let NewTokenExtraType::Group(ref mut extra) = last_group.extra {
+    if let TokenExtraType::Group(ref mut extra) = last_group.extra {
       return extra.children.last_mut();
     }
     None
   }
-  pub fn get_last_group(&mut self) -> Option<&mut NewToken> {
+  pub fn get_last_group(&mut self) -> Option<&mut Token> {
     let mut current = &mut self.root;
     if self.last_group_path.len() == 0 {
       return Some(current);
     }
     for i in &self.last_group_path {
       match current.extra {
-        NewTokenExtraType::Group(ref mut extra) => {
+        TokenExtraType::Group(ref mut extra) => {
           if i < &extra.children.len() {
             current = &mut extra.children[*i];
           } else {
@@ -82,10 +82,10 @@ impl NewParseStatus {
     Some(current)
   }
 
-  pub fn add_token(&mut self, token: NewToken) -> Option<usize> {
+  pub fn add_token(&mut self, token: Token) -> Option<usize> {
     if let Some(last_group) = self.get_last_group() {
       match last_group.extra {
-        NewTokenExtraType::Group(ref mut extra) => {
+        TokenExtraType::Group(ref mut extra) => {
           extra.children.push(token);
           return Some(extra.children.len() - 1);
         },
@@ -96,8 +96,8 @@ impl NewParseStatus {
   }
 
   pub fn add_bracket_token(&mut self, index: usize, c: char, mark_side: MarkSideType) {
-    let token = NewToken {
-      base: NewCommonToken {
+    let token = Token {
+      base: CommonToken {
         token_type: TokenType::BracketMark,
         index,
         length: 1,
@@ -109,13 +109,13 @@ impl NewParseStatus {
           meta: None,
         }),
       },
-      extra: NewTokenExtraType::Single,
+      extra: TokenExtraType::Single,
     };
     self.add_token(token);
   }
   pub fn add_single_punctuation_token(&mut self, index: usize, c: char, token_type: TokenType) {
-    let token = NewToken {
-      base: NewCommonToken {
+    let token = Token {
+      base: CommonToken {
         token_type,
         index,
         length: 1,
@@ -123,13 +123,13 @@ impl NewParseStatus {
         space_after: String::from(""),
         mark: None,
       },
-      extra: NewTokenExtraType::Single,
+      extra: TokenExtraType::Single,
     };
     self.add_token(token);
   }
   pub fn add_unmatched_token(&mut self, index: usize, c: char) {
-    let token = NewToken {
-      base: NewCommonToken {
+    let token = Token {
+      base: CommonToken {
         token_type: TokenType::UnmatchedMark,
         index,
         length: 1,
@@ -137,13 +137,13 @@ impl NewParseStatus {
         space_after: String::from(""),
         mark: None,
       },
-      extra: NewTokenExtraType::Single,
+      extra: TokenExtraType::Single,
     };
     self.add_token(token);
   }
   pub fn add_content_token(&mut self, index: usize, c: char, token_type: TokenType) {
-    let token = NewToken {
-      base: NewCommonToken {
+    let token = Token {
+      base: CommonToken {
         token_type,
         index,
         length: 1, // appendable
@@ -151,7 +151,7 @@ impl NewParseStatus {
         space_after: String::from(""),
         mark: None,
       },
-      extra: NewTokenExtraType::Single,
+      extra: TokenExtraType::Single,
     };
     self.add_token(token);
   }
@@ -163,8 +163,8 @@ impl NewParseStatus {
   }
 
   pub fn add_group_token(&mut self, index: usize, c: char) {
-    let token = NewToken {
-      base: NewCommonToken {
+    let token = Token {
+      base: CommonToken {
         token_type: TokenType::Group,
         index,
         length: usize::MAX, // undetermined
@@ -172,7 +172,7 @@ impl NewParseStatus {
         space_after: String::from(""),
         mark: None,
       },
-      extra: NewTokenExtraType::Group(GroupTokenExtra {
+      extra: TokenExtraType::Group(GroupTokenExtra {
         start_index: index,
         start_value: c.to_string(),
         end_index: usize::MAX, // undetermined
@@ -190,7 +190,7 @@ impl NewParseStatus {
     if let Some(last_group) = self.get_last_group() {
       last_group.base.length = index - last_group.base.index + 1;
       match last_group.extra {
-        NewTokenExtraType::Group(ref mut extra) => {
+        TokenExtraType::Group(ref mut extra) => {
           extra.end_index = index;
           extra.end_value = c.to_string();
         },
@@ -220,7 +220,7 @@ impl NewParseStatus {
       if last_group.is_none() {
         return true;
       }
-      if let NewTokenExtraType::Group(extra) = &last_group.unwrap().extra {
+      if let TokenExtraType::Group(extra) = &last_group.unwrap().extra {
         if SHORTHAND_PAIR.contains_key(&extra.start_value.chars().nth(0).unwrap()) {
           return true;
         }
@@ -269,7 +269,7 @@ impl NewParseStatus {
       }
       if NEUTRAL_QUOTATION.contains(&c) {
         if let Some(last_group) = self.get_last_group() {
-          if let NewTokenExtraType::Group(ref mut extra) = last_group.extra {
+          if let TokenExtraType::Group(ref mut extra) = last_group.extra {
             if extra.start_value == c.to_string() {
               return self.finish_group_token(index, c);
             }
@@ -285,7 +285,7 @@ impl NewParseStatus {
   }
   pub fn handle_spaces(&mut self, spaces: &str) {
     if let Some(last_group) = self.get_last_group() {
-      if let NewTokenExtraType::Group(ref mut last_group_extra) = last_group.extra {
+      if let TokenExtraType::Group(ref mut last_group_extra) = last_group.extra {
         if let Some(last_token) = last_group_extra.children.last_mut() {
           last_token.base.space_after = String::from(spaces);
         } else {
@@ -297,13 +297,13 @@ impl NewParseStatus {
 }
 
 #[derive(Debug)]
-pub struct NewParseResult {
-  pub root: NewToken,
+pub struct ParseResult {
+  pub root: Token,
   pub errors: Vec<String>, // TODO: Validation
 }
 
 #[derive(Debug)]
-pub struct NewMutableParseResult {
-  pub root: NewMutToken,
+pub struct MutableParseResult {
+  pub root: MutToken,
   pub errors: Vec<String>, // TODO: Validation
 }
