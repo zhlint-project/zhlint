@@ -31,6 +31,7 @@ pub struct ParseResult {
   pub errors: Vec<Rc<RefCell<String>>>, // TODO: Validation
 }
 
+#[derive(Debug)]
 pub struct MutableParseResult {
   pub tokens: Rc<RefCell<MutToken>>,
   pub groups: Vec<Rc<RefCell<MutToken>>>,
@@ -87,6 +88,7 @@ pub fn init_mark(
   }
   let mark: Mark = Mark {
     mark_type: t,
+    mark_side: MarkSideType::Left,
     meta: None,
   };
   let mark_rc = Rc::new(RefCell::new(mark));

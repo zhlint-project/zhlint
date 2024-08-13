@@ -36,13 +36,8 @@ pub enum MarkSideType {
 #[derive(Debug)]
 pub struct Mark {
   pub mark_type: MarkType,
+  pub mark_side: MarkSideType,
   pub meta: Option<String>, // TODO: AST type enum
-}
-
-pub struct RawMark {
-  pub mark: Mark,
-  pub code: MarkSideType, // TODO: double check
-  pub right_pair: Option<Box<RawMark>>
 }
 
 /// Hyper token types
@@ -116,6 +111,22 @@ pub struct CommonToken {
 }
 
 #[derive(Debug)]
+pub struct NewCommonToken {
+  // pub id: usize,
+  // pub parent_id: usize,
+
+  pub token_type: TokenType,
+
+  pub index: usize,
+  pub length: usize,
+
+  pub value: String,
+  pub space_after: String,
+
+  pub mark: Option<Mark>,
+}
+
+#[derive(Debug)]
 pub struct GroupTokenExtra<T> {
   pub start_index: usize,
   pub start_value: String,
@@ -132,11 +143,24 @@ pub enum TokenExtraType {
 }
 
 #[derive(Debug)]
+pub enum NewTokenExtraType {
+  Single,
+  Group(GroupTokenExtra<NewToken>),
+}
+
+#[derive(Debug)]
 pub struct Token {
   pub base: CommonToken,
   pub extra: TokenExtraType,
 }
 
+#[derive(Debug)]
+pub struct NewToken {
+  pub base: NewCommonToken,
+  pub extra: NewTokenExtraType,
+}
+
+#[derive(Debug)]
 pub struct MutTokenExtra {
   pub modified_token_type: TokenType,
   pub ignored_token_type: bool,
@@ -146,6 +170,7 @@ pub struct MutTokenExtra {
   pub ignored_space_after: bool,
 }
 
+#[derive(Debug)]
 pub struct MutGroupTokenExtra {
   pub modified_start_value: String,
   pub ignored_start_value: bool,
@@ -157,12 +182,26 @@ pub struct MutGroupTokenExtra {
   pub ignored_inner_space_before: String,
 }
 
+#[derive(Debug)]
 pub enum MutTokenExtraType {
   Single(MutTokenExtra),
   Group(GroupTokenExtra<Rc<RefCell<MutToken>>>, MutGroupTokenExtra),
 }
 
+#[derive(Debug)]
+pub enum NewMutTokenExtraType {
+  Single(MutTokenExtra),
+  Group(GroupTokenExtra<NewMutToken>, MutGroupTokenExtra),
+}
+
+#[derive(Debug)]
 pub struct MutToken {
   pub token: CommonToken,
   pub extra: MutTokenExtraType,
+}
+
+#[derive(Debug)]
+pub struct NewMutToken {
+  pub token: NewCommonToken,
+  pub extra: NewMutTokenExtraType,
 }
