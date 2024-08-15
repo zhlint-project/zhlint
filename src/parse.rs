@@ -3,6 +3,7 @@ pub mod token_type;
 pub mod type_trait;
 pub mod parse_util;
 pub mod parse_context;
+pub mod hyper;
 
 use char_type::{get_char_type, get_unicode_substring, CharType};
 use type_trait::TypeTrait;
