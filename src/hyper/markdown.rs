@@ -1,72 +1,101 @@
-use pulldown_cmark::{Parser, Event};
+use markdown_context::ParseResult;
+use pulldown_cmark::{Event, Parser, Tag};
 
-pub struct InlineMark {
-  pub start_offset: usize,
-  pub start_content: String,
-  pub end_offset: usize,
-  pub end_content: String,
-  pub meta: Option<String>,
-  pub code: Option<String>,
-}
-
-pub struct BlockMark {
-  pub start_offset: usize,
-  pub end_offset: usize,
-  pub inline_marks: Vec<InlineMark>,
-}
-
-pub struct ParseResult {
-  pub blocks: Vec<BlockMark>,
-  pub errors: Vec<String>, // TODO: validation
-}
+pub mod markdown_context;
 
 pub fn parse(str: &str) -> ParseResult {
   let parser = Parser::new(str);
   let iter = parser.into_offset_iter();
   for (event, range) in iter {
     println!("event: {:?} {:?}", event, range);
+
     match event {
-      Event::Start(_tag) => {
+      Event::Start(tag) => {
         // block
-        // inline
+        match tag {
+          Tag::Paragraph => {
+            // new block
+          }
+          Tag::Heading(_, _, _) => {
+            // new block
+          }
+          Tag::TableCell => {
+            // new block
+          }
+          Tag::BlockQuote => {
+            // => Paragraph with `> ` in-between
+          }
+          Tag::Item => {
+            // => accept inline content after TaskListMarker and till a sub-block
+          }
+
+          Tag::Emphasis => {
+            // new inline (mark pair)
+          }
+          Tag::Strong => {
+            // new inline (mark pair)
+          }
+          Tag::Strikethrough => {
+            // new inline (mark pair)
+          }
+          Tag::Link(_, _, _) => {
+            // new inline (mark pair)
+          }
+          Tag::Image(_, _, _) => {
+            // new inline (mark pair: non-code)
+          }
+
+          Tag::List(_) => {} // => Item
+          Tag::Table(_) => {} // => TableCell
+          Tag::TableHead => {} // => TableCell
+          Tag::TableRow => {} // => TableCell
+
+          Tag::CodeBlock(_) => {} // code => skip
+          Tag::FootnoteDefinition(_) => {} // no display => skip
+        }
       }
-      Event::End(_tag) => {
-        // block
-        // inline
-      }
+      Event::End(_tag) => {} // skip
+
       Event::Text(_text) => {
-        // skip
+        // new inline
       }
       Event::Code(_code) => {
-        // in block: hyper with code
-        // out block: none
-      }
-      Event::Html(_html) => {
-        // in block: hyper with non-code
-        // out block: none
+        // new inline (single mark: code)
       }
       // `[^xxx]` -> FootnoteDefinition
       Event::FootnoteReference(_reference) => {
-        // hyper without content
+        // new inline (single mark)
       }
       // `\n`
       Event::SoftBreak => {
-        // hyper without content
+        // new inline (single mark)
       }
       // `  \n`
       Event::HardBreak => {
-        // hyper without content
+        // new inline (single mark)
       }
-      Event::Rule => {
-        // skip
+
+      Event::Html(_html) => {
+        // if in block => (single or pair, code or non-code)
       }
-      Event::TaskListMarker(_checked) => {
-        // TODO
-      }
+
+      Event::Rule => {} // skip
+      Event::TaskListMarker(_checked) => {} // skip
     }
   }
   ParseResult {
     blocks: vec![],
     errors: vec![],
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_parse() {
+    let result = parse("Hello, world!");
+    println!("result: {:?}", result);
   }
 }
