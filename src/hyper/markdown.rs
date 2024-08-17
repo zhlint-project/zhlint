@@ -1,4 +1,4 @@
-use markdown_context::ParseResult;
+use markdown_context::{Context, InlineType, ParseResult};
 use pulldown_cmark::{Event, Parser, Tag};
 
 pub mod markdown_context;
@@ -6,6 +6,7 @@ pub mod markdown_context;
 pub fn parse(str: &str) -> ParseResult {
   let parser = Parser::new(str);
   let iter = parser.into_offset_iter();
+  let mut context = Context::new(str);
   for (event, range) in iter {
     println!("event: {:?} {:?}", event, range);
 
@@ -14,13 +15,13 @@ pub fn parse(str: &str) -> ParseResult {
         // block
         match tag {
           Tag::Paragraph => {
-            // new block
+            context.handle_block(range.clone())
           }
           Tag::Heading(_, _, _) => {
-            // new block
+            context.handle_block(range.clone())
           }
           Tag::TableCell => {
-            // new block
+            context.handle_block(range.clone())
           }
           Tag::BlockQuote => {
             // => Paragraph with `> ` in-between
@@ -30,19 +31,19 @@ pub fn parse(str: &str) -> ParseResult {
           }
 
           Tag::Emphasis => {
-            // new inline (mark pair)
+            context.handle_inline(range.clone(), InlineType::MarkPair)
           }
           Tag::Strong => {
-            // new inline (mark pair)
+            context.handle_inline(range.clone(), InlineType::MarkPair)
           }
           Tag::Strikethrough => {
-            // new inline (mark pair)
+            context.handle_inline(range.clone(), InlineType::MarkPair)
           }
           Tag::Link(_, _, _) => {
-            // new inline (mark pair)
+            context.handle_inline(range.clone(), InlineType::MarkPair)
           }
           Tag::Image(_, _, _) => {
-            // new inline (mark pair: non-code)
+            context.handle_inline(range.clone(), InlineType::SingleMark)
           }
 
           Tag::List(_) => {} // => Item
@@ -57,22 +58,22 @@ pub fn parse(str: &str) -> ParseResult {
       Event::End(_tag) => {} // skip
 
       Event::Text(_text) => {
-        // new inline
+        context.handle_inline(range.clone(), InlineType::Text)
       }
       Event::Code(_code) => {
-        // new inline (single mark: code)
+        context.handle_inline(range.clone(), InlineType::MarkPairWithCode)
       }
       // `[^xxx]` -> FootnoteDefinition
       Event::FootnoteReference(_reference) => {
-        // new inline (single mark)
+        context.handle_inline(range.clone(), InlineType::SingleMark)
       }
       // `\n`
       Event::SoftBreak => {
-        // new inline (single mark)
+        context.handle_inline(range.clone(), InlineType::SingleMark)
       }
       // `  \n`
       Event::HardBreak => {
-        // new inline (single mark)
+        context.handle_inline(range.clone(), InlineType::SingleMark)
       }
 
       Event::Html(_html) => {
@@ -84,8 +85,8 @@ pub fn parse(str: &str) -> ParseResult {
     }
   }
   ParseResult {
-    blocks: vec![],
-    errors: vec![],
+    blocks: context.blocks,
+    errors: context.errors,
   }
 }
 
