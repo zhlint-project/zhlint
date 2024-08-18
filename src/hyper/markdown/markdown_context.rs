@@ -22,19 +22,39 @@ pub struct BlockMark {
 }
 
 #[derive(Debug)]
-pub struct Context {
-  pub str: String,
+pub struct Context<'a> {
+  pub str: &'a str,
   pub blocks: Vec<BlockMark>,
   pub errors: Vec<String>,
   pub unresolved_block: Option<BlockMark>,
-  pub unresolved_inlines: Vec<InlineMark>,
+  pub cur_index: usize,
 }
 
-fn update_pair_range(pair: &mut Pair, range: Range<usize>) {
+#[derive(PartialEq)]
+enum RangeVsPair {
+  Ahead,
+  Inside,
+  Behind,
+  None,
+}
+
+fn update_pair_range(pair: &mut Pair, range: Range<usize>) -> RangeVsPair {
   if range.start >= pair.start_range.start && range.end <= pair.start_range.end {
     pair.start_range.end = min(range.start, pair.start_range.end);
     pair.end_range.start = max(range.end, pair.end_range.start);
+    RangeVsPair::Inside
+  } else if range.start < pair.start_range.start {
+    RangeVsPair::Ahead
+  } else if range.end > pair.end_range.end {
+    RangeVsPair::Behind
+  } else {
+    RangeVsPair::None
   }
+}
+
+fn determine_pair_content(str: &str, pair: &mut Pair) {
+  pair.start_content = str[pair.start_range.clone()].to_string();
+  pair.end_content = str[pair.end_range.clone()].to_string();
 }
 
 // TODO: Item, BlockQuote, Html
@@ -47,15 +67,22 @@ pub enum InlineType {
   SingleMark,
 }
 
-impl Context {
+impl<'a> Context<'a> {
   pub fn new(str: &str) -> Context {
     Context {
-      str: str.to_string(),
+      str,
       blocks: Vec::new(),
       errors: Vec::new(),
       unresolved_block: None,
-      unresolved_inlines: Vec::new(),
+      cur_index: 0,
     }
+  }
+  pub fn get_unresolved_inlines(&mut self) -> Vec<&mut InlineMark> {
+    self.unresolved_block.as_mut().map(|block| {
+      block.inline_marks.iter_mut().filter(|inline|
+        inline.pair.end_range.end >= self.cur_index
+      ).collect()
+    }).unwrap_or_default()
   }
   pub fn handle_block(&mut self, range: Range<usize>) {
     let current_block = BlockMark {
@@ -68,34 +95,37 @@ impl Context {
       inline_marks: Vec::new(),
     };
     if self.unresolved_block.is_some() {
-      // TODO: determine the end_range and end_content
-      let unresolved_block = self.unresolved_block.take().unwrap();
+      let mut unresolved_block = self.unresolved_block.take().unwrap();
+      determine_pair_content(self.str, &mut unresolved_block.pair);
       self.blocks.push(unresolved_block);
     }
     self.unresolved_block = Some(current_block);
   }
-  pub fn update_unsolved_range(&mut self, range: Range<usize>) {
+  pub fn update_unresolved_range(&mut self, range: Range<usize>) {
     if let Some(last_block) = &mut self.unresolved_block {
       update_pair_range(&mut last_block.pair, range.clone());
-      for inline in &mut self.unresolved_inlines {
-        update_pair_range(&mut inline.pair, range.clone());
+      let str = self.str;
+      let mut new_cur_index = range.end;
+      for inline in self.get_unresolved_inlines() {
+        if update_pair_range(&mut inline.pair, range.clone()) == RangeVsPair::Behind {
+          determine_pair_content(str, &mut inline.pair);
+          new_cur_index = inline.pair.end_range.end;
+        }
       }
-      // TODO: resolve inlines and determine the `start_content` and `end_content`
-      // if `range.start` is beyond `inline.pair.end_range`
+      self.cur_index = new_cur_index;
     }
   }
   pub fn handle_inline(&mut self, range: Range<usize>, inline_type: InlineType) {
-    self.update_unsolved_range(range.clone());
-    if let Some(_last_block) = &mut self.unresolved_block {
-      // TODO:
-      // 0. => update temp start_content and end_content in the range
-      // 1. text: Text
-      // 2. mark pair: Start(Emphasis), Start(Strong), Start(Strikethrough), Start(Link)
-      //    - add to inline_marks with temp start_content and end_content
-      // 3. mark pair with code: Code
-      //    - add to inline_marks with full data
-      // 4. single mark: Start(Image), FootnoteReference, SoftBreak, HardBreak
-      //    - add to inline_marks with full data
+    // 0. => update temp start_content and end_content in the range
+    // 1. text: Text
+    // 2. mark pair: Start(Emphasis), Start(Strong), Start(Strikethrough), Start(Link)
+    //    - add to inline_marks with temp start_content and end_content
+    // 3. mark pair with code: Code
+    //    - add to inline_marks with full data
+    // 4. single mark: Start(Image), FootnoteReference, SoftBreak, HardBreak
+    //    - add to inline_marks with full data
+    self.update_unresolved_range(range.clone());
+    if let Some(last_block) = &mut self.unresolved_block {
       match inline_type {
         InlineType::Text => {
           // skip
@@ -111,7 +141,7 @@ impl Context {
             meta: None,
             code: None,
           };
-          self.unresolved_inlines.push(inline_mark);
+          last_block.inline_marks.push(inline_mark);
         }
         InlineType::MarkPairWithCode => {
           let inline_mark = InlineMark {
