@@ -8,11 +8,18 @@ pub struct Pair {
   pub end_content: String,
 }
 
+#[derive(Debug, PartialEq)]
+pub enum InlineType {
+  Text,
+  MarkPair,
+  MarkPairWithCode,
+  SingleMark,
+}
+
 #[derive(Debug)]
 pub struct InlineMark {
   pub pair: Pair,
-  pub meta: Option<String>,
-  pub code: Option<String>,
+  pub meta: InlineType,
 }
 
 #[derive(Debug)]
@@ -39,7 +46,7 @@ enum RangeVsPair {
 }
 
 fn update_pair_range(pair: &mut Pair, range: Range<usize>) -> RangeVsPair {
-  if range.start >= pair.start_range.start && range.end <= pair.start_range.end {
+  if range.start >= pair.start_range.start && range.end <= pair.end_range.end {
     pair.start_range.end = min(range.start, pair.start_range.end);
     pair.end_range.start = max(range.end, pair.end_range.start);
     RangeVsPair::Inside
@@ -59,14 +66,6 @@ fn determine_pair_content(str: &str, pair: &mut Pair) {
 
 // TODO: Item, BlockQuote, Html
 
-#[derive(PartialEq)]
-pub enum InlineType {
-  Text,
-  MarkPair,
-  MarkPairWithCode,
-  SingleMark,
-}
-
 impl<'a> Context<'a> {
   pub fn new(str: &str) -> Context {
     Context {
@@ -85,6 +84,7 @@ impl<'a> Context<'a> {
     }).unwrap_or_default()
   }
   pub fn handle_block(&mut self, range: Range<usize>) {
+    println!("handle block {:?} {:?}", range, &self.str[range.clone()]);
     let current_block = BlockMark {
       pair: Pair {
         start_range: range.clone(), // init the right from the max length
@@ -100,6 +100,7 @@ impl<'a> Context<'a> {
       self.blocks.push(unresolved_block);
     }
     self.unresolved_block = Some(current_block);
+    println!("context {:?}", self);
   }
   pub fn update_unresolved_range(&mut self, range: Range<usize>) {
     if let Some(last_block) = &mut self.unresolved_block {
@@ -107,7 +108,7 @@ impl<'a> Context<'a> {
       let str = self.str;
       let mut new_cur_index = range.end;
       for inline in self.get_unresolved_inlines() {
-        if update_pair_range(&mut inline.pair, range.clone()) == RangeVsPair::Behind {
+        if inline.meta == InlineType::MarkPair && update_pair_range(&mut inline.pair, range.clone()) == RangeVsPair::Behind {
           determine_pair_content(str, &mut inline.pair);
           new_cur_index = inline.pair.end_range.end;
         }
@@ -116,6 +117,7 @@ impl<'a> Context<'a> {
     }
   }
   pub fn handle_inline(&mut self, range: Range<usize>, inline_type: InlineType) {
+    println!("handle inline {:?} {:?} {:?}", range, inline_type, &self.str[range.clone()]);
     // 0. => update temp start_content and end_content in the range
     // 1. text: Text
     // 2. mark pair: Start(Emphasis), Start(Strong), Start(Strikethrough), Start(Link)
@@ -138,22 +140,19 @@ impl<'a> Context<'a> {
               end_range: range.clone(), // init the left from the max length
               end_content: String::new(), // determine when resolved
             },
-            meta: None,
-            code: None,
+            meta: inline_type,
           };
           last_block.inline_marks.push(inline_mark);
         }
         InlineType::MarkPairWithCode => {
           let inline_mark = InlineMark {
             pair: Pair {
-              // TODO: double-check
               start_range: range.clone(),
-              start_content: String::new(),
-              end_range: range.clone(),
+              start_content: self.str[range.clone()].to_string(),
+              end_range: Range { start: range.end, end: range.end },
               end_content: String::new(),
             },
-            meta: None,
-            code: Some(String::new()),
+            meta: inline_type,
           };
           self.unresolved_block.as_mut().unwrap().inline_marks.push(inline_mark);
         }
@@ -165,12 +164,18 @@ impl<'a> Context<'a> {
               end_range: Range { start: range.end, end: range.end },
               end_content: String::new(),
             },
-            meta: None,
-            code: None,
+            meta: inline_type,
           };
           self.unresolved_block.as_mut().unwrap().inline_marks.push(inline_mark);
         }
       }
+    }
+    println!("context {:?}", self);
+  }
+  pub fn finalize(&mut self) {
+    if let Some(mut last_block) = self.unresolved_block.take() {
+      determine_pair_content(self.str, &mut last_block.pair);
+      self.blocks.push(last_block);
     }
   }
 }

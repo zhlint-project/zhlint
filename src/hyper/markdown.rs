@@ -8,7 +8,7 @@ pub fn parse(str: &str) -> ParseResult {
   let iter = parser.into_offset_iter();
   let mut context = Context::new(str);
   for (event, range) in iter {
-    println!("event: {:?} {:?}", event, range);
+    println!("cmark event: {:?} {:?}", event, range);
 
     match event {
       Event::Start(tag) => {
@@ -84,6 +84,7 @@ pub fn parse(str: &str) -> ParseResult {
       Event::TaskListMarker(_checked) => {} // skip
     }
   }
+  context.finalize();
   ParseResult {
     blocks: context.blocks,
     errors: context.errors,
@@ -97,6 +98,15 @@ mod tests {
   #[test]
   fn test_parse() {
     let result = parse("Hello, world!");
+    println!("result: {:?}", result);
+
+    let result = parse("**Hello**, world!");
+    println!("result: {:?}", result);
+
+    let result = parse("**Hello**, `world`!");
+    println!("result: {:?}", result);
+
+    let result = parse("**Hello**, ![foo](#foo), [bar bar](#bar-bar) `world`!");
     println!("result: {:?}", result);
   }
 }
