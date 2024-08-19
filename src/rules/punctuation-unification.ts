@@ -96,14 +96,14 @@ const generateHandler = (options: Options): Handler => {
 
   const handlerPunctuationUnified = (token: MutableToken) => {
     if (token.type === GroupTokenType.GROUP) {
-      if (charMap[token.modifiedStartValue]) {
+      if (Object.prototype.hasOwnProperty.call(charMap, token.modifiedStartValue)) {
         checkStartValue(
           token,
           charMap[token.modifiedStartValue],
           PUNCTUATION_UNIFICATION
         )
       }
-      if (charMap[token.modifiedEndValue]) {
+      if (Object.prototype.hasOwnProperty.call(charMap, token.modifiedEndValue)) {
         checkEndValue(
           token,
           charMap[token.modifiedEndValue],
@@ -112,7 +112,7 @@ const generateHandler = (options: Options): Handler => {
       }
       return
     } else {
-      if (charMap[token.modifiedValue]) {
+      if (Object.prototype.hasOwnProperty.call(charMap, token.modifiedValue)) {
         checkValue(
           token,
           charMap[token.modifiedValue],
