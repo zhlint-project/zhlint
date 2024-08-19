@@ -27,7 +27,7 @@ const newCharTypeSet: { [key in CharType]?: string } = {
   [CharType.FULLWIDTH_BRACKET]: '（）〔〕［］｛｝',
   [CharType.HALFWIDTH_OTHER_PUNCTUATION]: [
     // on-keyboard symbols
-    '~-+*/\\%=&|"`<>@#$^',
+    '~-+*/\\%=&|`<>@#$^',
     // symbol of death
     '†‡'
   ].join(''),
