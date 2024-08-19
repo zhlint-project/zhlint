@@ -182,4 +182,9 @@ import ApiIndex from './ApiIndex.vue'
 `
     expect(getOutput(text, options)).toBe(text)
   })
+  // https://github.com/zhlint-project/zhlint/issues/159
+  test('#159 unexpected function () { [native code] }', () => {
+    const text = `p.toString() 中文`
+    expect(getOutput(text, options)).toBe(text)
+  })
 })
