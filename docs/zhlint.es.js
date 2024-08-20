@@ -5647,7 +5647,7 @@ const $i = (e) => {
   [R.FULLWIDTH_BRACKET]: "（）〔〕［］｛｝",
   [R.HALFWIDTH_OTHER_PUNCTUATION]: [
     // on-keyboard symbols
-    '~-+*/\\%=&|"`<>@#$^',
+    "~-+*/\\%=&|`<>@#$^",
     // symbol of death
     "†‡"
   ].join(""),
@@ -7257,18 +7257,18 @@ ${w}
   const n = _f(e);
   return (i) => {
     if (i.type === ee.GROUP) {
-      n[i.modifiedStartValue] && In(
+      Object.prototype.hasOwnProperty.call(n, i.modifiedStartValue) && In(
         i,
         n[i.modifiedStartValue],
         cn
-      ), n[i.modifiedEndValue] && Pn(
+      ), Object.prototype.hasOwnProperty.call(n, i.modifiedEndValue) && Pn(
         i,
         n[i.modifiedEndValue],
         cn
       );
       return;
     } else
-      n[i.modifiedValue] && Rn(
+      Object.prototype.hasOwnProperty.call(n, i.modifiedValue) && Rn(
         i,
         n[i.modifiedValue],
         void 0,
