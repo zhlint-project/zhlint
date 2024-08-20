@@ -84,7 +84,7 @@ impl<'a> Context<'a> {
     }).unwrap_or_default()
   }
   pub fn handle_block(&mut self, range: Range<usize>) {
-    println!("handle block {:?} {:?}", range, &self.str[range.clone()]);
+    // println!("handle block {:?} {:?}", range, &self.str[range.clone()]);
     let current_block = BlockMark {
       pair: Pair {
         start_range: range.clone(), // init the right from the max length
@@ -100,7 +100,7 @@ impl<'a> Context<'a> {
       self.blocks.push(unresolved_block);
     }
     self.unresolved_block = Some(current_block);
-    println!("context {:?}", self);
+    // println!("context {:?}", self);
   }
   pub fn update_unresolved_range(&mut self, range: Range<usize>) {
     if let Some(last_block) = &mut self.unresolved_block {
@@ -117,7 +117,7 @@ impl<'a> Context<'a> {
     }
   }
   pub fn handle_inline(&mut self, range: Range<usize>, inline_type: InlineType) {
-    println!("handle inline {:?} {:?} {:?}", range, inline_type, &self.str[range.clone()]);
+    // println!("handle inline {:?} {:?} {:?}", range, inline_type, &self.str[range.clone()]);
     // 0. => update temp start_content and end_content in the range
     // 1. text: Text
     // 2. mark pair: Start(Emphasis), Start(Strong), Start(Strikethrough), Start(Link)
@@ -170,7 +170,7 @@ impl<'a> Context<'a> {
         }
       }
     }
-    println!("context {:?}", self);
+    // println!("context {:?}", self);
   }
   pub fn finalize(&mut self) {
     if let Some(mut last_block) = self.unresolved_block.take() {

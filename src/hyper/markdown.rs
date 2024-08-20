@@ -8,7 +8,7 @@ pub fn parse(str: &str) -> ParseResult {
   let iter = parser.into_offset_iter();
   let mut context = Context::new(str);
   for (event, range) in iter {
-    println!("cmark event: {:?} {:?}", event, range);
+    // println!("cmark event: {:?} {:?}", event, range);
 
     match event {
       Event::Start(tag) => {
@@ -78,6 +78,7 @@ pub fn parse(str: &str) -> ParseResult {
 
       Event::Html(_html) => {
         // if in block => (single or pair, code or non-code)
+        context.handle_inline(range.clone(), InlineType::SingleMark)
       }
 
       Event::Rule => {} // skip
@@ -107,6 +108,27 @@ mod tests {
     println!("result: {:?}", result);
 
     let result = parse("**Hello**, ![foo](#foo), [bar bar](#bar-bar) `world`!");
+    println!("result: {:?}", result);
+
+    let result = parse(r#"
+### foo
+
+hello world<s>!</s>
+
+<em>foo</em> bar <img /> baz <img> x
+
+<div>foo</div>
+
+<div>foo</div> bar
+
+baz <div>foo</div>
+
+foo <xxx>bar</xxx> baz
+
+<hr>
+
+yyy
+"#);
     println!("result: {:?}", result);
   }
 }
