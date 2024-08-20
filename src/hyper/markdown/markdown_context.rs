@@ -117,6 +117,7 @@ impl<'a> Context<'a> {
     }
   }
   pub fn handle_inline(&mut self, range: Range<usize>, inline_type: InlineType) {
+    // TODO: skip indents like `  `, blockquote prefix like `> `, list prefix like `- `
     // println!("handle inline {:?} {:?} {:?}", range, inline_type, &self.str[range.clone()]);
     // 0. => update temp start_content and end_content in the range
     // 1. text: Text

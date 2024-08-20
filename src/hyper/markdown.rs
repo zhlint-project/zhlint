@@ -4,7 +4,14 @@ use pulldown_cmark::{Event, Parser, Tag};
 pub mod markdown_context;
 
 pub fn parse(str: &str) -> ParseResult {
-  let parser = Parser::new(str);
+  let mut options = pulldown_cmark::Options::empty();
+  options.insert(pulldown_cmark::Options::ENABLE_TABLES);
+  options.insert(pulldown_cmark::Options::ENABLE_FOOTNOTES);
+  options.insert(pulldown_cmark::Options::ENABLE_STRIKETHROUGH);
+  options.insert(pulldown_cmark::Options::ENABLE_TASKLISTS);
+  options.insert(pulldown_cmark::Options::ENABLE_SMART_PUNCTUATION);
+  options.insert(pulldown_cmark::Options::ENABLE_HEADING_ATTRIBUTES);
+  let parser = Parser::new_ext(str, options);
   let iter = parser.into_offset_iter();
   let mut context = Context::new(str);
   for (event, range) in iter {
@@ -23,11 +30,9 @@ pub fn parse(str: &str) -> ParseResult {
           Tag::TableCell => {
             context.handle_block(range.clone())
           }
-          Tag::BlockQuote => {
-            // => Paragraph with `> ` in-between
-          }
           Tag::Item => {
             // => accept inline content after TaskListMarker and till a sub-block
+            // => create a temp block for each line
           }
 
           Tag::Emphasis => {
@@ -46,6 +51,7 @@ pub fn parse(str: &str) -> ParseResult {
             context.handle_inline(range.clone(), InlineType::SingleMark)
           }
 
+          Tag::BlockQuote => {} // => Paragraph
           Tag::List(_) => {} // => Item
           Tag::Table(_) => {} // => TableCell
           Tag::TableHead => {} // => TableCell
@@ -77,7 +83,7 @@ pub fn parse(str: &str) -> ParseResult {
       }
 
       Event::Html(_html) => {
-        // if in block => (single or pair, code or non-code)
+        // if in block => single mark
         context.handle_inline(range.clone(), InlineType::SingleMark)
       }
 
@@ -97,7 +103,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_parse() {
+  fn test_parse_basic() {
     let result = parse("Hello, world!");
     println!("result: {:?}", result);
 
@@ -109,7 +115,10 @@ mod tests {
 
     let result = parse("**Hello**, ![foo](#foo), [bar bar](#bar-bar) `world`!");
     println!("result: {:?}", result);
+  }
 
+  #[test]
+  fn test_parse_html() {
     let result = parse(r#"
 ### foo
 
@@ -128,6 +137,57 @@ foo <xxx>bar</xxx> baz
 <hr>
 
 yyy
+"#);
+    println!("result: {:?}", result);
+  }
+
+  #[test]
+  fn test_parse_blockquote() {
+    let result = parse(r#"
+> hello world
+> foo bar
+>
+> baz
+"#);
+    println!("result: {:?}", result);
+  }
+
+  #[test]
+  fn test_parse_list() {
+      let result = parse(r#"
+x
+
+ y
+
+- [x] foo  
+  fooo
+- [ ] bar
+- [x] baz  
+  bazzz
+  - [ ] qux
+
+  ```rust
+  fn main() {
+    println!("Hello, world!");
+  }
+  ```
+
+  foo
+"#);
+    println!("result: {:?}", result);
+  }
+
+  #[test]
+  fn test_parse_list_x_html() {
+    let result = parse(r#"
+- foo
+- <s>bar</s> bar bar
+- <div>bar</div> bazz
+- baz
+
+<s>bar</s> bar bar
+
+<div>baz</div> *bazz* bazzz
 "#);
     println!("result: {:?}", result);
   }
