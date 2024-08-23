@@ -2,7 +2,7 @@ use std::{fs, process::exit};
 
 use clap::Parser;
 
-use zhlint::parse;
+use zhlint::parse::parse;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]

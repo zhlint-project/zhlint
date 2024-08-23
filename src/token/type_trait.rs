@@ -1,4 +1,4 @@
-use crate::{char_type::CharType, token_type::TokenType};
+use super::{char_type::CharType, token_type::TokenType};
 
 pub fn char_type_to_token_type(char_type: CharType) -> Option<TokenType> {
   match char_type {

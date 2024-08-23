@@ -1,7 +1,6 @@
-use markdown_context::{Context, InlineType, ParseResult};
 use pulldown_cmark::{Event, Parser, Tag};
 
-pub mod markdown_context;
+use super::context::{Context, InlineType, ParseResult};
 
 pub fn parse(str: &str) -> ParseResult {
   let mut options = pulldown_cmark::Options::empty();

@@ -1,9 +1,6 @@
 use regex::Regex;
 
-use crate::{
-  char_type::{get_char_type, CharType},
-  token_type::HyperTokenType,
-};
+use crate::token::{char_type::{get_char_type, CharType}, token_type::HyperTokenType};
 
 pub fn get_space_length(
   str: &str,

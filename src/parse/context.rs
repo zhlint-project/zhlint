@@ -1,4 +1,4 @@
-use crate::{
+use crate::token::{
   char_type::{get_char_type, CharType, LEFT_BRACKET, LEFT_QUOTATION, NEUTRAL_QUOTATION, RIGHT_QUOTATION, SHORTHAND, SHORTHAND_PAIR},
   token_type::{GroupTokenExtra, Mark, MarkSideType, MarkType, CommonToken, MutToken, Token, TokenExtraType, TokenType},
   type_trait::{char_type_to_token_type, TypeTrait}

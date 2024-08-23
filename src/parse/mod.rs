@@ -1,15 +1,11 @@
-pub mod char_type;
-pub mod token_type;
-pub mod type_trait;
-pub mod parse_util;
-pub mod parse_context;
-pub mod hyper;
-pub mod generator;
+pub mod util;
+pub mod context;
 
-use char_type::{get_char_type, get_unicode_substring, CharType};
-use type_trait::TypeTrait;
-use parse_util::get_space_length;
-use parse_context::{ParseResult, ParseContext};
+use crate::token::char_type::{get_char_type, get_unicode_substring, CharType};
+use crate::token::type_trait::TypeTrait;
+
+use util::get_space_length;
+use context::{ParseResult, ParseContext};
 
 pub fn parse(str: &str) -> ParseResult {
   let mut context = ParseContext::new(str);

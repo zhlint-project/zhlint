@@ -1,4 +1,4 @@
-use crate::parse_context::MutParseResult;
+use crate::parse::context::MutParseResult;
 
 pub fn generate(result: &MutParseResult) -> String {
   result.root.to_string()
@@ -6,7 +6,7 @@ pub fn generate(result: &MutParseResult) -> String {
 
 #[cfg(test)]
 mod tests {
-  use crate::{parse, token_type::MutTokenExtraType};
+  use crate::{parse::parse, token::token_type::MutTokenExtraType};
   use super::*;
 
   fn modify_result(result: &mut MutParseResult) {
