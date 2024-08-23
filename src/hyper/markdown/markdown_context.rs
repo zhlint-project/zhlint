@@ -14,6 +14,7 @@ pub enum InlineType {
   MarkPair,
   MarkPairWithCode,
   SingleMark,
+  SingleMarkConnect,
 }
 
 #[derive(Debug)]
@@ -64,8 +65,6 @@ fn determine_pair_content(str: &str, pair: &mut Pair) {
   pair.end_content = str[pair.end_range.clone()].to_string();
 }
 
-// TODO: Item, BlockQuote, Html
-
 impl<'a> Context<'a> {
   pub fn new(str: &str) -> Context {
     Context {
@@ -105,6 +104,20 @@ impl<'a> Context<'a> {
   pub fn update_unresolved_range(&mut self, range: Range<usize>) {
     if let Some(last_block) = &mut self.unresolved_block {
       update_pair_range(&mut last_block.pair, range.clone());
+      if self.cur_index > last_block.pair.start_range.start && self.cur_index < range.start {
+        // InlineType::SingleMarkConnect
+        let connect_range = Range { start: self.cur_index, end: range.start };
+        let connect_mark = InlineMark {
+          pair: Pair {
+            start_range: connect_range.clone(),
+            start_content: self.str[connect_range.clone()].to_string(),
+            end_range: Range { start: range.start, end: range.start },
+            end_content: String::new(),
+          },
+          meta: InlineType::SingleMarkConnect,
+        };
+        last_block.inline_marks.push(connect_mark);
+      }
       let str = self.str;
       let mut new_cur_index = range.end;
       for inline in self.get_unresolved_inlines() {
@@ -118,7 +131,7 @@ impl<'a> Context<'a> {
   }
   pub fn handle_inline(&mut self, range: Range<usize>, inline_type: InlineType) {
     // TODO: skip indents like `  `, blockquote prefix like `> `, list prefix like `- `
-    // println!("handle inline {:?} {:?} {:?}", range, inline_type, &self.str[range.clone()]);
+    // println!("handle inline {:?} {:?} {:?} {:?}", &self.cur_index, range, inline_type, &self.str[range.clone()]);
     // 0. => update temp start_content and end_content in the range
     // 1. text: Text
     // 2. mark pair: Start(Emphasis), Start(Strong), Start(Strikethrough), Start(Link)
@@ -168,6 +181,9 @@ impl<'a> Context<'a> {
             meta: inline_type,
           };
           self.unresolved_block.as_mut().unwrap().inline_marks.push(inline_mark);
+        }
+        InlineType::SingleMarkConnect => {
+          // skip
         }
       }
     }

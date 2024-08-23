@@ -31,6 +31,7 @@ pub fn parse(str: &str) -> ParseResult {
             context.handle_block(range.clone())
           }
           Tag::Item => {
+            // TODO:
             // => accept inline content after TaskListMarker and till a sub-block
             // => create a temp block for each line
           }
@@ -188,6 +189,17 @@ x
 <s>bar</s> bar bar
 
 <div>baz</div> *bazz* bazzz
+"#);
+    println!("result: {:?}", result);
+  }
+
+  #[test]
+  fn test_inline_prefix() {
+    let result = parse(r#"
+> hello world  
+> foo bar
+>
+> baz
 "#);
     println!("result: {:?}", result);
   }
