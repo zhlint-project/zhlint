@@ -64,6 +64,6 @@ mod tests {
   fn test_parse() {
     let str = "中文，English 中文";
     let result = parse(str);
-    println!("{:?}", result);
+    println!("{:#?}", result);
   }
 }

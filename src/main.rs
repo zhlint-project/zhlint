@@ -17,7 +17,7 @@ fn main() {
   match fs::read_to_string(&args.file) {
     Ok(s) => {
       let result = parse(&s);
-      println!("{:?}", result);
+      println!("{:#?}", result);
     },
     Err(e) => {
       println!("Unable to read file: {e}");

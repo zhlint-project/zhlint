@@ -106,16 +106,16 @@ mod tests {
   #[test]
   fn test_parse_basic() {
     let result = parse("Hello, world!");
-    println!("result: {:?}", result);
+    println!("result: {:#?}", result);
 
     let result = parse("**Hello**, world!");
-    println!("result: {:?}", result);
+    println!("result: {:#?}", result);
 
     let result = parse("**Hello**, `world`!");
-    println!("result: {:?}", result);
+    println!("result: {:#?}", result);
 
     let result = parse("**Hello**, ![foo](#foo), [bar bar](#bar-bar) `world`!");
-    println!("result: {:?}", result);
+    println!("result: {:#?}", result);
   }
 
   #[test]
@@ -139,7 +139,7 @@ foo <xxx>bar</xxx> baz
 
 yyy
 "#);
-    println!("result: {:?}", result);
+    println!("result: {:#?}", result);
   }
 
   #[test]
@@ -150,7 +150,7 @@ yyy
 >
 > baz
 "#);
-    println!("result: {:?}", result);
+    println!("result: {:#?}", result);
   }
 
   #[test]
@@ -175,7 +175,7 @@ x
 
   foo
 "#);
-    println!("result: {:?}", result);
+    println!("result: {:#?}", result);
   }
 
   #[test]
@@ -190,7 +190,7 @@ x
 
 <div>baz</div> *bazz* bazzz
 "#);
-    println!("result: {:?}", result);
+    println!("result: {:#?}", result);
   }
 
   #[test]
@@ -201,6 +201,6 @@ x
 >
 > baz
 "#);
-    println!("result: {:?}", result);
+    println!("result: {:#?}", result);
   }
 }
