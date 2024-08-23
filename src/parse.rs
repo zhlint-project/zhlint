@@ -63,5 +63,5 @@ mod tests {
     println!("{:#?}", result);
     let mut_result = result.to_mut();
     println!("{:#?}", mut_result);
-}
+  }
 }

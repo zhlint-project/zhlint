@@ -212,3 +212,44 @@ impl Token {
     }
   }
 }
+
+impl MutToken {
+  pub fn to_string(&self) -> String {
+    let mut s = String::new();
+    match &self.extra {
+      MutTokenExtraType::Single(mut_extra) => {
+        if mut_extra.ignored_value {
+          s.push_str(self.base.value.as_str());
+        } else {
+          s.push_str(mut_extra.modified_value.as_str());
+        }
+        if mut_extra.ignored_space_after {
+          s.push_str(self.base.space_after.as_str());
+        } else {
+          s.push_str(mut_extra.modified_space_after.as_str());
+        }
+      },
+      MutTokenExtraType::Group(extra, mut_extra) => {
+        if mut_extra.ignored_start_value {
+          s.push_str(extra.start_value.as_str());
+        } else {
+          s.push_str(mut_extra.modified_start_value.as_str());
+        }
+        if mut_extra.ignored_inner_space_before {
+          s.push_str(extra.inner_space_before.as_str());
+        } else {
+          s.push_str(mut_extra.modified_inner_space_before.as_str());
+        }
+        for child in extra.children.iter() {
+          s.push_str(child.to_string().as_str());
+        }
+        if mut_extra.ignored_end_value {
+          s.push_str(extra.end_value.as_str());
+        } else {
+          s.push_str(mut_extra.modified_end_value.as_str());
+        }
+      },
+    }
+    s
+  }
+}
