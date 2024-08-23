@@ -4,6 +4,7 @@ pub mod type_trait;
 pub mod parse_util;
 pub mod parse_context;
 pub mod hyper;
+pub mod generator;
 
 use char_type::{get_char_type, get_unicode_substring, CharType};
 use type_trait::TypeTrait;
@@ -51,11 +52,6 @@ pub fn parse(str: &str) -> ParseResult {
   };
 }
 
-pub fn to_mut_parse_result() {
-  // to_mut_token
-  // to_mut_mark
-}
-
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -65,5 +61,7 @@ mod tests {
     let str = "中文，English 中文";
     let result = parse(str);
     println!("{:#?}", result);
-  }
+    let mut_result = result.to_mut();
+    println!("{:#?}", mut_result);
+}
 }

@@ -307,3 +307,12 @@ pub struct MutParseResult {
   pub root: MutToken,
   pub errors: Vec<String>, // TODO: Validation
 }
+
+impl ParseResult {
+  pub fn to_mut(&self) -> MutParseResult {
+    MutParseResult {
+      root: self.root.to_mut(),
+      errors: self.errors.clone(),
+    }
+  }
+}

@@ -6,7 +6,7 @@
  * Marks are hyper info, including content and wrappers.
  * They are categorized by parsers, not by usage.
  */
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum MarkType {
   /**
    * Brackets
@@ -25,13 +25,13 @@ pub enum MarkType {
   Raw = 0x32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum MarkSideType {
   Left = 0x40,
   Right = 0x41,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Mark {
   pub mark_type: MarkType,
   pub mark_side: MarkSideType,
@@ -151,7 +151,7 @@ pub struct MutGroupTokenExtra {
   pub modified_token_type: TokenType,
   pub ignored_token_type: bool,
   pub modified_inner_space_before: String,
-  pub ignored_inner_space_before: String,
+  pub ignored_inner_space_before: bool,
 }
 
 #[derive(Debug)]
@@ -162,6 +162,53 @@ pub enum MutTokenExtraType {
 
 #[derive(Debug)]
 pub struct MutToken {
-  pub token: CommonToken,
+  pub base: CommonToken,
   pub extra: MutTokenExtraType,
+}
+
+impl Token {
+  pub fn to_mut(&self) -> MutToken {
+    let base = CommonToken {
+      token_type: self.base.token_type,
+      index: self.base.index,
+      length: self.base.length,
+      value: self.base.value.clone(),
+      space_after: self.base.space_after.clone(),
+      mark: self.base.mark.clone(),
+    };
+    let extra = match &self.extra {
+      TokenExtraType::Single => MutTokenExtraType::Single(MutTokenExtra {
+        modified_token_type: base.token_type,
+        ignored_token_type: false,
+        modified_value: base.value.clone(),
+        ignored_value: false,
+        modified_space_after: base.space_after.clone(),
+        ignored_space_after: false,
+      }),
+      TokenExtraType::Group(ref group_extra) => MutTokenExtraType::Group(
+        GroupTokenExtra {
+          children: group_extra.children.iter().map(|child| child.to_mut()).collect(),
+          start_index: group_extra.start_index,
+          start_value: group_extra.start_value.clone(),
+          end_index: group_extra.end_index,
+          end_value: group_extra.end_value.clone(),
+          inner_space_before: group_extra.inner_space_before.clone(),
+        },
+        MutGroupTokenExtra {
+          modified_start_value: group_extra.start_value.clone(),
+          ignored_start_value: false,
+          modified_end_value: group_extra.end_value.clone(),
+          ignored_end_value: false,
+          modified_token_type: base.token_type,
+          ignored_token_type: false,
+          modified_inner_space_before: group_extra.inner_space_before.clone(),
+          ignored_inner_space_before: false,
+        },
+      ),
+    };
+    MutToken {
+      base,
+      extra,
+    }
+  }
 }
