@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{hyper::markdown::context::InlineMark, token::{
+use crate::{hyper::markdown::context::{InlineMark, InlineType}, token::{
   char_type::{get_char_type, CharType, LEFT_BRACKET, LEFT_QUOTATION, NEUTRAL_QUOTATION, RIGHT_QUOTATION, SHORTHAND, SHORTHAND_PAIR},
   token_type::{CommonToken, GroupTokenExtra, Mark, MarkSideType, MarkType, MutToken, Token, TokenExtraType, TokenType},
   type_trait::{char_type_to_token_type, TypeTrait}
@@ -104,6 +104,24 @@ impl ParseContext {
     None
   }
 
+  pub fn add_hyper_token(&mut self, index: usize, content: String, token_type: TokenType, mark_side: Option<MarkSideType>) {
+    // TODO: debug
+    let token = Token {
+      base: CommonToken {
+        token_type: token_type,
+        index,
+        length: content.len(),
+        value: content,
+        space_after: String::from(""),
+        mark: mark_side.map(|side| Mark {
+          mark_type: MarkType::Hyper,
+          mark_side: side,
+        }),
+      },
+      extra: TokenExtraType::Single,
+    };
+    self.add_token(token);
+  }
   pub fn add_bracket_token(&mut self, index: usize, c: char, mark_side: MarkSideType) {
     let token = Token {
       base: CommonToken {
@@ -240,12 +258,36 @@ impl ParseContext {
     return true;
   }
 
-  pub fn handle_hyper_mark(&mut self, _index: usize) -> usize {
-    // TODO:
-    // - finalize _last_ token
-    // - add raw content or add hyper token
-    // - move index forward according to the mark start/end length
-    todo!();
+  pub fn handle_hyper_mark(&mut self, index: usize) -> usize {
+    let hyper_mark = self.hyper_mark_map.get(&index).unwrap();
+    let start_len = hyper_mark.pair.start_content.len();
+    let end_len = hyper_mark.pair.end_content.len();
+    match hyper_mark.meta {
+      InlineType::MarkPair => {
+        if hyper_mark.pair.start_range.start == index {
+          self.add_hyper_token(index, hyper_mark.pair.start_content.clone(), TokenType::HyperMark, Some(MarkSideType::Left)); // normal pair
+          return start_len;
+        } else {
+          self.add_hyper_token(index, hyper_mark.pair.end_content.clone(), TokenType::HyperMark, Some(MarkSideType::Right)); // normal pair
+          return end_len;
+        }
+      },
+      InlineType::MarkPairWithCode => {
+        if hyper_mark.pair.start_range.start == index {
+          self.add_hyper_token(index, hyper_mark.pair.start_content.clone(), TokenType::CodeMark, Some(MarkSideType::Left)); // code pair
+          return start_len;
+        } else {
+          self.add_hyper_token(index, hyper_mark.pair.end_content.clone(), TokenType::CodeMark, Some(MarkSideType::Right)); // code pair
+          return end_len;
+        }
+      },
+      InlineType::SingleMark | InlineType::SingleMarkConnect => {
+        self.add_hyper_token(index, hyper_mark.pair.start_content.clone(), TokenType::HyperContent, None); // single mark
+        return start_len;
+      },
+      InlineType::Text => {},
+    }
+    return 1;
   }
   pub fn handle_letter(&mut self, index: usize, c: char, char_type: CharType) {
     if let Some(token_type) = char_type_to_token_type(char_type) {

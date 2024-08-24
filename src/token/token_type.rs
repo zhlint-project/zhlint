@@ -85,6 +85,7 @@ pub enum TokenType {
   HyperMark,
   UnmatchedMark, // TODO: adapt other type trait logics
   CodeContent,
+  CodeMark, // try to replace CodeContent
   HyperContent,
 }
 
