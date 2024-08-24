@@ -28,7 +28,7 @@ mod tests {
   #[test]
   fn test_parse() {
     let str = "中文，English 中文";
-    let result = parse(str);
+    let result = parse(str, 0..str.len(), &mut vec![]);
     println!("{:#?}", result);
     let mut mut_result = result.to_mut();
     println!("{:#?}", mut_result);
