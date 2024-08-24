@@ -35,14 +35,10 @@ pub enum MarkSideType {
 pub struct Mark {
   pub mark_type: MarkType,
   pub mark_side: MarkSideType,
-  pub meta: Option<String>, // TODO: AST type enum
 }
 
 /// Hyper token types
 
-/**
- * TODO: paired html tags should be hyper mark
- */
 pub enum HyperTokenType {
   /**
    * Brackets

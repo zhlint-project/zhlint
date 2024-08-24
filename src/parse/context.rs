@@ -106,7 +106,6 @@ impl ParseContext {
         mark: Some(Mark {
           mark_type: MarkType::Brackets,
           mark_side,
-          meta: None,
         }),
       },
       extra: TokenExtraType::Single,
