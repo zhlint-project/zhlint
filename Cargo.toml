@@ -22,4 +22,4 @@ path = "src/lib.rs"
 
 [[bin]]
 name = "zhlint"
-path = "src/main.rs"
+path = "src/bin.rs"
