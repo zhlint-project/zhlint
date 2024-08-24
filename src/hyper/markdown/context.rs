@@ -1,6 +1,6 @@
 use std::{cmp::{max, min}, ops::Range};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Pair {
   pub start_range: Range<usize>,
   pub start_content: String,
@@ -8,7 +8,7 @@ pub struct Pair {
   pub end_content: String,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum InlineType {
   Text,
   MarkPair,
@@ -17,7 +17,7 @@ pub enum InlineType {
   SingleMarkConnect,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct InlineMark {
   pub pair: Pair,
   pub meta: InlineType,

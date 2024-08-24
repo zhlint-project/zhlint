@@ -1,21 +1,27 @@
-use crate::token::{
+use std::collections::HashMap;
+
+use crate::{hyper::markdown::context::InlineMark, token::{
   char_type::{get_char_type, CharType, LEFT_BRACKET, LEFT_QUOTATION, NEUTRAL_QUOTATION, RIGHT_QUOTATION, SHORTHAND, SHORTHAND_PAIR},
-  token_type::{GroupTokenExtra, Mark, MarkSideType, MarkType, CommonToken, MutToken, Token, TokenExtraType, TokenType},
+  token_type::{CommonToken, GroupTokenExtra, Mark, MarkSideType, MarkType, MutToken, Token, TokenExtraType, TokenType},
   type_trait::{char_type_to_token_type, TypeTrait}
-};
+}};
+
+use super::util::get_hyper_mark_map;
 
 type TokenPath = Vec<usize>;
 
 #[derive(Debug)]
 pub struct ParseContext {
   pub root: Token,
+  pub offset: usize,
+  pub hyper_mark_map: HashMap<usize, InlineMark>,
   pub last_group_path: TokenPath,
   pub unresolved_marks_count: usize,
   pub errors: Vec<String>, // TODO: Validation
 }
 
 impl ParseContext {
-  pub fn new(str: &str) -> Self {
+  pub fn new(str: &str, offset: usize, hyper_marks: &mut Vec<InlineMark>) -> Self {
     let root = Token {
       base: CommonToken {
         // id: 0,
@@ -36,8 +42,11 @@ impl ParseContext {
         children: vec![],
       }),
     };
+    let hyper_mark_map = get_hyper_mark_map(hyper_marks);
     ParseContext {
       root,
+      offset,
+      hyper_mark_map,
       last_group_path: vec![],
       unresolved_marks_count: 0,
       errors: vec![],
@@ -199,6 +208,9 @@ impl ParseContext {
     self.last_group_path.pop();
   }
 
+  pub fn is_hyper_mark(&self, index: usize) -> bool {
+    self.hyper_mark_map.contains_key(&index)
+  }
   pub fn is_shorthand(&mut self, c: char, next_c: Option<char>) -> bool {
     if !SHORTHAND.contains(&c) {
       return false;
@@ -228,6 +240,13 @@ impl ParseContext {
     return true;
   }
 
+  pub fn handle_hyper_mark(&mut self, _index: usize) -> usize {
+    // TODO:
+    // - finalize _last_ token
+    // - add raw content or add hyper token
+    // - move index forward according to the mark start/end length
+    todo!();
+  }
   pub fn handle_letter(&mut self, index: usize, c: char, char_type: CharType) {
     if let Some(token_type) = char_type_to_token_type(char_type) {
       if let Some(last_token) = self.get_last_token() {
