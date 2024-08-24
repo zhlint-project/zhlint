@@ -67,7 +67,7 @@ pub fn parse(str: &str) -> ParseResult {
         context.handle_inline(range.clone(), InlineType::Text)
       }
       Event::Code(_code) => {
-        context.handle_inline(range.clone(), InlineType::MarkPairWithCode)
+        context.handle_inline(range.clone(), InlineType::SingleMarkCode)
       }
       // `[^xxx]` -> FootnoteDefinition
       Event::FootnoteReference(_reference) => {

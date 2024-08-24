@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
-use regex::Regex;
-
-use crate::{hyper::markdown::context::{InlineMark, InlineType}, token::{char_type::{get_char_type, CharType}, token_type::HyperTokenType}};
+use crate::{hyper::markdown::context::{InlineMark, InlineType}, token::char_type::{get_char_type, CharType}};
 
 pub fn get_space_length(
   str: &str,
@@ -22,30 +20,17 @@ pub fn get_space_length(
   space_length
 }
 
-pub fn get_hyper_content_type(
-  str: &str
-) -> HyperTokenType {
-  if Regex::new("\n").unwrap().is_match(str) {
-    return HyperTokenType::HyperContent;
-  }
-  if Regex::new("^<code.*>.*<\\/code.*>$").unwrap().is_match(str) {
-    return HyperTokenType::CodeContent;
-  }
-  if Regex::new("^<.+>$").unwrap().is_match(str) {
-    return HyperTokenType::HyperContent;
-  }
-  return HyperTokenType::CodeContent;
-}
-
-pub fn get_hyper_mark_map(hyper_marks: &mut Vec<InlineMark>) -> HashMap<usize, InlineMark> {
+pub fn get_hyper_mark_map(
+  hyper_marks: &mut Vec<InlineMark>
+) -> HashMap<usize, InlineMark> {
   let mut hyper_mark_map: HashMap<usize, InlineMark> = HashMap::new();
   hyper_marks.iter().for_each(|mark| {
     match mark.meta {
-      InlineType::MarkPair | InlineType::MarkPairWithCode => {
+      InlineType::MarkPair => {
         hyper_mark_map.insert(mark.pair.start_range.start, mark.clone());
         hyper_mark_map.insert(mark.pair.end_range.start, mark.clone());
       },
-      InlineType::SingleMark | InlineType::SingleMarkConnect => {
+      InlineType::SingleMark | InlineType::SingleMarkCode | InlineType::SingleMarkConnect => {
         hyper_mark_map.insert(mark.pair.start_range.start, mark.clone());
       },
       _ => {}

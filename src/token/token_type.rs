@@ -29,6 +29,7 @@ pub enum MarkType {
 pub enum MarkSideType {
   Left = 0x40,
   Right = 0x41,
+  Single = 0x42,
 }
 
 #[derive(Debug, Clone)]
@@ -37,56 +38,29 @@ pub struct Mark {
   pub mark_side: MarkSideType,
 }
 
-/// Hyper token types
-
-pub enum HyperTokenType {
-  /**
-   * Brackets
-   */
-  BracketMark = 0x50,
-  /**
-   * Inline Markdown marks
-   */
-  HyperMark = 0x51,
-
-  /**
-   * - \`xxx\`
-   * - &lt;code&gt;xxx&lt;/code&gt;
-   */
-  CodeContent = 0x52,
-  /**
-   * - Hexo/VuePress container
-   * - Other html code
-   */
-  HyperContent = 0x53,
-
-  /**
-   * Unpaired brackets/quotations
-   */
-  Unmatched = 0x54,
-  /**
-   * For indeterminate tokens
-   */
-  Indeterminate = 0x55,
-}
-
 /// Token Types
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum TokenType {
+  // regular tokens
   WesternLetter,
   CjkChar,
   HalfwidthPauseOrStop,
   FullwidthPauseOrStop,
   HalfwidthOtherPunctuation,
   FullwidthOtherPunctuation,
-  Group,
-  BracketMark,
-  HyperMark,
+
+  // special tokens
+  Group, // e.g. “”
+  BracketMark, // e.g. ()
+
+  // hyper tokens
+  HyperMark, // Markdown mark pair e.g. ** __ ~~
+  CodeMark, // Markdown code e.g. `xxx`
+  HyperContent, // Markdown content, Markdown connectors, HTML tags
+
+  // unexpected tokens
   UnmatchedMark, // TODO: adapt other type trait logics
-  CodeContent,
-  CodeMark, // try to replace CodeContent
-  HyperContent,
 }
 
 /// Tokens

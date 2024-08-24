@@ -10,6 +10,9 @@ use context::{ParseResult, ParseContext};
 
 pub fn parse(str: &str, offset: usize, hyper_marks: &mut Vec<InlineMark>) -> ParseResult {
   let mut context = ParseContext::new(str, offset, hyper_marks);
+  // println!("parse: {}", str);
+  // println!("offset: {}", offset);
+  // println!("hyper_marks: {:?}", hyper_marks);
 
   let mut last_index = 0;
   for (i, c) in str.chars().enumerate() {
@@ -21,11 +24,12 @@ pub fn parse(str: &str, offset: usize, hyper_marks: &mut Vec<InlineMark>) -> Par
 
     // get char type
     let char_type = get_char_type(c);
+    // println!("- char: {} {}, type: {:?}", i, c, char_type);
 
     // if char_type is hyper!
     if context.is_hyper_mark(i) {
       let hyper_len = context.handle_hyper_mark(i);
-      last_index = i + hyper_len - 1;
+      last_index = i + hyper_len;
     } else if char_type == CharType::Space {
       let space_len = get_space_length(str, i);
       let spaces = get_unicode_substring(str, i, space_len);

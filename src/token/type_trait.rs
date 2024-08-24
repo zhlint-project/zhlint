@@ -271,7 +271,7 @@ impl TypeTrait for TokenType {
     match self {
       TokenType::BracketMark => true,
       TokenType::HyperMark => true,
-      TokenType::CodeContent => true,
+      TokenType::CodeMark => true,
       TokenType::HyperContent => true,
       _ => false,
     }
@@ -303,7 +303,7 @@ impl TypeTrait for TokenType {
       return true;
     }
     match self {
-      TokenType::CodeContent => true,
+      TokenType::CodeMark => true,
       _ => false,
     }
   }

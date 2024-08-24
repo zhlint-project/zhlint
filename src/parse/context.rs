@@ -264,25 +264,29 @@ impl ParseContext {
     let end_len = hyper_mark.pair.end_content.len();
     match hyper_mark.meta {
       InlineType::MarkPair => {
+        // normal pair
         if hyper_mark.pair.start_range.start == index {
-          self.add_hyper_token(index, hyper_mark.pair.start_content.clone(), TokenType::HyperMark, Some(MarkSideType::Left)); // normal pair
+          self.add_hyper_token(index, hyper_mark.pair.start_content.clone(),
+            TokenType::HyperMark, Some(MarkSideType::Left));
           return start_len;
         } else {
-          self.add_hyper_token(index, hyper_mark.pair.end_content.clone(), TokenType::HyperMark, Some(MarkSideType::Right)); // normal pair
+          self.add_hyper_token(index, hyper_mark.pair.end_content.clone(),
+            TokenType::HyperMark, Some(MarkSideType::Right));
           return end_len;
         }
       },
-      InlineType::MarkPairWithCode => {
+      InlineType::SingleMarkCode => {
+        // single code mark
         if hyper_mark.pair.start_range.start == index {
-          self.add_hyper_token(index, hyper_mark.pair.start_content.clone(), TokenType::CodeMark, Some(MarkSideType::Left)); // code pair
+          self.add_hyper_token(index, hyper_mark.pair.start_content.clone(),
+            TokenType::CodeMark, Some(MarkSideType::Single));
           return start_len;
-        } else {
-          self.add_hyper_token(index, hyper_mark.pair.end_content.clone(), TokenType::CodeMark, Some(MarkSideType::Right)); // code pair
-          return end_len;
         }
       },
       InlineType::SingleMark | InlineType::SingleMarkConnect => {
-        self.add_hyper_token(index, hyper_mark.pair.start_content.clone(), TokenType::HyperContent, None); // single mark
+        // single mark
+        self.add_hyper_token(index, hyper_mark.pair.start_content.clone(),
+          TokenType::HyperContent, None);
         return start_len;
       },
       InlineType::Text => {},

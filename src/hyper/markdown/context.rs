@@ -12,8 +12,8 @@ pub struct Pair {
 pub enum InlineType {
   Text,
   MarkPair,
-  MarkPairWithCode,
   SingleMark,
+  SingleMarkCode,
   SingleMarkConnect,
 }
 
@@ -157,7 +157,7 @@ impl<'a> Context<'a> {
           };
           last_block.inline_marks.push(inline_mark);
         }
-        InlineType::MarkPairWithCode => {
+        InlineType::SingleMarkCode => {
           let inline_mark = InlineMark {
             pair: Pair {
               start_range: range.clone(),
