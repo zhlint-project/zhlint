@@ -298,12 +298,14 @@ impl ParseContext {
 #[derive(Debug)]
 pub struct ParseResult {
   pub root: Token,
+  pub offset: usize,
   pub errors: Vec<String>, // TODO: Validation
 }
 
 #[derive(Debug)]
 pub struct MutParseResult {
   pub root: MutToken,
+  pub offset: usize,
   pub errors: Vec<String>, // TODO: Validation
 }
 
@@ -311,6 +313,7 @@ impl ParseResult {
   pub fn to_mut(&self) -> MutParseResult {
     MutParseResult {
       root: self.root.to_mut(),
+      offset: self.offset,
       errors: self.errors.clone(),
     }
   }

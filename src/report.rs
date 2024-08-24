@@ -1,4 +1,12 @@
-use crate::{hyper::markdown::context::ParseResult, LintReport};
+use crate::hyper::markdown::context::ParseResult;
+
+#[derive(Debug)]
+pub struct LintReport {
+  pub input: String,
+  pub output: String,
+  pub errors: Vec<String>,
+  pub warnings: Vec<String>,
+}
 
 pub fn report(
   input: String,

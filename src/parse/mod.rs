@@ -1,8 +1,6 @@
 pub mod util;
 pub mod context;
 
-use std::ops::Range;
-
 use crate::hyper::markdown::context::InlineMark;
 use crate::token::char_type::{get_char_type, get_unicode_substring, CharType};
 use crate::token::type_trait::TypeTrait;
@@ -10,7 +8,9 @@ use crate::token::type_trait::TypeTrait;
 use util::get_space_length;
 use context::{ParseResult, ParseContext};
 
-pub fn parse(str: &str, _range: Range<usize>, _hyper_marks: &mut Vec<InlineMark>) -> ParseResult {
+pub fn parse(str: &str, offset: usize, _hyper_marks: &mut Vec<InlineMark>) -> ParseResult {
+  // TODO: handle offset from range
+  // TODO: handle hyper marks
   let mut context = ParseContext::new(str);
 
   let mut last_index = 0;
@@ -47,6 +47,7 @@ pub fn parse(str: &str, _range: Range<usize>, _hyper_marks: &mut Vec<InlineMark>
 
   return ParseResult {
     root: context.root,
+    offset,
     errors: context.errors,
   };
 }
@@ -58,7 +59,7 @@ mod tests {
   #[test]
   fn test_parse() {
     let str = "中文，English 中文";
-    let result = parse(str, 0..str.len(), &mut vec![]);
+    let result = parse(str, 0, &mut vec![]);
     println!("{:#?}", result);
     let mut_result = result.to_mut();
     println!("{:#?}", mut_result);

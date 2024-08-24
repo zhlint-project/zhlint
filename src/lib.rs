@@ -1,24 +1,18 @@
-use std::ops::Range;
-
-use lint::lint;
-use report::report;
-
 pub mod token;
 pub mod parse;
 pub mod hyper;
 pub mod generator;
-
 pub mod traverse;
 pub mod lint;
 pub mod report;
 
-#[derive(Debug)]
-pub struct LintReport {
-  pub input: String,
-  pub output: String,
-  pub errors: Vec<String>,
-  pub warnings: Vec<String>,
-}
+use std::ops::Range;
+
+use parse::parse;
+use traverse::traverse;
+use generator::generate;
+use lint::lint;
+use report::{report, LintReport};
 
 pub fn run(
   str: &str
@@ -32,15 +26,16 @@ pub fn run(
       start: block.pair.start_range.end,
       end: block.pair.end_range.start,
     };
-    let tokens = parse::parse(&str[range.clone()], range, &mut block.inline_marks);
+
+    let tokens = parse(&str[range.clone()], range.start, &mut block.inline_marks);
     let mut mut_tokens = tokens.to_mut();
 
-    traverse::traverse(&mut mut_tokens, lint);
+    traverse(&mut mut_tokens, lint);
 
     output.push_str(&str[last_index..block.pair.start_range.start]);
     last_index = block.pair.end_range.end;
 
-    let block_output = generator::generate(&mut_tokens);
+    let block_output = generate(&mut_tokens);
     output.push_str(&block_output);
   });
 
