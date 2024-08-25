@@ -50,7 +50,7 @@ mod tests {
 
   #[test]
   fn test_run() {
-    let str = "中文，English 中文";
+    let str = "中文，English中文";
     let result = run(str);
     println!("{:#?}", result);
   }

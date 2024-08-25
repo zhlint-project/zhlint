@@ -105,7 +105,6 @@ impl ParseContext {
   }
 
   pub fn add_hyper_token(&mut self, index: usize, content: String, token_type: TokenType, mark_side: Option<MarkSideType>) {
-    // TODO: debug
     let token = Token {
       base: CommonToken {
         token_type: token_type,
@@ -314,7 +313,8 @@ impl ParseContext {
           self.add_bracket_token(index, c, MarkSideType::Right);
         } else {
           self.add_unmatched_token(index, c);
-          // TODO: self.add_error(i, "Unmatched right bracket");
+          // TODO: parser error
+          // self.add_error(i, "Unmatched right bracket");
         }
       }
       return;
@@ -328,7 +328,8 @@ impl ParseContext {
           self.finish_group_token(index, c);
         } else {
           self.add_unmatched_token(index, c);
-          // TODO: self.add_error(i, "Unmatched right quotation");
+          // TODO: parser error
+          // self.add_error(i, "Unmatched right quotation");
         }
       }
       if NEUTRAL_QUOTATION.contains(&c) {

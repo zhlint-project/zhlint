@@ -30,7 +30,7 @@ pub fn parse(str: &str) -> ParseResult {
             context.handle_block(range.clone())
           }
           Tag::Item => {
-            // TODO:
+            // TODO: markdown list item
             // => accept inline content after TaskListMarker and till a sub-block
             // => create a temp block for each line
           }

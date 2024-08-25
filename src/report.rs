@@ -4,8 +4,6 @@ use crate::hyper::markdown::context::ParseResult;
 pub struct LintReport {
   pub input: String,
   pub output: String,
-  pub errors: Vec<String>,
-  pub warnings: Vec<String>,
 }
 
 pub fn report(
@@ -13,12 +11,10 @@ pub fn report(
   output: String,
   _hyper_tokens: ParseResult,
 ) -> LintReport {
-  // TODO:
+  // TODO: errors and warnings
 
   LintReport {
     input,
     output,
-    errors: vec![], // TODO: later
-    warnings: vec![], // TODO: later
   }
 }
