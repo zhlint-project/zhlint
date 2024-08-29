@@ -1,4 +1,4 @@
-# <img src="./docs/logo.svg" style="vertical-align: middle;" /> zhlint
+# ![logo](docs/zhlint.svg) zhlint
 
 一个中文内容的格式化工具。
 
