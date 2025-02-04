@@ -49,7 +49,7 @@ const matchAbbr = (
     // get the next matching abbr chars by removing the last char and filtering
     const matchedAbbrChars = reversedAbbrChars
       .filter(
-        (abbr) => abbr[0].toLowerCase() === tokenBefore.value.toLowerCase()
+        (abbr) => tokenBefore.value && abbr[0].toLowerCase() === tokenBefore.value.toLowerCase()
       )
       .map((abbr) => abbr.slice(1))
 
