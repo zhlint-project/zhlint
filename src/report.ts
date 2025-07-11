@@ -75,22 +75,33 @@ export type Validation = {
 
 const adjustedFullwidthPunctuations = `“”‘’`
 
-const generateMarker = (str: string, index: number): string => {
-  const prefix = str.substring(0, index)
+export const generateMarker = (str: string, index: number): string => {
+  const prefix = Array.from(str).slice(0, index)
   let fullwidthCount = 0
   let halfwidthCount = 0
-  for (let i = 0; i < prefix.length; i++) {
-    const charType = checkCharType(prefix[i])
+  let emojiWidthCount = 0
+  const EMOJI_PLACEHOLDER = '\u2B1C' // ⬜
+  const FULLWIDTH_SPACE = '\u3000' // 全角空格
+  function isEmoji(char: string): boolean {
+    const cp = char.codePointAt(0)
+    return cp !== undefined && cp >= 0x1F600 && cp <= 0x1F64F
+  }
+  for (const char of prefix) {
+    if (isEmoji(char)) {
+      emojiWidthCount++
+      continue
+    }
+    const charType = checkCharType(char)
     if (
       charType === CharType.CJK_CHAR ||
       (isFullwidthPunctuationType(charType) &&
-        adjustedFullwidthPunctuations.indexOf(prefix[i]) === -1)
+        adjustedFullwidthPunctuations.indexOf(char) === -1)
     ) {
       fullwidthCount++
     } else if (
       charType === CharType.WESTERN_LETTER ||
-      (isHalfwidthPunctuationType(charType) &&
-        adjustedFullwidthPunctuations.indexOf(prefix[i]) !== -1) ||
+      isHalfwidthPunctuationType(charType) ||
+      adjustedFullwidthPunctuations.indexOf(char) !== -1 ||
       charType === CharType.SPACE
     ) {
       halfwidthCount++
@@ -98,7 +109,8 @@ const generateMarker = (str: string, index: number): string => {
   }
   return (
     ' '.repeat(halfwidthCount) +
-    '　'.repeat(fullwidthCount) +
+    FULLWIDTH_SPACE.repeat(fullwidthCount) +
+    EMOJI_PLACEHOLDER.repeat(emojiWidthCount) +
     `${chalk.red('^')}`
   )
 }
