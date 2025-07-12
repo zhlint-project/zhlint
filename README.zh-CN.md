@@ -24,10 +24,10 @@ pnpm add zhlint -g
 ```bash
 # Glob 文件，执行格式化命令，并打印错误报告，
 # 如果有任何错误被发现，则会以错误码 `1` 退出。
-zhlint <file-pattern>
+zhlint <file-pattern>[, ...]
 
 # Glob 文件，并修复所有可能发现的错误。
-zhlint <file-pattern> --fix
+zhlint --fix <file-pattern>[, ...]
 
 # 格式化文件并将修复后的内容输出到另一个文件。
 zhlint <input-file-path> --output=<output-file-path>

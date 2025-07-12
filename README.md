@@ -24,10 +24,10 @@ pnpm add zhlint -g
 ```bash
 # glob files, lint them, and print validation report,
 # and exit with code `1` if there is any error found.
-zhlint <file-pattern>
+zhlint <file-pattern>[, ...]
 
 # glob files and fix their all possilbly found errors.
-zhlint <file-pattern> --fix
+zhlint --fix <file-pattern>[, ...]
 
 # lint the file and output fixed content into another file
 zhlint <input-file-path> --output=<output-file-path>

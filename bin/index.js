@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from 'fs'
+import path from 'path'
 import minimist from 'minimist'
 import * as glob from 'glob'
 import gitignore from 'ignore'
@@ -11,8 +12,7 @@ This is zhlint!
 
 Usage:
   zhlint <file-pattern>[, ...]
-  zhlint <file-pattern>[, ...] --fix
-  zhlint --fix <file-pattern>
+  zhlint --fix <file-pattern>[, ...]
   zhlint --fix=<file-pattern>
   zhlint <input-file-path> --output <output-file-path>
   zhlint <input-file-path> --output=<output-file-path>
@@ -42,9 +42,10 @@ Examples:
   zhlint foo.md bar.md
   zhlint foo.md bar.md --fix
   zhlint --fix foo.md
-  zhlint --fix=foo.md
+  zhlint --fix foo.md bar.md
   zhlint --fix *.md
-  zhlint --fix=*.md
+  zhlint --fix *.md *.txt
+  zhlint --fix=foo.md
   zhlint foo.md --output dest.md
   zhlint foo.md --output=dest.md
 `.trim()
@@ -71,8 +72,8 @@ const main = () => {
   }
 
   if (argv._ && argv._.length) {
-    const [filePattern] = [...argv._]
-    const configDir = argv.dir
+    const filePatterns = [...argv._]
+    const configDir = argv.dir || process.cwd()
     const configPath = argv.config
     const fileIgnorePath = argv.ignore || argv['file-ignore']
     const caseIgnorePath = argv['case-ignore']
@@ -80,8 +81,19 @@ const main = () => {
     const fileIgnore = gitignore().add(config.fileIgnores)
     const fileIgnoreFilter = fileIgnore.createFilter()
     try {
-      const files = glob.sync(filePattern)
-      const resultList = files.filter(fileIgnoreFilter).map((file) => {
+      // Process all file patterns
+      const allFiles = new Set()
+      filePatterns.forEach(pattern => {
+        const files = glob.sync(pattern)
+        files.forEach(file => allFiles.add(file))
+      })
+      
+      const files = Array.from(allFiles)
+      const resultList = files.filter(file => {
+        // Convert absolute path to relative path for gitignore filter
+        const relativePath = path.relative(configDir, file)
+        return fileIgnoreFilter(relativePath)
+      }).map((file) => {
         console.log(`[start] ${file}`)
         const origin = fs.readFileSync(file, { encoding: 'utf8' })
         const { result, validations } = runWithConfig(origin, config)
@@ -104,8 +116,8 @@ const main = () => {
           )
         }
       } else if (argv.f || argv.fix) {
-        resultList.forEach(({ file, value, result }) => {
-          if (value !== result) {
+        resultList.forEach(({ file, origin, result }) => {
+          if (origin !== result) {
             fs.writeFileSync(file, result)
             console.log(`[fixed] ${file}`)
           }
