@@ -87,13 +87,43 @@ type InlineMark = {
   raw: boolean
 }
 
+const isTaskListItem = (node: Node): node is Ast.ListItem => {
+  return (
+    node.type === 'listItem' &&
+    typeof (node as Ast.ListItem).checked === 'boolean'
+  )
+}
+
+/**
+ * In a GFM task list item, the `[ ] `/`[x] ` checkbox is not kept as a child
+ * node. It's stripped from the leading text node of the first paragraph, but
+ * when that paragraph starts with a non-text node (a link, inline code, etc.)
+ * there is no leading text node to strip it from, so the checkbox stays inside
+ * the paragraph's range. Move the range forward to the first child so that the
+ * checkbox never reaches the rules as normal content.
+ */
+const skipTaskListItemCheckbox = (block: BlockType): void => {
+  const firstChild = block.children[0]
+  if (!block.position || !firstChild?.position) {
+    return
+  }
+  const blockStart = block.position.start.offset || 0
+  const childStart = firstChild.position.start.offset || 0
+  if (childStart > blockStart) {
+    block.position.start = { ...firstChild.position.start }
+  }
+}
+
 const travelBlocks = (node: Node, blocks: BlockMark[]): void => {
   if (isParent(node)) {
-    node.children.forEach((child) => {
+    node.children.forEach((child, index) => {
       if (child.type === 'yaml') {
         return
       }
       if (isBlock(child)) {
+        if (index === 0 && isTaskListItem(node)) {
+          skipTaskListItemCheckbox(child)
+        }
         const blockMark: BlockMark = {
           block: child,
           inlineMarks: [],
