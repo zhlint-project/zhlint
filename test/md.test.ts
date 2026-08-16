@@ -318,4 +318,30 @@ describe('markdown lint', () => {
       '- [`<KeepAlive>` API 参考](/api/built-in-components.html#keepalive)'
     )
   })
+  test('[md] task list item checkbox is not content', () => {
+    // the checkbox is stripped by remark only when the item starts with text,
+    // so items starting with a link/code/etc. used to be linted as `[ ]`
+    expect(getOutput('- [ ] [链接](http://xxx)')).toBe(
+      '- [ ] [链接](http://xxx)'
+    )
+    expect(run('- [ ] [链接](http://xxx)', options).validations).toEqual([])
+    expect(getOutput('- [x] [链接](http://xxx)')).toBe(
+      '- [x] [链接](http://xxx)'
+    )
+    expect(getOutput('1. [ ] [链接](http://xxx)')).toBe(
+      '1. [ ] [链接](http://xxx)'
+    )
+    expect(getOutput('  - [ ] **粗体**和中文')).toBe('  - [ ] **粗体**和中文')
+    expect(getOutput('- [ ] 中文和 [链接](http://xxx)')).toBe(
+      '- [ ] 中文和[链接](http://xxx)'
+    )
+  })
+  test('[md] task list item keeps reporting the right position', () => {
+    expect(run('- [ ] [链接](http://xxx) 和中文', options).validations).toEqual(
+      run('- [链接](http://xxx) 和中文', options).validations.map((v) => ({
+        ...v,
+        index: v.index + 4
+      }))
+    )
+  })
 })
