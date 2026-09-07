@@ -69,10 +69,6 @@ const inlineRawTypes: string[] = [
   'footnoteDefinition',
   'html'
 ]
-const isInlineRaw = (node: Node): node is InlineRawType => {
-  return inlineRawTypes.indexOf(node.type) >= 0
-}
-
 // Marks related
 
 type BlockMark = {
@@ -82,15 +78,41 @@ type BlockMark = {
   value: string
 }
 
+export type InlineMarkKind = 'raw' | 'hyper' | 'wrapper'
+
 type InlineMark = {
   inline: InlineContentType | InlineRawType
-  raw: boolean
+  kind: InlineMarkKind
 }
 
-const travelBlocks = (node: Node, blocks: BlockMark[]): void => {
+export type MarkdownDialect = {
+  /** produce the AST, e.g. plain markdown or mdx with fallback */
+  parse: (value: string) => Ast.Root
+  /** extra block-level node types to skip entirely besides markdown's,
+      e.g. ['mdxjsEsm'] */
+  extraSkipBlockTypes?: string[]
+  /** extra inline node types to protect as raw marks besides markdown's */
+  extraInlineRawTypes?: string[]
+  /** classify unknown inline nodes: 'raw' protects the whole node,
+      'wrapper' protects the open/close parts and keeps linting children */
+  classifyInline?: (node: Node) => 'raw' | 'wrapper' | undefined
+}
+
+type NormalizedDialect = {
+  parse: (value: string) => Ast.Root
+  skipBlockTypes: string[]
+  inlineRawTypes: string[]
+  classifyInline?: (node: Node) => 'raw' | 'wrapper' | undefined
+}
+
+const travelBlocks = (
+  node: Node,
+  blocks: BlockMark[],
+  spec: NormalizedDialect
+): void => {
   if (isParent(node)) {
     node.children.forEach((child) => {
-      if (child.type === 'yaml') {
+      if (spec.skipBlockTypes.indexOf(child.type as string) >= 0) {
         return
       }
       if (isBlock(child)) {
@@ -101,23 +123,37 @@ const travelBlocks = (node: Node, blocks: BlockMark[]): void => {
           value: '' // to be initialzed
         }
         blocks.push(blockMark)
-        travelInlines(child, blockMark)
+        travelInlines(child, blockMark, spec)
       } else {
-        travelBlocks(child, blocks)
+        travelBlocks(child, blocks, spec)
       }
     })
   }
 }
 
-const travelInlines = (node: Node, blockMark: BlockMark): void => {
+const travelInlines = (
+  node: Node,
+  blockMark: BlockMark,
+  spec: NormalizedDialect
+): void => {
   if (isParent(node)) {
     node.children.forEach((child) => {
-      if (isInlineContent(child)) {
-        blockMark.inlineMarks.push({ inline: child, raw: false })
-        travelInlines(child, blockMark)
+      const classified = spec.classifyInline?.(child)
+      if (classified === 'raw') {
+        blockMark.inlineMarks.push({ inline: child as InlineRawType, kind: 'raw' })
+        return
       }
-      if (isInlineRaw(child)) {
-        blockMark.inlineMarks.push({ inline: child, raw: true })
+      if (classified === 'wrapper') {
+        blockMark.inlineMarks.push({ inline: child as InlineContentType, kind: 'wrapper' })
+        travelInlines(child, blockMark, spec)
+        return
+      }
+      if (isInlineContent(child)) {
+        blockMark.inlineMarks.push({ inline: child, kind: 'hyper' })
+        travelInlines(child, blockMark, spec)
+      }
+      if (spec.inlineRawTypes.indexOf(child.type) >= 0) {
+        blockMark.inlineMarks.push({ inline: child as InlineRawType, kind: 'raw' })
       }
     })
   }
@@ -133,16 +169,16 @@ const processBlockMark = (blockMark: BlockMark, str: string): void => {
   const marks: Mark[] = []
   const unresolvedCodeMarks: RawMark[] = []
 
-  // Generate all the marks includes hyper (inline) and raw.
+  // Generate all the marks includes hyper (inline), raw and wrapper.
   inlineMarks.forEach((inlineMark) => {
-    const { inline } = inlineMark
+    const { inline, kind } = inlineMark
     if (!inline.position) {
       return
     }
     const startOffset = inline.position.start.offset || 0
     const endOffset = inline.position.end.offset || 0
 
-    if (isInlineRaw(inline)) {
+    if (kind === 'raw') {
       const mark: Mark = {
         type: MarkType.RAW,
         // TODO: typeof RawMark.meta
@@ -168,25 +204,47 @@ const processBlockMark = (blockMark: BlockMark, str: string): void => {
         return
       }
       marks.push(mark)
-    } else {
-      const firstChild = inline.children[0]
-      const lastChild = inline.children[inline.children.length - 1]
-      if (!firstChild.position || !lastChild.position) {
-        return
-      }
-      const innerStartOffset = firstChild.position.start.offset || 0
-      const innerEndOffset = lastChild.position.end.offset || 0
-      const mark: Mark = {
-        type: MarkType.HYPER,
-        // TODO: typeof RawMark.meta
-        meta: inline.type,
-        startIndex: startOffset - offset,
-        startValue: str.substring(startOffset, innerStartOffset),
-        endIndex: innerEndOffset - offset,
-        endValue: str.substring(innerEndOffset, endOffset)
-      }
-      marks.push(mark)
+      return
     }
+    const parentInline = inline as InlineContentType
+    const firstChild = parentInline.children[0]
+    const lastChild = parentInline.children[parentInline.children.length - 1]
+    if (!firstChild.position || !lastChild.position) {
+      return
+    }
+    const innerStartOffset = firstChild.position.start.offset || 0
+    const innerEndOffset = lastChild.position.end.offset || 0
+    if (kind === 'wrapper') {
+      // Protect the open/close parts as two raw marks (legacy inline-html
+      // semantics); the children are linted as normal inline content.
+      marks.push({
+        type: MarkType.RAW,
+        meta: `${inline.type}-open`,
+        startIndex: startOffset - offset,
+        endIndex: innerStartOffset - offset,
+        startValue: str.substring(startOffset, innerStartOffset),
+        endValue: ''
+      })
+      marks.push({
+        type: MarkType.RAW,
+        meta: `${inline.type}-close`,
+        startIndex: innerEndOffset - offset,
+        endIndex: endOffset - offset,
+        startValue: str.substring(innerEndOffset, endOffset),
+        endValue: ''
+      })
+      return
+    }
+    const mark: Mark = {
+      type: MarkType.HYPER,
+      // TODO: typeof RawMark.meta
+      meta: inline.type,
+      startIndex: startOffset - offset,
+      startValue: str.substring(startOffset, innerStartOffset),
+      endIndex: innerEndOffset - offset,
+      endValue: str.substring(innerEndOffset, endOffset)
+    }
+    marks.push(mark)
   })
 
   blockMark.value = str.substring(
@@ -216,6 +274,9 @@ const processBlockMark = (blockMark: BlockMark, str: string): void => {
     .filter(Boolean) as Mark[]
 }
 
+const parseMarkdown = (value: string): Ast.Root =>
+  unified().use(markdown).use(gfm).use(frontmatter).parse(value) as Ast.Root
+
 /**
   - travel all blocks/lists/tables/rows/cells
     - content: paragraph/heading/table-cell
@@ -224,24 +285,21 @@ const processBlockMark = (blockMark: BlockMark, str: string): void => {
     - no text: inline code/break/image/image ref/footnote ref/html
     - marks: emphasis/strong/delete/footnote/link/link ref
  */
-const parser = (data: ParsedStatus): ParsedStatus => {
+const processWithTree = (
+  data: ParsedStatus,
+  tree: Ast.Root,
+  spec: NormalizedDialect
+): ParsedStatus => {
   const value = data.value
-  const modifiedValue = data.modifiedValue
   const ignoredByParsers = data.ignoredByParsers
 
   const blockMarks: BlockMark[] = []
-
-  const tree: Ast.Root = unified()
-    .use(markdown)
-    .use(gfm)
-    .use(frontmatter)
-    .parse(modifiedValue) as Ast.Root
 
   // - travel and record all paragraphs/headings/table-cells into blocks
   // - for each block, travel and record all
   // - - 'hyper' marks: emphasis/strong/delete/footnote/link/linkRef and continue
   // - - 'raw' marks: inlineCode/break/image/imageRef/footnoteRef/html and stop
-  travelBlocks(tree, blockMarks)
+  travelBlocks(tree, blockMarks, spec)
 
   // for each block marks
   // - get block.start.offset
@@ -276,5 +334,18 @@ const parser = (data: ParsedStatus): ParsedStatus => {
   data.ignoredByParsers = []
   return data
 }
+
+export const createParser = (spec: MarkdownDialect) => {
+  const normalized: NormalizedDialect = {
+    parse: spec.parse,
+    skipBlockTypes: ['yaml', ...(spec.extraSkipBlockTypes ?? [])],
+    inlineRawTypes: [...inlineRawTypes, ...(spec.extraInlineRawTypes ?? [])],
+    classifyInline: spec.classifyInline
+  }
+  return (data: ParsedStatus): ParsedStatus =>
+    processWithTree(data, normalized.parse(data.modifiedValue), normalized)
+}
+
+const parser = createParser({ parse: parseMarkdown })
 
 export default parser

@@ -22,6 +22,7 @@ import ignore, { parseIngoredCase } from './hypers/ignore.js'
 import hexo from './hypers/hexo.js'
 import vuepress from './hypers/vuepress.js'
 import md from './hypers/md.js'
+import mdx from './hypers/mdx.js'
 
 import { defaultConfig as defaultRules } from './rules/index.js'
 
@@ -32,8 +33,12 @@ const hyperParseInfo = [
   { name: 'ignore', value: ignore },
   { name: 'hexo', value: hexo },
   { name: 'vuepress', value: vuepress },
-  { name: 'markdown', value: md }
+  { name: 'markdown', value: md },
+  { name: 'mdx', value: mdx }
 ]
+
+// the default chain stays unchanged: mdx is opt-in only
+const defaultHyperParserNames = ['ignore', 'hexo', 'vuepress', 'markdown']
 
 const arrToMap = <T>(
   arr: { name: string; value: T }[]
@@ -105,7 +110,7 @@ export const normalizeOptions = (options: Options): NormalizedOptions => {
   if (typeof options.hyperParse === 'function') {
     hyperParse = [options.hyperParse]
   } else {
-    hyperParse = options.hyperParse || hyperParseInfo.map((item) => item.name)
+    hyperParse = options.hyperParse || defaultHyperParserNames
   }
 
   const normoalizedOptions: NormalizedOptions = {
@@ -136,7 +141,7 @@ export const normalizeConfig = (
   // preset
   if (config.preset === 'default') {
     options.rules = { ...defaultRules }
-    hyperParse = hyperParseInfo.map((item) => item.name)
+    hyperParse = [...defaultHyperParserNames]
   }
 
   // rules
